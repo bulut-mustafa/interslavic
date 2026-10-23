@@ -47,6 +47,7 @@ export function glossFeature(name: string, d: Decision<string>): GlossedFeature 
   return {
     name,
     value: d.value,
+    ruleId: d.ruleId,
     because: d.because,
     confidence: d.confidence,
     alternatives: (d.alternatives ?? []).map((a) => ({ value: String(a.value), because: a.because })),

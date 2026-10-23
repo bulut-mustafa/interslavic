@@ -13,6 +13,13 @@ import type { AspectOutcome } from './resolvers/aspect.ts';
 export interface GlossedFeature {
   name: string;
   value: string;
+  /**
+   * The rule that decided this. Carried through to the output because it is
+   * the link between a decision and the source that justifies it - without it
+   * a reader sees the `because` prose but has no way to ask which rule said so,
+   * and no test can check that every rule we emit has a citation.
+   */
+  ruleId: string;
   because: string;
   confidence: string;
   alternatives: { value: string; because: string }[];

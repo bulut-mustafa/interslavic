@@ -1,0 +1,391 @@
+{
+  "_comment": "Every rule the engine can emit, with the source that justifies it. A test fails if the engine emits a ruleId absent from this file, so a rule cannot be added without saying where it comes from.",
+  "_tiers": {
+    "normative": "van Steenbergen’s grammar pages. The only tier that may be cited as authority for a claim about Interslavic.",
+    "corpus": "Attested usage, where the grammar pages are silent. Needed because there is no page on case usage at all.",
+    "dictionary": "A fact about one specific word from the dictionary, not a rule about the language.",
+    "transfer": "Copying something the SOURCE language states. Not a claim about Interslavic.",
+    "structural": "A mechanical consequence of the parse or of an earlier decision. Asserts nothing about Interslavic that needs a citation."
+  },
+  "_quoteGap": "Entries with quote: null are justified by the cited page but not yet pinned to a single verbatim sentence - usually because the page expresses the rule as a declension table. The test holds this count so it can only shrink.",
+  "rules": {
+    "agreement.fromHead": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/adjectives.html",
+      "quote": null,
+      "why": "a modifier agrees with its head in gender, number and case - expressed by the declension tables rather than by a single sentence"
+    },
+    "agreement.impersonal": {
+      "tier": "corpus",
+      "source": "corpus: van Steenbergen’s parallel texts and the Interslavic Wikipedia (incubator.wikimedia.org/wiki/Wp/isv)",
+      "quote": null,
+      "why": "an impersonal predicate is neuter singular, as the corpus writes it (\"Nužno jest tuty članok prěvesti\")"
+    },
+    "agreement.pastParticiple": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/verbs.html",
+      "quote": "Most commonly used is the compound past, made by combining the present tense of the verb byti „to be” with the so-called L-participle.",
+      "why": "the l-participle is a participle, so it agrees with the subject in gender and number"
+    },
+    "agreement.predicate": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/syntax.html",
+      "quote": null,
+      "why": "a predicate adjective agrees with its subject and takes the nominative"
+    },
+    "agreement.predicate.defaultGender": {
+      "tier": "structural",
+      "source": null,
+      "quote": null,
+      "why": "a predicate adjective must have a gender and some subjects carry none; the unmarked masculine, reported as a default rather than a certainty"
+    },
+    "agreement.predicate.person": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/adjectives.html",
+      "quote": "Except for adjectives referring to masculine, animate nouns, the nominate and accusative plural are identical for all genders.",
+      "why": "a 1st/2nd person subject is a person, so the predicate is animate"
+    },
+    "agreement.relative": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/pronouns.html",
+      "quote": "Relative pronouns (Odnositeljne zaimenniky) The relative pronoun that is used most frequently is ktory.",
+      "why": "the relative pronoun ktory agrees with its antecedent"
+    },
+    "animacy.lexical": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/nouns.html",
+      "quote": "In the case of animate nouns (animals and male persons) the accusative is always identical to the genitive, while in the case of inanimate nouns it is identical to the nominative.",
+      "why": "animacy decides the accusative, and the dictionary states it per noun"
+    },
+    "animacy.noAnimateHead": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/nouns.html",
+      "quote": "In the case of animate nouns (animals and male persons) the accusative is always identical to the genitive, while in the case of inanimate nouns it is identical to the nominative.",
+      "why": "the accusative of an inanimate equals its nominative"
+    },
+    "aspect.adverbial.imp": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/verbs.html",
+      "quote": "Using the present tense of a perfective verb for the future (as is done in West and East Slavic) is rather to be avoided, as it can easily be misunderstood by South Slavs.",
+      "why": "a habitual or iterative adverbial forces the imperfective"
+    },
+    "aspect.copy": {
+      "tier": "transfer",
+      "source": "packages/engine/src/source/adapters.ts",
+      "quote": null,
+      "why": "Russian marks aspect explicitly"
+    },
+    "aspect.default.imp": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/verbs.html",
+      "quote": "Using the present tense of a perfective verb for the future (as is done in West and East Slavic) is rather to be avoided, as it can easily be misunderstood by South Slavs.",
+      "why": "the imperfective is the safe default for the same reason"
+    },
+    "aspect.lexemeOverride": {
+      "tier": "dictionary",
+      "source": "packages/lexicon/data/raw/words.tsv",
+      "quote": null,
+      "why": "the aspect the chosen lexeme actually has, which outranks an inferred one"
+    },
+    "aspect.pastTelic": {
+      "tier": "corpus",
+      "source": "corpus: van Steenbergen’s parallel texts and the Interslavic Wikipedia (incubator.wikimedia.org/wiki/Wp/isv)",
+      "quote": null,
+      "why": "a completed past event takes the perfective; the grammar states the distinction but gives no mechanical test, so the choice follows attested usage"
+    },
+    "aspect.perfect": {
+      "tier": "corpus",
+      "source": "corpus: van Steenbergen’s parallel texts and the Interslavic Wikipedia (incubator.wikimedia.org/wiki/Wp/isv)",
+      "quote": null,
+      "why": "an English perfect describes a completed event, so the perfective"
+    },
+    "aspect.tense.presImp": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/verbs.html",
+      "quote": "Using the present tense of a perfective verb for the future (as is done in West and East Slavic) is rather to be avoided, as it can easily be misunderstood by South Slavs.",
+      "why": "a present tense takes the imperfective, because a perfective present reads as a future"
+    },
+    "case.coordination": {
+      "tier": "structural",
+      "source": null,
+      "quote": null,
+      "why": "a conjunct copies its head’s case; a preposition governs the whole coordination, not just its first member"
+    },
+    "case.copy": {
+      "tier": "transfer",
+      "source": "packages/engine/src/source/adapters.ts",
+      "quote": null,
+      "why": "Russian marks case explicitly, so it is copied rather than inferred"
+    },
+    "case.deprel.iobj": {
+      "tier": "corpus",
+      "source": "corpus: van Steenbergen’s parallel texts and the Interslavic Wikipedia (incubator.wikimedia.org/wiki/Wp/isv)",
+      "quote": null,
+      "why": "an indirect object takes the dative"
+    },
+    "case.deprel.nsubj": {
+      "tier": "corpus",
+      "source": "corpus: van Steenbergen’s parallel texts and the Interslavic Wikipedia (incubator.wikimedia.org/wiki/Wp/isv)",
+      "quote": null,
+      "why": "a subject takes the nominative. The grammar has NO page on case usage - cases.html, case.html and accusative.html all 404 - which is why this tier exists"
+    },
+    "case.deprel.obj": {
+      "tier": "corpus",
+      "source": "corpus: van Steenbergen’s parallel texts and the Interslavic Wikipedia (incubator.wikimedia.org/wiki/Wp/isv)",
+      "quote": null,
+      "why": "a direct object takes the accusative, absent a government code"
+    },
+    "case.durationAccusative": {
+      "tier": "corpus",
+      "source": "corpus: van Steenbergen’s parallel texts and the Interslavic Wikipedia (incubator.wikimedia.org/wiki/Wp/isv)",
+      "quote": null,
+      "why": "a bare duration takes the accusative"
+    },
+    "case.fallback": {
+      "tier": "structural",
+      "source": null,
+      "quote": null,
+      "why": "the honest last resort when no rule applies; emitted at `guess` confidence so it is visible as such"
+    },
+    "case.fromCountingNumeral": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/numerals.html",
+      "quote": "The subject always remains in the genitive plural.",
+      "why": "and it persists in oblique positions"
+    },
+    "case.predicate": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/syntax.html",
+      "quote": null,
+      "why": "a predicate complement takes the nominative"
+    },
+    "case.prep.governed": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/prepositions.html",
+      "quote": "Prepositions should only be used according to their logical meaning, not according to national idioms.",
+      "why": "each preposition governs a stated case; the table on this page is the source"
+    },
+    "case.temporalAccusative": {
+      "tier": "corpus",
+      "source": "corpus: van Steenbergen’s parallel texts and the Interslavic Wikipedia (incubator.wikimedia.org/wiki/Wp/isv)",
+      "quote": null,
+      "why": "a bare time adverbial takes the accusative"
+    },
+    "case.verb.governed": {
+      "tier": "dictionary",
+      "source": "packages/lexicon/data/raw/words.tsv",
+      "quote": null,
+      "why": "the verb’s own (+N) government code"
+    },
+    "case.verbGovernedPrep": {
+      "tier": "dictionary",
+      "source": "packages/lexicon/data/raw/words.tsv",
+      "quote": null,
+      "why": "the preposition a verb governs lexically"
+    },
+    "copula.inserted": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/syntax.html",
+      "quote": null,
+      "why": "Interslavic writes the present copula where Russian omits it"
+    },
+    "degree.comparative": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/adjectives.html",
+      "quote": "Comparatives and superlatives can be built in two ways: a simple (analytic) form and a more complex (synthetic) form.",
+      "why": "a comparative, analytic or synthetic"
+    },
+    "degree.superlative": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/adjectives.html",
+      "quote": "The superlative is formed by adding the prefix naj- to the comparative: najnovějši",
+      "why": "naj- prefixed to the comparative"
+    },
+    "future.agreement": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/verbs.html",
+      "quote": "The future tense is formed by combining the future tense of the verb byti „to be” with the infinitive.",
+      "why": "the budu auxiliary carries the person and number"
+    },
+    "future.periphrastic": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/verbs.html",
+      "quote": "The future tense is formed by combining the future tense of the verb byti „to be” with the infinitive.",
+      "why": "budu plus the infinitive, not a conjugated verb"
+    },
+    "gender.lexical": {
+      "tier": "dictionary",
+      "source": "packages/lexicon/data/raw/words.tsv",
+      "quote": null,
+      "why": "the noun’s gender, from its partOfSpeech cell"
+    },
+    "gender.pronounLemma": {
+      "tier": "dictionary",
+      "source": "packages/lexicon/data/raw/words.tsv",
+      "quote": null,
+      "why": "the gender of the chosen Interslavic pronoun lemma"
+    },
+    "mood.conditional": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/verbs.html",
+      "quote": "The conditional is be formed by using the L-participle with the conditional of byti „to be”: ja byh dělal(a) „I would do”.",
+      "why": "by plus the l-participle"
+    },
+    "mood.imperative": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/verbs.html",
+      "quote": "The imperative has forms for the 2nd person singular, the 1st person plural and the 2nd person plural: dělaj „do!” (to one person, informal), dělajmo „let’s do!”, dělajte „do!” (to more persons, or to one person formal).",
+      "why": "imperative exists for 2sg, 1pl and 2pl only"
+    },
+    "mood.indicative": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/verbs.html",
+      "quote": "There are three moods: indicative, conditional and imperative.",
+      "why": "the unmarked mood of the three the language has"
+    },
+    "negation.beforeVerb": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/syntax.html",
+      "quote": "Negation in Interslavic can always be recognized by the particle ne „not” preceding the verb.",
+      "why": "ne precedes the verb it negates"
+    },
+    "number.copy": {
+      "tier": "transfer",
+      "source": "packages/engine/src/source/adapters.ts",
+      "quote": null,
+      "why": "the source states number"
+    },
+    "number.fromSubject": {
+      "tier": "structural",
+      "source": null,
+      "quote": null,
+      "why": "a verb’s number comes from its SUBJECT, not from its own features or its auxiliary - a plural nominal subject often leaves the English verb unmarked"
+    },
+    "number.pluraleTantum": {
+      "tier": "dictionary",
+      "source": "packages/lexicon/data/raw/words.tsv",
+      "quote": null,
+      "why": "nouns the dictionary marks pl. only"
+    },
+    "number.pronounLemma": {
+      "tier": "dictionary",
+      "source": "packages/lexicon/data/raw/words.tsv",
+      "quote": null,
+      "why": "the number of the chosen Interslavic pronoun, which is a property of that lemma: English \"you\" is unmarked but `vy` is plural"
+    },
+    "number.singulareTantum": {
+      "tier": "dictionary",
+      "source": "packages/lexicon/data/raw/words.tsv",
+      "quote": null,
+      "why": "nouns the dictionary marks sg. only"
+    },
+    "numeral.government": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/numerals.html",
+      "quote": "All numbers higher than 4 are followed by the genitive plural: pet domov",
+      "why": "5 and up govern the genitive plural"
+    },
+    "optative.nehaj": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/verbs.html",
+      "quote": "nehaj is used: Nehaj umre! „Let him die!” Nehaj žive dolgo! „May he live long!”",
+      "why": "a third-person command uses nehaj plus the present"
+    },
+    "optative.present": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/verbs.html",
+      "quote": "nehaj is used: Nehaj umre! „Let him die!” Nehaj žive dolgo! „May he live long!”",
+      "why": "the verb after nehaj stays in the present"
+    },
+    "passive.participle": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/syntax.html",
+      "quote": "Koja žena jest ljubjena od togo muža? „Which woman is loved by that man?”",
+      "why": "a participial passive with od plus the genitive for the agent"
+    },
+    "past.compoundAuxiliary": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/verbs.html",
+      "quote": "Most commonly used is the compound past, made by combining the present tense of the verb byti „to be” with the so-called L-participle.",
+      "why": "the byti auxiliary the compound past needs beside its l-participle"
+    },
+    "past.lParticiple": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/verbs.html",
+      "quote": "Most commonly used is the compound past, made by combining the present tense of the verb byti „to be” with the so-called L-participle.",
+      "why": "a past tense is the l-participle plus the present of byti"
+    },
+    "person.fromSubject": {
+      "tier": "structural",
+      "source": null,
+      "quote": null,
+      "why": "a verb’s person comes from its SUBJECT; English auxiliaries mislead, and Stanza tags \"did\" as Person=2"
+    },
+    "pronoun.prepCase": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/pronouns.html",
+      "quote": "After a preposition, it is better to use the longer forms: k mně, za tebe.",
+      "why": "the long pronoun form after a preposition"
+    },
+    "purpose.conditional": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/syntax.html",
+      "quote": "Ona prinosi jabloka, da by děti byli zdrave.",
+      "why": "a purpose clause is da by plus the l-participle"
+    },
+    "reflexive.clitic": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/syntax.html",
+      "quote": "Even more common is a reflexive construction: Pica dělaje se, which literally means „Pizza is making itself” and should be translated as „One makes pizza, pizza is being made”.",
+      "why": "the clitic is written as a separate word"
+    },
+    "rewrite.en.'sAsCase": {
+      "tier": "structural",
+      "source": null,
+      "quote": null,
+      "why": "English-side analysis: the possessive clitic is a case, not a word, so it is not translated"
+    },
+    "rewrite.en.ofAsCase": {
+      "tier": "structural",
+      "source": null,
+      "quote": null,
+      "why": "English-side analysis: \"of\" marks the genitive rather than being a preposition to translate"
+    },
+    "rewrite.en.toAsCase": {
+      "tier": "structural",
+      "source": null,
+      "quote": null,
+      "why": "English-side analysis: \"to\" before a recipient marks the dative"
+    },
+    "tense.copy": {
+      "tier": "transfer",
+      "source": "packages/engine/src/source/adapters.ts",
+      "quote": null,
+      "why": "the source states tense"
+    },
+    "tense.perfectAsPast": {
+      "tier": "structural",
+      "source": null,
+      "quote": null,
+      "why": "an English perfect maps onto the Interslavic past; there is no separate perfect"
+    },
+    "verbform.finite": {
+      "tier": "structural",
+      "source": null,
+      "quote": null,
+      "why": "a finite clause takes a conjugated verb"
+    },
+    "verbform.infinitive": {
+      "tier": "structural",
+      "source": null,
+      "quote": null,
+      "why": "an infinitive complement stays infinitive"
+    },
+    "verbform.modalComplement": {
+      "tier": "structural",
+      "source": null,
+      "quote": null,
+      "why": "the complement of a modal is an infinitive, so it must not be conjugated"
+    }
+  }
+}
