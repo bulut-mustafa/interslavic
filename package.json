@@ -1,0 +1,40 @@
+{
+  "name": "interslavic-translator",
+  "private": true,
+  "type": "module",
+  "packageManager": "npm@10.9.2",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "test": "vitest run",
+    "isv": "node --experimental-strip-types packages/cli/src/main.ts",
+    "lexicon:fetch": "node --experimental-strip-types packages/lexicon/scripts/fetch.ts",
+    "typecheck": "tsc --noEmit",
+    "parser": "cd services/parser && PYTHONPATH=src .venv/bin/uvicorn parser_service.app:app --host 127.0.0.1 --port 8765",
+    "parser:setup": "cd services/parser && uv venv && uv pip install -q stanza fastapi \"uvicorn[standard]\" && PYTHONPATH=src .venv/bin/python -c \"import stanza; [stanza.download(l, processors=\"tokenize,pos,lemma,depparse\", verbose=False) for l in (\"en\",\"ru\")]\"",
+    "fixtures:check": "cd services/parser && PYTHONPATH=src .venv/bin/python -m parser_service.fixtures",
+    "fixtures:write": "cd services/parser && PYTHONPATH=src .venv/bin/python -m parser_service.fixtures --write",
+    "server": "node --experimental-strip-types packages/server/src/main.ts",
+    "web": "vite packages/web",
+    "dev": "npm run parser & npm run server & npm run web"
+  },
+  "devDependencies": {
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/react": "^16.3.3",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^5.2.0",
+    "jsdom": "^26.1.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "typescript": "~5.9.3",
+    "vite": "^7.3.7",
+    "vitest": "^3.2.4"
+  },
+  "dependencies": {
+    "@interslavic/morphology": "0.1.2",
+    "@interslavic/utils": "^3.4.4"
+  }
+}

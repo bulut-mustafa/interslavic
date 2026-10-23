@@ -1,0 +1,1177 @@
+{
+  "_comment": "GENERATED from the dictionary addition column numeric codes (+2=Gen ... +6=Loc). Regenerate with packages/rules/scripts/gen-prepositions.ts. Hand edits belong in preposition-government.overrides.json.",
+  "_generatedFrom": "packages/lexicon/data/provenance.json",
+  "_stats": {
+    "prepLemmas": 108,
+    "governmentRows": 133,
+    "lemmasGoverningMoreThanOneCase": 11
+  },
+  "prepositions": [
+    {
+      "prep": "bez",
+      "case": "Gen",
+      "en": [
+        "without"
+      ],
+      "freq": 9730
+    },
+    {
+      "prep": "bez obzira na",
+      "case": "Acc",
+      "en": [
+        "regardless"
+      ],
+      "freq": 6769
+    },
+    {
+      "prep": "blizko",
+      "case": "Gen",
+      "en": [
+        "near",
+        "close to"
+      ],
+      "freq": 7170
+    },
+    {
+      "prep": "blågodarę",
+      "case": "Dat",
+      "en": [
+        "thanks to"
+      ],
+      "freq": 7660
+    },
+    {
+      "prep": "dlja",
+      "case": "Gen",
+      "en": [
+        "for"
+      ],
+      "freq": 10859
+    },
+    {
+      "prep": "do",
+      "case": "Gen",
+      "en": [
+        "to",
+        "till",
+        "towards"
+      ],
+      "freq": 10378
+    },
+    {
+      "prep": "dovnųtra",
+      "case": "Gen",
+      "en": [
+        "inside (goal)"
+      ],
+      "freq": 6846
+    },
+    {
+      "prep": "dękujųći",
+      "case": "Dat",
+      "en": [
+        "thanks to"
+      ],
+      "freq": 7398
+    },
+    {
+      "prep": "ględęći na",
+      "case": "Acc",
+      "en": [
+        "regarding"
+      ],
+      "freq": 6254
+    },
+    {
+      "prep": "hvala",
+      "case": "Dat",
+      "en": [
+        "thanks to"
+      ],
+      "freq": 6720
+    },
+    {
+      "prep": "iz",
+      "case": "Gen",
+      "en": [
+        "from",
+        "out of"
+      ],
+      "freq": 10619
+    },
+    {
+      "prep": "iz-među",
+      "case": "Gen",
+      "en": [
+        "from between",
+        "from among"
+      ],
+      "freq": 5440
+    },
+    {
+      "prep": "iz-nad",
+      "case": "Gen",
+      "en": [
+        "from above"
+      ],
+      "freq": 5986
+    },
+    {
+      "prep": "iz-pod",
+      "case": "Gen",
+      "en": [
+        "from under"
+      ],
+      "freq": 8134
+    },
+    {
+      "prep": "iz-prěd",
+      "case": "Gen",
+      "en": [
+        "from before"
+      ],
+      "freq": 6945
+    },
+    {
+      "prep": "iz-srěd",
+      "case": "Gen",
+      "en": [
+        "from among"
+      ],
+      "freq": 5167
+    },
+    {
+      "prep": "iz-za",
+      "case": "Gen",
+      "en": [
+        "from behind"
+      ],
+      "freq": 6081
+    },
+    {
+      "prep": "izključajųći",
+      "case": "Acc",
+      "en": [
+        "excluding"
+      ],
+      "freq": 5981
+    },
+    {
+      "prep": "jerbo za",
+      "case": "Acc",
+      "en": [
+        "because of"
+      ],
+      "freq": 7641
+    },
+    {
+      "prep": "k",
+      "case": "Dat",
+      "en": [
+        "to",
+        "towards"
+      ],
+      "freq": 7906
+    },
+    {
+      "prep": "kolo",
+      "case": "Gen",
+      "en": [
+        "next to",
+        "by",
+        "around"
+      ],
+      "freq": 6700
+    },
+    {
+      "prep": "kromě",
+      "case": "Gen",
+      "en": [
+        "except"
+      ],
+      "freq": 6461
+    },
+    {
+      "prep": "kȯ",
+      "case": "Dat",
+      "en": [
+        "to",
+        "towards"
+      ],
+      "freq": 7906
+    },
+    {
+      "prep": "među",
+      "case": "Acc",
+      "en": [
+        "between (direction)",
+        "among (direction)"
+      ],
+      "freq": 7756
+    },
+    {
+      "prep": "među",
+      "case": "Ins",
+      "en": [
+        "between",
+        "among",
+        "amongst"
+      ],
+      "freq": 7911
+    },
+    {
+      "prep": "mimo",
+      "case": "Gen",
+      "en": [
+        "past",
+        "by"
+      ],
+      "freq": 7339
+    },
+    {
+      "prep": "na",
+      "case": "Loc",
+      "en": [
+        "on",
+        "at",
+        "upon"
+      ],
+      "freq": 9841
+    },
+    {
+      "prep": "na",
+      "case": "Acc",
+      "en": [
+        "onto",
+        "unto"
+      ],
+      "freq": 9590
+    },
+    {
+      "prep": "na prěkor",
+      "case": "Gen",
+      "en": [
+        "in defiance of"
+      ],
+      "freq": 5754
+    },
+    {
+      "prep": "nad",
+      "case": "Ins",
+      "en": [
+        "above",
+        "beyond",
+        "over"
+      ],
+      "freq": 8654
+    },
+    {
+      "prep": "nad",
+      "case": "Acc",
+      "en": [
+        "above",
+        "over"
+      ],
+      "freq": 7739
+    },
+    {
+      "prep": "naprotiv",
+      "case": "Gen",
+      "en": [
+        "opposite",
+        "across from"
+      ],
+      "freq": 5977
+    },
+    {
+      "prep": "ne ględęći na",
+      "case": "Acc",
+      "en": [
+        "disregarding"
+      ],
+      "freq": 5495
+    },
+    {
+      "prep": "o",
+      "case": "Loc",
+      "en": [
+        "about"
+      ],
+      "freq": 9458
+    },
+    {
+      "prep": "ob",
+      "case": "Loc",
+      "en": [
+        "about"
+      ],
+      "freq": 9458
+    },
+    {
+      "prep": "od",
+      "case": "Gen",
+      "en": [
+        "of",
+        "from",
+        "away from",
+        "since"
+      ],
+      "freq": 9940
+    },
+    {
+      "prep": "od",
+      "case": "Gen",
+      "en": [
+        "by"
+      ],
+      "freq": 7699
+    },
+    {
+      "prep": "od stråny",
+      "case": "Gen",
+      "en": [
+        "by"
+      ],
+      "freq": 8856
+    },
+    {
+      "prep": "odnosno",
+      "case": "Gen",
+      "en": [
+        "about",
+        "concerning",
+        "regarding"
+      ],
+      "freq": 6581
+    },
+    {
+      "prep": "okolo",
+      "case": "Gen",
+      "en": [
+        "around"
+      ],
+      "freq": 6929
+    },
+    {
+      "prep": "okolo",
+      "case": "Gen",
+      "en": [
+        "approximately",
+        "about"
+      ],
+      "freq": 7274
+    },
+    {
+      "prep": "po",
+      "case": "Loc",
+      "en": [
+        "throughout",
+        "round",
+        "on (along a surface)",
+        "all over",
+        "across"
+      ],
+      "freq": 6929
+    },
+    {
+      "prep": "po",
+      "case": "Loc",
+      "en": [
+        "after",
+        "following"
+      ],
+      "freq": 6582
+    },
+    {
+      "prep": "po",
+      "case": "Acc",
+      "en": [
+        "up to"
+      ],
+      "freq": 7339
+    },
+    {
+      "prep": "po",
+      "case": "Acc",
+      "en": [
+        "for (in pursuit of, to get)"
+      ],
+      "freq": 6062
+    },
+    {
+      "prep": "po",
+      "case": "Dat",
+      "en": [
+        "according to",
+        "per",
+        "by",
+        "in the manner of"
+      ],
+      "freq": 7319
+    },
+    {
+      "prep": "po",
+      "case": "Loc",
+      "en": [
+        "along",
+        "alongside"
+      ],
+      "freq": 6605
+    },
+    {
+      "prep": "po",
+      "case": "Acc",
+      "en": [
+        "for (the Xth time)"
+      ],
+      "freq": 6456
+    },
+    {
+      "prep": "po",
+      "case": "Dat",
+      "en": [
+        "for … each",
+        "for … a piece"
+      ],
+      "freq": 7081
+    },
+    {
+      "prep": "po odnošeńju k",
+      "case": "Dat",
+      "en": [
+        "regarding",
+        "with regard to"
+      ],
+      "freq": 6659
+    },
+    {
+      "prep": "po pričině",
+      "case": "Gen",
+      "en": [
+        "because of"
+      ],
+      "freq": 7543
+    },
+    {
+      "prep": "po slučaju",
+      "case": "Gen",
+      "en": [
+        "on the occasion of"
+      ],
+      "freq": 5979
+    },
+    {
+      "prep": "pod",
+      "case": "Ins",
+      "en": [
+        "under",
+        "underneath"
+      ],
+      "freq": 7598
+    },
+    {
+      "prep": "pod",
+      "case": "Acc",
+      "en": [
+        "under (direction)",
+        "underneath (direction)"
+      ],
+      "freq": 7314
+    },
+    {
+      "prep": "pod nakazom",
+      "case": "Gen",
+      "en": [
+        "under the command of"
+      ],
+      "freq": 5501
+    },
+    {
+      "prep": "pod voditeljstvom",
+      "case": "Gen",
+      "en": [
+        "under the command of",
+        "under the leadership of"
+      ],
+      "freq": 5062
+    },
+    {
+      "prep": "pod vodstvom",
+      "case": "Gen",
+      "en": [
+        "under the command of",
+        "under the leadership of"
+      ],
+      "freq": 5859
+    },
+    {
+      "prep": "podle",
+      "case": "Gen",
+      "en": [
+        "beside",
+        "near"
+      ],
+      "freq": 6621
+    },
+    {
+      "prep": "podčas",
+      "case": "Gen",
+      "en": [
+        "during",
+        "so long as",
+        "amid"
+      ],
+      "freq": 7743
+    },
+    {
+      "prep": "podȯlg",
+      "case": "Gen",
+      "en": [
+        "according to"
+      ],
+      "freq": 7212
+    },
+    {
+      "prep": "polěv",
+      "case": "Gen",
+      "en": [
+        "to the left of"
+      ],
+      "freq": 5792
+    },
+    {
+      "prep": "pomimo",
+      "case": "Gen",
+      "en": [
+        "in spite of",
+        "despite",
+        "notwithstanding"
+      ],
+      "freq": 5993
+    },
+    {
+      "prep": "ponad",
+      "case": "Ins",
+      "en": [
+        "above",
+        "beyond"
+      ],
+      "freq": 6509
+    },
+    {
+      "prep": "poniž",
+      "case": "Gen",
+      "en": [
+        "below",
+        "beneath"
+      ],
+      "freq": 6263
+    },
+    {
+      "prep": "poniže",
+      "case": "Gen",
+      "en": [
+        "below",
+        "beneath"
+      ],
+      "freq": 6263
+    },
+    {
+      "prep": "poprav",
+      "case": "Gen",
+      "en": [
+        "to the right of"
+      ],
+      "freq": 6614
+    },
+    {
+      "prep": "poprěk",
+      "case": "Gen",
+      "en": [
+        "across"
+      ],
+      "freq": 6330
+    },
+    {
+      "prep": "poręd",
+      "case": "Gen",
+      "en": [
+        "beside",
+        "next to"
+      ],
+      "freq": 7007
+    },
+    {
+      "prep": "poslě",
+      "case": "Gen",
+      "en": [
+        "after"
+      ],
+      "freq": 9274
+    },
+    {
+      "prep": "posrěd",
+      "case": "Gen",
+      "en": [
+        "amidst",
+        "among",
+        "amongst",
+        "in the middle of"
+      ],
+      "freq": 5854
+    },
+    {
+      "prep": "posrědstvom",
+      "case": "Gen",
+      "en": [
+        "using",
+        "by means of"
+      ],
+      "freq": 6645
+    },
+    {
+      "prep": "povodom",
+      "case": "Gen",
+      "en": [
+        "on the occasion of"
+      ],
+      "freq": 7071
+    },
+    {
+      "prep": "povyše",
+      "case": "Gen",
+      "en": [
+        "above"
+      ],
+      "freq": 5911
+    },
+    {
+      "prep": "povŕh",
+      "case": "Gen",
+      "en": [
+        "atop",
+        "to the upper side of"
+      ],
+      "freq": 5655
+    },
+    {
+      "prep": "pri",
+      "case": "Loc",
+      "en": [
+        "by",
+        "near"
+      ],
+      "freq": 8096
+    },
+    {
+      "prep": "pri",
+      "case": "Loc",
+      "en": [
+        "during (a rule of a king)"
+      ],
+      "freq": 7105
+    },
+    {
+      "prep": "protiv",
+      "case": "Dat",
+      "en": [
+        "against",
+        "contra",
+        "versus"
+      ],
+      "freq": 6096
+    },
+    {
+      "prep": "prěd",
+      "case": "Ins",
+      "en": [
+        "before",
+        "prior to",
+        "in front of",
+        "ahead of"
+      ],
+      "freq": 7512
+    },
+    {
+      "prep": "prěd",
+      "case": "Acc",
+      "en": [
+        "before (direction)",
+        "in front of (direction)"
+      ],
+      "freq": 7937
+    },
+    {
+      "prep": "prěd",
+      "case": "Ins",
+      "en": [
+        "ago"
+      ],
+      "freq": 8213
+    },
+    {
+      "prep": "prěz",
+      "case": "Acc",
+      "en": [
+        "through",
+        "across",
+        "via"
+      ],
+      "freq": 6580
+    },
+    {
+      "prep": "radi",
+      "case": "Gen",
+      "en": [
+        "for the sake of",
+        "on account of"
+      ],
+      "freq": 7614
+    },
+    {
+      "prep": "s",
+      "case": "Ins",
+      "en": [
+        "with",
+        "together with"
+      ],
+      "freq": 9404
+    },
+    {
+      "prep": "s",
+      "case": "Ins",
+      "en": [
+        "using",
+        "by means of"
+      ],
+      "freq": 6354
+    },
+    {
+      "prep": "s",
+      "case": "Gen",
+      "en": [
+        "off (from a surface)"
+      ],
+      "freq": 9789
+    },
+    {
+      "prep": "s izključeńjem",
+      "case": "Gen",
+      "en": [
+        "except",
+        "with the exception of"
+      ],
+      "freq": 6606
+    },
+    {
+      "prep": "s obzirom na",
+      "case": "Acc",
+      "en": [
+        "with regard to"
+      ],
+      "freq": 6570
+    },
+    {
+      "prep": "s pomoćjų",
+      "case": "Gen",
+      "en": [
+        "with the help of"
+      ],
+      "freq": 7798
+    },
+    {
+      "prep": "sgodno s",
+      "case": "Ins",
+      "en": [
+        "according to",
+        "conform"
+      ],
+      "freq": 7049
+    },
+    {
+      "prep": "srěd",
+      "case": "Gen",
+      "en": [
+        "among",
+        "amongs",
+        "amid"
+      ],
+      "freq": 6212
+    },
+    {
+      "prep": "sųglåsno",
+      "case": "Dat",
+      "en": [
+        "according to"
+      ],
+      "freq": 7295
+    },
+    {
+      "prep": "sųprotiv",
+      "case": "Gen",
+      "en": [
+        "contrary to"
+      ],
+      "freq": 5921
+    },
+    {
+      "prep": "sųsědno do",
+      "case": "Gen",
+      "en": [
+        "next to"
+      ],
+      "freq": 6612
+    },
+    {
+      "prep": "sȯ",
+      "case": "Ins",
+      "en": [
+        "with",
+        "together with"
+      ],
+      "freq": 9404
+    },
+    {
+      "prep": "sȯ",
+      "case": "Ins",
+      "en": [
+        "using",
+        "by means of"
+      ],
+      "freq": 6354
+    },
+    {
+      "prep": "sȯ",
+      "case": "Gen",
+      "en": [
+        "off (from a surface)"
+      ],
+      "freq": 9789
+    },
+    {
+      "prep": "sȯglåsno",
+      "case": "Dat",
+      "en": [
+        "according to"
+      ],
+      "freq": 7295
+    },
+    {
+      "prep": "u",
+      "case": "Gen",
+      "en": [
+        "at",
+        "at the place of"
+      ],
+      "freq": 9635
+    },
+    {
+      "prep": "v",
+      "case": "Loc",
+      "en": [
+        "in",
+        "within"
+      ],
+      "freq": 9404
+    },
+    {
+      "prep": "v",
+      "case": "Acc",
+      "en": [
+        "into"
+      ],
+      "freq": 8608
+    },
+    {
+      "prep": "v imenu",
+      "case": "Gen",
+      "en": [
+        "in the name of"
+      ],
+      "freq": 7496
+    },
+    {
+      "prep": "v odnošeńju k",
+      "case": "Dat",
+      "en": [
+        "regarding",
+        "with regard to"
+      ],
+      "freq": 6690
+    },
+    {
+      "prep": "v odråzlikě od",
+      "case": "Gen",
+      "en": [
+        "unlike",
+        "in contrast to",
+        "in distinction to"
+      ],
+      "freq": 6852
+    },
+    {
+      "prep": "v protivnosti k",
+      "case": "Dat",
+      "en": [
+        "unlike",
+        "in opposition to"
+      ],
+      "freq": 6256
+    },
+    {
+      "prep": "v ramkah",
+      "case": "Gen",
+      "en": [
+        "within",
+        "as a part of",
+        "within the framework of",
+        "in the context of"
+      ],
+      "freq": 8393
+    },
+    {
+      "prep": "v råzličji od",
+      "case": "Gen",
+      "en": [
+        "unlike",
+        "in contrast to"
+      ],
+      "freq": 6729
+    },
+    {
+      "prep": "v svęzi s",
+      "case": "Ins",
+      "en": [
+        "in connection with"
+      ],
+      "freq": 7763
+    },
+    {
+      "prep": "v tečeńju",
+      "case": "Gen",
+      "en": [
+        "during"
+      ],
+      "freq": 8334
+    },
+    {
+      "prep": "v vrěmenu",
+      "case": "Gen",
+      "en": [
+        "during"
+      ],
+      "freq": 7579
+    },
+    {
+      "prep": "v zaměn za",
+      "case": "Acc",
+      "en": [
+        "instead of",
+        "in return for"
+      ],
+      "freq": 6038
+    },
+    {
+      "prep": "v času",
+      "case": "Gen",
+      "en": [
+        "during"
+      ],
+      "freq": 8246
+    },
+    {
+      "prep": "vizavi",
+      "case": "Gen",
+      "en": [
+        "vis-à-vis"
+      ],
+      "freq": 4773
+    },
+    {
+      "prep": "vključajųći",
+      "case": "Acc",
+      "en": [
+        "including"
+      ],
+      "freq": 6300
+    },
+    {
+      "prep": "vměsto",
+      "case": "Gen",
+      "en": [
+        "instead of"
+      ],
+      "freq": 7266
+    },
+    {
+      "prep": "vně",
+      "case": "Gen",
+      "en": [
+        "outside of",
+        "beyond"
+      ],
+      "freq": 7612
+    },
+    {
+      "prep": "vnųtri",
+      "case": "Gen",
+      "en": [
+        "inside",
+        "within"
+      ],
+      "freq": 7304
+    },
+    {
+      "prep": "vslěd",
+      "case": "Gen",
+      "en": [
+        "following",
+        "because of",
+        "as a result of",
+        "based on"
+      ],
+      "freq": 6897
+    },
+    {
+      "prep": "vsrěd",
+      "case": "Gen",
+      "en": [
+        "amid",
+        "among"
+      ],
+      "freq": 6867
+    },
+    {
+      "prep": "vȯ",
+      "case": "Loc",
+      "en": [
+        "in",
+        "within"
+      ],
+      "freq": 9404
+    },
+    {
+      "prep": "vȯ",
+      "case": "Acc",
+      "en": [
+        "into"
+      ],
+      "freq": 8608
+    },
+    {
+      "prep": "vȯdle",
+      "case": "Gen",
+      "en": [
+        "beside",
+        "near"
+      ],
+      "freq": 5919
+    },
+    {
+      "prep": "vȯzdȯlž",
+      "case": "Gen",
+      "en": [
+        "along",
+        "alongside"
+      ],
+      "freq": 6576
+    },
+    {
+      "prep": "za",
+      "case": "Ins",
+      "en": [
+        "behind",
+        "after"
+      ],
+      "freq": 7530
+    },
+    {
+      "prep": "za",
+      "case": "Acc",
+      "en": [
+        "for"
+      ],
+      "freq": 9539
+    },
+    {
+      "prep": "za",
+      "case": "Acc",
+      "en": [
+        "because of",
+        "due to"
+      ],
+      "freq": 8985
+    },
+    {
+      "prep": "za",
+      "case": "Acc",
+      "en": [
+        "behind (direction)"
+      ],
+      "freq": 6563
+    },
+    {
+      "prep": "za",
+      "case": "Acc",
+      "en": [
+        "in favour of",
+        "in favor of"
+      ],
+      "freq": 6394
+    },
+    {
+      "prep": "za",
+      "case": "Acc",
+      "en": [
+        "in exchange for",
+        "per"
+      ],
+      "freq": 6997
+    },
+    {
+      "prep": "za",
+      "case": "Gen",
+      "en": [
+        "during",
+        "in times of"
+      ],
+      "freq": 8103
+    },
+    {
+      "prep": "zaměsto",
+      "case": "Gen",
+      "en": [
+        "instead of"
+      ],
+      "freq": 6673
+    },
+    {
+      "prep": "zaradi",
+      "case": "Gen",
+      "en": [
+        "for the sake of",
+        "on account of"
+      ],
+      "freq": 7472
+    },
+    {
+      "prep": "črěz",
+      "case": "Acc",
+      "en": [
+        "through",
+        "across",
+        "via"
+      ],
+      "freq": 6745
+    },
+    {
+      "prep": "čto sę tyče",
+      "case": "Gen",
+      "en": [
+        "regarding",
+        "with regard to"
+      ],
+      "freq": 6776
+    }
+  ]
+}

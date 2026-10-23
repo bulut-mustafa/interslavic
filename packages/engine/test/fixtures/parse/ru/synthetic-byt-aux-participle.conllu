@@ -1,0 +1,13 @@
+# text = Дом был построен.
+# provenance = HAND-WRITTEN, not from stanza. A synthetic variant of the past
+# provenance = passive in which `был` is labelled `aux` rather than `aux:pass`.
+# provenance = Stanza does not produce this (verified over six constructions:
+# provenance = it uses aux only with an infinitive head, aux:pass for the
+# provenance = passive, cop for a nominal predicate), so this fixture exists to
+# provenance = exercise the VerbForm=Inf guard in the Russian future rule,
+# provenance = which is insurance against a labelling we do not control.
+# lang = ru
+1	Дом	дом	NOUN	_	Animacy=Inan|Case=Nom|Gender=Masc|Number=Sing	3	nsubj:pass	_	_
+2	был	быть	AUX	_	Gender=Masc|Mood=Ind|Number=Sing|Tense=Past|VerbForm=Fin	3	aux	_	_
+3	построен	построить	VERB	_	Aspect=Perf|Gender=Masc|Number=Sing|Tense=Past|Variant=Short|VerbForm=Part|Voice=Pass	0	root	_	_
+4	.	.	PUNCT	_	_	3	punct	_	_

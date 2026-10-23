@@ -1,0 +1,545 @@
+{
+  "_comment": "Gold Interslavic sentences with their English, taken verbatim from Jan van Steenbergen's own grammar pages. He is the language's co-author, so these are the most authoritative parallel data available. Used to measure whether our output MEANS the right thing - the full-form lexicon only proves words are real. Every `isv` string here was checked against the page text character by character; do not paraphrase one.",
+  "_sources": {
+    "syntax": "http://steen.free.fr/interslavic/syntax.html",
+    "prepositions": "http://steen.free.fr/interslavic/prepositions.html",
+    "verbs": "http://steen.free.fr/interslavic/verbs.html",
+    "pronouns": "http://steen.free.fr/interslavic/pronouns.html",
+    "adjectives": "http://steen.free.fr/interslavic/adjectives.html",
+    "numerals": "http://steen.free.fr/interslavic/numerals.html"
+  },
+  "_retrieved": "2026-10-18",
+  "_note": "Pairs 1-10 were the original set, retrieved 2026-10-17 from the syntax page alone. 11-29 widen coverage to the constructions that page never exercised: prepositional case contrast, reflexives, svoj, predicate adjectives, numeral government, purpose clauses and the optative. Many of them are expected to fail - that is the point of measuring.  Harvest status (2026-10-23): the grammar pages are now exhausted for en->isv SENTENCE pairs. A sweep of nouns/adjectives/pronouns/numerals/verbs/prepositions/conjunctions/syntax/word_formation/derivation yields 40 ISV-with-English-gloss candidates, of which 23 were already here and 11 are word-level examples or prose fragments rather than sentences. The plan's 60-80 target assumed ~150 candidates; most of those are single words. 35 is the realistic ceiling from tier 1.  Russian gold (2026-10-23): the TARGET of each ru- pair is van Steenbergen's own Interslavic, taken from the English pair it mirrors; only the SOURCE changes. The Russian source sentences were authored for this repo and are NOT his - that is the weak half of these pairs, and a Russian speaker should review them. They are still worth having: they test the Russian pipeline against an authoritative target rather than against our own English output, which is the only independent check available without a Russian speaker.",
+  "pairs": [
+    {
+      "id": "g01",
+      "en": "Has father bought a book?",
+      "isv": "Otec kupil knigu?",
+      "page": "syntax",
+      "tests": [
+        "past l-participle",
+        "yes/no question"
+      ]
+    },
+    {
+      "id": "g02",
+      "en": "Which book has father bought?",
+      "isv": "Koju knigu kupil otec?",
+      "page": "syntax",
+      "tests": [
+        "wh-question",
+        "accusative"
+      ]
+    },
+    {
+      "id": "g03",
+      "en": "Where did father buy that book?",
+      "isv": "Kde otec kupil tu knigu?",
+      "page": "syntax",
+      "tests": [
+        "wh-question",
+        "demonstrative"
+      ]
+    },
+    {
+      "id": "g04",
+      "en": "Which woman loves that man?",
+      "isv": "Koja žena ljubi togo muža?",
+      "page": "syntax",
+      "tests": [
+        "masc animate accusative"
+      ]
+    },
+    {
+      "id": "g05",
+      "en": "I don't want to go to the cinema.",
+      "isv": "Ja ne hoču idti v kino.",
+      "page": "syntax",
+      "tests": [
+        "modal + infinitive",
+        "negation"
+      ]
+    },
+    {
+      "id": "g06",
+      "en": "This car is not expensive.",
+      "isv": "Tuto avto ne jest drago.",
+      "page": "syntax",
+      "tests": [
+        "negated copula",
+        "predicate adjective"
+      ]
+    },
+    {
+      "id": "g07",
+      "en": "I never eat chocolate.",
+      "isv": "Ja nikogda ne jem čokoladu.",
+      "page": "syntax",
+      "tests": [
+        "negative concord",
+        "accusative"
+      ]
+    },
+    {
+      "id": "g08",
+      "en": "Nobody came to the party.",
+      "isv": "Nikto ne prijehal na zabavu.",
+      "page": "syntax",
+      "tests": [
+        "negative concord",
+        "preposition na",
+        "word sense"
+      ]
+    },
+    {
+      "id": "g09",
+      "en": "This bread is inexpensive.",
+      "isv": "Tutoj hlěb jest nedragy.",
+      "page": "syntax",
+      "tests": [
+        "copula",
+        "predicate adjective"
+      ]
+    },
+    {
+      "id": "g10",
+      "en": "This bread is not expensive.",
+      "isv": "Tutoj hlěb ne jest dragy.",
+      "page": "syntax",
+      "tests": [
+        "negated copula"
+      ]
+    },
+    {
+      "id": "g11",
+      "en": "Which woman does that man love?",
+      "isv": "Koju ženu ljubi toj muž?",
+      "page": "syntax",
+      "tests": [
+        "wh-question",
+        "case disambiguates roles"
+      ]
+    },
+    {
+      "id": "g12",
+      "en": "Which woman is loved by that man?",
+      "isv": "Koja žena jest ljubjena od togo muža?",
+      "page": "syntax",
+      "tests": [
+        "passive",
+        "agent with od + genitive"
+      ]
+    },
+    {
+      "id": "g13",
+      "en": "Father couldn't find his keys anywhere.",
+      "isv": "Otec nikde ne mogl najdti svoje ključi.",
+      "page": "syntax",
+      "tests": [
+        "negative concord",
+        "modal past",
+        "svoj"
+      ]
+    },
+    {
+      "id": "g14",
+      "en": "I am never going to read a single book anymore!",
+      "isv": "Ja uže nikogda ne budu čitati nijednu knigu!",
+      "page": "syntax",
+      "tests": [
+        "future periphrastic",
+        "multiple negation"
+      ]
+    },
+    {
+      "id": "g15",
+      "en": "Tourists visit the Netherlands to take photos of the tulips.",
+      "isv": "Turisti posětet Niderlandiju, že by fotografovali tulipany.",
+      "page": "syntax",
+      "tests": [
+        "purpose clause",
+        "conditional by"
+      ]
+    },
+    {
+      "id": "g16",
+      "en": "She brings apples so that the kids will be healthy.",
+      "isv": "Ona prinosi jabloka, da by děti byli zdrave.",
+      "page": "syntax",
+      "tests": [
+        "purpose clause",
+        "conditional by"
+      ]
+    },
+    {
+      "id": "g17",
+      "en": "My brother doesn't eat bread.",
+      "isv": "Moj brat ne je hlěb.",
+      "page": "syntax",
+      "tests": [
+        "negation",
+        "accusative under negation"
+      ]
+    },
+    {
+      "id": "g18",
+      "en": "The cat is sleeping under the table",
+      "isv": "Kot spi pod stolom",
+      "page": "prepositions",
+      "tests": [
+        "pod + instrumental",
+        "static location"
+      ]
+    },
+    {
+      "id": "g19",
+      "en": "The cat fled under the table",
+      "isv": "Kot poběgl pod stol",
+      "page": "prepositions",
+      "tests": [
+        "pod + accusative",
+        "motion"
+      ]
+    },
+    {
+      "id": "g20",
+      "en": "May he live long!",
+      "isv": "Nehaj žive dolgo!",
+      "page": "verbs",
+      "tests": [
+        "optative nehaj"
+      ]
+    },
+    {
+      "id": "g21",
+      "en": "Igor was driving around in Moscow",
+      "isv": "Igor jezdil po Moskvě",
+      "page": "verbs",
+      "tests": [
+        "po + locative",
+        "iterative imperfective"
+      ]
+    },
+    {
+      "id": "g22",
+      "en": "I am washing my car",
+      "isv": "Ja myju svoje avto",
+      "page": "pronouns",
+      "tests": [
+        "svoj",
+        "accusative neuter"
+      ]
+    },
+    {
+      "id": "g23",
+      "en": "I'm washing myself",
+      "isv": "Ja myju se",
+      "page": "pronouns",
+      "tests": [
+        "reflexive se"
+      ]
+    },
+    {
+      "id": "g24",
+      "en": "Peter is happy",
+      "isv": "Petr jest ščestliv",
+      "page": "adjectives",
+      "tests": [
+        "predicate adjective",
+        "short form"
+      ]
+    },
+    {
+      "id": "g25",
+      "en": "A house with three floors",
+      "isv": "Dom s tri etažami",
+      "page": "numerals",
+      "tests": [
+        "s + instrumental",
+        "undeclined numeral"
+      ]
+    },
+    {
+      "id": "g26",
+      "en": "Some people prefer Summer, others Winter",
+      "isv": "Jedni ljudi prědpočitajut lěto, drugi zimu",
+      "page": "numerals",
+      "tests": [
+        "jedin in the plural",
+        "ellipsis"
+      ]
+    },
+    {
+      "id": "g27",
+      "en": "five houses",
+      "isv": "pet domov",
+      "page": "numerals",
+      "tests": [
+        "numeral government",
+        "genitive plural after 5"
+      ]
+    },
+    {
+      "id": "g28",
+      "en": "two students",
+      "isv": "dva studenti",
+      "page": "numerals",
+      "tests": [
+        "numeral government",
+        "nominative plural after 2-4"
+      ]
+    },
+    {
+      "id": "g29",
+      "en": "one door",
+      "isv": "jedne dveri",
+      "page": "numerals",
+      "tests": [
+        "plurale tantum",
+        "numeral agreement"
+      ]
+    },
+    {
+      "id": "g30",
+      "en": "I wash nobody but myself",
+      "isv": "Ja myju jedino sebe",
+      "page": "pronouns",
+      "tests": [
+        "reflexive sebe",
+        "emphatic reflexive"
+      ]
+    },
+    {
+      "id": "g31",
+      "en": "Pjotr gave Ivan his book",
+      "isv": "Pjotr dal Ivanu svoju knigu",
+      "page": "pronouns",
+      "tests": [
+        "svoj",
+        "recipient dative"
+      ],
+      "_note": "the page writes 'his [= Pjotr's]' to disambiguate; the bracket is dropped because the English input cannot carry it. Its counterpart - the same English with 'jegovu', meaning Ivan's book - is deliberately NOT a gold pair, because English cannot express that difference at all."
+    },
+    {
+      "id": "g32",
+      "en": "Igor has gone to Moscow",
+      "isv": "Igor pojehal do Moskvy",
+      "page": "verbs",
+      "tests": [
+        "perfective aspect",
+        "motion verb"
+      ]
+    },
+    {
+      "id": "g33",
+      "en": "While going to her work, she always smokes a cigarette",
+      "isv": "Iduči do raboty, ona vsegda dymi cigaretoju",
+      "page": "verbs",
+      "tests": [
+        "present participle",
+        "instrumental"
+      ]
+    },
+    {
+      "id": "g34",
+      "en": "Tourists visited the Netherlands to take photos of the tulips.",
+      "isv": "Turisty posětili Niderlandiju, že by fotografovali tulipany.",
+      "page": "syntax",
+      "tests": [
+        "purpose clause",
+        "past conditional"
+      ]
+    },
+    {
+      "id": "g35",
+      "en": "She brought apples so that the kids would be healthy.",
+      "isv": "Ona prinosila jabloka, da by děti byli zdrave.",
+      "page": "syntax",
+      "tests": [
+        "purpose clause da by",
+        "predicate agreement"
+      ]
+    },
+    {
+      "id": "g01-ru",
+      "lang": "ru",
+      "ru": "Отец купил книгу?",
+      "isv": "Otec kupil knigu?",
+      "page": "syntax",
+      "tests": [
+        "past l-participle",
+        "yes/no question"
+      ],
+      "of": "g01",
+      "en_of_target": "Has father bought a book?"
+    },
+    {
+      "id": "g02-ru",
+      "lang": "ru",
+      "ru": "Какую книгу купил отец?",
+      "isv": "Koju knigu kupil otec?",
+      "page": "syntax",
+      "tests": [
+        "wh-question",
+        "accusative"
+      ],
+      "of": "g02",
+      "en_of_target": "Which book has father bought?"
+    },
+    {
+      "id": "g03-ru",
+      "lang": "ru",
+      "ru": "Где отец купил ту книгу?",
+      "isv": "Kde otec kupil tu knigu?",
+      "page": "syntax",
+      "tests": [
+        "wh-question",
+        "demonstrative"
+      ],
+      "of": "g03",
+      "en_of_target": "Where did father buy that book?"
+    },
+    {
+      "id": "g04-ru",
+      "lang": "ru",
+      "ru": "Какая женщина любит того мужчину?",
+      "isv": "Koja žena ljubi togo muža?",
+      "page": "syntax",
+      "tests": [
+        "masc animate accusative"
+      ],
+      "of": "g04",
+      "en_of_target": "Which woman loves that man?"
+    },
+    {
+      "id": "g05-ru",
+      "lang": "ru",
+      "ru": "Я не хочу идти в кино.",
+      "isv": "Ja ne hoču idti v kino.",
+      "page": "syntax",
+      "tests": [
+        "modal + infinitive",
+        "negation"
+      ],
+      "of": "g05",
+      "en_of_target": "I don't want to go to the cinema."
+    },
+    {
+      "id": "g07-ru",
+      "lang": "ru",
+      "ru": "Я никогда не ем шоколад.",
+      "isv": "Ja nikogda ne jem čokoladu.",
+      "page": "syntax",
+      "tests": [
+        "negative concord",
+        "accusative"
+      ],
+      "of": "g07",
+      "en_of_target": "I never eat chocolate."
+    },
+    {
+      "id": "g08-ru",
+      "lang": "ru",
+      "ru": "Никто не пришёл на вечеринку.",
+      "isv": "Nikto ne prijehal na zabavu.",
+      "page": "syntax",
+      "tests": [
+        "negative concord",
+        "preposition na",
+        "word sense"
+      ],
+      "of": "g08",
+      "en_of_target": "Nobody came to the party."
+    },
+    {
+      "id": "g17-ru",
+      "lang": "ru",
+      "ru": "Мой брат не ест хлеб.",
+      "isv": "Moj brat ne je hlěb.",
+      "page": "syntax",
+      "tests": [
+        "negation",
+        "accusative under negation"
+      ],
+      "of": "g17",
+      "en_of_target": "My brother doesn't eat bread."
+    },
+    {
+      "id": "g18-ru",
+      "lang": "ru",
+      "ru": "Кот спит под столом",
+      "isv": "Kot spi pod stolom",
+      "page": "prepositions",
+      "tests": [
+        "pod + instrumental",
+        "static location"
+      ],
+      "of": "g18",
+      "en_of_target": "The cat is sleeping under the table"
+    },
+    {
+      "id": "g19-ru",
+      "lang": "ru",
+      "ru": "Кот побежал под стол",
+      "isv": "Kot poběgl pod stol",
+      "page": "prepositions",
+      "tests": [
+        "pod + accusative",
+        "motion"
+      ],
+      "of": "g19",
+      "en_of_target": "The cat fled under the table"
+    },
+    {
+      "id": "g22-ru",
+      "lang": "ru",
+      "ru": "Я мою свою машину",
+      "isv": "Ja myju svoje avto",
+      "page": "pronouns",
+      "tests": [
+        "svoj",
+        "accusative neuter"
+      ],
+      "of": "g22",
+      "en_of_target": "I am washing my car"
+    },
+    {
+      "id": "g23-ru",
+      "lang": "ru",
+      "ru": "Я мою себя",
+      "isv": "Ja myju se",
+      "page": "pronouns",
+      "tests": [
+        "reflexive se"
+      ],
+      "of": "g23",
+      "en_of_target": "I'm washing myself"
+    },
+    {
+      "id": "g27-ru",
+      "lang": "ru",
+      "ru": "пять домов",
+      "isv": "pet domov",
+      "page": "numerals",
+      "tests": [
+        "numeral government",
+        "genitive plural after 5"
+      ],
+      "of": "g27",
+      "en_of_target": "five houses"
+    },
+    {
+      "id": "g28-ru",
+      "lang": "ru",
+      "ru": "два студента",
+      "isv": "dva studenti",
+      "page": "numerals",
+      "tests": [
+        "numeral government",
+        "nominative plural after 2-4"
+      ],
+      "of": "g28",
+      "en_of_target": "two students"
+    }
+  ]
+}

@@ -1,0 +1,100 @@
+{
+  "_comment": "Curated choices for CLOSED-CLASS words (demonstratives, interrogatives, pronouns). Frequency ranking is the wrong tool here: there are only a few dozen of these, they appear constantly, and the dictionary's glosses mislead. 'that' ranked 'tamto' first because it is glossed exactly 'that', while the general demonstrative 'tȯj' is glossed 'this, that' and so looked like a worse match - but tamto means 'that OVER THERE'. Each entry below is justified against a cited source rather than chosen by score.",
+  "_sources": {
+    "steenbergen-syntax": "http://steen.free.fr/interslavic/syntax.html",
+    "steenbergen-pronouns": "http://steen.free.fr/interslavic/pronouns.html",
+    "steenbergen-nouns": "http://steen.free.fr/interslavic/nouns.html"
+  },
+  "_scope": "Closed classes only. Open-class words (nouns, verbs, adjectives) stay with dictionary ranking - curating them by hand would never end.",
+  "words": [
+    {
+      "en": "that",
+      "upos": [
+        "DET",
+        "PRON"
+      ],
+      "isv": "tȯj",
+      "why": "the plain distal demonstrative; 'tamto' means 'that over there'",
+      "evidence": "steenbergen-syntax: 'Kde otec kupil tu knigu?' = 'Where did father buy that book?'; 'Koja žena ljubi togo muža?' = 'Which woman loves that man?'",
+      "source": "steenbergen-syntax"
+    },
+    {
+      "en": "this",
+      "upos": [
+        "DET",
+        "PRON"
+      ],
+      "isv": "tutoj",
+      "why": "the proximal demonstrative",
+      "evidence": "steenbergen-syntax: 'Tutoj hlěb jest nedragy.' = 'This bread is inexpensive.'",
+      "source": "steenbergen-syntax"
+    },
+    {
+      "en": "which",
+      "upos": [
+        "DET",
+        "PRON"
+      ],
+      "isv": "koj",
+      "why": "used in the grammar's own interrogative examples; 'ktory' is also correct and is ranked type 1, so this is a preference rather than a correction",
+      "evidence": "steenbergen-syntax: 'Koju knigu kupil otec?'; 'Koja žena ljubi togo muža?'",
+      "source": "steenbergen-syntax"
+    },
+    {
+      "en": "его",
+      "lang": "ru",
+      "upos": [
+        "DET"
+      ],
+      "isv": "jegov",
+      "why": "the possessive 'his/its', not an oblique form of the personal pronoun. It declines, so it can agree with the noun it modifies",
+      "evidence": "steenbergen-pronouns: 'Pjotr dal Ivanu jegovu knigu' = 'Pjotr gave Ivan his [= Ivan's] book'. Ranking gave `nju` ('her', accusative) because the dictionary glosses oblique forms as entries of their own",
+      "source": "steenbergen-pronouns"
+    },
+    {
+      "en": "её",
+      "lang": "ru",
+      "upos": [
+        "DET"
+      ],
+      "isv": "jejin",
+      "why": "the possessive 'her/hers'; the declinable form, so it agrees with its noun",
+      "evidence": "steenbergen-pronouns: the possessives are listed as jegov / jejin / jihny beside the indeclinable jego / jej / jih",
+      "source": "steenbergen-pronouns"
+    },
+    {
+      "en": "их",
+      "lang": "ru",
+      "upos": [
+        "DET"
+      ],
+      "isv": "jihny",
+      "why": "the possessive 'their'; the declinable form, so it agrees with its noun",
+      "evidence": "steenbergen-pronouns: the possessives are listed as jegov / jejin / jihny beside the indeclinable jego / jej / jih",
+      "source": "steenbergen-pronouns"
+    },
+    {
+      "en": "нет",
+      "lang": "ru",
+      "upos": [
+        "VERB"
+      ],
+      "isv": "nema",
+      "why": "the negative existential, glossed 'there is/are no'. The interjection `ne` ('no') is far more frequent and was winning, giving the verbless 'U mene ne brata'",
+      "evidence": "the dictionary glosses `nema` and `nemaje` exactly 'there is/are no, there is/are not'; `ne` is glossed 'no' as an intj. and 'not' as an adv.",
+      "source": "steenbergen-nouns"
+    },
+    {
+      "en": "какой",
+      "lang": "ru",
+      "upos": [
+        "DET",
+        "PRON"
+      ],
+      "isv": "koj",
+      "why": "the interrogative 'which' in a question. `ktory` is also pron.int. and wins on frequency, but the pronouns page reserves it for RELATIVE clauses - and the English side already produces `koj` here, so this aligns the two source languages",
+      "evidence": "steenbergen-syntax: 'Koju knigu kupil otec?' = 'Which book has father bought?'; 'Koja žena ljubi togo muža?' = 'Which woman loves that man?'. steenbergen-pronouns: 'The relative pronoun that is used most frequently is ktory'",
+      "source": "steenbergen-syntax"
+    }
+  ]
+}

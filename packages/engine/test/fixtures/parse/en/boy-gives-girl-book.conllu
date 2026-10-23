@@ -1,0 +1,11 @@
+# text = The boy gives the girl a book.
+# provenance = HAND-WRITTEN pending Stanza verification (make fixtures)
+# lang = en
+1	The	the	DET	DT	Definite=Def|PronType=Art	2	det	_	_
+2	boy	boy	NOUN	NN	Number=Sing	3	nsubj	_	_
+3	gives	give	VERB	VBZ	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	0	root	_	_
+4	the	the	DET	DT	Definite=Def|PronType=Art	5	det	_	_
+5	girl	girl	NOUN	NN	Number=Sing	3	iobj	_	_
+6	a	a	DET	DT	Definite=Ind|PronType=Art	7	det	_	_
+7	book	book	NOUN	NN	Number=Sing	3	obj	_	_
+8	.	.	PUNCT	.	_	3	punct	_	_

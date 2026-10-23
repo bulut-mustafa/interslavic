@@ -1,0 +1,130 @@
+import type { ParsedSentence, UdToken } from '../../types/index.ts';
+import { personalPronounLemma, personalPronounNumber } from '../../rules/src/pronouns.ts';
+import { adapterFor } from './source/adapters.ts';
+
+/**
+ * Pure helpers over the dependency parse. Their own module because several
+ * stages need them and none of them needs the pipeline.
+ */
+
+/**
+ * The subject of the clause a verb sits in, walking up until one is found.
+ * Declared here because both `subjectPerson` and `subjectNumber` are
+ * module-level and need it.
+ */
+export function subjectOfClause(from: UdToken, sentence: ParsedSentence): UdToken | undefined {
+  let current: UdToken | undefined = from;
+  for (let hops = 0; current !== undefined && hops < 8; hops++) {
+    const here: UdToken = current;
+    const subject = sentence.tokens.find(
+      (t) => t.head === here.id && t.deprel.startsWith('nsubj'),
+    );
+    if (subject) return subject;
+    current = sentence.tokens.find((t) => t.id === here.head);
+  }
+  return undefined;
+}
+
+/**
+ * Every token in a phrase headed by `rootId`, excluding the subject (which
+ * hangs off a predicate but belongs to no predicate phrase) and punctuation.
+ */
+export function phraseOf(rootId: number, sentence: ParsedSentence): Set<number> {
+  const out = new Set<number>([rootId]);
+  for (let grew = true; grew; ) {
+    grew = false;
+    for (const t of sentence.tokens) {
+      if (t.upos === 'PUNCT') continue;
+      /**
+       * The clause's OWN subject is excluded, because it hangs off the
+       * predicate while belonging to no predicate phrase. Only at this level
+       * though: a relative clause inside the phrase has a subject of its own,
+       * and excluding that split "Kniga ktoru ja čitaju" into two pieces -
+       * "Kniga ktoru jest ja čitaju interesna".
+       */
+      if (t.head === rootId && t.deprel.startsWith('nsubj')) continue;
+      if (!out.has(t.id) && out.has(t.head)) {
+        out.add(t.id);
+        grew = true;
+      }
+    }
+  }
+  return out;
+}
+
+export function baseDeprel(deprel: string): string {
+  return deprel.split(':')[0] ?? deprel;
+}
+
+export /**
+ * The pronoun rule, with the source language's own second-person behaviour
+ * taken from its adapter. Threading the flag through each call site by hand
+ * missed five of six, which left Russian "Ты čitaješ" conjugated as a plural
+ * because `personalPronounNumber('vy')` is Plur.
+ */
+function pronounLemmaFor(
+  feats: Record<string, string>,
+  sentence: ParsedSentence,
+): string | null {
+  return personalPronounLemma(feats, adapterFor(sentence).marksSecondPersonNumber);
+}
+
+export function subjectNumber(verb: UdToken, sentence: ParsedSentence, fallback?: string): string {
+  const subject =
+    sentence.tokens.find((t) => t.head === verb.id && t.deprel.startsWith('nsubj')) ??
+    // A copula has no subject of its own: "you are right" hangs `you` off
+    // `right`. Without walking up, "vy jesi prave" came out 2nd SINGULAR.
+    subjectOfClause(verb, sentence);
+  if (subject) {
+    const pronoun = pronounLemmaFor(subject.feats, sentence);
+    if (pronoun) return personalPronounNumber(pronoun);
+    if (subject.feats['Number']) return subject.feats['Number'];
+  }
+  return fallback ?? verb.feats['Number'] ?? 'Sing';
+}
+
+export function subjectPerson(verb: UdToken, sentence: ParsedSentence): string {
+  const subject =
+    sentence.tokens.find((t) => t.head === verb.id && t.deprel.startsWith('nsubj')) ??
+    subjectOfClause(verb, sentence);
+  if (subject) {
+    if (subject.upos === 'PRON') return subject.feats['Person'] ?? '3';
+    // Any noun, proper noun or nominal subject is third person.
+    return '3';
+  }
+  // No subject in the tree: fall back to the verb, then its auxiliary.
+  const aux = sentence.tokens.find(
+    (t) => t.head === verb.id && t.deprel === 'aux' && t.feats['Person'],
+  );
+  return verb.feats['Person'] ?? aux?.feats['Person'] ?? '3';
+}
+
+/**
+ * The sentence's own final punctuation. Carried over rather than assumed:
+ * appending "." turned "Do you know the answer?" into a statement.
+ */
+export function sentencePunctuation(sentence: ParsedSentence): string {
+  const last = [...sentence.tokens].reverse().find((t) => t.upos === 'PUNCT');
+  return last && /[.!?…]+$/.test(last.form) ? last.form : '';
+}
+
+/**
+ * Conjuncts of a token, transitively. UD hangs every later conjunct off the
+ * FIRST one, so "in the house and the garden" attaches "garden" to "house" -
+ * and a preposition governs the whole coordination, not just its first
+ * member. Without this, "v domu i sad" came out with a nominative conjunct.
+ */
+export function conjunctsOf(id: number, sentence: ParsedSentence): number[] {
+  const out: number[] = [];
+  const queue = [id];
+  while (queue.length > 0 && out.length < 32) {
+    const current = queue.shift()!;
+    for (const t of sentence.tokens) {
+      if (t.head === current && t.deprel === 'conj' && !out.includes(t.id)) {
+        out.push(t.id);
+        queue.push(t.id);
+      }
+    }
+  }
+  return out;
+}

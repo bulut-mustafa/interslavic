@@ -1,0 +1,196 @@
+import { decide, type Case, type Decision, type ParsedSentence, type UdToken } from '../../../types/index.ts';
+import { CASE_MARKER_PREPOSITIONS, candidatesForEnglish } from '../../../rules/src/prepositions.ts';
+import { isMotionVerb } from '../../../rules/src/motion.ts';
+import { isTimeUnit, verbGovernedPhrase } from '../../../rules/src/verb-prepositions.ts';
+
+/**
+ * What to do with a prepositional phrase.
+ *
+ * Either the preposition survives into Interslavic and governs a case, or it
+ * is a bare case marker that must be deleted (English "of"/recipient "to").
+ */
+export type PrepPlan =
+  | { kind: 'preposition'; prep: string; case: Decision<Case>; alternatives: string[] }
+  | { kind: 'caseMarker'; case: Decision<Case> }
+  | { kind: 'unknown' };
+
+/**
+ * English verbs that take a recipient, which is the class that licenses the
+ * dative alternation: "give the girl a book" / "give a book to the girl". A
+ * source-side fact about English, and the test that decides whether "to" is a
+ * recipient marker (a bare Interslavic dative) or a direction.
+ *
+ * Without it, "having a direct object" was the whole test, which made every
+ * "to"-phrase beside an object a dative: "I took the book to Rome" came out as
+ * "Ja jesm vzel knigu Rimu", putting a destination in the dative.
+ */
+const RECIPIENT_VERBS = new Set([
+  'give', 'send', 'write', 'tell', 'show', 'offer', 'hand', 'pass', 'read',
+  'sell', 'lend', 'owe', 'teach', 'promise', 'mail', 'email', 'post', 'pay',
+  'serve', 'award', 'grant', 'explain', 'describe', 'report', 'recommend',
+  'say', 'speak', 'return', 'deliver', 'present', 'leave', 'throw',
+]);
+
+/**
+ * Is this "to" a recipient marker rather than a direction? UD labels the two
+ * alternation variants differently (iobj vs obl+case), and both must become a
+ * bare Interslavic dative.
+ *
+ * The phrase may hang off the verb ("gave a book to her brother") or off the
+ * object noun ("wrote a letter to his mother", which Stanza makes an `nmod` of
+ * "letter") - the recipient is the same either way, and reading only the verb's
+ * own dependents gave "do svojej matere", "up to his mother".
+ */
+function isRecipientTo(adp: UdToken, sentence: ParsedSentence): boolean {
+  // Called only for "to" (the caller short-circuits), so no lemma check here.
+  const complement = sentence.tokens.find((t) => t.id === adp.head);
+  if (!complement) return false;
+
+  // Up through nominal heads to the verb that governs the phrase.
+  let host = sentence.tokens.find((t) => t.id === complement.head);
+  for (let hops = 0; host && host.upos !== 'VERB' && hops < 3; hops++) {
+    host = sentence.tokens.find((t) => t.id === host!.head);
+  }
+  if (!host || host.upos !== 'VERB') return false;
+  if (!RECIPIENT_VERBS.has(host.lemma.toLowerCase())) return false;
+  return sentence.tokens.some((t) => t.head === host!.id && t.deprel === 'obj');
+}
+
+/** Exported for tests. */
+export const RECIPIENT_VERB_LEMMAS = [...RECIPIENT_VERBS];
+
+/**
+ * Why each marker is deleted. Keyed, not branched: with an if/else on "of" the
+ * possessive clitic inherited the "to" message, so the gloss for `mojego brata`
+ * read "recipient 'to' is a dative marker" under a genitive.
+ */
+const MARKER_REASON: Record<string, string> = {
+  of: 'English "of" is a genitive marker - Interslavic uses a bare genitive',
+  to: 'recipient "to" is a dative marker - Interslavic uses a bare dative',
+  "'s": 'the English possessive is a genitive marker - Interslavic uses a bare genitive, like "of"',
+};
+
+export function planPreposition(adp: UdToken, sentence: ParsedSentence): PrepPlan {
+  const lemma = adp.lemma.toLowerCase();
+
+  // Case markers: delete the word, keep the case.
+  const marker = CASE_MARKER_PREPOSITIONS[lemma];
+  if (marker && (lemma !== 'to' || isRecipientTo(adp, sentence))) {
+    return {
+      kind: 'caseMarker',
+      case: decide<Case>(
+        marker,
+        `rewrite.en.${lemma}AsCase`,
+        'high',
+        MARKER_REASON[lemma] ?? `English "${lemma}" is a case marker, not a preposition`,
+      ),
+    };
+  }
+
+  const complement = sentence.tokens.find((t) => t.id === adp.head);
+  const governor = complement && sentence.tokens.find((t) => t.id === complement.head);
+
+  /**
+   * A span of time takes no preposition. "They have lived here for ten years"
+   * was "Oni žili tu dlja deset rokov", which reads as living on ten years'
+   * behalf - `dlja` is the benefactive "for" and is never temporal.
+   *
+   *   "Eksperiment trval samo několiko lět"   (the experiment lasted only a
+   *                                            few years - no preposition)
+   *   https://incubator.wikimedia.org/wiki/Wp/isv/Jediny_bog
+   *   "Dėnj i noć ja blųđų po lěsah i poljah" (day and night I wander)
+   *   http://steen.free.fr/interslavic/volk_i_pes.html
+   *
+   * This is checked before verb government, because "I waited for an hour" is
+   * a duration and not the thing waited for.
+   */
+  if (lemma === 'for' && complement && isTimeUnit(complement.lemma)) {
+    return {
+      kind: 'caseMarker',
+      case: decide<Case>('Acc', 'case.durationAccusative', 'high',
+        'a span of time takes no preposition - "dlja" is the benefactive "for" and is never temporal'),
+    };
+  }
+
+  /**
+   * Some verbs pick the preposition themselves, and the English one is no
+   * guide: "wait FOR" is `čekati na`, "depend ON" is `zavisěti od`.
+   */
+  if (governor?.upos === 'VERB' || governor?.upos === 'AUX') {
+    const governed = verbGovernedPhrase(governor.lemma, lemma);
+    if (governed) {
+      const because = `${governed.why} (${governed.evidence})`;
+      return governed.prep === null
+        ? { kind: 'caseMarker', case: decide<Case>(governed.case, 'case.verbGovernedPrep', 'high', because) }
+        : {
+            kind: 'preposition',
+            prep: governed.prep,
+            case: decide<Case>(governed.case, 'case.verbGovernedPrep', 'high', because),
+            alternatives: [],
+          };
+    }
+  }
+
+  const cands = candidatesForEnglish(lemma);
+  if (cands.length === 0) return { kind: 'unknown' };
+
+  /**
+   * "The instrumental is used when the location is stable (Kot spi pod
+   * stolom), the accusative expresses a motion toward it (Kot poběgl pod
+   * stol)." English writes "under" for both, so the governing verb is the only
+   * signal; without it the planner chose by frequency and gave the
+   * sleeping-cat reading for a fleeing cat.
+   */
+  const noun = complement;
+
+  /**
+   * The agent of a passive: "The agent in passive construction is either in the
+   * instrumental case or preceded by the preposition od with the genitive."
+   * Ranking by frequency picked `od stråny` ("on the part of", 8856) over plain
+   * `od` (7699), giving "od strany togo muža" where the page writes
+   * "od togo muža".
+   */
+  if (noun?.deprel === 'obl:agent') {
+    const agent = cands.find((c) => c.prep === 'od' && c.case === 'Gen');
+    if (agent) {
+      return {
+        kind: 'preposition',
+        prep: agent.prep,
+        case: decide<Case>('Gen', 'case.prep.governed', 'certain',
+          'the agent of a passive takes "od" with the genitive'),
+        alternatives: ['instrumental without a preposition'],
+      };
+    }
+  }
+
+  const governingVerb = governor;
+  const towards =
+    governingVerb?.upos === 'VERB' && isMotionVerb(governingVerb.lemma)
+      ? cands.find((c) => c.direction)
+      : undefined;
+
+  const best = towards ?? cands[0]!;
+  const distinctCases = new Set(cands.map((c) => c.case));
+
+  // Confidence tracks what is actually uncertain: if every candidate governs
+  // the same case, the CASE is certain even when the preposition choice is not.
+  const confidence =
+    cands.length === 1 || towards ? 'high' : distinctCases.size === 1 ? 'high' : 'default';
+  const because =
+    cands.length === 1
+      ? `"${best.prep}" governs the ${best.case.toLowerCase()}`
+      : towards
+        ? `"${governingVerb?.form}" is a verb of motion, and the accusative expresses ` +
+          'movement towards a place (the instrumental or locative would be a stable location)'
+        : distinctCases.size === 1
+          ? `every candidate for "${lemma}" governs the ${best.case.toLowerCase()}`
+          : `"${lemma}" is ambiguous - chose "${best.prep}" (+${best.case.toLowerCase()}) by frequency`;
+
+  return {
+    kind: 'preposition',
+    prep: best.prep,
+    case: decide<Case>(best.case, 'case.prep.governed', confidence, because,
+      cands.slice(1, 4).map((c) => ({ value: c.case, because: `"${c.prep}" + ${c.case.toLowerCase()}` }))),
+    alternatives: cands.slice(1, 4).map((c) => `${c.prep} (+${c.case.toLowerCase()})`),
+  };
+}

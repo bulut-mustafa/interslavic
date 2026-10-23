@@ -1,0 +1,15 @@
+node_modules/
+dist/
+*.tsbuildinfo
+# dictionary snapshot is NOT redistributed - see docs/dictionary-provenance.md
+packages/lexicon/data/raw/
+packages/lexicon/data/built/
+
+# mutation-audit crash-recovery backups
+.mutation-backup/
+
+# Python parser service
+__pycache__/
+*.pyc
+# uv writes its own .gitignore inside .venv; do not rely on it alone (713 MB)
+services/parser/.venv/
