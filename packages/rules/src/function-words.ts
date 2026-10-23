@@ -26,6 +26,16 @@ export interface FunctionWord {
    */
   lang?: string;
   upos: string[];
+  /**
+   * When set, this entry applies only inside a NEGATED clause. English
+   * switches to a positive-polarity indefinite under negation ("a single
+   * book", "anywhere", "anymore") where Interslavic negates it, so the right
+   * word depends on the clause, not on the source word alone.
+   *
+   * A conditional entry wins over an unconditional one for the same lemma, so
+   * the negated reading is the specific case and the plain entry the default.
+   */
+  whenNegated?: boolean;
   isv: string;
   why: string;
   evidence: string;
@@ -55,9 +65,17 @@ export function functionWordFor(
   lemma: string,
   upos: string,
   lang = 'en',
+  negated = false,
 ): FunctionWord | null {
-  const candidates = index().get(`${lang}|${lemma.trim().toLowerCase()}`) ?? [];
-  return candidates.find((w) => w.upos.includes(upos)) ?? null;
+  const candidates = index()
+    .get(`${lang}|${lemma.trim().toLowerCase()}`)
+    ?.filter((w) => w.upos.includes(upos)) ?? [];
+  // The negated reading is the more specific entry, so it is tried first.
+  return (
+    (negated ? candidates.find((w) => w.whenNegated) : undefined) ??
+    candidates.find((w) => !w.whenNegated) ??
+    null
+  );
 }
 
 export function allFunctionWords(): FunctionWord[] {

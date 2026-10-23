@@ -142,7 +142,32 @@ export class Lexicon {
           lemma,
           pos,
           addition,
-          type: Number(typeMeta.text) || 3,
+          /**
+           * `type` is the dictionary's intelligibility tier, documented in the
+           * official schema: 1 universally intelligible, 2 regionally, 3 in
+           * single languages only, 4 Church-Slavonic-derived, 5 a coined
+           * neologism, 9 unclear. Lower is better, and `score()` adds it
+           * directly, so the default for an EMPTY cell is a real ranking
+           * decision about 799 entries, and it decides 307 contested gloss
+           * keys.
+           *
+           * It used to default to 3, which asserts something the dictionary
+           * never said and lands them in a bucket holding only 469 rows
+           * (2.4%), two points behind the 74% that are tier 1.
+           *
+           * 2 is what the dictionary's OWN separate `intelligibility` column
+           * says, counting the languages each row marks '+':
+           *
+           *   type 1   14,168 rows   7.04 languages
+           *   (empty)     799 rows   5.07     <- measured
+           *   type 2    3,493 rows   4.97     <- indistinguishable
+           *   type 3      469 rows   3.94
+           *
+           * So an untyped row behaves like a tier-2 word. This is read off the
+           * data rather than chosen, which is the only reason to prefer one
+           * default over another here.
+           */
+          type: Number(typeMeta.text) || 2,
           frequency: Number(f[cFreq!]) || 0,
           glosses,
           ruGlosses: parseGlosses(f[cRu!] ?? ''),

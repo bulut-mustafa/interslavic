@@ -5,6 +5,7 @@ import { Lexicon } from '../../lexicon/src/reader.ts';
 import { parseConllu } from '../src/conllu.ts';
 import { translate } from '../src/pipeline.ts';
 import { negativeCounterparts } from '../../rules/src/negation.ts';
+import { functionWordFor } from '../../rules/src/function-words.ts';
 import { toStandard } from '../../morph/src/orthography.ts';
 
 const ROOT = path.resolve(import.meta.dirname, '../../..');
@@ -72,5 +73,44 @@ describe('negative concord on indefinites', () => {
       // "nikogo" is not a dictionary lemma, so nothing may be emitted for it.
       if (candidate === 'nikogo') expect(lex.lookupLemma(candidate)).toEqual([]);
     }
+  });
+
+  /**
+   * The syntax page's own example of total negation, and the two words in it
+   * that English does not negate:
+   *
+   *   "Unlike in English, all negatable words are being negated in
+   *    Interslavic, for example: - Ja uže nikogda ne budu čitati nijednu
+   *    knigu! \u201eI am never going to read a single book anymore!\u201d"
+   *   http://steen.free.fr/interslavic/syntax.html
+   *
+   * Neither reachable by the morphological ni- swap: "single" is an English
+   * ADJ whose candidates are all positive (`jednokratny` "one-time" won on
+   * gloss position), and "anymore" has no gloss of its own at all - the
+   * dictionary pairs it as the multiword `už ne`, whose `ne` half is the
+   * clause negation. Both are curated entries conditioned on the clause.
+   */
+  it('negates "a single" and translates "anymore" inside a negated clause', () => {
+    const text = translate(
+      parseConllu(
+        fs.readFileSync(path.join(import.meta.dirname, 'fixtures/parse/gold/g14.conllu'), 'utf8'),
+      ),
+      lex,
+      { orthography: 'standard' },
+    ).text;
+    // nijednu, not the positive jednokratnu; uže, not the English "anymore".
+    expect(text).toContain('nijednu knigu');
+    expect(text).toContain('uže');
+    expect(text).not.toMatch(/anymore/i);
+  });
+
+  /**
+   * And the condition is a condition: outside a negated clause "single" must
+   * NOT become `nijedin`, or "a single book" in a positive sentence would come
+   * out as "no book".
+   */
+  it('does not negate "a single" outside a negated clause', () => {
+    expect(functionWordFor('single', 'ADJ', 'en', false)).toBeNull();
+    expect(functionWordFor('single', 'ADJ', 'en', true)?.isv).toBe('nijedin');
   });
 });

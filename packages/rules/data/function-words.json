@@ -95,6 +95,27 @@
       "why": "the interrogative 'which' in a question. `ktory` is also pron.int. and wins on frequency, but the pronouns page reserves it for RELATIVE clauses - and the English side already produces `koj` here, so this aligns the two source languages",
       "evidence": "steenbergen-syntax: 'Koju knigu kupil otec?' = 'Which book has father bought?'; 'Koja žena ljubi togo muža?' = 'Which woman loves that man?'. steenbergen-pronouns: 'The relative pronoun that is used most frequently is ktory'",
       "source": "steenbergen-syntax"
+    },
+    {
+      "en": "single",
+      "upos": [
+        "ADJ"
+      ],
+      "whenNegated": true,
+      "isv": "nijedin",
+      "why": "under negation English 'a single' is a positive-polarity indefinite; Interslavic negates it, so 'not ... a single book' is 'ne ... nijednu knigu'. Dictionary ranking chose `jednokratny` ('one-time') because 'single' is its first gloss",
+      "evidence": "steenbergen-syntax: 'Unlike in English, all negatable words are being negated in Interslavic, for example: - Ja uze nikogda ne budu citati nijednu knigu! „I am never going to read a single book anymore!”'",
+      "source": "steenbergen-syntax"
+    },
+    {
+      "en": "anymore",
+      "upos": [
+        "ADV"
+      ],
+      "isv": "uže",
+      "why": "the dictionary pairs this as the multiword `uz ne` glossed 'not anymore'; the `ne` half is the clause negation the negation pass already emits, so only `uze` is this word's own contribution. Left untranslated it printed the English 'anymore' in Interslavic output",
+      "evidence": "steenbergen-syntax: 'Unlike in English, all negatable words are being negated in Interslavic, for example: - Ja uze nikogda ne budu citati nijednu knigu! „I am never going to read a single book anymore!”'",
+      "source": "steenbergen-syntax"
     }
   ]
 }

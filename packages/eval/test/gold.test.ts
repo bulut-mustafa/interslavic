@@ -132,8 +132,8 @@ const DIFFERENCES: Record<string, { status: Status; why: string }> = {
     why: 'the modal, the possessive and the negative concord are now right ("ne mogl ... svoje ... nikde"); two causes remain - the verb is imperfective "nahoditi" where the gold has perfective "najdti", and "nikde" sits after the object rather than before the verb (word order is free, but the gold reads better). Our "ključe" is NOT a defect: the nouns page states "animate nouns have the nominative plural ending -i instead of the ending -y/-e of inanimate nouns" and tables inanimate soft kraj -> kraje, so ključe is table-conformant; the gold\'s "ključi" appears in no paradigm table, and the reference engine gives ključe too',
   },
   g14: {
-    status: 'defect',
-    why: '"going to" is not recognised as a future, so we emit "idu čitati" rather than "budu čitati", and "anymore" is passed through as raw English',
+    status: 'acceptable',
+    why: 'word order only. Every word is now right - "budu čitati" for the periphrastic future, "nijednu knigu" for the negated "a single book", and "uže" for "anymore" - but `uže` stays where the English "anymore" stood, at the end, where the gold puts it before the negation complex ("Ja uže nikogda ne"). The syntax page opens with "Word order is basically free", and g13 is classified the same way for the same reason, so this is not counted as a defect. The tighter reading of `uže ne` as "no longer" would be better served by the gold order, which is why it is listed here rather than ignored',
   },
   g15: {
     status: 'defect',
@@ -217,7 +217,7 @@ describe("gold: van Steenbergen's own Interslavic", () => {
     // Not an assertion about quality - a tripwire, so that silently
     // reclassifying a defect as "acceptable" shows up as a failing test.
     expect({ acceptable: by('acceptable'), defect: by('defect'), unsupported: by('unsupported'), parser: by('parser') })
-      .toEqual({ acceptable: 6, defect: 14, unsupported: 0, parser: 3 });
+      .toEqual({ acceptable: 7, defect: 13, unsupported: 0, parser: 3 });
   });
 });
 

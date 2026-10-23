@@ -198,8 +198,24 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
     // Closed-class words use a curated choice: ranking picks "tamto" ("that
     // over there") for plain "that", because the narrower gloss looks like a
     // better match than the general demonstrative's "this, that".
-    const curated = functionWordFor(token.lemma, token.upos, sentence.lang);
-    const curatedEntry = curated ? ranked.find((e) => e.lemma === curated.isv) : undefined;
+    const curated = functionWordFor(token.lemma, token.upos, sentence.lang, inNegatedClause(token));
+    /**
+     * A curated lemma need not be a candidate for the source word, for the
+     * same reason a planned preposition need not be (see below): curation
+     * exists precisely where the dictionary's own glosses do not connect the
+     * two words. Under negation English "a single book" is `nijednu knigu`,
+     * but `nijedin` is glossed "no, not any, none" and never "single"; and
+     * "anymore" reaches `uže` only through the multiword `už ne`.
+     *
+     * The part of speech may differ too, so it is tried and then dropped:
+     * "single" is an ADJ in the source and `nijedin` is an indefinite pronoun
+     * in Interslavic. That mismatch is the thing being curated, not an error.
+     */
+    const curatedEntry = curated
+      ? (ranked.find((e) => e.lemma === curated.isv) ??
+          lex.lookupLemma(curated.isv, token.upos)[0] ??
+          lex.lookupLemma(curated.isv)[0])
+      : undefined;
     const curatedMissing = curated !== null && curatedEntry === undefined;
 
     const modalEntry = modalPlan ? ranked.find((e) => e.lemma === modalPlan.isv) : undefined;

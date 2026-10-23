@@ -1621,3 +1621,48 @@ with a two-case preposition already selects the accusative on a cited rule.
 Lesson worth keeping: `copyCase` is only sound where the source form actually
 encodes a case. A language that marks case still has words that do not.
 
+## VERIFIED: an empty `type` cell behaves like tier 2, not tier 3
+
+`type` is the dictionary's intelligibility tier (official schema
+`steenbergen.xsd`): 1 universally intelligible, 2 regionally, 3 single
+languages only, 4 Church-Slavonic-derived, 5 a coined neologism, 9 unclear.
+Lower is better and `score()` adds it directly, so the default for an empty
+cell is a real ranking decision - it covers 799 entries and decides 307
+contested gloss keys.
+
+It defaulted to 3. That asserts something the dictionary never said, and lands
+those rows in a bucket holding only 469 rows (2.4%), two points behind the 74%
+that are tier 1.
+
+The dictionary answers the question itself. Its separate `intelligibility`
+column - populated on 19,096 of 19,100 rows, and previously unread - gives a
+per-language `+`/`-` verdict. Counting the languages each row marks `+`:
+
+| `type`  | rows   | mean languages marked `+` |
+|---------|--------|---------------------------|
+| 1       | 14,168 | 7.04                      |
+| (empty) | 799    | **5.07**                  |
+| 2       | 3,493  | **4.97**                  |
+| 3       | 469    | 3.94                      |
+| 4       | 30     | 2.77                      |
+| 5       | 138    | 4.07                      |
+
+An untyped row is indistinguishable from a tier-2 row on the dictionary's own
+measure of exactly the property `type` encodes, and clearly above tier 3. So
+the default is 2, read off the data rather than chosen.
+
+Effect: 0 of the 220 fixtures change and the gold score is unmoved, so this is
+not an accuracy claim. It is not inert either - re-ranking all 6,355 contested
+gloss keys with tier 2 treated as tier 3 moves the top choice on 163 of them
+(an upper bound, since it bumps every tier-2 row and not only the untyped
+ones), and the movement is toward more widely intelligible words:
+`akomodacija` -> `pravka` for "adjustment", `avarija` -> `nesgoda` for
+"accident", `aluzija` -> `podkazka` for "hint".
+
+## CORRECTED: "`type` is too coarse to rank with"
+
+This log previously dismissed `type`. The official schema documents it as the
+language's own intelligibility tier, and the table above shows it tracks a
+second, independent column. It is a real signal; what was wrong was the
+default applied when it is absent.
+
