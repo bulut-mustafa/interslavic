@@ -1,5 +1,5 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { GlossedWord, Translation } from '../../engine/src/pipeline.ts';
+import type { GlossedWord, RuleCitation, Translation } from '../../engine/src/pipeline.ts';
 import type { Orthography } from '../../morph/src/orthography.ts';
 
 const API = 'http://127.0.0.1:8766';
@@ -227,6 +227,7 @@ export default function App() {
               <WordEntry
                 key={`${i}-${j}`}
                 word={w}
+                citations={s.citations ?? {}}
                 active={activeWord === `${i}-${j}`}
                 onSelect={() => setActiveWord(`${i}-${j}`)}
               />
@@ -281,12 +282,57 @@ export default function App() {
   );
 }
 
+/**
+ * What says so.
+ *
+ * The confidence rail already told the reader how sure the engine is. This
+ * tells them WHY, which for a language-learning tool is the more useful half:
+ * a learner can follow the rule to van Steenbergen's own sentence and decide
+ * for themselves, instead of taking our word for it.
+ *
+ * Collapsed by default. A gloss panel that shouted every citation at once
+ * would bury the translation it is explaining.
+ */
+const TIER_LABEL: Record<RuleCitation['tier'], string> = {
+  normative: 'grammar',
+  corpus: 'attested usage',
+  dictionary: 'dictionary',
+  transfer: 'from the source text',
+  structural: 'sentence structure',
+};
+
+function Citation({ citation, ruleId }: { citation?: RuleCitation; ruleId: string }) {
+  // A rule with no entry is a bug the registry test catches; say so plainly
+  // rather than quietly showing nothing.
+  if (!citation) return <span className="citation-missing">no source recorded for {ruleId}</span>;
+  return (
+    <details className="citation">
+      <summary data-tier={citation.tier}>{TIER_LABEL[citation.tier]}</summary>
+      <div className="citation-body">
+        <p className="citation-why">{citation.why}</p>
+        {citation.quote && <blockquote className="citation-quote">{citation.quote}</blockquote>}
+        {citation.source &&
+          (citation.source.startsWith('http') ? (
+            <a className="citation-source" href={citation.source} target="_blank" rel="noreferrer">
+              {citation.source}
+            </a>
+          ) : (
+            <span className="citation-source">{citation.source}</span>
+          ))}
+        <span className="citation-rule">{ruleId}</span>
+      </div>
+    </details>
+  );
+}
+
 function WordEntry({
   word,
+  citations,
   active,
   onSelect,
 }: {
   word: GlossedWord;
+  citations: Record<string, RuleCitation>;
   active: boolean;
   onSelect: () => void;
 }) {
@@ -324,6 +370,7 @@ function WordEntry({
                 ))}
               </ul>
             )}
+            <Citation citation={citations[f.ruleId]} ruleId={f.ruleId} />
           </div>
         ))}
 

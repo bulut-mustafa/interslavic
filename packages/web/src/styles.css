@@ -413,3 +413,79 @@ textarea::placeholder {
     transition: border-color 120ms ease;
   }
 }
+
+/* "What says so."
+   The confidence rail says how sure we are; this says on whose authority.
+   Collapsed by default: a learner should be able to reach the evidence in one
+   click, not have to read past it on every word. */
+.citation {
+  width: 100%;
+  margin-top: 0.2rem;
+  font-size: 0.82rem;
+}
+
+.citation > summary {
+  cursor: pointer;
+  display: inline-block;
+  color: var(--ink-faint);
+  border-bottom: 1px dotted currentColor;
+  list-style: none;
+}
+
+.citation > summary::-webkit-details-marker {
+  display: none;
+}
+
+.citation > summary:hover,
+.citation[open] > summary {
+  color: var(--ink-soft);
+}
+
+/* The tier is the point: a grammar page and a guess at structure are not the
+   same kind of claim, and the reader can see which they are getting. */
+.citation > summary[data-tier='normative'] {
+  color: var(--certain);
+}
+.citation > summary[data-tier='corpus'] {
+  color: var(--high);
+}
+
+.citation-body {
+  margin-top: 0.3rem;
+  padding-left: 0.7rem;
+  border-left: 2px solid var(--rule);
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.citation-why {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+/* Verbatim, so it is visibly a quotation and not our paraphrase. */
+.citation-quote {
+  margin: 0;
+  padding-left: 0.6rem;
+  border-left: 2px solid var(--ink-faint);
+  color: var(--ink);
+  font-style: italic;
+}
+
+.citation-source {
+  color: var(--ink-faint);
+  word-break: break-all;
+}
+
+.citation-rule {
+  color: var(--ink-faint);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.78rem;
+}
+
+.citation-missing {
+  width: 100%;
+  color: var(--guess);
+  font-size: 0.82rem;
+}

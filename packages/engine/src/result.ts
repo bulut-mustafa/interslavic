@@ -1,5 +1,6 @@
 import type { Decision, UdToken } from '../../types/index.ts';
 import type { Entry } from '../../lexicon/src/reader.ts';
+import type { RuleCitation } from '../../rules/src/registry.ts';
 import type { AspectOutcome } from './resolvers/aspect.ts';
 
 /**
@@ -9,6 +10,8 @@ import type { AspectOutcome } from './resolvers/aspect.ts';
  * calls the stage. `pipeline.ts` re-exports these, because the CLI, the server
  * and the web UI all import them from there.
  */
+
+export type { RuleCitation };
 
 export interface GlossedFeature {
   name: string;
@@ -47,6 +50,15 @@ export interface Translation {
   /** Share of emitted words that resolve in the full-form lexicon, or null when
    *  no validator was supplied. This is the project's primary quality metric. */
   validationRate: number | null;
+  /**
+   * The source behind each rule this translation used, keyed by rule id.
+   *
+   * Sent with the translation rather than looked up by the reader, and keyed
+   * rather than inlined per feature, so a quote appears once however many
+   * words it justifies. Only the rules actually used are included - this is
+   * the evidence for THIS sentence, not the whole registry.
+   */
+  citations: Record<string, RuleCitation>;
 }
 
 /** A token after lexeme choice and feature resolution, before realisation. */

@@ -16,6 +16,26 @@ const sentence = (overrides: Partial<Translation> = {}): Translation => ({
   lang: 'en',
   text: 'Žena čitala knigu.',
   validationRate: 1,
+  citations: {
+    'case.deprel.nsubj': {
+      tier: 'corpus',
+      source: 'corpus: van Steenbergen\u2019s parallel texts',
+      quote: null,
+      why: 'a subject takes the nominative',
+    },
+    'aspect.default.imp': {
+      tier: 'normative',
+      source: 'http://steen.free.fr/interslavic/verbs.html',
+      quote: 'Using the present tense of a perfective verb for the future is rather to be avoided.',
+      why: 'the imperfective is the safe default',
+    },
+    'case.deprel.obj': {
+      tier: 'corpus',
+      source: 'corpus: the Interslavic Wikipedia',
+      quote: null,
+      why: 'a direct object takes the accusative',
+    },
+  },
   dropped: [{ form: 'The', why: 'Interslavic has no articles' }],
   unknown: [],
   words: [
@@ -30,6 +50,7 @@ const sentence = (overrides: Partial<Translation> = {}): Translation => ({
         {
           name: 'Case',
           value: 'Nom',
+          ruleId: 'case.deprel.nsubj',
           because: 'subject (nsubj)',
           confidence: 'certain',
           alternatives: [],
@@ -48,6 +69,7 @@ const sentence = (overrides: Partial<Translation> = {}): Translation => ({
         {
           name: 'Aspect',
           value: 'Imp',
+          ruleId: 'aspect.default.imp',
           because: 'no aspect cue found - defaulting to imperfective',
           confidence: 'guess',
           alternatives: [{ value: 'Perf', because: 'possible if the action is completed' }],
@@ -65,6 +87,7 @@ const sentence = (overrides: Partial<Translation> = {}): Translation => ({
         {
           name: 'Case',
           value: 'Acc',
+          ruleId: 'case.deprel.obj',
           because: 'direct object default',
           confidence: 'default',
           alternatives: [],
@@ -216,5 +239,60 @@ describe('the output line reads as a sentence', () => {
     await waitFor(() => expect(container.querySelectorAll('.output-word').length).toBe(3), {
       timeout: 3000,
     });
+  });
+});
+
+describe('what says so', () => {
+  /**
+   * The citation is the project's whole claim made visible. The reader is
+   * already told how confident the engine is; this is what lets them check the
+   * rule against van Steenbergen's own sentence instead of trusting us.
+   */
+  it('shows what says so, with the tier and the verbatim source', async () => {
+    const { container } = render(<App />);
+    await waitFor(() => expect(container.querySelectorAll('.citation').length).toBeGreaterThan(0), {
+      timeout: 3000,
+    });
+
+    const tiers = [...container.querySelectorAll('.citation > summary')].map((el) =>
+      el.getAttribute('data-tier'),
+    );
+    // A grammar page and attested usage are different kinds of claim, and the
+    // reader can see which one they are getting.
+    expect(tiers).toContain('normative');
+    expect(tiers).toContain('corpus');
+
+    // The verbatim quote is present, and marked as a quotation rather than
+    // being folded into our own prose.
+    const quote = container.querySelector('.citation-quote');
+    expect(quote?.textContent ?? '').toMatch(/present tense of a perfective verb/);
+
+    // And the source is reachable, not just named.
+    const link = container.querySelector('a.citation-source');
+    expect(link?.getAttribute('href') ?? '').toMatch(/steen\.free\.fr/);
+  });
+
+  /**
+   * A rule with no recorded source is a bug the registry test catches. The
+   * panel says so rather than rendering nothing, because silence here looks
+   * exactly like a rule that needed no justification.
+   */
+  it('says plainly when a rule has no recorded source', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => ({
+        ok: true,
+        status: 200,
+        json: async () => ({ sentences: [sentence({ citations: {} })] }),
+      })),
+    );
+    const { container } = render(<App />);
+    await waitFor(
+      () => expect(container.querySelector('.citation-missing')).not.toBeNull(),
+      { timeout: 3000 },
+    );
+    expect(container.querySelector('.citation-missing')?.textContent ?? '').toMatch(
+      /no source recorded/,
+    );
   });
 });

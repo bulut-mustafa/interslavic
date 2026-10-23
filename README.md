@@ -189,6 +189,11 @@ Design rules worth knowing before changing anything:
 1. **Every feature assignment is a `Decision<T>`** carrying a rule id, a confidence, a
    human-readable justification and the rejected alternatives. Resolvers may not write a
    bare value. Glossing is structural, not retrofitted.
+   The rule id reaches the output, and `packages/rules/data/rule-registry.json` says where
+   each rule comes from - its tier, its source and, where the grammar states it in a
+   sentence, the verbatim quote. A test fails if the engine can emit a rule the registry
+   does not cite, so a rule cannot be added without saying what says so, and the UI shows
+   that citation beside the decision it justifies.
 2. **Aspect is resolved before the lexeme is finalised.** Aspect is a *filter* on
    candidates: "give" ranks `dati` (perfective, freq 7606) above `davati` (imperfective,
    freq 6395), and a perfective present reads as a *future* in Interslavic — the error the

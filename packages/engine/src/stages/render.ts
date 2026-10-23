@@ -1,6 +1,7 @@
 import { render, type Orthography } from '../../../morph/src/orthography.ts';
 import type { ParsedSentence } from '../../../types/index.ts';
 import type { GlossedWord, Translation } from '../result.ts';
+import { citationFor } from '../../../rules/src/registry.ts';
 
 /**
  * The last stage: turn the chosen surfaces into a sentence.
@@ -43,6 +44,19 @@ export function renderStage(input: RenderInput): Translation {
     words: words.map((w) => ({ ...w, surface: render(w.surface, orthography) })),
     dropped,
     unknown,
+    /**
+     * Every rule these words used, with the source that justifies it. A rule
+     * with no registry entry is a bug the registry test catches, so it is left
+     * out here rather than papered over with a placeholder.
+     */
+    citations: Object.fromEntries(
+      [...new Set(words.flatMap((w) => w.features.map((f) => f.ruleId)))]
+        .sort()
+        .map((id) => [id, citationFor(id)] as const)
+        .filter((pair): pair is [string, NonNullable<ReturnType<typeof citationFor>>] =>
+          pair[1] !== null,
+        ),
+    ),
     validationRate: validated
       ? words.length === 0
         ? 1
