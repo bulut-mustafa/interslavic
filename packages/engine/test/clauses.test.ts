@@ -151,4 +151,35 @@ describe('an accusative with no animate noun to agree with', () => {
     expect(out('i-see-the-man.conllu')).toBe('Ja vidžu muža.');
     expect(out('i-see-the-house.conllu')).toBe('Ja vidžu dom.');
   });
+
+  /**
+   * A purpose clause with no subject of its own agrees with the subject of the
+   * clause it modifies:
+   *
+   *   "Ona prinosi jabloka, da by děti byli zdrave."
+   *   http://steen.free.fr/interslavic/syntax.html
+   *
+   * "Tourists visited the Netherlands to take photos" has no subject inside
+   * the purpose clause at all, so the l-participle has nowhere else to get its
+   * number: plural `brali`, from "Turisti". Reading the wrong clause gives the
+   * singular `bral`.
+   *
+   * The mutation audit found this uncovered, and the reason is worth keeping:
+   * g15 and g34 exercise it, but both are written off in the gold exception
+   * list over word choice, and a gold pair that is already failing cannot
+   * detect a regression. An exception buys a blind spot, so the rule needs its
+   * own test.
+   */
+  it('agrees a subjectless purpose clause with the main clause subject', () => {
+    const text = translate(
+      parseConllu(
+        fs.readFileSync(path.join(import.meta.dirname, 'fixtures/parse/gold/g34.conllu'), 'utf8'),
+      ),
+      lex,
+      { orthography: 'standard' },
+    ).text;
+    // plural, from "Turisti" - not the singular "bral".
+    expect(text).toMatch(/\bbrali\b/);
+    expect(text).not.toMatch(/\bbral\b/);
+  });
 });
