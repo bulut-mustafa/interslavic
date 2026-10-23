@@ -51,6 +51,12 @@
       "quote": "Relative pronouns (Odnositeljne zaimenniky) The relative pronoun that is used most frequently is ktory.",
       "why": "the relative pronoun ktory agrees with its antecedent"
     },
+    "anaphora.one": {
+      "tier": "structural",
+      "source": null,
+      "quote": null,
+      "why": "English-side analysis: placeholder \"one\" is not a word to translate, and the adjective left behind agrees with the antecedent instead"
+    },
     "animacy.lexical": {
       "tier": "normative",
       "source": "http://steen.free.fr/interslavic/nouns.html",
@@ -68,6 +74,12 @@
       "source": "http://steen.free.fr/interslavic/verbs.html",
       "quote": "Using the present tense of a perfective verb for the future (as is done in West and East Slavic) is rather to be avoided, as it can easily be misunderstood by South Slavs.",
       "why": "a habitual or iterative adverbial forces the imperfective"
+    },
+    "aspect.adverbial.perf": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/verbs.html",
+      "quote": "Using the present tense of a perfective verb for the future (as is done in West and East Slavic) is rather to be avoided, as it can easily be misunderstood by South Slavs.",
+      "why": "an adverbial naming a single completed event forces the perfective; the aspect pair is the distinction this quote turns on"
     },
     "aspect.copy": {
       "tier": "transfer",
@@ -104,6 +116,12 @@
       "source": "http://steen.free.fr/interslavic/verbs.html",
       "quote": "Using the present tense of a perfective verb for the future (as is done in West and East Slavic) is rather to be avoided, as it can easily be misunderstood by South Slavs.",
       "why": "a present tense takes the imperfective, because a perfective present reads as a future"
+    },
+    "aspect.tense.progressive": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/verbs.html",
+      "quote": "Using the present tense of a perfective verb for the future (as is done in West and East Slavic) is rather to be avoided, as it can easily be misunderstood by South Slavs.",
+      "why": "an English progressive describes an action in progress, so the imperfective - and a perfective present would read as a future"
     },
     "case.coordination": {
       "tier": "structural",
@@ -152,6 +170,12 @@
       "source": "http://steen.free.fr/interslavic/numerals.html",
       "quote": "The subject always remains in the genitive plural.",
       "why": "and it persists in oblique positions"
+    },
+    "case.phrasalObject": {
+      "tier": "corpus",
+      "source": "corpus: van Steenbergen’s parallel texts and the Interslavic Wikipedia (incubator.wikimedia.org/wiki/Wp/isv)",
+      "quote": null,
+      "why": "a complement whose English preposition was absorbed by a phrasal verb becomes that verb’s direct object, so the accusative unless the verb has its own government code"
     },
     "case.predicate": {
       "tier": "normative",

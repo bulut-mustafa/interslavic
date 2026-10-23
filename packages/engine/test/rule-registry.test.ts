@@ -5,6 +5,7 @@ import { Lexicon } from '../../lexicon/src/reader.ts';
 import { parseConllu } from '../src/conllu.ts';
 import { translate } from '../src/pipeline.ts';
 import { ruleRegistry } from '../../rules/src/registry.ts';
+import { scanRuleIds } from '../../rules/src/scan-rule-ids.ts';
 
 const ROOT = path.resolve(import.meta.dirname, '../../..');
 const lex = Lexicon.fromTsv(path.join(ROOT, 'packages/lexicon/data/raw/words.tsv'));
@@ -34,6 +35,19 @@ function emittedRuleIds(): Map<string, number> {
   }
   return counts;
 }
+
+/**
+ * Rule ids written in the source, whether or not any fixture reaches them.
+ * Collecting only emitted ids missed four rules entirely - and a rule no
+ * fixture runs is the one most likely to be wrong, so it is the last one that
+ * should escape having to name a source.
+ */
+const inSource = scanRuleIds([
+  path.join(ROOT, 'packages/engine/src'),
+  path.join(ROOT, 'packages/rules/src'),
+  path.join(ROOT, 'packages/morph/src'),
+  path.join(ROOT, 'packages/lexicon/src'),
+]);
 
 describe('rule registry', () => {
   /**
@@ -72,13 +86,36 @@ describe('rule registry', () => {
     const unquoted = [...ruleRegistry()]
       .filter(([, c]) => (c.tier === 'normative' || c.tier === 'corpus') && !c.quote)
       .map(([id]) => id);
-    expect(unquoted.length).toBeLessThanOrEqual(12);
+    expect(unquoted.length).toBeLessThanOrEqual(13);
   });
 
-  /** A registry entry for a rule nothing emits is stale documentation. */
-  it('keeps no entry for a rule the engine never emits', () => {
-    const emitted = new Set(emittedRuleIds().keys());
-    const stale = [...ruleRegistry().keys()].filter((id) => !emitted.has(id)).sort();
+  /**
+   * And every rule WRITTEN in the source, including those no fixture reaches.
+   * This is the check that found `anaphora.one`, `aspect.adverbial.perf`,
+   * `aspect.tense.progressive` and `case.phrasalObject` - all emittable, none
+   * exercised, so all four were invisible to the emitted-ids check above.
+   */
+  it('cites every rule written in the source', () => {
+    const registry = ruleRegistry();
+    const uncited = [...inSource].filter((id) => !registry.has(id)).sort();
+    expect(uncited).toEqual([]);
+  });
+
+  /** A registry entry for a rule that exists nowhere is stale documentation. */
+  it('keeps no entry for a rule that is not in the engine', () => {
+    const live = new Set([...emittedRuleIds().keys(), ...inSource]);
+    const stale = [...ruleRegistry().keys()].filter((id) => !live.has(id)).sort();
     expect(stale).toEqual([]);
+  });
+
+  /**
+   * Four rules are reachable but exercised by no fixture, so nothing checks
+   * what they produce. Held at its measured size: adding a fixture for one is
+   * an improvement, adding another untested rule is not.
+   */
+  it('does not grow the set of rules no fixture exercises', () => {
+    const emitted = new Set(emittedRuleIds().keys());
+    const unexercised = [...inSource].filter((id) => !emitted.has(id)).sort();
+    expect(unexercised.length).toBeLessThanOrEqual(4);
   });
 });
