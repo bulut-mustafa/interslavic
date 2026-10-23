@@ -81,6 +81,26 @@ describe('xpos notation', () => {
     expect(parseXpos('v.intr. ipf.')).toMatchObject({ transitive: false });
   });
 
+  /**
+   * An explicit `v.intr.` and no transitivity marking at all are DIFFERENT
+   * facts, and the ranker weighs them differently: an explicitly intransitive
+   * verb beside a direct object is a 200-point error, an unmarked one only
+   * 100, because the dictionary not saying is weaker evidence than the
+   * dictionary saying no.
+   *
+   * Asserting only `transitive: false` cannot see the difference - an unmarked
+   * verb is also not transitive. The mutation audit caught this: conflating
+   * the two survived the whole suite.
+   */
+  it('separates an explicit intransitive marker from no marking at all', () => {
+    expect(parseXpos('v.intr. ipf.')).toMatchObject({ transitive: false, intransitive: true });
+    // Unmarked: the dictionary says nothing either way, so neither flag is set.
+    expect(parseXpos('v. ipf.')?.intransitive).toBeFalsy();
+    expect(parseXpos('v. ipf.')?.transitive).toBeFalsy();
+    // And `v.tr.` is not intransitive, which the conflation would also lose.
+    expect(parseXpos('v.tr. ipf.')?.intransitive).toBeFalsy();
+  });
+
   it('gives biaspectual verbs no aspect at all', () => {
     expect(parseXpos('v.tr. ipf./pf.')?.aspect).toBeUndefined();
   });
