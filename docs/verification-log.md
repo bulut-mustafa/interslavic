@@ -1590,3 +1590,34 @@ bounds the event, a durative or frequency adverbial unbounds it - and half of
 that produces confident wrongness in the commoner case. English past aspect
 stays an honest `guess`, which is what the label is for. **Russian does not
 have this problem at all, because it states aspect.**
+
+## CORRECTED: "`kino` should be indeclinable"
+
+Filed as a dictionary-data defect: `kino` is a borrowing, the dictionary marks
+it plain `n.`, so it declined to `kinu` where van Steenbergen writes `v kino`.
+
+That diagnosis was wrong, and the nouns page says so:
+
+> "Borrowed international vocabulary ending in **-e, -i or -u** (f.ex. alibi,
+> hobi, intervju, kafe, kakao, kliše, menju, tabu, taksi) and abbreviations are
+> indeclinable."
+> http://steen.free.fr/interslavic/nouns.html
+
+`kino` ends in **-o**, so it is NOT in that class - it is a regular neuter, and
+a regular neuter's accusative equals its nominative. `kino` is already the
+correct accusative without any indeclinability.
+
+The real cause was on the SOURCE side. Russian кино is indeclinable *in
+Russian*: one form for all seven cases, so the parser has nothing to read and
+guesses. Stanza tags "идти в кино" as `Case=Loc` when the sense is motion into,
+i.e. the accusative, and `case.copy` trusted that guess with `certain`
+confidence.
+
+VERIFIED fix: `fromSource` in `resolvers/case.ts` refuses to copy a case from a
+token marked `InflClass=Ind`. Nothing is lost - the form carried no case - and
+the cascade then reaches the preposition's own government, where a motion verb
+with a two-case preposition already selects the accusative on a cited rule.
+
+Lesson worth keeping: `copyCase` is only sound where the source form actually
+encodes a case. A language that marks case still has words that do not.
+

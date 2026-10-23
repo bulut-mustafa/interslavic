@@ -409,4 +409,26 @@ describe('the reflexive clitic Russian fuses onto the verb', () => {
     expect(out('on-muchitsja.conllu')).toBe('On agonizuje se.');
     expect(out('on-muchit-sobaku.conllu')).toBe('On muči psa.');
   });
+
+  /**
+   * An indeclinable noun states a case it cannot know. Russian кино, метро,
+   * такси, радио, пальто have ONE form for all seven cases, so there is
+   * nothing in the word for the parser to read: Stanza tags "идти в кино" as
+   * `Case=Loc` when the sense is motion into, i.e. the accusative, and copying
+   * that guess gave "idti v kinu" for van Steenbergen's own "idti v kino".
+   *
+   * Refusing to copy a case the form does not carry lets the cascade reach the
+   * preposition's government instead, where a motion verb with a two-case
+   * preposition already selects the accusative.
+   */
+  it('does not copy a case from an indeclinable source noun', () => {
+    const text = translate(
+      parseConllu(
+        fs.readFileSync(path.join(import.meta.dirname, 'fixtures/parse/gold/g05-ru.conllu'), 'utf8'),
+      ),
+      lex,
+      { orthography: 'standard' },
+    ).text;
+    expect(text).toBe('Ja ne hoču idti v kino.');
+  });
 });

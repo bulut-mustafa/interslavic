@@ -38,6 +38,22 @@ const VALID_CASES = new Set<string>(['Nom', 'Acc', 'Gen', 'Dat', 'Ins', 'Loc', '
  */
 const fromSource: CaseRule = ({ token, copyFromSource }) => {
   if (!copyFromSource) return null;
+  /**
+   * An INDECLINABLE source noun states a case it cannot possibly know. Russian
+   * кино, метро, такси, радио, пальто, кафе, меню have one form for all seven
+   * cases, so there is nothing in the word for the parser to read, and it
+   * falls back to a guess. UD marks exactly this with `InflClass=Ind`.
+   *
+   * Stanza guesses wrong on the one example we can check against van
+   * Steenbergen: "идти в кино" is motion into, so the accusative, but it tags
+   * кино `Case=Loc`, which gave "idti v kinu" for an attested "idti v kino".
+   *
+   * Refusing the copy is not a loss of information - there was none. The
+   * cascade below then reaches the preposition's own government, where a
+   * motion verb with a two-case preposition already selects the accusative,
+   * and that rule cites the grammar directly.
+   */
+  if (token.feats['InflClass'] === 'Ind') return null;
   const c = token.feats['Case'];
   if (!c || !VALID_CASES.has(c)) return null;
   return decide<Case>(

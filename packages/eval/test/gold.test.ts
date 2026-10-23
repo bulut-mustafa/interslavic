@@ -95,10 +95,6 @@ const DIFFERENCES: Record<string, { status: Status; why: string }> = {
     status: 'defect',
     why: 'aspect only - `prinesla` (perfective) for `prinosila` (imperfective); "brought" is telic so the perfective is defensible. The construction itself is now right: the doubled conditional ("da by děti BY byli") was fixed by dropping a `would` whose purpose clause already supplies `by`',
   },
-  'g05-ru': {
-    status: 'defect',
-    why: 'dictionary data - `kino` is a borrowing and should be indeclinable, as the nouns page says of borrowed vocabulary, but the entry is plain `n.` so it declines to `kinu`',
-  },
   'g08-ru': {
     status: 'acceptable',
     why: 'lexical choice - Russian "пришёл" is arrival on foot, so we pick `prijdti`; the page writes `prijehati` for the English "came to the party". Both are "came"',
@@ -211,9 +207,9 @@ describe("gold: van Steenbergen's own Interslavic", () => {
     // the passive.
     // 15/29 held for a while; the set then grew to 49 pairs - 35 English, now
     // exhausting the grammar pages for sentence-level examples, plus 14 Russian
-    // whose TARGET is his own Interslavic and only whose source changes. 25/49.
+    // whose TARGET is his own Interslavic and only whose source changes. 26/49.
     // Raise this floor as it improves; never lower it.
-    expect(matched).toBeGreaterThanOrEqual(25);
+    expect(matched).toBeGreaterThanOrEqual(26);
   });
 
   it('counts how much of the gap is ours', () => {
@@ -221,7 +217,7 @@ describe("gold: van Steenbergen's own Interslavic", () => {
     // Not an assertion about quality - a tripwire, so that silently
     // reclassifying a defect as "acceptable" shows up as a failing test.
     expect({ acceptable: by('acceptable'), defect: by('defect'), unsupported: by('unsupported'), parser: by('parser') })
-      .toEqual({ acceptable: 6, defect: 15, unsupported: 0, parser: 3 });
+      .toEqual({ acceptable: 6, defect: 14, unsupported: 0, parser: 3 });
   });
 });
 
