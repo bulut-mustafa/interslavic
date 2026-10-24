@@ -124,3 +124,18 @@ describe('the person addressed', () => {
     expect(c?.alternatives.map((a) => a.value)).toContain('Voc');
   });
 });
+
+/**
+ * "ja čital jesm knigu (imperfective) means „I was reading a book" or „I have
+ * been reading a book", ja pročital jesm knigu (perfective) means „I have read
+ * a book (and finished it)"." http://steen.free.fr/interslavic/verbs.html
+ */
+describe('the English perfect', () => {
+  it('is perfective when completed', () => {
+    expect(out('have-read-a-book.conllu')).toBe('Ja jesm pročital knigu.');
+  });
+
+  it('is imperfective when progressive', () => {
+    expect(out('have-been-reading.conllu')).toBe('Ja jesm čital knigu.');
+  });
+});

@@ -88,6 +88,12 @@ const perfectAuxiliary: AspectStrategy = {
       (t) => t.head === token.id && t.deprel === 'aux' && t.lemma.toLowerCase() === 'have',
     );
     if (!hasPerfect) return null;
+    // "ja čital jesm knigu (imperfective) means „I was reading a book" or „I
+    // have been reading a book"" (verbs page): the perfect PROGRESSIVE is
+    // ongoing, not completed. UD marks it only by the -ing form.
+    if (token.xpos === 'VBG' || token.feats['Aspect'] === 'Prog') {
+      return decide<Aspect>('Imp', 'aspect.tense.progressive', 'high', 'English progressive is ongoing, so imperfective');
+    }
     return decide<Aspect>(
       'Perf',
       'aspect.perfect',

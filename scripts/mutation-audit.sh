@@ -501,6 +501,7 @@ mutate "transgressive despite own subject" transg "/c.deprel.startsWith(.nsubj.)
 mutate "collective alternative never named"  numst "s/if (collective \&\& takesCollective(/if (false \&\& takesCollective(/"
 mutate "collective: children not covered"   num "s/  return pluralOnly || lemma === .dětę.;/  return pluralOnly;/"
 mutate "vocative rule removed"            case "s/    case .vocative.:/    case 'vocative-x':/"
+mutate "perfect progressive made perfective" aspect "s/    if (token.xpos === .VBG. || token.feats\[.Aspect.\] === .Prog.) {/    if (false) {/"
 
 echo
 echo "==================================================="
