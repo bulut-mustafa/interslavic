@@ -275,6 +275,21 @@ export function translate(
    * ends in those letters is left alone.
    */
   const lookupLemmaOf = (token: UdToken): string => {
+    /**
+     * A plural noun whose OWN form the dictionary glosses is looked up by that
+     * form. English lemmatises "people" to "person", and the dictionary keeps
+     * the suppletive plural as an entry of its own - `ljudi` "people", as the
+     * nouns page has it ("člověk ... pl. ljudi „people""); "years" likewise
+     * reaches `lěta` "years", and the corpus writes "deset lět" (5 Wp/isv
+     * hits, "deset rokov" none). Gated on the dictionary, so an ordinary
+     * plural ("books") falls through to its lemma.
+     */
+    if (token.upos === 'NOUN' && token.feats['Number'] === 'Plur' && sentence.lang === 'en') {
+      const form = token.form.toLowerCase();
+      if (form !== token.lemma.toLowerCase() && lex.lookup(form, 'en').some((e) => e.pos.upos === 'NOUN')) {
+        return form;
+      }
+    }
     if (token.upos !== 'VERB') return token.lemma;
     /**
      * Only as a FALLBACK. Many reflexive lemmas are dictionary headwords in

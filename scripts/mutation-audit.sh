@@ -512,6 +512,11 @@ mutate "light verb not rewritten"          light "s/^  if (removed.size === 0) r
 mutate "light verb absorbs a modifier"     light "s/    if (rest.length > 0 || ofPhrases.length > 1) continue;/    if (ofPhrases.length > 1) continue;/"
 mutate "of-object left on the noun"        light "s/      changed.set(object.id, { head: verb.id, deprel: 'obj' });//"
 mutate "absorbed words unreported"         pipe  "s/  const dropped: Translation\\['dropped'\\] = \\[...absorbed\\];/  const dropped: Translation['dropped'] = [];/"
+mutate "indefinite numeral governs nothing"  numst "s/    if (node.entry \&\& isIndefiniteCardinal(node.entry.lemma)) {/    if (false) {/"
+mutate "indefinite numerals list emptied"    num   "s/^  'mnogo', 'malo', 'velje', 'veče', 'menje', 'koliko', 'několiko', 'toliko', 'para',\$//"
+mutate "plural not looked up by its form"    pipe  "s/      if (form !== token.lemma.toLowerCase() \&\& lex.lookup(form, 'en').some((e) => e.pos.upos === 'NOUN')) {/      if (false) {/"
+mutate "many back to the adjective"          fwjson "s/\"isv\": \"mnogo\"/\"isv\": \"mnogy\"/"
+mutate "few curated as small"                fwjson "s/\"isv\": \"malo\"/\"isv\": \"maly\"/"
 
 echo
 echo "==================================================="

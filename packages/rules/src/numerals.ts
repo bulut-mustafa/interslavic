@@ -36,6 +36,26 @@ const RU_NUMERALS: Record<string, number> = {
   сто: 100, тысяча: 1000, миллион: 1000000,
 };
 
+/**
+ * The indefinite cardinal numbers, named on the numerals page: "a category of
+ * so-called indefinite cardinal numbers, consisting of words like mnogo „much,
+ * many", malo „little, few", velje „a lot", veče „more", menje „less", koliko
+ * „how many", několiko „a few, some", toliko „this/that many", para „a few""
+ * (http://steen.free.fr/interslavic/numerals.html).
+ *
+ * The page does not say what case follows them. The corpus does: on Wp/isv,
+ * "několiko" + a genitive plural in -ov has 21 hits and + a nominative plural
+ * in -y has none. So the counted noun takes the genitive, keeping its own
+ * number - "much water" is a singular.
+ */
+const INDEFINITE_CARDINALS = new Set([
+  'mnogo', 'malo', 'velje', 'veče', 'menje', 'koliko', 'několiko', 'toliko', 'para',
+]);
+
+export function isIndefiniteCardinal(isvLemma: string): boolean {
+  return INDEFINITE_CARDINALS.has(isvLemma.toLowerCase());
+}
+
 /** The integer a numeral token denotes, or null if we cannot tell. */
 export function numeralValue(lemma: string, form: string, lang: string): number | null {
   const digits = form.replace(/[\s.,]/g, '');

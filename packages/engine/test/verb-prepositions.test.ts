@@ -25,8 +25,8 @@ const out = (name: string) =>
 describe('a span of time takes no preposition', () => {
   it('drops the preposition and uses the accusative', () => {
     // Was "Oni žili tu dlja deset rokov". `deset` governs the genitive plural
-    // of the noun it counts, which is why the noun is still "rokov".
-    expect(out('lived-for-ten-years.conllu')).toBe('Oni žili tu deset rokov.');
+    // of the noun it counts: "lět", of `lěta` "years" (word-sense.test.ts).
+    expect(out('lived-for-ten-years.conllu')).toBe('Oni žili tu deset lět.');
     expect(out('waited-for-an-hour.conllu')).toBe('Ja jesm čekal časinu.');
   });
 

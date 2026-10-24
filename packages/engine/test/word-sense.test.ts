@@ -134,3 +134,36 @@ describe('a sense the parse shows', () => {
     expect(gold('g33')).toContain('do svojej raboty');
   });
 });
+
+describe('a plural the dictionary keeps as its own entry', () => {
+  it('reads "people" as ljudi, not the plural of osoba "person"', () => {
+    expect(gold('g26')).toMatch(/^Několiko ljudij /);
+  });
+
+  it('reads "years" as lěta, as the corpus writes "deset lět"', () => {
+    expect(out('lived-for-ten-years.conllu')).toBe('Oni žili tu deset lět.');
+  });
+});
+
+/**
+ * "so-called indefinite cardinal numbers, consisting of words like mnogo
+ * „much, many", malo „little, few" [...] několiko „a few, some""
+ * (numerals page), followed by the genitive as the corpus writes it:
+ * "několiko projektov".
+ */
+describe('the indefinite numerals', () => {
+  it('chooses the numeral, not an adjective, for English "many" and "much"', () => {
+    expect(out('i-have-many-books.conllu')).toBe('Ja imaju mnogo knig.');
+    expect(out('he-drinks-much-water.conllu')).toBe('On pije mnogo vody.');
+  });
+
+  it('puts the noun in the genitive and keeps its number', () => {
+    // plural "ljudij" after několiko; singular "vody" after mnogo above.
+    expect(gold('g26')).toContain('ljudij');
+  });
+
+  it('curates few as malo, never maly "small"', () => {
+    expect(functionWordFor('few', 'ADJ')?.isv).toBe('malo');
+    expect(functionWordFor('much', 'ADV')).toBeNull();
+  });
+});

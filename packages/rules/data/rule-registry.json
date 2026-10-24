@@ -309,6 +309,12 @@
       "quote": "All numbers higher than 4 are followed by the genitive plural: pet domov",
       "why": "5 and up govern the genitive plural"
     },
+    "numeral.government.indefinite": {
+      "tier": "corpus",
+      "source": "corpus: https://incubator.wikimedia.org/wiki/Wp/isv/User:IJzeren_Jan/Abhazsky_alfabet",
+      "quote": "V 1990-yh lětah byli prědložene několiko projektov",
+      "why": "an indefinite cardinal number (mnogo, malo, několiko...: numerals page) is followed by the genitive, which the page does not state; the corpus writes it - \"několiko projektov\", in van Steenbergen's own text - and \"několiko\" + -ov has 21 Wp/isv hits against none for + -y"
+    },
     "optative.nehaj": {
       "tier": "normative",
       "source": "http://steen.free.fr/interslavic/verbs.html",

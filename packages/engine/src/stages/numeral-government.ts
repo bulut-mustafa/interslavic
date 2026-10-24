@@ -1,5 +1,11 @@
 import { decide } from '../../../types/index.ts';
-import { collectiveFor, governmentFor, numeralValue, takesCollective } from '../../../rules/src/numerals.ts';
+import {
+  collectiveFor,
+  governmentFor,
+  isIndefiniteCardinal,
+  numeralValue,
+  takesCollective,
+} from '../../../rules/src/numerals.ts';
 import { baseDeprel } from '../tree.ts';
 import type { StageContext } from './context.ts';
 
@@ -14,6 +20,23 @@ export function numeralGovernmentStage(ctx: StageContext): void {
   const { plan, byTokenId, sentence } = ctx;
 
   for (const node of plan) {
+    /**
+     * "několiko ljudij", "mnogo knig": an indefinite cardinal puts its noun in
+     * the genitive, whatever the source made it - English "some" is a
+     * determiner and "many" an adjective. Only in a direct case, as below.
+     */
+    if (node.entry && isIndefiniteCardinal(node.entry.lemma)) {
+      const head = byTokenId.get(node.token.head);
+      const current = head?.feats.get('Case')?.value;
+      if (head?.entry && (current === 'Nom' || current === 'Acc')) {
+        head.feats.set(
+          'Case',
+          decide('Gen', 'numeral.government.indefinite', 'default',
+            `genitive after the indefinite numeral "${node.entry.lemma}"`),
+        );
+      }
+      continue;
+    }
     if (baseDeprel(node.token.deprel) !== 'nummod') continue;
     const head = byTokenId.get(node.token.head);
     if (!head?.entry) continue;

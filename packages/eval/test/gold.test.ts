@@ -148,8 +148,8 @@ const DIFFERENCES: Record<string, { status: Status; why: string }> = {
     why: 'the noun is now right ("etaž", curated for a counted floor), so only the numeral differs, and the declined numeral is NOT a defect: the numerals page calls leaving cardinals undeclined "the easiest solution [...] even though it may sound a little strange to native speakers. However, a better effect can be achieved by using the following declension patterns", so our "trěmi" is the better form',
   },
   g26: {
-    status: 'defect',
-    why: '"Some people" becomes "Několiko osoby" rather than "Jedni ljudi" (jedin in the plural), and the elliptical second clause is not handled',
+    status: 'parser',
+    why: 'Stanza parses the elliptical second clause as "others" a descriptive modifier of "Winter", and "Winter" an apposition of "Summer" - there is no clause left whose subject "others" could be, so "drugi zimu" cannot be built. Our own part is now "Několiko ljudij" ("people" read as ljudi, in the genitive after the indefinite numeral, as the page writes "osmero ljudij"). Two word choices also differ: the page uses plural "jedni" for the contrastive "some ... others", and "prědpočitati" where we pick "preferovati" (both glossed "prefer"; preferovati is type 1, prědpočitati type 2)',
   },
 };
 
@@ -208,7 +208,7 @@ describe("gold: van Steenbergen's own Interslavic", () => {
     // Not an assertion about quality - a tripwire, so that silently
     // reclassifying a defect as "acceptable" shows up as a failing test.
     expect({ acceptable: by('acceptable'), defect: by('defect'), unsupported: by('unsupported'), parser: by('parser') })
-      .toEqual({ acceptable: 13, defect: 4, unsupported: 0, parser: 3 });
+      .toEqual({ acceptable: 13, defect: 3, unsupported: 0, parser: 4 });
   });
 });
 
