@@ -81,7 +81,7 @@ const DIFFERENCES: Record<string, { status: Status; why: string }> = {
   },
   g33: {
     status: 'defect',
-    why: 'the PRESENT ACTIVE PARTICIPLE is not built: "While going to her work" becomes a subordinate clause ("Dokolě ide do ...") where the page writes the participle "Iduči". The library computes these and the token layer discards them, the same gap the l-participle had. Also `kuri cigaretu` for `dymi cigaretoju` - a bare instrumental of means',
+    why: 'the participle is now right ("Iduči do ...", the transgressive). What remains is lexical: "work" resolves to "dělo" (a deed, a job) where the page writes "rabota", and "smoke" to "kuriti" + accusative where the page writes "dymiti" + instrumental "cigaretoju"; the page also leaves "her" unexpressed',
   },
   g34: {
     status: 'defect',

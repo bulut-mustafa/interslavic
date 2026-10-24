@@ -428,6 +428,12 @@
       "source": "http://steen.free.fr/interslavic/nouns.html",
       "quote": "In the case of animate nouns (animals and male persons) the accusative is always identical to the genitive, while in the case of inanimate objects the accusative is identical to the nominative.",
       "why": "animacy decides only the accusative, and the parse does not say whether an unknown name is a person, so the inanimate (nominative-like) accusative is kept as a visible guess"
+    },
+    "verbform.transgressive": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/verbs.html",
+      "quote": "The adverbial present active participle (also known as „transgressive”) has the same ending, but is not inflected for gender: Iduči do raboty, ona vsegda dymi cigaretoju „While going to her work, she always smokes a cigarette”.",
+      "why": "an English -ing clause with no subject of its own, simultaneous with the main verb, is the adverbial present participle, which is not inflected"
     }
   }
 }

@@ -1,7 +1,7 @@
 import { decide, type Decision } from '../../../types/index.ts';
 import { realize } from '../../../morph/src/realize.ts';
 import { compared, type Degree } from '../../../morph/src/comparison.ts';
-import { pastPassiveParticiple } from '../../../morph/src/participles.ts';
+import { pastPassiveParticiple, presentActiveParticiple } from '../../../morph/src/participles.ts';
 import { conditionalAuxiliary, futureAuxiliary } from '../../../rules/src/auxiliaries.ts';
 import { isOneAnaphor, antecedentOf } from '../../../rules/src/anaphora.ts';
 import { isExpletiveSubject } from '../../../rules/src/expletives.ts';
@@ -425,6 +425,32 @@ export function realiseStage(input: RealiseInput): RealiseOutput {
         notes: [],
         validation: 'validated',
       });
+    }
+
+    // The transgressive is not inflected at all (verbs page), so it is the
+    // derived form itself rather than a paradigm cell.
+    const transgressive =
+      feats.get('VerbForm')?.value === 'Conv'
+        ? presentActiveParticiple(entry.lemma, entry.pos.xpos)
+        : null;
+    if (transgressive) {
+      const known = opts.validator ? unknownWords(transgressive, opts.validator).length === 0 : true;
+      surfaces.push(transgressive);
+      words.push({
+        surface: transgressive,
+        lemma: entry.lemma,
+        sourceForm: token.form,
+        pos: entry.pos.raw,
+        features,
+        lexicalChoice: {
+          chosen: transgressive,
+          because: `matched ${sentence.lang} gloss "${matchedGloss(entry, token.lemma, sentence.lang)}"`,
+          rejected: node.ranked.slice(1, 4).map((e) => `${e.lemma} (${e.pos.raw})`),
+        },
+        notes,
+        validation: known ? 'validated' : 'unvalidated',
+      });
+      continue;
     }
 
     const request: Record<string, string> = {};

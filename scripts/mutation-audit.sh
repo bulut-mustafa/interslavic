@@ -54,6 +54,7 @@ APP=packages/web/src/App.tsx
 AUXRULES=packages/rules/src/auxiliaries.ts
 FNWORDS=packages/rules/src/function-words.ts
 PROPER=packages/rules/src/proper-nouns.ts
+TRANSG=packages/rules/src/transgressive.ts
 MODALS=packages/rules/src/modals.ts
 REFL=packages/rules/src/reflexives.ts
 DERIV=packages/rules/src/derivation.ts
@@ -87,7 +88,7 @@ FWJSON=packages/rules/data/function-words.json
 save "$CASE" case; save "$ASPECT" aspect; save "$READER" reader
 save "$REALIZE" realize; save "$ORTH" orth; save "$PIPE" pipe
 save "$PREP" prep; save "$NUM" num; save "$PREPRULES" preprules; save "$SPLIT" split
-save "$FULLFORM" fullform; save "$APP" app; save "$AUXRULES" auxrules; save "$FNWORDS" fnwords; save "$MODALS" modals; save "$REFL" refl; save "$DERIV" deriv; save "$PRON" pron; save "$NEG" neg; save "$COMPARE" compare; save "$MOTION" motion; save "$PARTIC" partic; save "$VERBPREP" verbprep; save "$EXPL" expl; save "$ANAPH" anaph; save "$XPOS" xpos; save "$ADAPT" adapt; save "$FWJSON" fwjson; save "$PROPER" proper
+save "$FULLFORM" fullform; save "$APP" app; save "$AUXRULES" auxrules; save "$FNWORDS" fnwords; save "$MODALS" modals; save "$REFL" refl; save "$DERIV" deriv; save "$PRON" pron; save "$NEG" neg; save "$COMPARE" compare; save "$MOTION" motion; save "$PARTIC" partic; save "$VERBPREP" verbprep; save "$EXPL" expl; save "$ANAPH" anaph; save "$XPOS" xpos; save "$ADAPT" adapt; save "$FWJSON" fwjson; save "$PROPER" proper; save "$TRANSG" transg
 save "$LEXEME" lexeme; save "$AUXST" auxst; save "$PREPST" prepst
 save "$PHRASALST" phrasalst; save "$NEGST" negst; save "$GOVST" govst
 save "$REALST" realst; save "$AGRST" agrst; save "$PREDST" predst
@@ -492,6 +493,11 @@ mutate "name ending: consonant not masc"    proper "/CONSONANT.test(name)/d"
 mutate "name ending: -a not feminine"       proper "/return .f.sg./d"
 mutate "unknown name gender called lexical" lexeme "s/entry === properNounEntry \&\& entry.pos.gender/false/"
 mutate "unknown name claimed validated"   realst "s/    if (entry.unlisted) {/    if (false) {/"
+mutate "transgressive not built"           lexeme "s/^      if (isTransgressive(token, sentence)) {$/      if (false) {/"
+mutate "transgressive mark kept"           lexeme "s/^    if (isTransgressiveMark(token, sentence)) {$/    if (false) {/"
+mutate "transgressive inflected"           realst "s/        ? presentActiveParticiple(entry.lemma, entry.pos.xpos)/        ? null/"
+mutate "transgressive marks ignored"       transg "s/.every((m) => SIMULTANEOUS_MARKS.has(m.lemma.toLowerCase()));/.every(() => true);/"
+mutate "transgressive despite own subject" transg "/c.deprel.startsWith(.nsubj.)/d"
 
 echo
 echo "==================================================="

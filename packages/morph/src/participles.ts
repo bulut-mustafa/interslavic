@@ -40,3 +40,21 @@ export function pastPassiveParticiple(lemma: string, xpos: string): string | nul
   // present one ("dělajemy"), which is a different construction.
   return tokens.find((t) => t.xpos?.includes('pfpp'))?.form ?? null;
 }
+
+/**
+ * The present active participle, which is also the adverbial "transgressive"
+ * (`idųći`, standard `iduči`): "built by replacing the ending -t of the 3rd
+ * person plural by -či" (verbs page). The library derives it; its tag is
+ * `v.prap.`.
+ */
+export function presentActiveParticiple(lemma: string, xpos: string): string | null {
+  let tokens;
+  try {
+    tokens = derive({ form: lemma, xpos } as never) as { form: string; xpos?: string }[];
+  } catch {
+    return null;
+  }
+  if (!Array.isArray(tokens)) return null;
+
+  return tokens.find((t) => t.xpos?.includes('prap'))?.form ?? null;
+}

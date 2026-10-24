@@ -7,6 +7,7 @@ import { realize } from '../../../morph/src/realize.ts';
 import { auxiliaryRole, conditionalAuxiliary, futureAuxiliary } from '../../../rules/src/auxiliaries.ts';
 import { functionWordFor } from '../../../rules/src/function-words.ts';
 import { properNounXpos } from '../../../rules/src/proper-nouns.ts';
+import { isTransgressive, isTransgressiveMark } from '../../../rules/src/transgressive.ts';
 import { parseXpos } from '../../../lexicon/src/steen/parse-xpos.ts';
 import { parseAddition } from '../../../lexicon/src/steen/parse-addition.ts';
 import { modalFor } from '../../../rules/src/modals.ts';
@@ -86,6 +87,13 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
       dropped.push({
         form: token.form,
         why: 'the infinitive ending carries this, so no separate word is needed',
+      });
+      continue;
+    }
+    if (isTransgressiveMark(token, sentence)) {
+      dropped.push({
+        form: token.form,
+        why: 'the participle "-uči/-eči" itself means "while doing", so no separate word is needed',
       });
       continue;
     }
@@ -914,6 +922,17 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
         feats.set(
           'VerbForm',
           decide('Inf', 'verbform.infinitive', 'certain', 'infinitive complement of the main verb'),
+        );
+        if (effectiveAspect) feats.set('Aspect', effectiveAspect);
+        plan.push({ token, entry, ranked, aspect, feats, notes });
+        continue;
+      }
+
+      if (isTransgressive(token, sentence)) {
+        feats.set(
+          'VerbForm',
+          decide('Conv', 'verbform.transgressive', 'high',
+            'an -ing clause with no subject of its own, happening at the same time: the adverbial present participle'),
         );
         if (effectiveAspect) feats.set('Aspect', effectiveAspect);
         plan.push({ token, entry, ranked, aspect, feats, notes });
