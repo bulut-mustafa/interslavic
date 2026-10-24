@@ -56,6 +56,11 @@ describe('verb-governed prepositions', () => {
     expect(out('believe-in-god.conllu')).toBe('Ja věrju v boga.');
   });
 
+  it('uses "s" for "talk to": one talks with someone, not towards them', () => {
+    // Was "Ona razgovarjala do svojej matere".
+    expect(out('talked-to-her-mother.conllu')).toBe('Ona razgovarjala s svojeju materju.');
+  });
+
   it('cites evidence for every pair in the table', () => {
     expect(GOVERNED_PAIRS.length).toBeGreaterThan(0);
     for (const pair of GOVERNED_PAIRS) {

@@ -78,6 +78,18 @@ const GOVERNED: Record<string, VerbGovernedPhrase> = {
     why: '"v" with the ACCUSATIVE, not the locative: belief is not a location, and the locative is for a stable place',
     evidence: '"člověk može ne věriti v Boga" - Wp/isv/Hinduizm; "prodolžajut věriti v reinkarnaciju" - Wp/isv/Reinkarnacija',
   },
+  'talk|to': {
+    prep: 's',
+    case: 'Ins',
+    why: 'one talks WITH someone: English "to" would give "do" ("towards"), but the corpus uses "s" with the instrumental',
+    evidence: '"ktory govoril s njim iz gorečego kusta" - Wp/isv/Mojsej; "kogda se govorit s neznakomcom" - Wp/isv/Brithenig; "oni razgovarjajut s soboju" - Wp/isv/Argos (pes)',
+  },
+  'speak|to': {
+    prep: 's',
+    case: 'Ins',
+    why: 'as for "talk to": "s" with the instrumental, not "do"',
+    evidence: '"ktory govoril s njim iz gorečego kusta" - Wp/isv/Mojsej; "kogda se govorit s neznakomcom" - Wp/isv/Brithenig',
+  },
   'depend|on': {
     prep: 'od',
     case: 'Gen',
