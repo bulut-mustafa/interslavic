@@ -369,6 +369,12 @@
       "quote": "Ona prinosi jabloka, da by děti byli zdrave.",
       "why": "a purpose clause is da by plus the l-participle"
     },
+    "reflexive.long": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/pronouns.html",
+      "quote": "If it needs to be stressed, the longer form is used: Ja myju jedino sebe „I wash nobody but myself”.",
+      "why": "a stressed reflexive - one with a focusing adverb such as \"only\" - and one after a preposition (\"After a preposition, it is better to use the longer forms\") take sebe, not the clitic se"
+    },
     "reflexive.clitic": {
       "tier": "normative",
       "source": "http://steen.free.fr/interslavic/syntax.html",

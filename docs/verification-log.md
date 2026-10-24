@@ -1709,3 +1709,42 @@ and was deleted), so the
 test requires a quote for every normative and corpus rule. Pinning `aspect.perfect`
 also exposed a real defect - the perfect progressive came out perfective, against the
 page's own "ja čital jesm knigu ... „I have been reading a book"" - fixed in `1f88eb5`.
+
+## VERIFIED: the remaining gold defects, one at a time (2026-10-25)
+
+Gold 29/49 -> 31/49; defects 7 -> 1. Each change was measured against every gold
+pair and every fixture before it was kept; each output it moved is listed here.
+
+| Change | Source | Outputs moved |
+|---|---|---|
+| "work" with to/at/from -> `råbota` (curated) | verbs page: "Iduči do raboty" | g33 only |
+| the source's interior commas carried over | as the final punctuation already was; his own prose writes "naděju, že" and "spoločenstvo, ktorym jest selska občina, jest" (selo page) | g26, g33, and 5 fixtures: an address, "prosim", a conditional, a relative clause, `že` |
+| "take photos (of X)" -> `fotografovati` X | syntax page: "že by fotografovali tulipany" | g15, g34 |
+| a plural whose own form the dictionary glosses is looked up by it | nouns page "člověk ... pl. ljudi"; Wp/isv "deset lět" 5 hits, "deset rokov" 0 | "people" -> `ljudi`, "years" -> `lěta` |
+| indefinite cardinals (`mnogo`, `malo`, `několiko` ...) govern the genitive | named on the numerals page; the case is the corpus's: "několiko projektov" (User:IJzeren Jan), -ov 21 hits, -y 0 | g26 `ljudij`; "mnogo knig", "mnogo vody" (new fixtures) |
+| "many/much/few" (UD: ADJ) -> `mnogo`/`malo` (curated) | numerals page | "mnoge knigy" -> "mnogo knig" |
+| motion verb + "around" + "in X" -> `po` + locative, "drive" there -> `jezditi` | verbs page: "Igor jezdil po Moskvě" | g21 (now exact) |
+| "nobody but X" -> "only X", stressed reflexive -> `sebe` | pronouns page: "Ja myju jedino sebe" | g30 (now exact) |
+| a reflexive after a preposition takes the long form | pronouns page: "After a preposition, it is better to use the longer forms" | none in the fixtures; it was only a note before, while the dictionary's published "(sę, ...)" made the clitic win |
+
+Reclassified rather than changed, each with the source that decides it:
+
+- **g15, g34 acceptable.** `Niderlandy` is the dictionary's own entry (m.pl.);
+  `Niderlandija` is not in it. `posěčajut` is the present-imperfective rule, which
+  quotes the verbs page's warning against the perfective present. `Turisti` is the
+  animate plural the nouns page gives, and g15 itself writes it.
+- **g33 acceptable.** `svojej` is what the pronouns page prescribes ("Whenever the
+  possessor is also the subject of the sentence, the reflexive svoj is used");
+  `kuriti` + accusative is the verb the dictionary marks transitive "smoke".
+- **g26 parser.** Stanza makes "others" a modifier of "Winter" and "Winter" an
+  apposition of "Summer", so no clause exists for "drugi zimu".
+
+### g13 stays a defect, on purpose
+
+"Father couldn't find his keys anywhere" -> gold `najdti` (pf), ours `nahoditi`
+(ipf, the visible `aspect.default.imp` guess). UD gives "could" no tense, and the
+obvious rule - the object of a past modal is a completed event - makes the ability
+reading wrong: "He could read books" is `mogl čitati`, imperfective. No page states
+which reading to pick, and a guess shown as a guess is better than a rule that is
+wrong half the time. It stays classified `defect` because the output is wrong for
+this sentence, not `acceptable`.

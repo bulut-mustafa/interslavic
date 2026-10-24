@@ -82,9 +82,17 @@ export function selectForm(
    */
   preferred?: readonly string[],
 ): { chosen: MorphToken; alternatives: string[] } | null {
+  /**
+   * `Variant=Long` asks for the stressed form of a pronoun that has a clitic.
+   * The paradigm marks only the clitic (`sę`, Variant=Short); the long `sebę`
+   * carries no Variant at all, so the request means "not the clitic". Without
+   * it the dictionary's published "(sę, ...)" won every accusative.
+   */
+  const matches = (t: MorphToken, k: string, v: string) =>
+    k === 'Variant' && v === 'Long' ? t.feats?.[k] !== 'Short' : t.feats?.[k] === v;
   const matching = (features: Record<string, string>) => {
     const wanted = Object.entries(features);
-    return tokens.filter((t) => wanted.every(([k, v]) => t.feats?.[k] === v));
+    return tokens.filter((t) => wanted.every(([k, v]) => matches(t, k, v)));
   };
 
   let hits = matching(want);

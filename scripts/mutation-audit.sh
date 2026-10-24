@@ -55,7 +55,7 @@ AUXRULES=packages/rules/src/auxiliaries.ts
 FNWORDS=packages/rules/src/function-words.ts
 PROPER=packages/rules/src/proper-nouns.ts
 TRANSG=packages/rules/src/transgressive.ts
-LIGHT=packages/rules/src/light-verbs.ts
+LIGHT=packages/rules/src/source-rewrites.ts
 MODALS=packages/rules/src/modals.ts
 REFL=packages/rules/src/reflexives.ts
 DERIV=packages/rules/src/derivation.ts
@@ -375,7 +375,7 @@ mutate "unmarked no longer preferred first" realize "s/= \[undefined, 'Long', 'A
 mutate "final tie-break sort removed"       realize "s/a.form.length !== b.form.length ? b.form.length - a.form.length : a.form.localeCompare(b.form)/0/"
 mutate "picks last matching form not first" realize "s/const chosen = hits\[0\]!;/const chosen = hits[hits.length - 1]!;/"
 mutate "multiword tail dropped"             realize "s/\[before, picked.chosen.form, after\]/[picked.chosen.form]/"
-mutate "feature matching uses OR not AND"   realize "s/wanted.every((\[k, v\]) => t.feats?.\[k\] === v)/wanted.some(([k, v]) => t.feats?.[k] === v)/"
+mutate "feature matching uses OR not AND"   realize "s/wanted.every((\[k, v\]) => matches(t, k, v))/wanted.some(([k, v]) => matches(t, k, v))/"
 mutate "plurale tantum relaxation removed"  realize "s/if (hits.length === 0 \&\& 'Number' in want/if (false \&\& 'Number' in want/"
 
 echo "=== orthography ==="
@@ -523,6 +523,12 @@ mutate "around on any verb"                 motion "s/  if (verb?.upos !== 'VERB
 mutate "po not planned for around"          prep   "s/  if (lemma === 'in' \&\& governor \&\& /  if (false \&\& governor \&\& /"
 mutate "around also translated"             lexeme "s/    if (isAroundAPlace(token, sentence)) {/    if (false) {/"
 mutate "drive around not curated"           fwjson "s/\"isv\": \"jezditi\"/\"isv\": \"voziti sę\"/"
+mutate "exceptive not rewritten"            light  "s/    if (!but) continue;/    continue;/"
+mutate "exceptive on any conjunction"       light  "s/ \&\& t.lemma.toLowerCase() === 'but',\$/,/"
+mutate "rewriteSource skips exceptives"     light  "s/  const exceptive = rewriteExceptives(light.sentence);/  const exceptive = { sentence: light.sentence, absorbed: [] };/"
+mutate "stressed reflexive gets the clitic" lexeme "s/ \&\& !stressed \&\& hasCliticForm(resolved)) {/ \&\& hasCliticForm(resolved)) {/"
+mutate "governed reflexive gets the clitic" lexeme "s/              ? decide('Long', 'reflexive.long'/              ? decide('Short', 'reflexive.long'/"
+mutate "long variant matches the clitic"    realize "s/    k === 'Variant' \&\& v === 'Long' ? t.feats?.\[k\] !== 'Short' : t.feats?.\[k\] === v;/    t.feats?.[k] === v;/"
 
 echo
 echo "==================================================="

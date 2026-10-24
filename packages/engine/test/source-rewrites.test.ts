@@ -4,7 +4,7 @@ import path from 'node:path';
 import { Lexicon } from '../../lexicon/src/reader.ts';
 import { parseConllu } from '../src/conllu.ts';
 import { translate } from '../src/pipeline.ts';
-import { rewriteLightVerbs } from '../../rules/src/light-verbs.ts';
+import { rewriteExceptives, rewriteLightVerbs } from '../../rules/src/source-rewrites.ts';
 
 const ROOT = path.resolve(import.meta.dirname, '../../..');
 const lex = Lexicon.fromTsv(path.join(ROOT, 'packages/lexicon/data/raw/words.tsv'));
@@ -50,5 +50,38 @@ describe('a light verb and its noun as one verb', () => {
     expect(gold('g15').text).toContain('že by fotografovali tulipany');
     expect(gold('g34').text).toContain('že by fotografovali tulipany');
     expect(gold('g15').dropped.map((d) => d.form)).toContain('photos');
+  });
+});
+
+/** "Ja myju jedino sebe „I wash nobody but myself"" - pronouns page. */
+describe('"nobody but X" as "only X"', () => {
+  const wash = (conj: string) =>
+    parseConllu(
+      [
+        '# text = x',
+        '# lang = en',
+        '1\tI\tI\tPRON\tPRP\tCase=Nom|Number=Sing|Person=1|PronType=Prs\t2\tnsubj\t_\t_',
+        '2\twash\twash\tVERB\tVBP\tTense=Pres|VerbForm=Fin\t0\troot\t_\t_',
+        '3\tnobody\tnobody\tPRON\tNN\tNumber=Sing|PronType=Neg\t2\tobj\t_\t_',
+        `4\t${conj}\t${conj}\tCCONJ\tCC\t_\t5\tcc\t_\t_`,
+        '5\tmyself\tmyself\tPRON\tPRP\tCase=Acc|Number=Sing|Person=1|PronType=Prs|Reflex=Yes\t3\tconj\t_\t_',
+        '',
+      ].join('\n'),
+    );
+
+  it('turns the negative into "only" on the exception, which takes its place', () => {
+    const { sentence, absorbed } = rewriteExceptives(wash('but'));
+    expect(sentence.tokens.find((t) => t.id === 3)).toMatchObject({ lemma: 'only', upos: 'ADV', head: 5, deprel: 'advmod' });
+    expect(sentence.tokens.find((t) => t.id === 5)).toMatchObject({ head: 2, deprel: 'obj' });
+    expect(absorbed.map((a) => a.form)).toEqual(['but']);
+  });
+
+  it('leaves any other coordination alone', () => {
+    const parsed = wash('and');
+    expect(rewriteExceptives(parsed).sentence).toBe(parsed);
+  });
+
+  it("reaches van Steenbergen's sentence, with no negation left", () => {
+    expect(gold('g30').text).toBe('Ja myju jedino sebe');
   });
 });

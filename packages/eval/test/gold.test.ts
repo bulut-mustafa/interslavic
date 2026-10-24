@@ -71,10 +71,6 @@ const matches = (p: { id: string; isv: string }): boolean => key(ours(p.id)) ===
  */
 type Status = 'acceptable' | 'defect' | 'unsupported' | 'parser';
 const DIFFERENCES: Record<string, { status: Status; why: string }> = {
-  g30: {
-    status: 'defect',
-    why: 'idiom - "nobody but myself" is rendered literally with negative concord ("ne myju nikogo ale se") where the page writes "jedino sebe", i.e. "only myself". Needs the English idiom, not a grammar rule',
-  },
   g32: {
     status: 'acceptable',
     why: 'lexical choice - we pick `pojdti` (go on foot), the page `pojehati` (go by vehicle). English "has gone" says neither',
@@ -85,7 +81,7 @@ const DIFFERENCES: Record<string, { status: Status; why: string }> = {
   },
   g34: {
     status: 'acceptable',
-    why: 'the construction and the verb are now right ("že by fotografovali tulipany": "take photos" is one verb, rules/src/light-verbs.ts). Two forms differ, both following our sources: "Niderlandy" is the dictionary\'s own entry ("Niderlandy m.pl. Netherlands"), and "Niderlandija" is not in it; and "Turisti" is the animate nominative plural the nouns page states ("animate nouns have the nominative plural ending -i"), which the page itself writes in the present-tense version of this sentence (g15)',
+    why: 'the construction and the verb are now right ("že by fotografovali tulipany": "take photos" is one verb, rules/src/source-rewrites.ts). Two forms differ, both following our sources: "Niderlandy" is the dictionary\'s own entry ("Niderlandy m.pl. Netherlands"), and "Niderlandija" is not in it; and "Turisti" is the animate nominative plural the nouns page states ("animate nouns have the nominative plural ending -i"), which the page itself writes in the present-tense version of this sentence (g15)',
   },
   g35: {
     status: 'acceptable',
@@ -195,9 +191,10 @@ describe("gold: van Steenbergen's own Interslavic", () => {
     // then 28/49 once a word the dictionary marks as not understood in 4+
     // languages stopped winning on frequency ("voz" -> "avto"), 29/49 once a
     // name the dictionary lacks was declined by its ending ("Ivanu"), 30/49
-    // once driving around in a place became "jezdil po Moskvě".
+    // once driving around in a place became "jezdil po Moskvě", 31/49 once
+    // "nobody but myself" became "jedino sebe".
     // Raise this floor as it improves; never lower it.
-    expect(matched).toBeGreaterThanOrEqual(30);
+    expect(matched).toBeGreaterThanOrEqual(31);
   });
 
   it('counts how much of the gap is ours', () => {
@@ -205,7 +202,7 @@ describe("gold: van Steenbergen's own Interslavic", () => {
     // Not an assertion about quality - a tripwire, so that silently
     // reclassifying a defect as "acceptable" shows up as a failing test.
     expect({ acceptable: by('acceptable'), defect: by('defect'), unsupported: by('unsupported'), parser: by('parser') })
-      .toEqual({ acceptable: 13, defect: 2, unsupported: 0, parser: 4 });
+      .toEqual({ acceptable: 13, defect: 1, unsupported: 0, parser: 4 });
   });
 });
 

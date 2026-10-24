@@ -101,3 +101,43 @@ describe('reflexive possessive svoj', () => {
     expect(text).not.toContain('svoj');
   });
 });
+
+/**
+ * "If it needs to be stressed, the longer form is used: Ja myju jedino sebe
+ * „I wash nobody but myself"" and "After a preposition, it is better to use
+ * the longer forms" (pronouns page). The dictionary publishes "(sę, ...)" for
+ * sebe, so without asking for the long form the clitic won both.
+ */
+describe('the long reflexive', () => {
+  const gold30 = () =>
+    translate(
+      parseConllu(fs.readFileSync(path.join(import.meta.dirname, 'fixtures/parse/gold/g30.conllu'), 'utf8')),
+      lex,
+      { orthography: 'standard' },
+    ).text;
+
+  it('is used when the reflexive is stressed', () => {
+    expect(gold30()).toBe('Ja myju jedino sebe');
+  });
+
+  it('is used after a preposition that takes the accusative', () => {
+    const into = parseConllu(
+      [
+        '# text = He looked into himself.',
+        '# lang = en',
+        '1\tHe\the\tPRON\tPRP\tCase=Nom|Gender=Masc|Number=Sing|Person=3|PronType=Prs\t2\tnsubj\t_\t_',
+        '2\tlooked\tlook\tVERB\tVBD\tMood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin\t0\troot\t_\t_',
+        '3\tinto\tinto\tADP\tIN\t_\t4\tcase\t_\t_',
+        '4\thimself\thimself\tPRON\tPRP\tCase=Acc|Gender=Masc|Number=Sing|Person=3|PronType=Prs|Reflex=Yes\t2\tobl\t_\t_',
+        '5\t.\t.\tPUNCT\t.\t_\t2\tpunct\t_\t_',
+        '',
+      ].join('\n'),
+    );
+    const result = translate(into, lex, { orthography: 'standard' });
+    expect(result.text).toMatch(/ v sebe\.$/);
+    // Inflected, not the citation form "sebe" falling out of a failed lookup,
+    // which happens to read the same.
+    const himself = result.words.find((w) => w.sourceForm === 'himself')!;
+    expect(himself.notes.join(' ')).not.toMatch(/could not inflect/);
+  });
+});

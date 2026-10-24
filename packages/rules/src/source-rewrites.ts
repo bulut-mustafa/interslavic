@@ -1,6 +1,12 @@
 import type { ParsedSentence, UdToken } from '../../types/index.ts';
 
 /**
+ * Rewrites of the English parse into what it MEANS, applied once before any
+ * stage reads the tree. Each is a construction a grammar page translates as a
+ * whole, which word-by-word transfer cannot reach.
+ */
+
+/**
  * English says some actions with a light verb and a noun where Interslavic has
  * one verb:
  *
@@ -24,7 +30,7 @@ const LIGHT_VERBS: { verb: string; objects: string[]; as: string; evidence: stri
   },
 ];
 
-export interface LightVerbRewrite {
+export interface SourceRewrite {
   sentence: ParsedSentence;
   /** Source words the single verb absorbs, with the reason, for the gloss. */
   absorbed: { form: string; why: string }[];
@@ -37,12 +43,12 @@ export interface LightVerbRewrite {
  * carries anything else (an adjective, a possessor), because absorbing the
  * noun would lose it.
  */
-export function rewriteLightVerbs(sentence: ParsedSentence): LightVerbRewrite {
+export function rewriteLightVerbs(sentence: ParsedSentence): SourceRewrite {
   if (sentence.lang !== 'en') return { sentence, absorbed: [] };
   const children = (t: UdToken) => sentence.tokens.filter((c) => c.head === t.id);
   const removed = new Set<number>();
   const changed = new Map<number, Partial<UdToken>>();
-  const absorbed: LightVerbRewrite['absorbed'] = [];
+  const absorbed: SourceRewrite['absorbed'] = [];
 
   for (const verb of sentence.tokens) {
     if (verb.upos !== 'VERB') continue;
@@ -85,4 +91,61 @@ export function rewriteLightVerbs(sentence: ParsedSentence): LightVerbRewrite {
     },
     absorbed,
   };
+}
+
+/**
+ * "nobody but myself" means "only myself", and Interslavic says it that way,
+ * with no negation at all:
+ *
+ *   "Ja myju jedino sebe „I wash nobody but myself""
+ *   http://steen.free.fr/interslavic/pronouns.html
+ *
+ * Translated word by word it became "Ja ne myju nikogo ale se" - "I do not
+ * wash anybody, but myself". The negative pronoun is turned into "only" on
+ * the exception, which takes over its place in the clause, and "but" goes.
+ */
+export function rewriteExceptives(sentence: ParsedSentence): SourceRewrite {
+  if (sentence.lang !== 'en') return { sentence, absorbed: [] };
+  const removed = new Set<number>();
+  const changed = new Map<number, Partial<UdToken>>();
+  const absorbed: SourceRewrite['absorbed'] = [];
+
+  for (const negative of sentence.tokens) {
+    if (negative.feats['PronType'] !== 'Neg' || negative.upos !== 'PRON') continue;
+    const exceptions = sentence.tokens.filter((t) => t.head === negative.id && t.deprel === 'conj');
+    if (exceptions.length !== 1) continue;
+    const exception = exceptions[0]!;
+    const but = sentence.tokens.find(
+      (t) => t.head === exception.id && t.deprel === 'cc' && t.lemma.toLowerCase() === 'but',
+    );
+    if (!but) continue;
+
+    changed.set(exception.id, { head: negative.head, deprel: negative.deprel });
+    changed.set(negative.id, {
+      lemma: 'only', upos: 'ADV', xpos: 'RB', feats: {}, head: exception.id, deprel: 'advmod',
+    });
+    removed.add(but.id);
+    absorbed.push({
+      form: but.form,
+      why: `"${negative.form} but ${exception.form}" means "only ${exception.form}" - "Ja myju jedino sebe" (pronouns page)`,
+    });
+  }
+
+  if (removed.size === 0) return { sentence, absorbed };
+  return {
+    sentence: {
+      ...sentence,
+      tokens: sentence.tokens
+        .filter((t) => !removed.has(t.id))
+        .map((t) => ({ ...t, ...changed.get(t.id) })),
+    },
+    absorbed,
+  };
+}
+
+/** Every rewrite, in order. Each returns the parse untouched when it declines. */
+export function rewriteSource(sentence: ParsedSentence): SourceRewrite {
+  const light = rewriteLightVerbs(sentence);
+  const exceptive = rewriteExceptives(light.sentence);
+  return { sentence: exceptive.sentence, absorbed: [...light.absorbed, ...exceptive.absorbed] };
 }

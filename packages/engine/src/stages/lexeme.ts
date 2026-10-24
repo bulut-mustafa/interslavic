@@ -545,7 +545,13 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
 
       if (isReflexive) {
         const resolved = feats.get('Case')?.value ?? '';
-        if (governed === undefined && hasCliticForm(resolved)) {
+        /**
+         * "If it needs to be stressed, the longer form is used: Ja myju jedino
+         * sebe" (pronouns page). A focusing adverb on the pronoun - "only
+         * myself" - is that stress.
+         */
+        const stressed = sentence.tokens.some((t) => t.head === token.id && t.deprel === 'advmod');
+        if (governed === undefined && !stressed && hasCliticForm(resolved)) {
           feats.set(
             'Variant',
             decide(
@@ -555,8 +561,15 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
               'reflexive verbs take the clitic "se", not the stressed "sebe"',
             ),
           );
-        } else if (governed !== undefined) {
-          notes.push('after a preposition the longer reflexive form is preferred');
+        } else if (hasCliticForm(resolved)) {
+          feats.set(
+            'Variant',
+            governed !== undefined
+              ? decide('Long', 'reflexive.long', 'certain',
+                  'after a preposition the longer reflexive form is used ("k mně, za tebe")')
+              : decide('Long', 'reflexive.long', 'certain',
+                  'stressed, so the longer reflexive form ("Ja myju jedino sebe")'),
+          );
         }
       }
     }
