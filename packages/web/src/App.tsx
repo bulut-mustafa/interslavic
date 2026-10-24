@@ -99,17 +99,58 @@ export default function App() {
   const unresolved = words.filter((w) => w.validation !== 'validated');
   const dropped = primary.flatMap((s) => s.dropped);
 
+  /**
+   * Every word in the result, flat and in reading order. The panel shows one
+   * at a time, so it needs an order to step through rather than a nested shape
+   * to search.
+   */
+  const wordKeys = useMemo(
+    () => primary.flatMap((s, i) => s.words.map((_, j) => `${i}-${j}`)),
+    [primary],
+  );
+
+  /**
+   * The panel is never empty: a translation shows its first word unless the
+   * reader has picked another one.
+   *
+   * DERIVED during render rather than set by an effect. An effect would leave
+   * one render where the words exist but nothing is selected - a visible flash
+   * of an empty panel under a heading reading "Why this word", and a real race
+   * for anything observing the DOM. Falling back here means the words and the
+   * panel appear in the same paint.
+   */
+  const active =
+    activeWord && wordKeys.includes(activeWord) ? activeWord : (wordKeys[0] ?? null);
+
+  const selected = useMemo(() => {
+    if (!active) return null;
+    for (const [i, s] of primary.entries()) {
+      for (const [j, w] of s.words.entries()) {
+        if (`${i}-${j}` === active) return { word: w, citations: s.citations ?? {} };
+      }
+    }
+    return null;
+  }, [primary, active]);
+
+  const selectedIndex = active ? wordKeys.indexOf(active) : -1;
+  const stepWord = (delta: number) => {
+    const next = selectedIndex + delta;
+    if (next >= 0 && next < wordKeys.length) setActiveWord(wordKeys[next]!);
+  };
+
   return (
     <div className="shell">
       <header className="masthead">
-        <h1 className="wordmark">Medžuslovjansky</h1>
-        <p>
-          Translates into Interslavic and shows its reasoning for every word, including
-          where it is guessing.
-        </p>
+        <div className="masthead-title">
+          <h1 className="wordmark">Medžuslovjansky</h1>
+          <p className="tagline">
+            Translates into Interslavic and shows its reasoning for every word, including
+            where it is guessing.
+          </p>
+        </div>
         <div className="controls">
           <label>
-            From
+            <span>From</span>
             <select value={lang} onChange={(e) => setLang(e.target.value as Lang)}>
               {LANGS.map((l) => (
                 <option key={l.value} value={l.value}>
@@ -119,7 +160,7 @@ export default function App() {
             </select>
           </label>
           <label>
-            Script
+            <span>Script</span>
             <select value={orth} onChange={(e) => setOrth(e.target.value as Orthography)}>
               {ORTHS.map((o) => (
                 <option key={o.value} value={o.value}>
@@ -131,81 +172,85 @@ export default function App() {
         </div>
       </header>
 
-      <div className="panes">
-        <section className="pane">
-          <div className="pane-head">{lang === 'en' ? 'English' : 'Russian'}</div>
-          <textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            spellCheck={false}
-            placeholder={lang === 'en' ? 'Type a sentence…' : 'Введите предложение…'}
-            aria-label="Text to translate"
-          />
-        </section>
+      <section className="block">
+        <h2 className="block-label">{lang === 'en' ? 'English' : 'Russian'}</h2>
+        <textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          spellCheck={false}
+          placeholder={lang === 'en' ? 'Type a sentence…' : 'Введите предложение…'}
+          aria-label="Text to translate"
+        />
+      </section>
 
-        <section className="pane">
-          <div className="pane-head">
-            Interslavic{busy ? ' · translating' : ''}
-          </div>
+      <section className="block">
+        <h2 className="block-label">
+          Interslavic
+          {busy && <span className="working"> · translating</span>}
+        </h2>
 
-          {primary.length === 0 && !error ? (
-            <p className="placeholder">—</p>
-          ) : (
-            <>
-              <div>
-                {primary.map((s, i) => (
-                  <p className="output" key={i}>
-                    {s.words.map((w, j) => (
-                      <Fragment key={`${i}-${j}`}>
-                        {/* An explicit space: adjacent JSX elements have none,
-                            so the words ran together as one string. */}
-                        {j > 0 ? ' ' : null}
-                        <button
-                          type="button"
-                          className={[
-                            'output-word',
-                            activeWord === `${i}-${j}` ? 'is-active' : '',
-                            w.validation !== 'validated' ? 'is-flagged' : '',
-                          ]
-                            .filter(Boolean)
-                            .join(' ')}
-                          onClick={() => setActiveWord(`${i}-${j}`)}
-                          title={`${w.lemma} · ${w.pos}`}
-                        >
-                          {w.surface}
-                        </button>
-                      </Fragment>
-                    ))}
-                    {/* The words carry no punctuation; the sentence does. */}
-                    {terminalPunctuation(s.text)}
-                  </p>
-                ))}
-              </div>
-
-              {alternate.length > 0 && (
-                <p className="alt-script" aria-label="The same text in the other script">
-                  {alternate.map((s) => s.text).join(' ')}
+        {primary.length === 0 && !error ? (
+          <p className="placeholder">
+            Type a sentence above to see it translated — and to see why each word came out
+            the way it did.
+          </p>
+        ) : (
+          <>
+            <div className="output-lines">
+              {primary.map((s, i) => (
+                <p className="output" key={i}>
+                  {s.words.map((w, j) => (
+                    <Fragment key={`${i}-${j}`}>
+                      {/* An explicit space: adjacent JSX elements have none,
+                          so the words ran together as one string. */}
+                      {j > 0 ? ' ' : null}
+                      <button
+                        type="button"
+                        className={[
+                          'output-word',
+                          active === `${i}-${j}` ? 'is-active' : '',
+                          w.validation !== 'validated' ? 'is-flagged' : '',
+                        ]
+                          .filter(Boolean)
+                          .join(' ')}
+                        onClick={() => setActiveWord(`${i}-${j}`)}
+                        aria-pressed={active === `${i}-${j}`}
+                        title={`${w.lemma} · ${w.pos}`}
+                      >
+                        {w.surface}
+                      </button>
+                    </Fragment>
+                  ))}
+                  {/* The words carry no punctuation; the sentence does. */}
+                  {terminalPunctuation(s.text)}
                 </p>
-              )}
+              ))}
+            </div>
 
-              {rate !== null && (
-                <div className="meter">
-                  <span>
-                    {words.length - unresolved.length} of {words.length} words found in the
-                    lexicon
-                  </span>
-                  <span className="meter-bar" aria-hidden="true">
-                    <span style={{ width: `${Math.round(rate * 100)}%` }} />
-                  </span>
-                </div>
-              )}
-            </>
-          )}
-        </section>
-      </div>
+            {alternate.length > 0 && (
+              <p className="alt-script" aria-label="The same text in the other script">
+                {alternate.map((s) => s.text).join(' ')}
+              </p>
+            )}
+
+            {rate !== null && (
+              <div className="meter">
+                <span className="meter-bar" aria-hidden="true">
+                  <span style={{ width: `${Math.round(rate * 100)}%` }} />
+                </span>
+                <span className="meter-label">
+                  {words.length - unresolved.length} of {words.length} words found in the
+                  lexicon
+                </span>
+              </div>
+            )}
+          </>
+        )}
+      </section>
 
       {error && (
         <div className="error">
+          <h2>Nothing is answering</h2>
           <p>{error}</p>
           <p>
             The parser and engine both need to be running: <code>npm run parser</code> in one
@@ -214,41 +259,52 @@ export default function App() {
         </div>
       )}
 
-      {words.length > 0 && (
-        <section className="analysis">
-          <h2>Why each word came out this way</h2>
-          <p>
-            The rail beside each line shows how much to trust it. Thick plum means the engine
-            guessed.
-          </p>
-
-          {primary.map((s, i) =>
-            s.words.map((w, j) => (
-              <WordEntry
-                key={`${i}-${j}`}
-                word={w}
-                citations={s.citations ?? {}}
-                active={activeWord === `${i}-${j}`}
-                onSelect={() => setActiveWord(`${i}-${j}`)}
-              />
-            )),
-          )}
-
-          <div className="legend">
-            {CONFIDENCE_ORDER.map((c) => (
-              <span key={c}>
-                <i style={{ background: `var(--${c})` }} />
-                {c === 'certain'
-                  ? 'certain'
-                  : c === 'high'
-                    ? 'lexically governed'
-                    : c === 'default'
-                      ? 'default, exceptions exist'
-                      : 'guess'}
+      {selected && (
+        <section className="block">
+          <div className="detail-head">
+            <h2 className="block-label">Why this word</h2>
+            <div className="stepper">
+              <button
+                type="button"
+                onClick={() => stepWord(-1)}
+                disabled={selectedIndex <= 0}
+                aria-label="Previous word"
+              >
+                ‹ prev
+              </button>
+              <span className="stepper-count">
+                {selectedIndex + 1} of {wordKeys.length}
               </span>
-            ))}
+              <button
+                type="button"
+                onClick={() => stepWord(1)}
+                disabled={selectedIndex >= wordKeys.length - 1}
+                aria-label="Next word"
+              >
+                next ›
+              </button>
+            </div>
           </div>
+          <WordDetail word={selected.word} citations={selected.citations} />
         </section>
+      )}
+
+      {words.length > 0 && (
+        <div className="legend">
+          <span className="legend-label">How much to trust a line</span>
+          {CONFIDENCE_ORDER.map((c) => (
+            <span key={c}>
+              <i style={{ background: `var(--${c})` }} />
+              {c === 'certain'
+                ? 'certain'
+                : c === 'high'
+                  ? 'lexically governed'
+                  : c === 'default'
+                    ? 'default, exceptions exist'
+                    : 'guess'}
+            </span>
+          ))}
+        </div>
       )}
 
       {(dropped.length > 0 || unresolved.length > 0) && (
@@ -325,27 +381,30 @@ function Citation({ citation, ruleId }: { citation?: RuleCitation; ruleId: strin
   );
 }
 
-function WordEntry({
+/**
+ * One word's reasoning, in full.
+ *
+ * This replaced a list of every word in the sentence. The list was complete and
+ * unreadable: ten words times four features times a citation each is forty
+ * blocks of small print, with nothing to say where to look. Showing one word at
+ * a time costs nothing - the sentence above is the index, and every word in it
+ * is a button - and buys room to set the reasoning at a size a person can read.
+ */
+function WordDetail({
   word,
   citations,
-  active,
-  onSelect,
 }: {
   word: GlossedWord;
   citations: Record<string, RuleCitation>;
-  active: boolean;
-  onSelect: () => void;
 }) {
   return (
-    <div
-      className={`entry${active ? ' is-active' : ''}`}
-      onMouseEnter={onSelect}
-      role="group"
-      aria-label={word.surface}
-    >
-      <div>
+    <div className="entry" role="group" aria-label={word.surface}>
+      <div className="entry-head">
         <span className="entry-form">{word.surface}</span>
         <span className="entry-source">from “{word.sourceForm}”</span>
+      </div>
+
+      <div className="entry-meta">
         <span className="entry-lemma">
           {word.lemma} · {word.pos}
         </span>
@@ -356,7 +415,7 @@ function WordEntry({
         )}
       </div>
 
-      <div>
+      <div className="entry-features">
         {word.features.map((f) => (
           <div className="feature" data-confidence={f.confidence} key={f.name}>
             <span className="feature-value">{readable(f.name, f.value)}</span>
@@ -376,21 +435,27 @@ function WordEntry({
 
         {word.aspect && (
           <div className="feature" data-confidence="high">
-            <span className="feature-value">{word.aspect.chosen === 'Imp' ? 'imperfective' : 'perfective'}</span>
+            <span className="feature-value">
+              {word.aspect.chosen === 'Imp' ? 'imperfective' : 'perfective'}
+            </span>
             <span className="feature-why">{word.aspect.because}</span>
           </div>
         )}
-
-        {word.lexicalChoice && <p className="note">{word.lexicalChoice.because}</p>}
-        {word.lexicalChoice?.rejected.length ? (
-          <p className="note">chosen over {word.lexicalChoice.rejected.join('; ')}</p>
-        ) : null}
-        {word.notes.map((n, i) => (
-          <p className="note" key={i}>
-            {n}
-          </p>
-        ))}
       </div>
+
+      {(word.lexicalChoice || word.notes.length > 0) && (
+        <div className="entry-notes">
+          {word.lexicalChoice && <p className="note">{word.lexicalChoice.because}</p>}
+          {word.lexicalChoice?.rejected.length ? (
+            <p className="note">chosen over {word.lexicalChoice.rejected.join('; ')}</p>
+          ) : null}
+          {word.notes.map((n, i) => (
+            <p className="note" key={i}>
+              {n}
+            </p>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

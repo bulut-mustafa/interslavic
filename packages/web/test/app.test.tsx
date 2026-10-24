@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import App from '../src/App.tsx';
 import type { Translation } from '../../engine/src/pipeline.ts';
 
@@ -114,6 +114,41 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
+/**
+ * The panel shows ONE word at a time, so a test about a particular word's
+ * reasoning has to select that word first.
+ *
+ * This is why several tests below changed shape when the analysis stopped
+ * being a list of every word. The contracts they check did not change - the
+ * confidence still has to reach the DOM, a guess still must not render as a
+ * certainty - only the path to them did. The sentence is the index: every word
+ * in the output line is a button.
+ */
+async function selectWord(container: HTMLElement, surface: string) {
+  const button = [...container.querySelectorAll('.output-word')].find(
+    (b) => b.textContent === surface,
+  );
+  if (!button) throw new Error(`no word button for "${surface}"`);
+  await act(async () => {
+    fireEvent.click(button);
+  });
+}
+
+/**
+ * Ready means the words AND the panel, not just the words. Waiting on the word
+ * buttons alone made the stepper test fail about one run in three: the panel
+ * used to be selected by an effect, so there was a render where the sentence
+ * existed and the panel did not.
+ */
+const settled = (container: HTMLElement) =>
+  waitFor(
+    () => {
+      expect(container.querySelectorAll('.output-word').length).toBe(3);
+      expect(container.querySelector('.entry')).not.toBeNull();
+    },
+    { timeout: 3000 },
+  );
+
 describe('translator UI', () => {
   it('renders the translation', async () => {
     render(<App />);
@@ -124,13 +159,20 @@ describe('translator UI', () => {
 
   it('carries each confidence level into the DOM', async () => {
     const { container } = render(<App />);
-    await waitFor(() => expect(container.querySelectorAll('.feature').length).toBeGreaterThan(0), {
-      timeout: 3000,
-    });
+    await settled(container);
 
-    const levels = [...container.querySelectorAll('.feature')].map((el) =>
-      el.getAttribute('data-confidence'),
-    );
+    // Collected across the whole sentence, one word at a time. Stepping through
+    // every word is a stronger check than the old single sweep: it proves both
+    // that the attribute is set AND that selecting a word changes the panel.
+    const levels: (string | null)[] = [];
+    for (const surface of ['žena', 'čitala', 'knigu']) {
+      await selectWord(container, surface);
+      levels.push(
+        ...[...container.querySelectorAll('.feature')].map((el) =>
+          el.getAttribute('data-confidence'),
+        ),
+      );
+    }
     // The rail is driven by this attribute; without it every line looks equally sure.
     expect(levels).toContain('certain');
     expect(levels).toContain('guess');
@@ -146,25 +188,83 @@ describe('translator UI', () => {
 
   it('shows feature values in words a learner would use', async () => {
     // "Nom" is not a word anyone says out loud.
-    render(<App />);
-    await waitFor(() => expect(screen.getByText('nominative')).toBeTruthy(), { timeout: 3000 });
+    const { container } = render(<App />);
+    await settled(container);
+    // žena is selected on arrival, so its nominative is already showing.
+    expect(screen.getByText('nominative')).toBeTruthy();
+    await selectWord(container, 'knigu');
     expect(screen.getByText('accusative')).toBeTruthy();
   });
 
   it('offers the alternative when the engine guessed', async () => {
-    render(<App />);
-    await waitFor(() => expect(screen.getByText(/could also be perfective/)).toBeTruthy(), {
-      timeout: 3000,
-    });
+    const { container } = render(<App />);
+    await settled(container);
+    await selectWord(container, 'čitala');
+    expect(screen.getByText(/could also be perfective/)).toBeTruthy();
   });
 
   it('marks an unverified word in the output and lists it', async () => {
     const { container } = render(<App />);
+    // The output line flags it without anything being selected, which is the
+    // point: a reader should see there is a doubt before they go looking.
     await waitFor(() => expect(container.querySelectorAll('.is-flagged').length).toBe(1), {
       timeout: 3000,
     });
     expect(screen.getByText(/may not be a real form/)).toBeTruthy();
+
+    await selectWord(container, 'knigu');
     expect(screen.getAllByText('unverified').length).toBe(1);
+  });
+
+  /**
+   * The panel is never empty. Showing one word at a time only works if the
+   * first one is already chosen - an empty panel under a heading reading "Why
+   * this word" is a dead end, and nothing would tell the reader that the words
+   * above are clickable.
+   */
+  it('selects the first word on arrival, so the panel is never empty', async () => {
+    const { container } = render(<App />);
+    await settled(container);
+    expect(container.querySelectorAll('.entry').length).toBe(1);
+    expect(container.querySelector('.entry-form')?.textContent).toBe('žena');
+    expect(container.querySelectorAll('.output-word.is-active').length).toBe(1);
+    expect(container.querySelector('.stepper-count')?.textContent).toBe('1 of 3');
+  });
+
+  /**
+   * prev / next walks the sentence, which is how someone actually reads one:
+   * word by word, rather than hunting for the next target with a mouse.
+   */
+  it('steps through the sentence with prev and next', async () => {
+    const { container } = render(<App />);
+    await settled(container);
+
+    // `disabled` read off the element rather than via jest-dom's matcher: this
+    // project has no test setup file, and one assertion is not a reason for one.
+    const prev = screen.getByLabelText('Previous word') as HTMLButtonElement;
+    const next = screen.getByLabelText('Next word') as HTMLButtonElement;
+
+    // At the first word there is nothing before it.
+    expect(prev.disabled).toBe(true);
+
+    await act(async () => {
+      fireEvent.click(next);
+    });
+    expect(container.querySelector('.entry-form')?.textContent).toBe('čitala');
+    expect(container.querySelector('.stepper-count')?.textContent).toBe('2 of 3');
+    expect(prev.disabled).toBe(false);
+
+    await act(async () => {
+      fireEvent.click(next);
+    });
+    expect(container.querySelector('.entry-form')?.textContent).toBe('knigu');
+    // And nothing after the last.
+    expect(next.disabled).toBe(true);
+
+    await act(async () => {
+      fireEvent.click(prev);
+    });
+    expect(container.querySelector('.entry-form')?.textContent).toBe('čitala');
   });
 
   it('reports the lexicon check as a count', async () => {
@@ -250,13 +350,18 @@ describe('what says so', () => {
    */
   it('shows what says so, with the tier and the verbatim source', async () => {
     const { container } = render(<App />);
-    await waitFor(() => expect(container.querySelectorAll('.citation').length).toBeGreaterThan(0), {
-      timeout: 3000,
-    });
+    await settled(container);
 
-    const tiers = [...container.querySelectorAll('.citation > summary')].map((el) =>
-      el.getAttribute('data-tier'),
-    );
+    // The two tiers sit on different words, so this walks the sentence.
+    const tiers: (string | null)[] = [];
+    for (const surface of ['žena', 'čitala']) {
+      await selectWord(container, surface);
+      tiers.push(
+        ...[...container.querySelectorAll('.citation > summary')].map((el) =>
+          el.getAttribute('data-tier'),
+        ),
+      );
+    }
     // A grammar page and attested usage are different kinds of claim, and the
     // reader can see which one they are getting.
     expect(tiers).toContain('normative');

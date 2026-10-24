@@ -2,7 +2,12 @@
  * The product is visible doubt: the reader cannot yet judge Interslavic, so the
  * interface's job is to show where the engine is sure and where it is guessing.
  * All boldness is spent on one device - the confidence rail down the left edge
- * of each analysis line. Everything else stays quiet.
+ * of each line of reasoning. Everything else stays quiet.
+ *
+ * Two scales do the rest of the work. Spacing and type are declared once, below,
+ * and nothing gets a hand-picked value: the previous stylesheet had gaps of
+ * 0.15, 0.2, 0.25, 0.3, 0.35 and 0.45rem chosen one at a time, which is why it
+ * read as unfinished even though each value looked reasonable on its own.
  */
 
 :root {
@@ -17,6 +22,7 @@
   --teal: #1f6b6b;
   --amber: #b07a1e;
 
+  /* These four carry meaning, not decoration. Do not retune them for looks. */
   --certain: var(--teal);
   --high: #4a7f93;
   --default: var(--amber);
@@ -25,7 +31,21 @@
   --sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
   --serif: "IBM Plex Serif", Georgia, serif;
 
-  --gap: clamp(1rem, 2.5vw, 2rem);
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 1rem;
+  --space-4: 1.5rem;
+  --space-5: 2.5rem;
+  --space-6: 4rem;
+
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.5rem;
+  /* Scales down rather than wrapping mid-sentence on a narrow screen. */
+  --text-2xl: clamp(1.75rem, 5vw, 2.25rem);
+
+  --radius: 6px;
 }
 
 * {
@@ -34,6 +54,9 @@
 
 html {
   color-scheme: light;
+  /* 17px: at 15px every derived size came out small, and the reasoning is the
+     thing people are here to read. */
+  font-size: 17px;
 }
 
 body {
@@ -41,8 +64,7 @@ body {
   background: var(--paper);
   color: var(--ink);
   font-family: var(--sans);
-  font-size: 15px;
-  line-height: 1.5;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -56,110 +78,144 @@ textarea {
 :focus-visible {
   outline: 2px solid var(--plum);
   outline-offset: 2px;
+  border-radius: 2px;
 }
 
 /* ---------- shell ---------- */
 
+/* One column. A translator shows short text, so a measure wide enough to read
+   comfortably beats filling the window - and it means the phone layout and the
+   desktop layout are the same layout, got right once. */
 .shell {
-  max-width: 68rem;
+  max-width: 44rem;
   margin: 0 auto;
-  padding: var(--gap);
+  padding: var(--space-5) var(--space-4) var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
 }
+
+/* ---------- masthead ---------- */
 
 .masthead {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.75rem 1.25rem;
-  padding-bottom: 0.75rem;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-3) var(--space-4);
+  padding-bottom: var(--space-3);
   border-bottom: 1px solid var(--rule);
+}
+
+.masthead-title {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
 }
 
 .wordmark {
   margin: 0;
   font-family: var(--serif);
-  font-size: 1.5rem;
+  font-size: var(--text-xl);
   font-weight: 600;
   letter-spacing: -0.01em;
 }
 
-.masthead p {
+.tagline {
   margin: 0;
   color: var(--ink-soft);
-  max-width: 34rem;
+  font-size: var(--text-sm);
+  max-width: 32rem;
 }
 
 .controls {
-  margin-left: auto;
   display: flex;
-  gap: 0.5rem;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
 }
 
 .controls label {
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
-  font-size: 0.78rem;
-  color: var(--ink-soft);
+  gap: var(--space-1);
+}
+
+.controls label span {
+  font-size: var(--text-sm);
+  color: var(--ink-faint);
 }
 
 select {
   background: var(--paper-raised);
   border: 1px solid var(--rule);
-  border-radius: 3px;
-  padding: 0.3rem 0.4rem;
+  border-radius: var(--radius);
+  /* Tall enough to tap. */
+  padding: var(--space-2);
+  min-height: 2.5rem;
 }
 
-/* ---------- panes ---------- */
+/* ---------- blocks ---------- */
 
-.panes {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1px;
-  background: var(--rule);
-  border: 1px solid var(--rule);
-  margin-top: var(--gap);
-}
-
-@media (max-width: 780px) {
-  .panes {
-    grid-template-columns: 1fr;
-  }
-}
-
-.pane {
-  background: var(--paper-raised);
-  padding: 1.1rem 1.25rem 1.25rem;
-  min-height: 11rem;
+.block {
   display: flex;
   flex-direction: column;
+  gap: var(--space-3);
 }
 
-.pane-head {
-  font-size: 0.78rem;
+/* The quiet editorial label above each section. */
+.block-label {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--ink-faint);
-  margin-bottom: 0.6rem;
+}
+
+.working {
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 textarea {
-  flex: 1;
-  border: 0;
-  background: none;
+  width: 100%;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--paper-raised);
+  padding: var(--space-3);
   resize: vertical;
-  min-height: 7rem;
+  min-height: 6rem;
   font-family: var(--serif);
-  font-size: 1.1rem;
-  line-height: 1.55;
+  font-size: var(--text-lg);
+  line-height: 1.5;
 }
 
 textarea::placeholder {
   color: var(--ink-faint);
 }
 
+.placeholder {
+  margin: 0;
+  color: var(--ink-faint);
+  font-size: var(--text-base);
+  max-width: 32rem;
+}
+
+/* ---------- the translation ---------- */
+
+.output-lines {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* The hero. Everything else on the page is in service of this line. */
 .output {
   font-family: var(--serif);
-  font-size: 1.45rem;
-  line-height: 1.45;
+  font-size: var(--text-2xl);
+  line-height: 1.4;
   margin: 0;
 }
 
@@ -169,44 +225,66 @@ textarea::placeholder {
 .alt-script {
   font-family: var(--serif);
   color: var(--ink-faint);
-  font-size: 1.05rem;
-  margin: 0.45rem 0 0;
+  font-size: var(--text-lg);
+  margin: 0;
 }
 
+/* Every word is a control, and on a phone it has to be a real target: the
+   previous rule was `padding: 0 0.04em`, which is a few pixels tall. */
 .output-word {
   background: none;
   border: 0;
-  padding: 0 0.04em;
+  border-radius: var(--radius);
+  /* The horizontal padding is cancelled by an equal negative margin, so the
+     button's hit area is bigger than the word without widening the line. Left
+     uncancelled, each word carried half a space of its own and the sentence
+     came out double-spaced with the full stop adrift from the last word.
+     Not cancelled to zero: a sliver of width keeps the selected word's filled
+     box off the one beside it. */
+  padding: var(--space-1) 0.3rem;
+  margin: 0 -0.2rem;
   cursor: pointer;
-  border-bottom: 2px solid transparent;
   font: inherit;
+  color: inherit;
+  box-shadow: inset 0 -2px 0 transparent;
+  transition: background-color 0.12s ease, box-shadow 0.12s ease;
 }
 
-.output-word:hover,
+.output-word:hover {
+  box-shadow: inset 0 -2px 0 var(--rule);
+}
+
+/* Filled, not underlined: the link between the sentence and the panel below
+   should be unmissable, because the panel only makes sense once you see it. */
 .output-word.is-active {
-  border-bottom-color: var(--plum);
+  background: var(--ink);
+  color: var(--paper-raised);
+  box-shadow: none;
 }
 
 .output-word.is-flagged {
-  border-bottom: 2px dotted var(--guess);
+  box-shadow: inset 0 -2px 0 var(--guess);
+}
+
+.output-word.is-flagged.is-active {
+  background: var(--guess);
+  box-shadow: none;
 }
 
 .meter {
-  margin-top: auto;
-  padding-top: 1rem;
-  font-size: 0.82rem;
-  color: var(--ink-soft);
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-2) var(--space-3);
 }
 
 .meter-bar {
-  flex: 1;
-  height: 3px;
+  flex: 0 1 10rem;
+  height: 4px;
+  border-radius: 2px;
   background: var(--rule);
   position: relative;
-  max-width: 9rem;
+  overflow: hidden;
 }
 
 .meter-bar span {
@@ -215,108 +293,157 @@ textarea::placeholder {
   background: var(--teal);
 }
 
-.placeholder {
-  color: var(--ink-faint);
-  font-family: var(--serif);
-  font-size: 1.2rem;
-  margin: 0;
+.meter-label {
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
 }
 
+/* ---------- error ---------- */
+
 .error {
-  margin: var(--gap) 0 0;
-  padding: 0.9rem 1.1rem;
+  padding: var(--space-3) var(--space-4);
   background: var(--paper-raised);
   border-left: 3px solid var(--guess);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.error h2 {
+  margin: 0;
+  font-size: var(--text-base);
+  font-weight: 600;
 }
 
 .error p {
-  margin: 0 0 0.4rem;
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: var(--text-sm);
 }
 
 .error code {
   font-family: var(--serif);
   background: var(--paper);
   padding: 0.1rem 0.3rem;
+  border-radius: 3px;
 }
 
-/* ---------- analysis ---------- */
+/* ---------- the word panel ---------- */
 
-.analysis {
-  margin-top: calc(var(--gap) * 1.5);
+.detail-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-3);
 }
 
-.analysis > h2 {
-  font-size: 0.95rem;
-  font-weight: 600;
-  margin: 0 0 0.2rem;
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
 }
 
-.analysis > p {
-  margin: 0 0 1.1rem;
+.stepper button {
+  background: var(--paper-raised);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: var(--space-1) var(--space-3);
+  min-height: 2.25rem;
+  cursor: pointer;
   color: var(--ink-soft);
 }
 
+.stepper button:hover:not(:disabled) {
+  color: var(--ink);
+  border-color: var(--ink-faint);
+}
+
+.stepper button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.stepper-count {
+  font-size: var(--text-sm);
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
 .entry {
-  padding: 0.85rem 0;
-  border-top: 1px solid var(--rule);
-  display: grid;
-  grid-template-columns: minmax(9rem, 13rem) 1fr;
-  gap: 0.35rem 1.5rem;
-}
-
-@media (max-width: 680px) {
-  .entry {
-    grid-template-columns: 1fr;
-  }
-}
-
-.entry.is-active {
   background: var(--paper-raised);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.entry-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-3);
 }
 
 .entry-form {
   font-family: var(--serif);
-  font-size: 1.18rem;
-  line-height: 1.3;
+  font-size: var(--text-xl);
+  line-height: 1.2;
 }
 
 .entry-source {
-  display: block;
-  font-family: var(--sans);
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   color: var(--ink-faint);
 }
 
+.entry-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--rule);
+}
+
 .entry-lemma {
-  display: block;
-  font-family: var(--sans);
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   color: var(--ink-soft);
-  margin-top: 0.15rem;
 }
 
 .flag {
-  display: inline-block;
-  margin-top: 0.3rem;
-  font-size: 0.72rem;
+  font-size: var(--text-sm);
   color: var(--guess);
   border: 1px solid currentColor;
-  border-radius: 2px;
-  padding: 0 0.3rem;
+  border-radius: 3px;
+  padding: 0 var(--space-1);
+}
+
+.entry-features {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.entry-notes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--rule);
 }
 
 /* The doubt gutter: the one place this interface raises its voice. */
 .feature {
-  padding-left: 0.7rem;
+  padding-left: var(--space-3);
   border-left: 3px solid var(--certain);
   display: flex;
   flex-wrap: wrap;
-  gap: 0.15rem 0.5rem;
+  gap: var(--space-1) var(--space-2);
   align-items: baseline;
-}
-
-.feature + .feature {
-  margin-top: 0.3rem;
 }
 
 .feature[data-confidence="certain"] {
@@ -334,7 +461,7 @@ textarea::placeholder {
 }
 
 .feature-value {
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .feature-why {
@@ -348,85 +475,35 @@ textarea::placeholder {
 
 .alts {
   width: 100%;
-  margin: 0.15rem 0 0;
+  margin: 0;
   padding: 0;
   list-style: none;
   color: var(--ink-faint);
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
 }
 
 .note {
-  margin: 0.35rem 0 0;
-  padding-left: 0.7rem;
+  margin: 0;
+  padding-left: var(--space-3);
   border-left: 3px solid var(--rule);
   color: var(--ink-soft);
-  font-size: 0.88rem;
+  font-size: var(--text-sm);
 }
 
-/* ---------- footnotes ---------- */
+/* ---------- "what says so" ---------- */
 
-.footnotes {
-  margin-top: calc(var(--gap) * 1.5);
-  padding-top: 0.9rem;
-  border-top: 1px solid var(--rule);
-  display: grid;
-  gap: 0.6rem;
-  color: var(--ink-soft);
-  font-size: 0.88rem;
-}
-
-.footnotes h3 {
-  margin: 0 0 0.15rem;
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: var(--ink);
-}
-
-.footnotes .dropped-word {
-  font-family: var(--serif);
-  color: var(--ink);
-}
-
-.legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem 1rem;
-  margin-top: 0.4rem;
-  font-size: 0.82rem;
-  color: var(--ink-soft);
-}
-
-.legend span {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-
-.legend i {
-  width: 3px;
-  height: 0.95em;
-  background: var(--certain);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .output-word {
-    transition: border-color 120ms ease;
-  }
-}
-
-/* "What says so."
-   The confidence rail says how sure we are; this says on whose authority.
-   Collapsed by default: a learner should be able to reach the evidence in one
-   click, not have to read past it on every word. */
+/* The confidence rail says how sure we are; this says on whose authority.
+   Collapsed by default: a learner should reach the evidence in one click, not
+   have to read past it on every word. */
 .citation {
   width: 100%;
-  margin-top: 0.2rem;
-  font-size: 0.82rem;
+  font-size: var(--text-sm);
 }
 
 .citation > summary {
   cursor: pointer;
   display: inline-block;
+  padding: var(--space-1) 0;
   color: var(--ink-faint);
   border-bottom: 1px dotted currentColor;
   list-style: none;
@@ -443,20 +520,20 @@ textarea::placeholder {
 
 /* The tier is the point: a grammar page and a guess at structure are not the
    same kind of claim, and the reader can see which they are getting. */
-.citation > summary[data-tier='normative'] {
+.citation > summary[data-tier="normative"] {
   color: var(--certain);
 }
-.citation > summary[data-tier='corpus'] {
+.citation > summary[data-tier="corpus"] {
   color: var(--high);
 }
 
 .citation-body {
-  margin-top: 0.3rem;
-  padding-left: 0.7rem;
+  margin-top: var(--space-2);
+  padding-left: var(--space-3);
   border-left: 2px solid var(--rule);
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
+  gap: var(--space-2);
 }
 
 .citation-why {
@@ -467,25 +544,127 @@ textarea::placeholder {
 /* Verbatim, so it is visibly a quotation and not our paraphrase. */
 .citation-quote {
   margin: 0;
-  padding-left: 0.6rem;
+  padding-left: var(--space-2);
   border-left: 2px solid var(--ink-faint);
   color: var(--ink);
+  font-family: var(--serif);
   font-style: italic;
+  line-height: 1.5;
 }
 
 .citation-source {
   color: var(--ink-faint);
-  word-break: break-all;
+  word-break: break-word;
 }
 
 .citation-rule {
   color: var(--ink-faint);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 0.78rem;
+  font-size: 0.8rem;
 }
 
 .citation-missing {
   width: 100%;
   color: var(--guess);
-  font-size: 0.82rem;
+}
+
+/* ---------- legend ---------- */
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--rule);
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+}
+
+.legend-label {
+  color: var(--ink-faint);
+}
+
+.legend span {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.legend i {
+  width: 0.75rem;
+  height: 3px;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+/* ---------- footnotes ---------- */
+
+.footnotes {
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--rule);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  color: var(--ink-soft);
+  font-size: var(--text-sm);
+}
+
+.footnotes > div {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.footnotes h3 {
+  margin: 0 0 var(--space-1);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.footnotes .dropped-word {
+  font-family: var(--serif);
+  color: var(--ink);
+}
+
+/* ---------- narrow screens ---------- */
+
+@media (max-width: 34rem) {
+  .shell {
+    padding: var(--space-4) var(--space-3) var(--space-5);
+    gap: var(--space-4);
+  }
+
+  /* The controls stop competing with the wordmark for the same line. */
+  .masthead {
+    align-items: flex-start;
+  }
+
+  .controls {
+    width: 100%;
+  }
+
+  .controls label {
+    flex: 1 1 8rem;
+  }
+
+  select {
+    width: 100%;
+  }
+
+  /* Generous leading so padded word buttons on consecutive lines do not touch. */
+  .output {
+    line-height: 1.75;
+  }
+
+  .entry {
+    padding: var(--space-3);
+  }
+
+  .detail-head {
+    align-items: flex-start;
+  }
 }
