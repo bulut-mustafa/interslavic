@@ -5,12 +5,19 @@ import { Lexicon, rank } from '../../lexicon/src/reader.ts';
 import { parseConllu } from '../src/conllu.ts';
 import { translate } from '../src/pipeline.ts';
 import { femaleEquivalentsOf, isFemaleEquivalent } from '../../rules/src/derivation.ts';
+import { functionWordFor } from '../../rules/src/function-words.ts';
 
 const ROOT = path.resolve(import.meta.dirname, '../../..');
 const lex = Lexicon.fromTsv(path.join(ROOT, 'packages/lexicon/data/raw/words.tsv'));
 const out = (name: string) =>
   translate(
     parseConllu(fs.readFileSync(path.join(import.meta.dirname, 'fixtures/parse/en', name), 'utf8')),
+    lex,
+    { orthography: 'standard' },
+  ).text;
+const gold = (id: string) =>
+  translate(
+    parseConllu(fs.readFileSync(path.join(import.meta.dirname, 'fixtures/parse/gold', `${id}.conllu`), 'utf8')),
     lex,
     { orthography: 'standard' },
   ).text;
@@ -93,5 +100,29 @@ describe('female equivalents are the marked member', () => {
   it('leaves a feminine noun that is nobody\'s derivative alone', () => {
     const top = rank(lex.lookupEnglish('snake'), { upos: 'NOUN', gloss: 'snake', lang: 'en' })[0];
     expect(top?.lemma).toBe('zmija');
+  });
+});
+
+/**
+ * An open-class word is curated only for the sense its parse shows, so the
+ * other sense must still reach dictionary ranking.
+ */
+describe('a sense the parse shows', () => {
+  it('reads a counted floor as a storey, and leaves a plain floor alone', () => {
+    expect(functionWordFor('floor', 'NOUN', 'en', false, [{ deprel: 'nummod', lemma: 'three' }])?.isv).toBe('etaž');
+    expect(functionWordFor('floor', 'NOUN', 'en', false, [{ deprel: 'case', lemma: 'on' }])).toBeNull();
+    expect(functionWordFor('floor', 'NOUN')).toBeNull();
+  });
+
+  it('reads a party one comes to or is at as an event, and leaves other parties alone', () => {
+    expect(functionWordFor('party', 'NOUN', 'en', false, [{ deprel: 'case', lemma: 'to' }])?.isv).toBe('zabava');
+    expect(functionWordFor('party', 'NOUN', 'en', false, [{ deprel: 'case', lemma: 'At' }])?.isv).toBe('zabava');
+    expect(functionWordFor('party', 'NOUN', 'en', false, [{ deprel: 'case', lemma: 'of' }])).toBeNull();
+    expect(functionWordFor('party', 'NOUN')).toBeNull();
+  });
+
+  it("reaches the sentence: van Steenbergen's storeys and party", () => {
+    expect(gold('g25')).toContain('etažami');
+    expect(gold('g08')).toContain('zabavy');
   });
 });

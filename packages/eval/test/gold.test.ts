@@ -117,7 +117,7 @@ const DIFFERENCES: Record<string, { status: Status; why: string }> = {
   },
   g08: {
     status: 'defect',
-    why: 'word sense - we pick "partija", the POLITICAL sense of "party". No signal in the dictionary separates it from "zabava": both are type 1 with the bare gloss "party", and frequency favours the wrong one',
+    why: 'the noun is now right ("zabava", curated for a party one comes to). The preposition is not a defect: the prepositions page gives "do - to, towards" and asks that prepositions follow "their logical meaning, not [...] national idioms", so "do zabavy" is the stated rule where the page writes the idiom "na zabavu". What remains is the verb: imperfective "prihodil" where "came" is a completed event and the page has perfective "prijehal"',
   },
   g11: {
     status: 'parser',
@@ -148,8 +148,8 @@ const DIFFERENCES: Record<string, { status: Status; why: string }> = {
     why: 'the gender is now right ("ščestlivy"), and the LONG form is what the adjectives page recommends: the short form "may also be used [...] This is not mandatory though, and in most cases, people will simply write: Petr jest ščestlivy". "Peter" stays as written because the dictionary carries no personal names and no source gives a transcription rule for them - keeping an unknown proper noun is the correct behaviour, and it is flagged as untranslated',
   },
   g25: {
-    status: 'defect',
-    why: 'word sense - "floor" resolves to "podloga" (the surface) rather than "etaž" (the storey). The declined numeral is NOT a defect: the numerals page calls leaving cardinals undeclined "the easiest solution [...] even though it may sound a little strange to native speakers. However, a better effect can be achieved by using the following declension patterns", so our "trěmi" is the better form',
+    status: 'acceptable',
+    why: 'the noun is now right ("etaž", curated for a counted floor), so only the numeral differs, and the declined numeral is NOT a defect: the numerals page calls leaving cardinals undeclined "the easiest solution [...] even though it may sound a little strange to native speakers. However, a better effect can be achieved by using the following declension patterns", so our "trěmi" is the better form',
   },
   g26: {
     status: 'defect',
@@ -211,7 +211,7 @@ describe("gold: van Steenbergen's own Interslavic", () => {
     // Not an assertion about quality - a tripwire, so that silently
     // reclassifying a defect as "acceptable" shows up as a failing test.
     expect({ acceptable: by('acceptable'), defect: by('defect'), unsupported: by('unsupported'), parser: by('parser') })
-      .toEqual({ acceptable: 6, defect: 12, unsupported: 0, parser: 3 });
+      .toEqual({ acceptable: 7, defect: 11, unsupported: 0, parser: 3 });
   });
 });
 

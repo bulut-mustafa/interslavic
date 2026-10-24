@@ -198,7 +198,13 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
     // Closed-class words use a curated choice: ranking picks "tamto" ("that
     // over there") for plain "that", because the narrower gloss looks like a
     // better match than the general demonstrative's "this, that".
-    const curated = functionWordFor(token.lemma, token.upos, sentence.lang, inNegatedClause(token));
+    const curated = functionWordFor(
+      token.lemma,
+      token.upos,
+      sentence.lang,
+      inNegatedClause(token),
+      sentence.tokens.filter((t) => t.head === token.id),
+    );
     /**
      * A curated lemma need not be a candidate for the source word, for the
      * same reason a planned preposition need not be (see below): curation

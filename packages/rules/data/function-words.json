@@ -5,7 +5,7 @@
     "steenbergen-pronouns": "http://steen.free.fr/interslavic/pronouns.html",
     "steenbergen-nouns": "http://steen.free.fr/interslavic/nouns.html"
   },
-  "_scope": "Closed classes only. Open-class words (nouns, verbs, adjectives) stay with dictionary ranking - curating them by hand would never end.",
+  "_scope": "Closed classes, plus open-class words only for a sense the parse itself shows (whenDependent). The other senses of such a word stay with dictionary ranking - curating open-class words wholesale would never end.",
   "words": [
     {
       "en": "that",
@@ -115,6 +115,36 @@
       "isv": "uže",
       "why": "the dictionary pairs this as the multiword `uz ne` glossed 'not anymore'; the `ne` half is the clause negation the negation pass already emits, so only `uze` is this word's own contribution. Left untranslated it printed the English 'anymore' in Interslavic output",
       "evidence": "steenbergen-syntax: 'Unlike in English, all negatable words are being negated in Interslavic, for example: - Ja uze nikogda ne budu citati nijednu knigu! „I am never going to read a single book anymore!”'",
+      "source": "steenbergen-syntax"
+    },
+    {
+      "en": "floor",
+      "upos": [
+        "NOUN"
+      ],
+      "whenDependent": {
+        "deprel": "nummod"
+      },
+      "isv": "etaž",
+      "why": "a floor counted by a numeral is a storey of a building. The dictionary glosses `etaž` only as 'storey', so 'floor' always reached `podloga` (the surface walked on), which stays the choice when nothing counts it",
+      "evidence": "steenbergen-numerals: 'Dom s tri etažami „A house with three floors”'",
+      "source": "steenbergen-numerals"
+    },
+    {
+      "en": "party",
+      "upos": [
+        "NOUN"
+      ],
+      "whenDependent": {
+        "deprel": "case",
+        "lemmas": [
+          "to",
+          "at"
+        ]
+      },
+      "isv": "zabava",
+      "why": "a party one comes to or is at is an event, `zabava`. `partija` is the political party; both are glossed bare 'party' and are type 1, so no dictionary column separates them, and frequency chose `partija`",
+      "evidence": "steenbergen-syntax: 'Nikto ne prijehal na zabavu. „Nobody came to the party.”'; steenbergen-numerals: 'zabava v troje „a party for three”'; the political sense on steenbergen-orthography: 'Komunistična partija Sovětskogo Sojuza'",
       "source": "steenbergen-syntax"
     }
   ]

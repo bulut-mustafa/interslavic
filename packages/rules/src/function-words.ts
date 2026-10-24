@@ -10,8 +10,9 @@ import path from 'node:path';
  * while the general demonstrative `tȯj` is glossed "this, that" and therefore
  * looked like a weaker match - but `tamto` means "that over there".
  *
- * Every entry cites the source that justifies it. Open-class words are
- * deliberately out of scope.
+ * Every entry cites the source that justifies it. An open-class word is
+ * curated only for a sense the parse itself shows (see `whenDependent`), so
+ * its other senses stay with dictionary ranking.
  */
 
 export interface FunctionWord {
@@ -36,6 +37,15 @@ export interface FunctionWord {
    * the negated reading is the specific case and the plain entry the default.
    */
   whenNegated?: boolean;
+  /**
+   * When set, this entry applies only when the source word has a dependent
+   * with this relation and, if given, one of these lemmas. This is how an
+   * open-class word with two senses is curated without breaking the other
+   * one: "three floors" is counted, so storeys (`etaž`), while "on the floor"
+   * keeps `podloga`; "came to the party" is an event (`zabava`), while "the
+   * party won" keeps `partija`.
+   */
+  whenDependent?: { deprel: string; lemmas?: string[] };
   isv: string;
   why: string;
   evidence: string;
@@ -66,14 +76,21 @@ export function functionWordFor(
   upos: string,
   lang = 'en',
   negated = false,
+  dependents: { deprel: string; lemma: string }[] = [],
 ): FunctionWord | null {
   const candidates = index()
     .get(`${lang}|${lemma.trim().toLowerCase()}`)
     ?.filter((w) => w.upos.includes(upos)) ?? [];
-  // The negated reading is the more specific entry, so it is tried first.
+  const hasDependent = ({ whenDependent: want }: FunctionWord) =>
+    want !== undefined &&
+    dependents.some(
+      (d) => d.deprel === want.deprel && (want.lemmas?.includes(d.lemma.toLowerCase()) ?? true),
+    );
+  // A conditional reading is the more specific entry, so it is tried first.
   return (
     (negated ? candidates.find((w) => w.whenNegated) : undefined) ??
-    candidates.find((w) => !w.whenNegated) ??
+    candidates.find(hasDependent) ??
+    candidates.find((w) => !w.whenNegated && !w.whenDependent) ??
     null
   );
 }
