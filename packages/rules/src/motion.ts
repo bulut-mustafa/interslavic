@@ -1,3 +1,5 @@
+import type { ParsedSentence, UdToken } from '../../types/index.ts';
+
 /**
  * Motion versus location, which decides the case after several prepositions.
  *
@@ -44,4 +46,28 @@ const MOTION_VERBS = new Set([
  */
 export function isMotionVerb(lemma: string): boolean {
   return MOTION_VERBS.has(lemma.trim().toLowerCase());
+}
+
+/**
+ * "around" on a verb of motion that also has a place it moves IN: the movement
+ * covers the place, which Interslavic says with `po` and the locative.
+ *
+ *   "Igor jezdil po Moskvě „Igor was driving around in Moscow""
+ *   http://steen.free.fr/interslavic/verbs.html
+ *
+ * The prepositions page gives po with the locative as "throughout, round, all
+ * over", and the dictionary glosses po (+loc) "throughout". The adverb is then
+ * carried by the preposition, so it is not translated on its own - it came out
+ * as "vokrug v Moskvě", "round about in Moscow".
+ */
+export function isAroundAPlace(adverb: UdToken, sentence: ParsedSentence): boolean {
+  if (adverb.deprel !== 'advmod' || adverb.lemma.toLowerCase() !== 'around') return false;
+  const verb = sentence.tokens.find((t) => t.id === adverb.head);
+  if (verb?.upos !== 'VERB' || !isMotionVerb(verb.lemma)) return false;
+  return sentence.tokens.some(
+    (obl) =>
+      obl.head === verb.id &&
+      obl.deprel === 'obl' &&
+      sentence.tokens.some((c) => c.head === obl.id && c.deprel === 'case' && c.lemma.toLowerCase() === 'in'),
+  );
 }

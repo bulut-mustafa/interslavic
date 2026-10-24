@@ -183,6 +183,12 @@
       "quote": "Tutoj hlěb jest nedragy. „This bread is inexpensive.”",
       "why": "a predicate complement takes the nominative"
     },
+    "case.prep.around": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/verbs.html",
+      "quote": "Igor jezdil po Moskvě „Igor was driving around in Moscow”",
+      "why": "moving around in a place covers it, which po with the locative says - the prepositions page gives it as \"po – after, following; along(side); throughout, round, all over\""
+    },
     "case.prep.governed": {
       "tier": "normative",
       "source": "http://steen.free.fr/interslavic/prepositions.html",

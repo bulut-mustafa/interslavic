@@ -8,6 +8,7 @@ import { auxiliaryRole, conditionalAuxiliary, futureAuxiliary } from '../../../r
 import { functionWordFor } from '../../../rules/src/function-words.ts';
 import { properNounXpos } from '../../../rules/src/proper-nouns.ts';
 import { isTransgressive, isTransgressiveMark } from '../../../rules/src/transgressive.ts';
+import { isAroundAPlace } from '../../../rules/src/motion.ts';
 import { parseXpos } from '../../../lexicon/src/steen/parse-xpos.ts';
 import { parseAddition } from '../../../lexicon/src/steen/parse-addition.ts';
 import { modalFor } from '../../../rules/src/modals.ts';
@@ -94,6 +95,13 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
       dropped.push({
         form: token.form,
         why: 'the participle "-uči/-eči" itself means "while doing", so no separate word is needed',
+      });
+      continue;
+    }
+    if (isAroundAPlace(token, sentence)) {
+      dropped.push({
+        form: token.form,
+        why: '"po" with the locative already says "all over" the place ("Igor jezdil po Moskvě")',
       });
       continue;
     }

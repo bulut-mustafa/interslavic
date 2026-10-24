@@ -4,7 +4,7 @@ import path from 'node:path';
 import { Lexicon } from '../../lexicon/src/reader.ts';
 import { parseConllu } from '../src/conllu.ts';
 import { translate } from '../src/pipeline.ts';
-import { isMotionVerb } from '../../rules/src/motion.ts';
+import { isAroundAPlace, isMotionVerb } from '../../rules/src/motion.ts';
 
 const ROOT = path.resolve(import.meta.dirname, '../../..');
 const lex = Lexicon.fromTsv(path.join(ROOT, 'packages/lexicon/data/raw/words.tsv'));
@@ -153,5 +153,34 @@ describe('agreement', () => {
     // so the adjective that agrees with it cannot be more certain than that.
     expect(caseOf('dom')?.confidence).toBe('default');
     expect(caseOf('večši')).toMatchObject({ ruleId: 'agreement.fromHead', confidence: 'default' });
+  });
+});
+
+/** "Igor jezdil po Moskvě „Igor was driving around in Moscow"" - verbs page. */
+describe('moving around in a place', () => {
+  it("reproduces van Steenbergen's sentence", () => {
+    expect(outGold('g21.conllu')).toBe('Igor jezdil po Moskvě');
+  });
+
+  /** "<verb lemma> around [in Moscow]" - only the shape matters. */
+  const around = (verb: string, place: boolean) =>
+    parseConllu(
+      [
+        '# text = x',
+        '# lang = en',
+        `1\t${verb}\t${verb}\tVERB\tVBD\tTense=Past|VerbForm=Fin\t0\troot\t_\t_`,
+        '2\taround\taround\tADV\tRB\t_\t1\tadvmod\t_\t_',
+        ...(place
+          ? ['3\tin\tin\tADP\tIN\t_\t4\tcase\t_\t_', '4\tMoscow\tMoscow\tPROPN\tNNP\tNumber=Sing\t1\tobl\t_\t_']
+          : []),
+        '',
+      ].join('\n'),
+    );
+
+  it('needs a verb of motion and a place it moves in', () => {
+    const adverb = (s: ReturnType<typeof around>) => s.tokens.find((t) => t.id === 2)!;
+    expect(isAroundAPlace(adverb(around('drive', true)), around('drive', true))).toBe(true);
+    expect(isAroundAPlace(adverb(around('drive', false)), around('drive', false))).toBe(false);
+    expect(isAroundAPlace(adverb(around('sleep', true)), around('sleep', true))).toBe(false);
   });
 });

@@ -4,7 +4,8 @@
     "steenbergen-syntax": "http://steen.free.fr/interslavic/syntax.html",
     "steenbergen-pronouns": "http://steen.free.fr/interslavic/pronouns.html",
     "steenbergen-nouns": "http://steen.free.fr/interslavic/nouns.html",
-    "steenbergen-numerals": "http://steen.free.fr/interslavic/numerals.html"
+    "steenbergen-numerals": "http://steen.free.fr/interslavic/numerals.html",
+    "steenbergen-verbs": "http://steen.free.fr/interslavic/verbs.html"
   },
   "_scope": "Closed classes, plus open-class words only for a sense the parse itself shows (whenDependent). The other senses of such a word stay with dictionary ranking - curating open-class words wholesale would never end.",
   "words": [
@@ -195,6 +196,22 @@
       "why": "an indefinite cardinal number, which puts its noun in the genitive (numeral.government.indefinite). English tags 'few' as an adjective, so ranking by part of speech chose `maly` 'small, little', which would say 'small people'",
       "evidence": "steenbergen-numerals: 'so-called indefinite cardinal numbers, consisting of words like mnogo „much, many”, malo „little, few”'",
       "source": "steenbergen-numerals"
+    },
+    {
+      "en": "drive",
+      "upos": [
+        "VERB"
+      ],
+      "whenDependent": {
+        "deprel": "advmod",
+        "lemmas": [
+          "around"
+        ]
+      },
+      "isv": "jezditi",
+      "why": "driving around is going by transport with no single direction, which the verbs page gives as the non-directional `jezditi` (directional `jehati`, perfective `pojehati`). `voziti sę` is glossed 'drive (e.g. by car)' and is chosen otherwise; the page lists `voziti` as 'to transport'",
+      "evidence": "steenbergen-verbs, the table of motion verbs (non-directional, directional, perfective): 'jezditi jehati pojehati'; 'Igor jezdil po Moskvě „Igor was driving around in Moscow”'",
+      "source": "steenbergen-verbs"
     }
   ]
 }

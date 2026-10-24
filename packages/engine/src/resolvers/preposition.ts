@@ -1,6 +1,6 @@
 import { decide, type Case, type Decision, type ParsedSentence, type UdToken } from '../../../types/index.ts';
 import { CASE_MARKER_PREPOSITIONS, candidatesForEnglish } from '../../../rules/src/prepositions.ts';
-import { isMotionVerb } from '../../../rules/src/motion.ts';
+import { isAroundAPlace, isMotionVerb } from '../../../rules/src/motion.ts';
 import { isTimeUnit, verbGovernedPhrase } from '../../../rules/src/verb-prepositions.ts';
 
 /**
@@ -129,6 +129,17 @@ export function planPreposition(adp: UdToken, sentence: ParsedSentence): PrepPla
             alternatives: [],
           };
     }
+  }
+
+  /** "driving around in Moscow" -> "jezdil po Moskvě" (rules/src/motion.ts). */
+  if (lemma === 'in' && governor && sentence.tokens.some((t) => t.head === governor.id && isAroundAPlace(t, sentence))) {
+    return {
+      kind: 'preposition',
+      prep: 'po',
+      case: decide<Case>('Loc', 'case.prep.around', 'high',
+        'moving around in a place covers it: "po" with the locative, "throughout, round, all over"'),
+      alternatives: [],
+    };
   }
 
   const cands = candidatesForEnglish(lemma);

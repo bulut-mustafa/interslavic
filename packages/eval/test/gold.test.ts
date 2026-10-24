@@ -135,10 +135,6 @@ const DIFFERENCES: Record<string, { status: Status; why: string }> = {
     status: 'acceptable',
     why: 'the aspect is now right (perfective, a movement that reached its goal) and the case too ("pod stol"). The verb differs: "izběgl" where the page writes "poběgl", but the dictionary glosses izběgti exactly "escape, flee", so it is a faithful translation of "fled"; poběgti is glossed "run"',
   },
-  g21: {
-    status: 'defect',
-    why: 'word sense - "drive" resolves to "gnati" (to drive cattle, to chase) rather than "jezditi" (to travel by vehicle), and the particle "around" is translated as a separate adverb instead of being carried by "po" + locative',
-  },
   g24: {
     status: 'acceptable',
     why: 'the gender is now right ("ščestlivy"), and the LONG form is what the adjectives page recommends: the short form "may also be used [...] This is not mandatory though, and in most cases, people will simply write: Petr jest ščestlivy". "Peter" stays as written because the dictionary carries no personal names and no source gives a transcription rule for them - keeping an unknown proper noun is the correct behaviour, and it is flagged as untranslated',
@@ -198,9 +194,10 @@ describe("gold: van Steenbergen's own Interslavic", () => {
     // whose TARGET is his own Interslavic and only whose source changes. 26/49,
     // then 28/49 once a word the dictionary marks as not understood in 4+
     // languages stopped winning on frequency ("voz" -> "avto"), 29/49 once a
-    // name the dictionary lacks was declined by its ending ("Ivanu").
+    // name the dictionary lacks was declined by its ending ("Ivanu"), 30/49
+    // once driving around in a place became "jezdil po Moskvě".
     // Raise this floor as it improves; never lower it.
-    expect(matched).toBeGreaterThanOrEqual(29);
+    expect(matched).toBeGreaterThanOrEqual(30);
   });
 
   it('counts how much of the gap is ours', () => {
@@ -208,7 +205,7 @@ describe("gold: van Steenbergen's own Interslavic", () => {
     // Not an assertion about quality - a tripwire, so that silently
     // reclassifying a defect as "acceptable" shows up as a failing test.
     expect({ acceptable: by('acceptable'), defect: by('defect'), unsupported: by('unsupported'), parser: by('parser') })
-      .toEqual({ acceptable: 13, defect: 3, unsupported: 0, parser: 4 });
+      .toEqual({ acceptable: 13, defect: 2, unsupported: 0, parser: 4 });
   });
 });
 

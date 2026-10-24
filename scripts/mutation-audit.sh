@@ -517,6 +517,12 @@ mutate "indefinite numerals list emptied"    num   "s/^  'mnogo', 'malo', 'velje
 mutate "plural not looked up by its form"    pipe  "s/      if (form !== token.lemma.toLowerCase() \&\& lex.lookup(form, 'en').some((e) => e.pos.upos === 'NOUN')) {/      if (false) {/"
 mutate "many back to the adjective"          fwjson "s/\"isv\": \"mnogo\"/\"isv\": \"mnogy\"/"
 mutate "few curated as small"                fwjson "s/\"isv\": \"malo\"/\"isv\": \"maly\"/"
+mutate "around never carried by po"         motion "s/  if (adverb.deprel !== 'advmod' || adverb.lemma.toLowerCase() !== 'around') return false;/  return false;/"
+mutate "around needs no place"              motion "s/^  return sentence.tokens.some(\$/  return true || sentence.tokens.some(/"
+mutate "around on any verb"                 motion "s/  if (verb?.upos !== 'VERB' || !isMotionVerb(verb.lemma)) return false;/  if (verb?.upos !== 'VERB') return false;/"
+mutate "po not planned for around"          prep   "s/  if (lemma === 'in' \&\& governor \&\& /  if (false \&\& governor \&\& /"
+mutate "around also translated"             lexeme "s/    if (isAroundAPlace(token, sentence)) {/    if (false) {/"
+mutate "drive around not curated"           fwjson "s/\"isv\": \"jezditi\"/\"isv\": \"voziti sę\"/"
 
 echo
 echo "==================================================="
