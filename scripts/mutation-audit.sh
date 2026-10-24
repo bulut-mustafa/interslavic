@@ -53,6 +53,7 @@ FULLFORM=packages/lexicon/src/full-forms.ts
 APP=packages/web/src/App.tsx
 AUXRULES=packages/rules/src/auxiliaries.ts
 FNWORDS=packages/rules/src/function-words.ts
+PROPER=packages/rules/src/proper-nouns.ts
 MODALS=packages/rules/src/modals.ts
 REFL=packages/rules/src/reflexives.ts
 DERIV=packages/rules/src/derivation.ts
@@ -86,7 +87,7 @@ FWJSON=packages/rules/data/function-words.json
 save "$CASE" case; save "$ASPECT" aspect; save "$READER" reader
 save "$REALIZE" realize; save "$ORTH" orth; save "$PIPE" pipe
 save "$PREP" prep; save "$NUM" num; save "$PREPRULES" preprules; save "$SPLIT" split
-save "$FULLFORM" fullform; save "$APP" app; save "$AUXRULES" auxrules; save "$FNWORDS" fnwords; save "$MODALS" modals; save "$REFL" refl; save "$DERIV" deriv; save "$PRON" pron; save "$NEG" neg; save "$COMPARE" compare; save "$MOTION" motion; save "$PARTIC" partic; save "$VERBPREP" verbprep; save "$EXPL" expl; save "$ANAPH" anaph; save "$XPOS" xpos; save "$ADAPT" adapt; save "$FWJSON" fwjson
+save "$FULLFORM" fullform; save "$APP" app; save "$AUXRULES" auxrules; save "$FNWORDS" fnwords; save "$MODALS" modals; save "$REFL" refl; save "$DERIV" deriv; save "$PRON" pron; save "$NEG" neg; save "$COMPARE" compare; save "$MOTION" motion; save "$PARTIC" partic; save "$VERBPREP" verbprep; save "$EXPL" expl; save "$ANAPH" anaph; save "$XPOS" xpos; save "$ADAPT" adapt; save "$FWJSON" fwjson; save "$PROPER" proper
 save "$LEXEME" lexeme; save "$AUXST" auxst; save "$PREPST" prepst
 save "$PHRASALST" phrasalst; save "$NEGST" negst; save "$GOVST" govst
 save "$REALST" realst; save "$AGRST" agrst; save "$PREDST" predst
@@ -486,6 +487,11 @@ mutate "lexicon count hidden"               app    "s/{rate !== null \&\& (/{fal
 mutate "parser instructions removed"        app    "s/npm run server<\/code> in another./X./"
 mutate "word spaces removed"                app    "s/{j > 0 ? ' ' : null}//"
 mutate "sentence punctuation dropped"       app    "s/{terminalPunctuation(s.text)}//"
+mutate "unknown name not declined"         lexeme "s/^      properNounEntry ??$//"
+mutate "name ending: consonant not masc"    proper "/CONSONANT.test(name)/d"
+mutate "name ending: -a not feminine"       proper "/return .f.sg./d"
+mutate "unknown name gender called lexical" lexeme "s/entry === properNounEntry \&\& entry.pos.gender/false/"
+mutate "unknown name claimed validated"   realst "s/    if (entry.unlisted) {/    if (false) {/"
 
 echo
 echo "==================================================="

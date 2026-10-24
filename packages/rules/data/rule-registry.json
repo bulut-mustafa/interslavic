@@ -416,6 +416,18 @@
       "source": null,
       "quote": null,
       "why": "the complement of a modal is an infinitive, so it must not be conjugated"
+    },
+    "gender.fromEnding": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/nouns.html",
+      "quote": "The first declension includes all masculine nouns ending in a consonant, as well as neuter nouns ending in -o or -e . The second declension includes all feminine nouns on -a .",
+      "why": "a name the dictionary does not have is declined by its ending: a consonant is masculine, -a feminine, -o/-e neuter"
+    },
+    "animacy.unknownName": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/nouns.html",
+      "quote": "In the case of animate nouns (animals and male persons) the accusative is always identical to the genitive, while in the case of inanimate objects the accusative is identical to the nominative.",
+      "why": "animacy decides only the accusative, and the parse does not say whether an unknown name is a person, so the inanimate (nominative-like) accusative is kept as a visible guess"
     }
   }
 }

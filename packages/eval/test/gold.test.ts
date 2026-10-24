@@ -75,10 +75,6 @@ const DIFFERENCES: Record<string, { status: Status; why: string }> = {
     status: 'defect',
     why: 'idiom - "nobody but myself" is rendered literally with negative concord ("ne myju nikogo ale se") where the page writes "jedino sebe", i.e. "only myself". Needs the English idiom, not a grammar rule',
   },
-  g31: {
-    status: 'defect',
-    why: 'an UNTRANSLATED proper noun cannot be inflected: "Ivan" is not in the dictionary, so it is passed through as the source form and the recipient dative is lost ("dal Ivan" for "dal Ivanu"). Everything else matches, including `svoju`',
-  },
   g32: {
     status: 'acceptable',
     why: 'lexical choice - we pick `pojdti` (go on foot), the page `pojehati` (go by vehicle). English "has gone" says neither',
@@ -201,9 +197,10 @@ describe("gold: van Steenbergen's own Interslavic", () => {
     // exhausting the grammar pages for sentence-level examples, plus 14 Russian
     // whose TARGET is his own Interslavic and only whose source changes. 26/49,
     // then 28/49 once a word the dictionary marks as not understood in 4+
-    // languages stopped winning on frequency ("voz" -> "avto").
+    // languages stopped winning on frequency ("voz" -> "avto"), 29/49 once a
+    // name the dictionary lacks was declined by its ending ("Ivanu").
     // Raise this floor as it improves; never lower it.
-    expect(matched).toBeGreaterThanOrEqual(28);
+    expect(matched).toBeGreaterThanOrEqual(29);
   });
 
   it('counts how much of the gap is ours', () => {
@@ -211,7 +208,7 @@ describe("gold: van Steenbergen's own Interslavic", () => {
     // Not an assertion about quality - a tripwire, so that silently
     // reclassifying a defect as "acceptable" shows up as a failing test.
     expect({ acceptable: by('acceptable'), defect: by('defect'), unsupported: by('unsupported'), parser: by('parser') })
-      .toEqual({ acceptable: 9, defect: 9, unsupported: 0, parser: 3 });
+      .toEqual({ acceptable: 9, defect: 8, unsupported: 0, parser: 3 });
   });
 });
 

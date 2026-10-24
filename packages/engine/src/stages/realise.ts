@@ -491,7 +491,11 @@ export function realiseStage(input: RealiseInput): RealiseOutput {
     }
 
     // The real check: is this an attested form of a known Interslavic word?
-    if (opts.validator) {
+    if (entry.unlisted) {
+      // A name kept from the source with a case ending: not translated, and
+      // not a word the full-form lexicon could know.
+      validation = 'untranslated';
+    } else if (opts.validator) {
       const missing = unknownWords(surface, opts.validator);
       validation = missing.length === 0 ? 'validated' : 'unvalidated';
       if (missing.length > 0) {

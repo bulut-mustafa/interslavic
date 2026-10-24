@@ -41,6 +41,11 @@ export interface Entry {
    * is better information than any rule of our own, so index 0 wins.
    */
   variantIndex: number;
+  /**
+   * Not a dictionary entry: a name the dictionary lacks, carried over from the
+   * source and declined by its ending (rules/src/proper-nouns.ts).
+   */
+  unlisted?: true;
 }
 
 export interface Gloss {
