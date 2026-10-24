@@ -186,3 +186,28 @@ describe('numeral government', () => {
     expect(r.words.find((w) => w.sourceForm === 'two')?.surface).toBe('dva');
   });
 });
+
+/**
+ * Collective numerals "can be used instead of a cardinal number" with
+ * pluralia tantum ("dvoje dverij") and with ljudi and děti ("četvero dětij").
+ * http://steen.free.fr/interslavic/numerals.html - optional, so the cardinal
+ * stays and the collective is named beside it.
+ */
+describe('collective numerals', () => {
+  const collectiveNote = (name: string, source: string) =>
+    out(name).words.find((w) => w.sourceForm === source)?.notes.find((n) => n.includes('collective'));
+
+  it('keeps the cardinal and names the collective for a plural-only noun', () => {
+    expect(out('i-see-two-doors.conllu').text).toBe('Ja vidžu dvě dveri.');
+    expect(collectiveNote('i-see-two-doors.conllu', 'doors')).toContain('"dvoje"');
+  });
+
+  it('does so for children too, which reach the noun through "child"', () => {
+    expect(out('four-children.conllu').text).toBe('Ja imaju četyri děti.');
+    expect(collectiveNote('four-children.conllu', 'children')).toContain('"četvero"');
+  });
+
+  it('says nothing for an ordinary countable noun', () => {
+    expect(collectiveNote('i-see-two-houses.conllu', 'houses')).toBeUndefined();
+  });
+});

@@ -1,5 +1,5 @@
 import { decide } from '../../../types/index.ts';
-import { governmentFor, numeralValue } from '../../../rules/src/numerals.ts';
+import { collectiveFor, governmentFor, numeralValue, takesCollective } from '../../../rules/src/numerals.ts';
 import { baseDeprel } from '../tree.ts';
 import type { StageContext } from './context.ts';
 
@@ -22,6 +22,14 @@ export function numeralGovernmentStage(ctx: StageContext): void {
     if (value === null) {
       head.notes.push(`numeral "${node.token.form}" not recognised - government not applied`);
       continue;
+    }
+
+    const collective = collectiveFor(value);
+    if (collective && takesCollective(head.entry.lemma, head.entry.pos.numberOnly === 'Plur')) {
+      head.notes.push(
+        `equally correct: the collective "${collective}" with the genitive plural - the numerals ` +
+          `page allows it "instead of a cardinal number" here ("dvoje dverij", "četvero dětij")`,
+      );
     }
 
     const gov = governmentFor(value);

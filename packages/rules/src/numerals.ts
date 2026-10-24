@@ -89,3 +89,26 @@ export function governmentFor(value: number): NumeralGovernment {
     stated: !(value > 20 && [1, 2, 3, 4].includes(value % 10)),
   };
 }
+
+/**
+ * The collective numerals, which "can be used instead of a cardinal number"
+ * - among other cases - "with gender-neutral words like ljudi and děti" and
+ * "with words that exist only in the plural (pluralia tantum): dvoje dverij
+ * „two doors"", always followed by the genitive plural.
+ * http://steen.free.fr/interslavic/numerals.html
+ *
+ * "Can": optional, so the cardinal stays and the collective is named as the
+ * equally correct alternative. The dictionary marks `ljudi` and `děti` f.pl.,
+ * so the plural-only test covers them - except that English "children" has
+ * the lemma "child" and reaches `dětę`, whose plural IS `děti`.
+ */
+const COLLECTIVES = ['dvoje', 'troje', 'četvero', 'petero', 'šestero', 'sedmero', 'osmero', 'devetero', 'desetero'];
+
+export function collectiveFor(value: number): string | null {
+  return COLLECTIVES[value - 2] ?? null;
+}
+
+export function takesCollective(lemma: string, pluralOnly: boolean): boolean {
+  return pluralOnly || lemma === 'dětę';
+}
+

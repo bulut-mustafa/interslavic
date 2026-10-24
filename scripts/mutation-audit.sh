@@ -498,6 +498,8 @@ mutate "transgressive mark kept"           lexeme "s/^    if (isTransgressiveMar
 mutate "transgressive inflected"           realst "s/        ? presentActiveParticiple(entry.lemma, entry.pos.xpos)/        ? null/"
 mutate "transgressive marks ignored"       transg "s/.every((m) => SIMULTANEOUS_MARKS.has(m.lemma.toLowerCase()));/.every(() => true);/"
 mutate "transgressive despite own subject" transg "/c.deprel.startsWith(.nsubj.)/d"
+mutate "collective alternative never named"  numst "s/if (collective \&\& takesCollective(/if (false \&\& takesCollective(/"
+mutate "collective: children not covered"   num "s/  return pluralOnly || lemma === .dětę.;/  return pluralOnly;/"
 
 echo
 echo "==================================================="
