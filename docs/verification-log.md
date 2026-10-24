@@ -1666,3 +1666,27 @@ language's own intelligibility tier, and the table above shows it tracks a
 second, independent column. It is a real signal; what was wrong was the
 default applied when it is absent.
 
+
+## VERIFIED: the per-language `intelligibility` marks are a ranking signal (2026-10-24)
+
+The `intelligibility` column marks each word per Slavic language: `+` understood,
+`~` partly, `-` not. A word marked `-` in 4 or more languages now loses one score
+step to an equal rival (`compareEntries`). Gold 26 -> 28: "car" is `avto` (`-` in no
+language) rather than `voz` (`-` in be, ru, sk, uk). The other outputs it moved
+were checked one by one; `každy` -> `vsaky` agrees with van Steenbergen's pronoun
+page, which gives *"vsaky 'each, every'"* and never uses `každy`.
+
+### Three other signals, measured and rejected
+
+Each was measured on the 49 gold pairs and all fixture outputs, starting from 28/49:
+
+| Signal | Result | Why rejected |
+|---|---|---|
+| intelligibility as the first tie-break, ahead of frequency | 23/49 | ties are common, so it overrode frequency almost everywhere: `idti` -> `hoditi`, `myju` -> `peru` |
+| `frequency` as a weighted score term (one step per 1,000-5,000) | 27/49 at every scale | `dveri` -> `vrata` (loses g29), `dělati` -> `rabiti` against the page's own *Pica dělaje se* |
+| `genesis` = `I` (international) as a penalty | 26/49 | gets "party" -> `zabava` but loses `avto`, and "doctor" -> `lěkarka` |
+
+So `frequency` stays the tie-break and `genesis` stays unread. The remaining
+word-choice defects (party, floor, drive, fled, visit) are not separable by any
+column: for floor, drive and fled the right word is not glossed with that English
+word at all.
