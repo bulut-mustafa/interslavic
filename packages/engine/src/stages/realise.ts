@@ -119,8 +119,46 @@ export function realiseStage(input: RealiseInput): RealiseOutput {
   const words: GlossedWord[] = [];
   const surfaces: string[] = [];
 
+  /**
+   * A comma attaches to the preceding word, so it renders without a space.
+   * Never doubled: a final clause the source already set off keeps one.
+   */
+  const appendComma = (): void => {
+    const last = surfaces.length - 1;
+    if (last < 0 || surfaces[last]!.endsWith(',')) return;
+    surfaces[last] += ',';
+    const lastWord = words[words.length - 1];
+    if (lastWord) lastWord.surface += ',';
+  };
+
+  /**
+   * A final clause is set off by a comma. No page states the rule outright,
+   * but all four of the syntax page's own examples write one:
+   *   "Turisti posětet Niderlandiju, že by fotografovali tulipany."
+   *   "Ona prinosi jabloka, da by děti byli zdrave."
+   */
+  const commaBeforeFinalClause = appendComma;
+
+  /**
+   * The source's own commas, carried over like its final punctuation rather
+   * than dropped: "Iduči do raboty, ona vsegda dymi cigaretoju", "Jedni ljudi
+   * prědpočitajut lěto, drugi zimu" (verbs and numerals pages, where the
+   * English has its comma in the same place). Each is owed by the word before
+   * it and paid once that word's node has been emitted - after any `ne`,
+   * auxiliary or clitic the node carries.
+   */
+  const commaAfter = new Set<number>();
+  for (const t of sentence.tokens) {
+    if (t.upos !== 'PUNCT' || t.form !== ',') continue;
+    const before = sentence.tokens.filter((p) => p.id < t.id && p.upos !== 'PUNCT').at(-1);
+    if (before) commaAfter.add(before.id);
+  }
+  let commaOwed = false;
+
   for (const node of plan) {
     const { token, entry, feats, notes } = node;
+    if (commaOwed) appendComma();
+    commaOwed = commaAfter.has(token.id);
 
     /**
      * Words the source left out are emitted FIRST, before any branch that can
@@ -204,21 +242,6 @@ export function realiseStage(input: RealiseInput): RealiseOutput {
       });
       continue;
     }
-  /**
-   * A final clause is set off by a comma. No page states the rule outright,
-   * but all four of the syntax page's own examples write one:
-   *   "Turisti posětet Niderlandiju, že by fotografovali tulipany."
-   *   "Ona prinosi jabloka, da by děti byli zdrave."
-   * The comma attaches to the preceding word so it renders without a space.
-   */
-  const commaBeforeFinalClause = (): void => {
-    const last = surfaces.length - 1;
-    if (last < 0 || surfaces[last]!.endsWith(',')) return;
-    surfaces[last] += ',';
-    const lastWord = words[words.length - 1];
-    if (lastWord) lastWord.surface += ',';
-  };
-
     // `ne` goes immediately before the verb it negates, which is why the
     // English particle was deleted rather than translated in place.
     //
@@ -617,6 +640,7 @@ export function realiseStage(input: RealiseInput): RealiseOutput {
       }
     }
   }
+  if (commaOwed) appendComma();
 
   return { words, surfaces };
 }

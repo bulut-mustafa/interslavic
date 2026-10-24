@@ -80,8 +80,8 @@ const DIFFERENCES: Record<string, { status: Status; why: string }> = {
     why: 'lexical choice - we pick `pojdti` (go on foot), the page `pojehati` (go by vehicle). English "has gone" says neither',
   },
   g33: {
-    status: 'defect',
-    why: 'the participle is now right ("Iduči do ...", the transgressive). What remains is lexical: "work" resolves to "dělo" (a deed, a job) where the page writes "rabota", and "smoke" to "kuriti" + accusative where the page writes "dymiti" + instrumental "cigaretoju"; the page also leaves "her" unexpressed',
+    status: 'acceptable',
+    why: 'the participle ("Iduči", the transgressive), the noun ("raboty", curated for work one goes to) and the comma are now right. Two choices remain, both faithful: "svojej" translates the English "her", which the page leaves unexpressed, and it is what the pronouns page prescribes: "Whenever the possessor is also the subject of the sentence, the reflexive svoj is used"; and "kuriti cigaretu" is the verb the dictionary marks transitive ("kuriti v.tr. ipf. smoke"), with its accusative object, where the page writes the intransitive "dymiti" ("v.intr. ipf. smoke") with an instrumental. Both verbs are type 1 and glossed exactly "smoke"',
   },
   g34: {
     status: 'defect',
@@ -208,7 +208,7 @@ describe("gold: van Steenbergen's own Interslavic", () => {
     // Not an assertion about quality - a tripwire, so that silently
     // reclassifying a defect as "acceptable" shows up as a failing test.
     expect({ acceptable: by('acceptable'), defect: by('defect'), unsupported: by('unsupported'), parser: by('parser') })
-      .toEqual({ acceptable: 10, defect: 7, unsupported: 0, parser: 3 });
+      .toEqual({ acceptable: 11, defect: 6, unsupported: 0, parser: 3 });
   });
 });
 

@@ -183,3 +183,21 @@ describe('an accusative with no animate noun to agree with', () => {
     expect(text).not.toMatch(/\bbral\b/);
   });
 });
+
+/**
+ * The source's own commas are carried over, like its final punctuation. The
+ * pages write them where the English has them - "Iduči do raboty, ona vsegda
+ * dymi cigaretoju" (verbs page) - and dropping them ran clauses together.
+ */
+describe("the source's commas", () => {
+  it('keeps a comma after an address and before an appended word', () => {
+    expect(out('brother-help-me.conllu')).toBe('Brat, pomagajte mně!');
+    expect(out('open-the-window.conllu')).toBe('Otvarjajte okno, prosim.');
+  });
+
+  it('pays the comma once, after the whole node, and never doubles it', () => {
+    const transgressive = out('../gold/g33.conllu');
+    expect(transgressive).toContain('raboty, ona');
+    expect(transgressive).not.toContain(',,');
+  });
+});

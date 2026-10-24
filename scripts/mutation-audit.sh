@@ -504,6 +504,9 @@ mutate "vocative rule removed"            case "s/    case .vocative.:/    case 
 mutate "perfect progressive made perfective" aspect "s/    if (token.xpos === .VBG. || token.feats\[.Aspect.\] === .Prog.) {/    if (false) {/"
 mutate "anaphor decision hidden from modifier" agrst "s/      if (hv.ruleId === .anaphora.one.) {/      if (false) {/"
 mutate "agreement launders confidence"     agrst "s/^          hv.confidence,$/          'certain',/"
+mutate "source comma dropped"              realst "s/^    if (commaOwed) appendComma();\$//"
+mutate "source comma owed by no word"      realst "s/^    commaOwed = commaAfter.has(token.id);\$/    commaOwed = false;/"
+mutate "work to the job sense removed"     fwjson "s/\"isv\": \"råbota\"/\"isv\": \"dělo\"/"
 
 echo
 echo "==================================================="

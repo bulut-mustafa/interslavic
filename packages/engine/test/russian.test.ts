@@ -161,7 +161,9 @@ describe('rules that are not English-specific', () => {
      * change that made Russian "нравиться" resolve to `podobati sę` instead of
      * taking `prijati` plus an inserted clitic.
      */
-    expect(out('skazala-chto.conllu')).toBe('Ona skazala mně že ona umorila se.');
+    // The Russian comma is carried over; his own prose writes it too: "možemo
+    // iměti naděju, že vsi interesujut se nami" (steen.free.fr/interslavic/selo.html).
+    expect(out('skazala-chto.conllu')).toBe('Ona skazala mně, že ona umorila se.');
     expect(RU.complementizers).toContain('что');
   });
 
@@ -192,7 +194,9 @@ describe('the copula Russian omits', () => {
      * a relative clause ("Kniga ktoru jest ja čitaju interesna").
      */
     expect(out('samyj-luchshij.conllu')).toBe('On jest najlěpši student.');
-    expect(out('kniga-kotoruju.conllu')).toBe('Kniga ktoru ja čitaju jest interesna.');
+    // Both commas of the Russian relative clause are carried over, as in "Malo
+    // spoločenstvo, ktorym jest selska občina, jest ..." (selo.html).
+    expect(out('kniga-kotoruju.conllu')).toBe('Kniga, ktoru ja čitaju, jest interesna.');
     expect(out('kde-stancija.conllu')).toBe('Kde jest stancija?');
   });
 
@@ -315,7 +319,7 @@ describe('comparison from Russian', () => {
  */
 describe('the Russian conditional', () => {
   it('becomes byh/bys/by and suppresses the compound past', () => {
-    expect(out('esli-by-ja-znal.conllu')).toBe('Jestli byh ja znal ja byh prišel.');
+    expect(out('esli-by-ja-znal.conllu')).toBe('Jestli byh ja znal, ja byh prišel.');
     expect(out('hotel-by-chitat.conllu')).toBe('Ja hotěl byh čitati.');
   });
 
