@@ -121,8 +121,16 @@ describe('a sense the parse shows', () => {
     expect(functionWordFor('party', 'NOUN')).toBeNull();
   });
 
-  it("reaches the sentence: van Steenbergen's storeys and party", () => {
+  it('reads work one goes to, is at or comes from as the job, and leaves other work alone', () => {
+    expect(functionWordFor('work', 'NOUN', 'en', false, [{ deprel: 'case', lemma: 'to' }])?.isv).toBe('råbota');
+    expect(functionWordFor('work', 'NOUN', 'en', false, [{ deprel: 'case', lemma: 'from' }])?.isv).toBe('råbota');
+    expect(functionWordFor('work', 'NOUN', 'en', false, [{ deprel: 'case', lemma: 'of' }])).toBeNull();
+    expect(functionWordFor('work', 'NOUN')).toBeNull();
+  });
+
+  it("reaches the sentence: van Steenbergen's storeys, party and work", () => {
     expect(gold('g25')).toContain('etažami');
     expect(gold('g08')).toContain('zabavy');
+    expect(gold('g33')).toContain('do svojej raboty');
   });
 });

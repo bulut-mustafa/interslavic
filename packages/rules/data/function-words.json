@@ -146,6 +146,24 @@
       "why": "a party one comes to or is at is an event, `zabava`. `partija` is the political party; both are glossed bare 'party' and are type 1, so no dictionary column separates them, and frequency chose `partija`",
       "evidence": "steenbergen-syntax: 'Nikto ne prijehal na zabavu. „Nobody came to the party.”'; steenbergen-numerals: 'zabava v troje „a party for three”'; the political sense on steenbergen-orthography: 'Komunistična partija Sovětskogo Sojuza'",
       "source": "steenbergen-syntax"
+    },
+    {
+      "en": "work",
+      "upos": [
+        "NOUN"
+      ],
+      "whenDependent": {
+        "deprel": "case",
+        "lemmas": [
+          "to",
+          "at",
+          "from"
+        ]
+      },
+      "isv": "råbota",
+      "why": "work one goes to, is at or comes from is the job, `råbota` ('job, work, employment'). `dělo` is glossed bare 'work' and so outranks it on gloss position, but its sense is the work produced - its other rows are 'act, deed' and 'affair'",
+      "evidence": "steenbergen-verbs: 'Iduči do raboty, ona vsegda dymi cigaretoju „While going to her work, she always smokes a cigarette”'; the dictionary's own usage example for råbota: 'Iz pričiny intensivnosti raboty'",
+      "source": "steenbergen-verbs"
     }
   ]
 }
