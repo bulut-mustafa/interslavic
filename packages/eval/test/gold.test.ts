@@ -115,10 +115,6 @@ const DIFFERENCES: Record<string, { status: Status; why: string }> = {
     status: 'acceptable',
     why: 'preposition choice - we produce "do kina" (do + genitive); both express motion to a place',
   },
-  g06: {
-    status: 'acceptable',
-    why: 'lexical choice - we pick "voz", also glossed "car" and more frequent than "avto"; our output agrees internally (voz is masculine, so "dragy")',
-  },
   g08: {
     status: 'defect',
     why: 'word sense - we pick "partija", the POLITICAL sense of "party". No signal in the dictionary separates it from "zabava": both are type 1 with the bare gloss "party", and frequency favours the wrong one',
@@ -146,10 +142,6 @@ const DIFFERENCES: Record<string, { status: Status; why: string }> = {
   g21: {
     status: 'defect',
     why: 'word sense - "drive" resolves to "gnati" (to drive cattle, to chase) rather than "jezditi" (to travel by vehicle), and the particle "around" is translated as a separate adverb instead of being carried by "po" + locative',
-  },
-  g22: {
-    status: 'defect',
-    why: 'svoj and the verb are now correct ("Ja myju svoj ..."); what remains is the noun - "car" resolves to "voz", also glossed "car" and more frequent than "avto", which also makes our agreement masculine where the gold is neuter',
   },
   g24: {
     status: 'acceptable',
@@ -207,9 +199,11 @@ describe("gold: van Steenbergen's own Interslavic", () => {
     // the passive.
     // 15/29 held for a while; the set then grew to 49 pairs - 35 English, now
     // exhausting the grammar pages for sentence-level examples, plus 14 Russian
-    // whose TARGET is his own Interslavic and only whose source changes. 26/49.
+    // whose TARGET is his own Interslavic and only whose source changes. 26/49,
+    // then 28/49 once a word the dictionary marks as not understood in 4+
+    // languages stopped winning on frequency ("voz" -> "avto").
     // Raise this floor as it improves; never lower it.
-    expect(matched).toBeGreaterThanOrEqual(26);
+    expect(matched).toBeGreaterThanOrEqual(28);
   });
 
   it('counts how much of the gap is ours', () => {
@@ -217,7 +211,7 @@ describe("gold: van Steenbergen's own Interslavic", () => {
     // Not an assertion about quality - a tripwire, so that silently
     // reclassifying a defect as "acceptable" shows up as a failing test.
     expect({ acceptable: by('acceptable'), defect: by('defect'), unsupported: by('unsupported'), parser: by('parser') })
-      .toEqual({ acceptable: 7, defect: 13, unsupported: 0, parser: 3 });
+      .toEqual({ acceptable: 6, defect: 12, unsupported: 0, parser: 3 });
   });
 });
 

@@ -98,12 +98,12 @@ describe('predicate agreement stops at a preposition', () => {
  */
 describe('an adverbial of time', () => {
   it('is accusative, which only shows on a feminine noun', () => {
-    // Was "každa noč" - the nominative.
-    expect(out('read-a-book-every-night.conllu')).toContain('každu noč');
+    // Was "vsaka noč" - the nominative.
+    expect(out('read-a-book-every-night.conllu')).toContain('vsaku noč');
   });
 
   it('is unchanged where the accusative equals the nominative', () => {
-    expect(out('cook-pumpkin-every-day.conllu')).toBe('Ja kuhaju tykvu každy denj');
+    expect(out('cook-pumpkin-every-day.conllu')).toBe('Ja kuhaju tykvu vsaky denj');
   });
 
   it('leaves a time phrase with its own preposition alone', () => {

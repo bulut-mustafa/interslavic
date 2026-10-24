@@ -367,7 +367,7 @@ describe('the reflexive clitic Russian fuses onto the verb', () => {
   });
 
   it('expresses the passive reflexively, keeping the instrumental agent', () => {
-    expect(out('dom-stroitsja.conllu')).toBe('Dom buduje se rabotnikami.');
+    expect(out('dom-stroitsja.conllu')).toBe('Dom stroji se rabotnikami.');
   });
 
   /**

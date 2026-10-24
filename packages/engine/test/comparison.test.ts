@@ -37,7 +37,8 @@ describe('comparatives and superlatives', () => {
     // dobry > lěpši, maly > menši, veliky > večši
     expect(compared('dobry', 'adj.', 'Cmp')).toBe('lěpši');
     expect(compared('maly', 'adj.', 'Cmp')).toBe('menši');
-    expect(out('smaller-car.conllu')).toContain('menši');
+    // Neuter here: "car" is `avto`.
+    expect(out('smaller-car.conllu')).toContain('menše avto');
   });
 
   it('declines the comparative, which is a lemma of its own', () => {

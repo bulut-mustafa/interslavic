@@ -425,6 +425,7 @@ mutate "multiword head back to first word"  split  "s/^    head: last,\$/    hea
 mutate "multiword prefix dropped"           split  "s/^    before: words.slice(0, -1).join(' '),\$/    before: '',/"
 mutate "reflexive clitic not detected"      split  "s/  const reflexive = TRAILING_CLITICS.has(last);/  const reflexive = false;/"
 mutate "single-word preference removed"     reader "/sourceIsSingleWord \&\&/d"
+mutate "unintelligibility penalty removed" reader "s/if (e.unintelligibleIn >= 4) s += 1;//"
 
 echo "=== past tense (M3) ==="
 mutate "l-participle conversion disabled"   partst      "s/if (node.feats.get('Tense')?.value !== 'Past') continue;/if (true) continue;/"
