@@ -207,14 +207,14 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
      * but `nijedin` is glossed "no, not any, none" and never "single"; and
      * "anymore" reaches `uže` only through the multiword `už ne`.
      *
-     * The part of speech may differ too, so it is tried and then dropped:
-     * "single" is an ADJ in the source and `nijedin` is an indefinite pronoun
-     * in Interslavic. That mismatch is the thing being curated, not an error.
+     * The lookup ignores the part of speech, because the mismatch IS the thing
+     * being curated: "single" is an ADJ in the source and `nijedin` is an
+     * indefinite pronoun in Interslavic. Filtering by the source's POS first
+     * and then falling back without it was measured to be dead code - none of
+     * the curated lemmas is POS-ambiguous, so the two lookups cannot differ.
      */
     const curatedEntry = curated
-      ? (ranked.find((e) => e.lemma === curated.isv) ??
-          lex.lookupLemma(curated.isv, token.upos)[0] ??
-          lex.lookupLemma(curated.isv)[0])
+      ? (ranked.find((e) => e.lemma === curated.isv) ?? lex.lookupLemma(curated.isv)[0])
       : undefined;
     const curatedMissing = curated !== null && curatedEntry === undefined;
 
