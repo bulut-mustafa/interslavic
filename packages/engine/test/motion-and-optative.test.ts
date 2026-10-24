@@ -110,3 +110,17 @@ describe('the aspect of a past movement', () => {
     expect(out('read-a-book-every-night.conllu')).toContain('jesm čital knigu');
   });
 });
+
+/**
+ * "The nominative can always be used instead of the vocative. However, if you
+ * prefer to use a real vocative anyway, then the following forms are
+ * recommended" - http://steen.free.fr/interslavic/nouns.html
+ */
+describe('the person addressed', () => {
+  it('takes the nominative, and names the vocative as the alternative', () => {
+    expect(out('brother-help-me.conllu')).toMatch(/^Brat\b/);
+    const c = caseOf('brother-help-me.conllu', 'Brother');
+    expect(c).toMatchObject({ value: 'Nom', ruleId: 'case.vocative.nominative', confidence: 'high' });
+    expect(c?.alternatives.map((a) => a.value)).toContain('Voc');
+  });
+});

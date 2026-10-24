@@ -500,6 +500,7 @@ mutate "transgressive marks ignored"       transg "s/.every((m) => SIMULTANEOUS_
 mutate "transgressive despite own subject" transg "/c.deprel.startsWith(.nsubj.)/d"
 mutate "collective alternative never named"  numst "s/if (collective \&\& takesCollective(/if (false \&\& takesCollective(/"
 mutate "collective: children not covered"   num "s/  return pluralOnly || lemma === .dětę.;/  return pluralOnly;/"
+mutate "vocative rule removed"            case "s/    case .vocative.:/    case 'vocative-x':/"
 
 echo
 echo "==================================================="

@@ -139,6 +139,20 @@ const byDeprel: CaseRule = ({ token, sentence }) => {
           { value: 'Ins', because: 'some verbs govern the instrumental' },
         ],
       );
+    /**
+     * "For this reason, the nominative can always be used instead of the
+     * vocative. However, if you prefer to use a real vocative anyway, then the
+     * following forms are recommended" (nouns page) - optional, so the safe
+     * nominative is emitted and the vocative named beside it.
+     */
+    case 'vocative':
+      return decide<Case>(
+        'Nom',
+        'case.vocative.nominative',
+        'high',
+        'the person addressed: the nominative can always stand for the vocative',
+        [{ value: 'Voc', because: 'a real vocative is equally correct: Ivane, prijatelju, otče, ženo' }],
+      );
     default:
       return null;
   }
