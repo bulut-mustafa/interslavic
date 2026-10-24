@@ -7,19 +7,19 @@
     "transfer": "Copying something the SOURCE language states. Not a claim about Interslavic.",
     "structural": "A mechanical consequence of the parse or of an earlier decision. Asserts nothing about Interslavic that needs a citation."
   },
-  "_quoteGap": "Entries with quote: null are justified by the cited page but not yet pinned to a single verbatim sentence - usually because the page expresses the rule as a declension table. The test holds this count so it can only shrink.",
+  "_quoteGap": "Every normative and corpus rule is pinned to a verbatim sentence, and the test keeps it that way: a rule whose page states it only as a table must quote the sentence that comes closest, or be cited from usage.",
   "rules": {
     "agreement.fromHead": {
       "tier": "normative",
       "source": "http://steen.free.fr/interslavic/adjectives.html",
-      "quote": null,
-      "why": "a modifier agrees with its head in gender, number and case - expressed by the declension tables rather than by a single sentence"
+      "quote": "Adjectives match with the noun they modify in gender, case and number.",
+      "why": "a modifier agrees with its head in gender, number and case"
     },
     "agreement.impersonal": {
       "tier": "corpus",
-      "source": "corpus: van Steenbergen’s parallel texts and the Interslavic Wikipedia (incubator.wikimedia.org/wiki/Wp/isv)",
-      "quote": null,
-      "why": "an impersonal predicate is neuter singular, as the corpus writes it (\"Nužno jest tuty članok prěvesti\")"
+      "source": "corpus: https://incubator.wikimedia.org/wiki/Wp/isv/Incubator:Krčma",
+      "quote": "Nužno jest tuty članok prěimenovati/prěměstiti, čto ne jest trudno",
+      "why": "an impersonal predicate is neuter singular, as the corpus writes it (\"Nužno jest tuty članok prěimenovati\")"
     },
     "agreement.pastParticiple": {
       "tier": "normative",
@@ -30,7 +30,7 @@
     "agreement.predicate": {
       "tier": "normative",
       "source": "http://steen.free.fr/interslavic/syntax.html",
-      "quote": null,
+      "quote": "Tuto avto ne jest drago. „This car is not expensive.”",
       "why": "a predicate adjective agrees with its subject and takes the nominative"
     },
     "agreement.predicate.defaultGender": {
@@ -60,13 +60,13 @@
     "animacy.lexical": {
       "tier": "normative",
       "source": "http://steen.free.fr/interslavic/nouns.html",
-      "quote": "In the case of animate nouns (animals and male persons) the accusative is always identical to the genitive, while in the case of inanimate nouns it is identical to the nominative.",
+      "quote": "In the case of animate nouns (animals and male persons) the accusative is always identical to the genitive, while in the case of inanimate objects the accusative is identical to the nominative.",
       "why": "animacy decides the accusative, and the dictionary states it per noun"
     },
     "animacy.noAnimateHead": {
       "tier": "normative",
       "source": "http://steen.free.fr/interslavic/nouns.html",
-      "quote": "In the case of animate nouns (animals and male persons) the accusative is always identical to the genitive, while in the case of inanimate nouns it is identical to the nominative.",
+      "quote": "In the case of animate nouns (animals and male persons) the accusative is always identical to the genitive, while in the case of inanimate objects the accusative is identical to the nominative.",
       "why": "the accusative of an inanimate equals its nominative"
     },
     "aspect.adverbial.imp": {
@@ -106,16 +106,16 @@
       "why": "a past movement to a goal reached it, so it is a completed event with a result; only a goal bounds it, so durative and habitual movements stay imperfective"
     },
     "aspect.pastTelic": {
-      "tier": "corpus",
-      "source": "corpus: van Steenbergen’s parallel texts and the Interslavic Wikipedia (incubator.wikimedia.org/wiki/Wp/isv)",
-      "quote": null,
-      "why": "a completed past event takes the perfective; the grammar states the distinction but gives no mechanical test, so the choice follows attested usage"
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/verbs.html",
+      "quote": "In short, perfective aspect focuses on the result of an action and not on the action itself. Depending on tense, it means that the action has been completed already or will be completed at some point.",
+      "why": "a past event with a direct object reads as completed, so perfective; the page defines the aspect but gives no mechanical test, so this stays at default confidence"
     },
     "aspect.perfect": {
-      "tier": "corpus",
-      "source": "corpus: van Steenbergen’s parallel texts and the Interslavic Wikipedia (incubator.wikimedia.org/wiki/Wp/isv)",
-      "quote": null,
-      "why": "an English perfect describes a completed event, so the perfective"
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/verbs.html",
+      "quote": "ja pročital jesm knigu (perfective) means „I have read a book (and finished it)”",
+      "why": "an English perfect describes a completed event, so the perfective - unless it is progressive"
     },
     "aspect.tense.presImp": {
       "tier": "normative",
@@ -142,28 +142,28 @@
       "why": "Russian marks case explicitly, so it is copied rather than inferred"
     },
     "case.deprel.iobj": {
-      "tier": "corpus",
-      "source": "corpus: van Steenbergen’s parallel texts and the Interslavic Wikipedia (incubator.wikimedia.org/wiki/Wp/isv)",
-      "quote": null,
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/pronouns.html",
+      "quote": "Pjotr dal Ivanu svoju knigu „Pjotr gave Ivan his [= Pjotr's] book”",
       "why": "an indirect object takes the dative"
     },
     "case.deprel.nsubj": {
-      "tier": "corpus",
-      "source": "corpus: van Steenbergen’s parallel texts and the Interslavic Wikipedia (incubator.wikimedia.org/wiki/Wp/isv)",
-      "quote": null,
-      "why": "a subject takes the nominative. The grammar has NO page on case usage - cases.html, case.html and accusative.html all 404 - which is why this tier exists"
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/syntax.html",
+      "quote": "In this type of sentences, the meaning is usually made clear by the case that's been used: Koja žena ljubi togo muža? „Which woman loves that man?” (woman = subject, man = object)",
+      "why": "a subject takes the nominative"
     },
     "case.deprel.obj": {
-      "tier": "corpus",
-      "source": "corpus: van Steenbergen’s parallel texts and the Interslavic Wikipedia (incubator.wikimedia.org/wiki/Wp/isv)",
-      "quote": null,
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/syntax.html",
+      "quote": "In this type of sentences, the meaning is usually made clear by the case that's been used: Koja žena ljubi togo muža? „Which woman loves that man?” (woman = subject, man = object)",
       "why": "a direct object takes the accusative, absent a government code"
     },
     "case.durationAccusative": {
       "tier": "corpus",
-      "source": "corpus: van Steenbergen’s parallel texts and the Interslavic Wikipedia (incubator.wikimedia.org/wiki/Wp/isv)",
-      "quote": null,
-      "why": "a bare duration takes the accusative"
+      "source": "corpus: https://incubator.wikimedia.org/wiki/Wp/isv/Kuba",
+      "quote": "Na Kubě jest těplo cěly god.",
+      "why": "a bare duration takes no preposition; its case is the accusative of a bare time adverbial, which the corpus shows unambiguously on a feminine noun (case.temporalAccusative: \"každu sedmicu\") - here the masculine inanimate accusative equals the nominative"
     },
     "case.fallback": {
       "tier": "structural",
@@ -178,15 +178,15 @@
       "why": "and it persists in oblique positions"
     },
     "case.phrasalObject": {
-      "tier": "corpus",
-      "source": "corpus: van Steenbergen’s parallel texts and the Interslavic Wikipedia (incubator.wikimedia.org/wiki/Wp/isv)",
+      "tier": "structural",
+      "source": null,
       "quote": null,
-      "why": "a complement whose English preposition was absorbed by a phrasal verb becomes that verb’s direct object, so the accusative unless the verb has its own government code"
+      "why": "a complement whose English preposition was absorbed by a phrasal verb is that verb's direct object; its case is the direct-object rule's (case.deprel.obj) unless the verb has its own government code"
     },
     "case.predicate": {
       "tier": "normative",
       "source": "http://steen.free.fr/interslavic/syntax.html",
-      "quote": null,
+      "quote": "Tutoj hlěb jest nedragy. „This bread is inexpensive.”",
       "why": "a predicate complement takes the nominative"
     },
     "case.prep.governed": {
@@ -197,8 +197,8 @@
     },
     "case.temporalAccusative": {
       "tier": "corpus",
-      "source": "corpus: van Steenbergen’s parallel texts and the Interslavic Wikipedia (incubator.wikimedia.org/wiki/Wp/isv)",
-      "quote": null,
+      "source": "corpus: https://incubator.wikimedia.org/wiki/Wp/isv/Radio",
+      "quote": "amerikansky prezident načal každu sedmicu posylati radio soobčenje o državě za amerikansky narod",
       "why": "a bare time adverbial takes the accusative"
     },
     "case.verb.governed": {
@@ -216,7 +216,7 @@
     "copula.inserted": {
       "tier": "normative",
       "source": "http://steen.free.fr/interslavic/syntax.html",
-      "quote": null,
+      "quote": "Although a sentence like: „Pica jest dělana” or „Pica jest dělajema” „Pizza is being made” is grammatically completely correct",
       "why": "Interslavic writes the present copula where Russian omits it"
     },
     "degree.comparative": {
@@ -264,7 +264,7 @@
     "mood.imperative": {
       "tier": "normative",
       "source": "http://steen.free.fr/interslavic/verbs.html",
-      "quote": "The imperative has forms for the 2nd person singular, the 1st person plural and the 2nd person plural: dělaj „do!” (to one person, informal), dělajmo „let’s do!”, dělajte „do!” (to more persons, or to one person formal).",
+      "quote": "The imperative has forms for the 2nd person singular, the 1st person plural and the 2nd person plural: dělaj „do!” (to one person, informal), dělajmo „let's do!”, dělajte „do!” (to more persons, or to one person formal).",
       "why": "imperative exists for 2sg, 1pl and 2pl only"
     },
     "mood.indicative": {
@@ -276,7 +276,7 @@
     "negation.beforeVerb": {
       "tier": "normative",
       "source": "http://steen.free.fr/interslavic/syntax.html",
-      "quote": "Negation in Interslavic can always be recognized by the particle ne „not” preceding the verb.",
+      "quote": "Negation in Interslavic can always be recognized by the particle ne „not” preceding the word being negated, usually the verb",
       "why": "ne precedes the verb it negates"
     },
     "number.copy": {

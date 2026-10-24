@@ -76,17 +76,16 @@ describe('rule registry', () => {
   });
 
   /**
-   * Some normative rules are expressed by the grammar as a declension table
-   * rather than as a sentence, so there is nothing to quote verbatim. That is
-   * a real gap, held at its measured size so it can only shrink: pinning one
-   * of these to a sentence is an improvement, and adding a new unquoted rule
-   * is not.
+   * Every rule that cites a page or usage quotes the sentence it rests on.
+   * This was held at 13 while some rules pointed at a page without a
+   * sentence; all 13 were pinned (or, for one that asserts nothing about
+   * Interslavic, reclassified structural), so it is now zero and stays zero.
    */
-  it('does not grow the set of rules cited without a verbatim quote', () => {
+  it('quotes a verbatim sentence for every normative and corpus rule', () => {
     const unquoted = [...ruleRegistry()]
       .filter(([, c]) => (c.tier === 'normative' || c.tier === 'corpus') && !c.quote)
       .map(([id]) => id);
-    expect(unquoted.length).toBeLessThanOrEqual(13);
+    expect(unquoted).toEqual([]);
   });
 
   /**

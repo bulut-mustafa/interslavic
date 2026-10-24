@@ -1690,3 +1690,21 @@ So `frequency` stays the tie-break and `genesis` stays unread. The remaining
 word-choice defects (party, floor, drive, fled, visit) are not separable by any
 column: for floor, drive and fled the right word is not glossed with that English
 word at all.
+
+## CORRECTED: five registry quotes were not verbatim (2026-10-24)
+
+Every normative quote in `rule-registry.json` was checked against the fetched page
+text. Four were paraphrases presented as quotations, and one corpus quote was wrong:
+
+| Rule | Was | The page / corpus actually says |
+|---|---|---|
+| `animacy.lexical`, `animacy.noAnimateHead` | "...in the case of inanimate nouns it is identical to the nominative" | "...in the case of inanimate objects the accusative is identical to the nominative" |
+| `negation.beforeVerb` | "...the particle ne „not" preceding the verb" | "...preceding the word being negated, usually the verb" |
+| `aspect.adverbial.imp` | a sentence about the perfective present read as future | "It can also express a an ongoing process, a habit or a repeated action" |
+| `agreement.impersonal` | "Nužno jest tuty članok prěvesti" | "Nužno jest tuty članok prěimenovati/prěměstiti" (Wp/isv/Incubator:Krčma) |
+
+The 13 rules that cited a page without a sentence are now pinned too (one,
+`case.phrasalObject`, asserts nothing about Interslavic and is `structural`), so the
+test requires a quote for every normative and corpus rule. Pinning `aspect.perfect`
+also exposed a real defect - the perfect progressive came out perfective, against the
+page's own "ja čital jesm knigu ... „I have been reading a book"" - fixed in `1f88eb5`.
