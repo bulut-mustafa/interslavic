@@ -88,8 +88,8 @@ const DIFFERENCES: Record<string, { status: Status; why: string }> = {
     why: 'multiword - "take photos" should resolve to the single verb `fotografovati` rather than `brali fotografije`. Also "the Netherlands" is plural in English and singular in Interslavic (`Niderlandy` for `Niderlandiju`), which needs a lexical number override',
   },
   g35: {
-    status: 'defect',
-    why: 'aspect only - `prinesla` (perfective) for `prinosila` (imperfective); "brought" is telic so the perfective is defensible. The construction itself is now right: the doubled conditional ("da by děti BY byli") was fixed by dropping a `would` whose purpose clause already supplies `by`',
+    status: 'acceptable',
+    why: 'aspect only - `prinesla` (perfective) for `prinosila` (imperfective). English "brought" does not say whether it was one delivery or a habit; the perfective is the one-delivery reading, which the verbs page defines as focusing "on the result of an action [...] the action has been completed", and the habitual reading the page chose is the alternative our gloss names. The construction itself is now right: the doubled conditional ("da by děti BY byli") was fixed by dropping a `would` whose purpose clause already supplies `by`',
   },
   'g08-ru': {
     status: 'acceptable',
@@ -121,7 +121,7 @@ const DIFFERENCES: Record<string, { status: Status; why: string }> = {
   },
   g13: {
     status: 'defect',
-    why: 'the modal, the possessive and the negative concord are now right ("ne mogl ... svoje ... nikde"); two causes remain - the verb is imperfective "nahoditi" where the gold has perfective "najdti", and "nikde" sits after the object rather than before the verb (word order is free, but the gold reads better). Our "ključe" is NOT a defect: the nouns page states "animate nouns have the nominative plural ending -i instead of the ending -y/-e of inanimate nouns" and tables inanimate soft kraj -> kraje, so ključe is table-conformant; the gold\'s "ključi" appears in no paradigm table, and the reference engine gives ključe too',
+    why: 'the modal, the possessive and the negative concord are now right ("ne mogl ... svoje ... nikde"); two causes remain - the verb is imperfective "nahoditi" where the gold has perfective "najdti" (UD gives "could" no Tense, and treating the object of every past modal as completed would make the ABILITY reading - "He could read books", "mogl čitati" - wrongly perfective, so this stays the visible aspect guess), and "nikde" sits after the object rather than before the verb (word order is free, but the gold reads better). Our "ključe" is NOT a defect: the nouns page states "animate nouns have the nominative plural ending -i instead of the ending -y/-e of inanimate nouns" and tables inanimate soft kraj -> kraje, so ključe is table-conformant; the gold\'s "ključi" appears in no paradigm table, and the reference engine gives ključe too',
   },
   g14: {
     status: 'acceptable',
@@ -208,7 +208,7 @@ describe("gold: van Steenbergen's own Interslavic", () => {
     // Not an assertion about quality - a tripwire, so that silently
     // reclassifying a defect as "acceptable" shows up as a failing test.
     expect({ acceptable: by('acceptable'), defect: by('defect'), unsupported: by('unsupported'), parser: by('parser') })
-      .toEqual({ acceptable: 9, defect: 8, unsupported: 0, parser: 3 });
+      .toEqual({ acceptable: 10, defect: 7, unsupported: 0, parser: 3 });
   });
 });
 
