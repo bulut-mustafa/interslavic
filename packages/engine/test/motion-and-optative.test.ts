@@ -143,3 +143,15 @@ describe('the English perfect', () => {
     expect(out('have-been-reading.conllu')).toBe('Ja jesm čital knigu.');
   });
 });
+
+describe('agreement', () => {
+  it('is only as certain as the head it copies from', () => {
+    const words = translate(read('en', 'i-see-a-bigger-house.conllu'), lex, { orthography: 'standard' }).words;
+    const caseOf = (surface: string) =>
+      words.find((w) => w.surface === surface)?.features.find((f) => f.name === 'Case');
+    // The object's accusative is a default (no government entry for "see"),
+    // so the adjective that agrees with it cannot be more certain than that.
+    expect(caseOf('dom')?.confidence).toBe('default');
+    expect(caseOf('večši')).toMatchObject({ ruleId: 'agreement.fromHead', confidence: 'default' });
+  });
+});

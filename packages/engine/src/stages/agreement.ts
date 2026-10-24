@@ -53,10 +53,13 @@ export function agreementStage(ctx: StageContext): void {
       }
       node.feats.set(
         f,
+        // Agreement itself is certain, but the value is only as certain as
+        // the head's own decision: an object's default accusative must not
+        // turn into a certainty on its adjective.
         decide(
           hv.value,
           'agreement.fromHead',
-          'certain',
+          hv.confidence,
           `agrees with "${head.entry.lemma}" (${f} = ${hv.value})`,
         ),
       );
