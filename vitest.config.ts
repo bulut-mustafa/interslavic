@@ -13,7 +13,8 @@ export default defineConfig({
      *   default (isolated, unbounded forks)   killed by the OOM watchdog
      *   maxForks=1, isolate=true              78.5s
      *   maxForks=1, isolate=false             57s
-     *   maxForks=4, isolate=false             25s   <- here
+     *   maxForks=4, isolate=false             25s
+     *   maxForks=2, isolate=false             69s   <- here
      *
      * Only 7.3s of that is running tests; the rest is Vite evaluating the
      * module graph once per test file. `isolate: false` lets the workers reuse
@@ -21,8 +22,9 @@ export default defineConfig({
      *
      * `maxForks` is capped rather than left to default: unbounded workers each
      * load their own copy of the 743k-form index, which is what the watchdog
-     * was killing. 4 leaves headroom on 8 cores; 6 and 8 measured 24s, which
-     * is not worth the risk of being killed halfway through a 2-hour audit.
+     * was killing. 4 workers (~350 MB each) froze the machine when the parser
+     * and dev servers were also running; at 2, free memory never fell below
+     * 66% (measured Oct 24). Slower, but a frozen laptop costs more than time.
      *
      * Isolation is off because no test file depends on another's module state -
      * each builds its own `Lexicon` and its own fixtures. If a test ever starts
@@ -30,7 +32,7 @@ export default defineConfig({
      */
     pool: 'forks',
     poolOptions: {
-      forks: { maxForks: 4, isolate: false },
+      forks: { maxForks: 2, isolate: false },
     },
   },
 });
