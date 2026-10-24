@@ -116,8 +116,8 @@ const DIFFERENCES: Record<string, { status: Status; why: string }> = {
     why: 'preposition choice - we produce "do kina" (do + genitive); both express motion to a place',
   },
   g08: {
-    status: 'defect',
-    why: 'the noun is now right ("zabava", curated for a party one comes to). The preposition is not a defect: the prepositions page gives "do - to, towards" and asks that prepositions follow "their logical meaning, not [...] national idioms", so "do zabavy" is the stated rule where the page writes the idiom "na zabavu". What remains is the verb: imperfective "prihodil" where "came" is a completed event and the page has perfective "prijehal"',
+    status: 'acceptable',
+    why: 'the noun ("zabava", curated for a party one comes to) and the aspect (perfective "prišel" for a movement that reached its goal) are now right. Two choices remain, both defensible: "do zabavy" follows the prepositions page ("do - to, towards", prepositions by "logical meaning, not [...] national idioms") where the page writes the idiom "na zabavu"; and "prijehal" means arriving by vehicle, which the English does not say, where "prišel" is the plain perfective of "come" (verbs page: "prihoditi (impf.)/ prijdti (pf.) „to come”")',
   },
   g11: {
     status: 'parser',
@@ -136,8 +136,8 @@ const DIFFERENCES: Record<string, { status: Status; why: string }> = {
     why: 'the construction is now right ("..., že by brali ...") - what remains is lexical: "visit" resolves to "navědžajut" rather than "posětet", and "take photos" to "brali fotografije" rather than the single verb "fotografovali"',
   },
   g19: {
-    status: 'defect',
-    why: 'the case is now right ("pod stol", accusative for motion); what remains is lexical - "fled" resolves to "izběgal" (escaped/avoided) rather than "poběgl"',
+    status: 'acceptable',
+    why: 'the aspect is now right (perfective, a movement that reached its goal) and the case too ("pod stol"). The verb differs: "izběgl" where the page writes "poběgl", but the dictionary glosses izběgti exactly "escape, flee", so it is a faithful translation of "fled"; poběgti is glossed "run"',
   },
   g21: {
     status: 'defect',
@@ -211,7 +211,7 @@ describe("gold: van Steenbergen's own Interslavic", () => {
     // Not an assertion about quality - a tripwire, so that silently
     // reclassifying a defect as "acceptable" shows up as a failing test.
     expect({ acceptable: by('acceptable'), defect: by('defect'), unsupported: by('unsupported'), parser: by('parser') })
-      .toEqual({ acceptable: 7, defect: 11, unsupported: 0, parser: 3 });
+      .toEqual({ acceptable: 9, defect: 9, unsupported: 0, parser: 3 });
   });
 });
 

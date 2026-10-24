@@ -79,3 +79,34 @@ describe('the optative', () => {
     expect(out('he-may-live-long.conllu')).toBe('On može žiti dolgo.');
   });
 });
+
+/**
+ * "Perfective aspect focuses on the result of an action [...] the action has
+ * been completed"; the imperfective expresses "an ongoing process, a habit or a
+ * repeated action". http://steen.free.fr/interslavic/verbs.html
+ *
+ * A movement that reached a goal has a result. One without a goal, or a
+ * habitual one, does not - and those two are what a wider rule got wrong.
+ */
+describe('the aspect of a past movement', () => {
+  it('is perfective when the movement reached a goal', () => {
+    expect(out('cat-ran-under-table.conllu')).toBe('Kot poběgl pod stol.');
+    expect(out('came-to-the-party.conllu')).toBe('On prišel do zabavy.');
+  });
+
+  it('stays imperfective without a goal', () => {
+    expect(out('ran-for-an-hour.conllu')).toBe('Ja jesm běgl časinu.');
+  });
+
+  it('applies only to verbs of motion', () => {
+    // "to" here is the addressee, not a goal: talking has no result.
+    expect(out('talked-to-her-mother.conllu')).toContain('razgovarjala');
+  });
+
+  it('stays imperfective when the movement was a habit', () => {
+    // "every" belongs to "morning", one level below the verb.
+    expect(out('ran-every-morning.conllu')).toBe('Ona běgla vsako utro.');
+    // And it outranks the direct object, which alone would make it perfective.
+    expect(out('read-a-book-every-night.conllu')).toContain('jesm čital knigu');
+  });
+});

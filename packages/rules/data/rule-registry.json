@@ -72,7 +72,7 @@
     "aspect.adverbial.imp": {
       "tier": "normative",
       "source": "http://steen.free.fr/interslavic/verbs.html",
-      "quote": "Using the present tense of a perfective verb for the future (as is done in West and East Slavic) is rather to be avoided, as it can easily be misunderstood by South Slavs.",
+      "quote": "Imperfective aspect, on the other hand, focuses on action itself; it indicates that on the point of reference the action is or was going on. It can also express a an ongoing process, a habit or a repeated action",
       "why": "a habitual or iterative adverbial forces the imperfective"
     },
     "aspect.adverbial.perf": {
@@ -98,6 +98,12 @@
       "source": "packages/lexicon/data/raw/words.tsv",
       "quote": null,
       "why": "the aspect the chosen lexeme actually has, which outranks an inferred one"
+    },
+    "aspect.pastGoal": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/verbs.html",
+      "quote": "In short, perfective aspect focuses on the result of an action and not on the action itself. Depending on tense, it means that the action has been completed already or will be completed at some point.",
+      "why": "a past movement to a goal reached it, so it is a completed event with a result; only a goal bounds it, so durative and habitual movements stay imperfective"
     },
     "aspect.pastTelic": {
       "tier": "corpus",

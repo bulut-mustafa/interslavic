@@ -469,6 +469,11 @@ mutate "curated function words ignored"     lexeme      "s/    const curatedEntr
 mutate "perfect-as-perfective removed"      aspect "s/^  perfectAuxiliary,$//"
 mutate "past-telic perfective removed"      aspect "s/^  pastWithObject,$//"
 mutate "tense not read off the auxiliary"   aspect "s/if (token.feats\\['Tense'\\]) return token.feats\\['Tense'\\];/return token.feats['Tense'];/"
+mutate "goal aspect rule removed"          aspect "s/^  pastWithGoal,$//"
+mutate "goal prepositions ignored"         aspect "s/GOAL_PREPOSITIONS.includes(lemma) || //"
+mutate "directional prepositions ignored"  aspect "s/ || candidatesForEnglish(lemma).some((p) => p.direction)//"
+mutate "goal rule not limited to motion"   aspect "s/ || !isMotionVerb(token.lemma)//"
+mutate "habitual cue below verb ignored"   aspect "/t.deprel === .det. \&\& children.some/d"
 
 echo "=== web UI (M4) ==="
 mutate "confidence never reaches the DOM"   app    "s/data-confidence={f.confidence}/data-confidence=\"certain\"/"

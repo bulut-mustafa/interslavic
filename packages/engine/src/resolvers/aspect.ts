@@ -1,4 +1,6 @@
 import { decide, type Aspect, type Decision, type ParsedSentence, type UdToken } from '../../../types/index.ts';
+import { isMotionVerb } from '../../../rules/src/motion.ts';
+import { candidatesForEnglish } from '../../../rules/src/prepositions.ts';
 
 /**
  * Aspect selection is the hardest problem in the project: Interslavic requires
@@ -53,7 +55,13 @@ const PERFECTIVE_CUES = ['suddenly', 'already', 'finally', 'once', 'completely']
 const adverbialCue: AspectStrategy = {
   id: 'aspect.adverbial',
   decide({ token, sentence }) {
-    const deps = sentence.tokens.filter((t) => t.head === token.id);
+    const children = sentence.tokens.filter((t) => t.head === token.id);
+    // One level down too: in "ran every morning" the cue is the determiner of
+    // "morning", not a dependent of the verb.
+    const deps = [
+      ...children,
+      ...sentence.tokens.filter((t) => t.deprel === 'det' && children.some((c) => c.id === t.head)),
+    ];
     for (const d of deps) {
       const lem = d.lemma.toLowerCase();
       if (IMPERFECTIVE_CUES.includes(lem)) {
@@ -147,6 +155,45 @@ const pastWithObject: AspectStrategy = {
   },
 };
 
+/**
+ * A past motion verb with a goal reached the goal, so the event is bounded and
+ * takes the perfective: "The cat fled under the table" -> `Kot poběgl pod stol`,
+ * "Nobody came to the party" -> `Nikto ne prijehal na zabavu`.
+ *
+ * Only a GOAL bounds it: `to`, `into`, `onto`, or a preposition the dictionary
+ * marks as directional ("under (direction)"). "Ran for an hour" and "ran
+ * towards the house" have none, and a habitual "ran to school every morning"
+ * is caught by the adverbial cue first - those are the readings that broke a
+ * wider "every past motion verb" rule (docs/verification-log.md).
+ */
+const GOAL_PREPOSITIONS = ['to', 'into', 'onto'];
+
+const pastWithGoal: AspectStrategy = {
+  id: 'aspect.pastGoal',
+  decide({ token, sentence }) {
+    if (effectiveTense(token, sentence) !== 'Past') return null;
+    if (token.feats['Aspect'] === 'Prog' || !isMotionVerb(token.lemma)) return null;
+    const goal = sentence.tokens.some(
+      (obl) =>
+        obl.head === token.id &&
+        obl.deprel === 'obl' &&
+        sentence.tokens.some((c) => {
+          if (c.head !== obl.id || c.deprel !== 'case') return false;
+          const lemma = c.lemma.toLowerCase();
+          return GOAL_PREPOSITIONS.includes(lemma) || candidatesForEnglish(lemma).some((p) => p.direction);
+        }),
+    );
+    if (!goal) return null;
+    return decide<Aspect>(
+      'Perf',
+      'aspect.pastGoal',
+      'default',
+      'a past movement to a goal reached it, so the event is completed: perfective',
+      [{ value: 'Imp', because: 'imperfective if the movement was repeated or still under way' }],
+    );
+  },
+};
+
 /** Last resort: imperfective is the lexically unmarked member of the pair. */
 const defaultImperfective: AspectStrategy = {
   id: 'aspect.default',
@@ -167,6 +214,7 @@ export const ASPECT_CHAIN: AspectStrategy[] = [
   adverbialCue,
   tenseCue,
   pastWithObject,
+  pastWithGoal,
   defaultImperfective,
 ];
 
