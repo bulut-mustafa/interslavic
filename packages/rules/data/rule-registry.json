@@ -177,12 +177,6 @@
       "quote": "The subject always remains in the genitive plural.",
       "why": "and it persists in oblique positions"
     },
-    "case.phrasalObject": {
-      "tier": "structural",
-      "source": null,
-      "quote": null,
-      "why": "a complement whose English preposition was absorbed by a phrasal verb is that verb's direct object; its case is the direct-object rule's (case.deprel.obj) unless the verb has its own government code"
-    },
     "case.predicate": {
       "tier": "normative",
       "source": "http://steen.free.fr/interslavic/syntax.html",

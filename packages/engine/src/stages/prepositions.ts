@@ -23,7 +23,6 @@ export function planPrepositions(
   sentence: ParsedSentence,
   lex: Lexicon,
   phrasalVerbs: Map<number, Entry>,
-  phrasalObjects: Set<number>,
   phrasalParticles: Set<number>,
 ): PrepositionPlan {
   // Must run before noun case resolution, because a preposition's government
@@ -31,32 +30,6 @@ export function planPrepositions(
   const prepPlans = new Map<number, PrepPlan>(); // keyed by the ADP token id
   const governedCase = new Map<number, Decision<string>>(); // keyed by HEAD noun id
   const deletedPreps = new Set<number>();
-
-  /**
-   * A complement whose English preposition was consumed by a phrasal verb is
-   * now that verb's direct object: "look after my brother" is `prigledati` +
-   * an accusative, and leaving the noun as a bare `obl` gave the nominative
-   * "prigledaju svoj brat". The verb's own government code wins where it has
-   * one, exactly as for an ordinary object.
-   */
-  for (const id of phrasalObjects) {
-    const noun = sentence.tokens.find((t) => t.id === id);
-    const entry = noun ? phrasalVerbs.get(noun.head) : undefined;
-    if (!noun || !entry) continue;
-    const governs = entry.addition.governs;
-    governedCase.set(
-      id,
-      decide<string>(
-        governs ?? 'Acc',
-        'case.phrasalObject',
-        governs ? 'high' : 'default',
-        governs
-          ? `"${entry.lemma}" governs this case lexically - the dictionary marks it (+${governs})`
-          : `the complement of the phrasal verb "${entry.lemma}", which takes a direct object`,
-      ),
-    );
-  }
-
 
   for (const token of sentence.tokens) {
     // The possessive clitic is tagged PART, not ADP, but it is a `case` marker

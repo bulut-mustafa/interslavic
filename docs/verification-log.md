@@ -1704,7 +1704,8 @@ text. Four were paraphrases presented as quotations, and one corpus quote was wr
 | `agreement.impersonal` | "Nužno jest tuty članok prěvesti" | "Nužno jest tuty članok prěimenovati/prěměstiti" (Wp/isv/Incubator:Krčma) |
 
 The 13 rules that cited a page without a sentence are now pinned too (one,
-`case.phrasalObject`, asserts nothing about Interslavic and is `structural`), so the
+`case.phrasalObject`, turned out to be unreachable - its input set was never filled -
+and was deleted), so the
 test requires a quote for every normative and corpus rule. Pinning `aspect.perfect`
 also exposed a real defect - the perfect progressive came out perfective, against the
 page's own "ja čital jesm knigu ... „I have been reading a book"" - fixed in `1f88eb5`.

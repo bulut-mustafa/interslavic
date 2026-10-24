@@ -209,14 +209,13 @@ export function translate(
   const contextWords = contextWordsOf(sentence);
 
   // ---- Phase 0-: phrasal verbs -------------------------------------------
-  const { phrasalVerbs, phrasalParticles, phrasalObjects } = planPhrasalVerbs(sentence, lex);
+  const { phrasalVerbs, phrasalParticles } = planPhrasalVerbs(sentence, lex);
 
   // ---- Phase 0: plan prepositional phrases -------------------------------
   const { prepPlans, governedCase, deletedPreps } = planPrepositions(
     sentence,
     lex,
     phrasalVerbs,
-    phrasalObjects,
     phrasalParticles,
   );
 

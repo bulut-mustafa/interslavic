@@ -91,7 +91,7 @@ describe('rule registry', () => {
   /**
    * And every rule WRITTEN in the source, including those no fixture reaches.
    * This is the check that found `anaphora.one`, `aspect.adverbial.perf`,
-   * `aspect.tense.progressive` and `case.phrasalObject` - all emittable, none
+   * `aspect.tense.progressive` and `case.phrasalObject` - all written, none
    * exercised, so all four were invisible to the emitted-ids check above.
    */
   it('cites every rule written in the source', () => {
@@ -108,13 +108,13 @@ describe('rule registry', () => {
   });
 
   /**
-   * Four rules are reachable but exercised by no fixture, so nothing checks
-   * what they produce. Held at its measured size: adding a fixture for one is
-   * an improvement, adding another untested rule is not.
+   * A rule reachable in the source but emitted by no fixture has nothing
+   * checking what it produces. This was held at 4; each now has a fixture (or,
+   * for one that was unreachable, was deleted), so it is zero and stays zero.
    */
   it('does not grow the set of rules no fixture exercises', () => {
     const emitted = new Set(emittedRuleIds().keys());
     const unexercised = [...inSource].filter((id) => !emitted.has(id)).sort();
-    expect(unexercised.length).toBeLessThanOrEqual(4);
+    expect(unexercised).toEqual([]);
   });
 });

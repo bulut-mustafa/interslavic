@@ -40,6 +40,18 @@ describe('the placeholder "one"', () => {
     expect(out('i-want-the-red-one.conllu')).toBe('Ja hoču črveny.');
   });
 
+  it('shows its decision on the modifier, since "one" itself is not emitted', () => {
+    const gender = (name: string, surface: string) =>
+      result(name).words.find((w) => w.surface === surface)?.features.find((f) => f.name === 'Gender');
+    expect(gender('more-interesting-than-that-one.conllu', 'ta')).toMatchObject({
+      value: 'Fem', ruleId: 'anaphora.one', confidence: 'high',
+    });
+    // The default is reported as a default, not laundered into a certainty.
+    expect(gender('i-want-the-red-one.conllu', 'črveny')).toMatchObject({
+      value: 'Masc', ruleId: 'anaphora.one', confidence: 'default',
+    });
+  });
+
   it('says why the word is gone', () => {
     const why = result('i-want-the-red-one.conllu').dropped.map((d) => d.why).join(' ');
     expect(why).toContain('placeholder noun');

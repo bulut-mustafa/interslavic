@@ -44,6 +44,13 @@ export function agreementStage(ctx: StageContext): void {
     for (const f of ['Case', 'Gender', 'Number', 'Animacy'] as const) {
       const hv = head.feats.get(f);
       if (!hv) continue;
+      // A placeholder "one" is not emitted, so its modifier is the only place
+      // its decision can show: "stands for kniga", or the stated default when
+      // the sentence names no noun.
+      if (hv.ruleId === 'anaphora.one') {
+        node.feats.set(f, hv);
+        continue;
+      }
       node.feats.set(
         f,
         decide(

@@ -60,14 +60,13 @@ export const STAGES: readonly StageSpec[] = [
     phase: '0-',
     name: 'planPhrasalVerbs',
     reads: ['sentence', 'lex', 'contextWords'],
-    writes: ['phrasalVerbs', 'phrasalParticles', 'phrasalObjects'],
+    writes: ['phrasalVerbs', 'phrasalParticles'],
   },
   {
     phase: '0',
     name: 'planPrepositions',
-    // A phrasal verb swallows its particle, which turns that particle's
-    // complement into a direct object - so the phrasal pass must come first.
-    reads: ['sentence', 'lex', 'phrasalVerbs', 'phrasalObjects', 'phrasalParticles'],
+    // A phrasal verb swallows its particle, so the phrasal pass must come first.
+    reads: ['sentence', 'lex', 'phrasalVerbs', 'phrasalParticles'],
     writes: ['prepPlans', 'governedCase', 'deletedPreps'],
   },
   {

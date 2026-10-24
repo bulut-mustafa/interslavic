@@ -135,6 +135,10 @@ describe('the English perfect', () => {
     expect(out('have-read-a-book.conllu')).toBe('Ja jesm pročital knigu.');
   });
 
+  it('is perfective after a completive adverb', () => {
+    expect(out('suddenly-opened-the-door.conllu')).toBe('On iznenada otvoril dveri.');
+  });
+
   it('is imperfective when progressive', () => {
     expect(out('have-been-reading.conllu')).toBe('Ja jesm čital knigu.');
   });

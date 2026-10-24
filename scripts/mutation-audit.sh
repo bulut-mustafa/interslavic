@@ -502,6 +502,7 @@ mutate "collective alternative never named"  numst "s/if (collective \&\& takesC
 mutate "collective: children not covered"   num "s/  return pluralOnly || lemma === .dětę.;/  return pluralOnly;/"
 mutate "vocative rule removed"            case "s/    case .vocative.:/    case 'vocative-x':/"
 mutate "perfect progressive made perfective" aspect "s/    if (token.xpos === .VBG. || token.feats\[.Aspect.\] === .Prog.) {/    if (false) {/"
+mutate "anaphor decision hidden from modifier" agrst "s/      if (hv.ruleId === .anaphora.one.) {/      if (false) {/"
 
 echo
 echo "==================================================="

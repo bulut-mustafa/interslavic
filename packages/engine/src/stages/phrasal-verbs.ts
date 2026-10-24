@@ -8,8 +8,6 @@ export interface PhrasalVerbPlan {
   phrasalVerbs: Map<number, Entry>;
   /** Particle tokens, which the Interslavic verb absorbs and so are deleted. */
   phrasalParticles: Set<number>;
-  /** Oblique nominals promoted to direct objects by that absorption. */
-  phrasalObjects: Set<number>;
 }
 
 /**
@@ -42,7 +40,6 @@ export function planPhrasalVerbs(sentence: ParsedSentence, lex: Lexicon): Phrasa
    */
   const phrasalVerbs = new Map<number, Entry>(); // verb token id -> chosen entry
   const phrasalParticles = new Set<number>(); // particle tokens, deleted
-  const phrasalObjects = new Set<number>(); // obl nouns promoted to objects
 
   if (sentence.lang === 'en') {
     for (const verb of sentence.tokens) {
@@ -64,14 +61,13 @@ export function planPhrasalVerbs(sentence: ParsedSentence, lex: Lexicon): Phrasa
        * njego", "I suit him". `after` is no safer: "look after my brother" and
        * "go after lunch" are indistinguishable without word sense.
        */
-      type Candidate = { particle: UdToken; promoted?: UdToken };
-      const candidates: Candidate[] = [];
+      const candidates: { particle: UdToken }[] = [];
       for (const child of sentence.tokens) {
         if (child.head !== verb.id) continue;
         if (child.deprel === 'compound:prt') candidates.push({ particle: child });
       }
 
-      for (const { particle, promoted } of candidates) {
+      for (const { particle } of candidates) {
         const phrase = `${verb.lemma} ${particle.lemma}`.toLowerCase();
         /**
          * `lookup` is keyed by normalised gloss, so every hit already has this
@@ -96,11 +92,10 @@ export function planPhrasalVerbs(sentence: ParsedSentence, lex: Lexicon): Phrasa
         if (!best) continue;
         phrasalVerbs.set(verb.id, best);
         phrasalParticles.add(particle.id);
-        if (promoted) phrasalObjects.add(promoted.id);
         break;
       }
     }
   }
 
-  return { phrasalVerbs, phrasalParticles, phrasalObjects };
+  return { phrasalVerbs, phrasalParticles };
 }
