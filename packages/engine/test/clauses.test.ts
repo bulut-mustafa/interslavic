@@ -161,8 +161,8 @@ describe('an accusative with no animate noun to agree with', () => {
    *
    * "Tourists visited the Netherlands to take photos" has no subject inside
    * the purpose clause at all, so the l-participle has nowhere else to get its
-   * number: plural `brali`, from "Turisti". Reading the wrong clause gives the
-   * singular `bral`.
+   * number: plural `fotografovali`, from "Turisti". Reading the wrong clause gives the
+   * singular `fotografoval`.
    *
    * The mutation audit found this uncovered, and the reason is worth keeping:
    * g15 and g34 exercise it, but both are written off in the gold exception
@@ -178,9 +178,10 @@ describe('an accusative with no animate noun to agree with', () => {
       lex,
       { orthography: 'standard' },
     ).text;
-    // plural, from "Turisti" - not the singular "bral".
-    expect(text).toMatch(/\bbrali\b/);
-    expect(text).not.toMatch(/\bbral\b/);
+    // plural, from "Turisti" - not the singular "fotografoval". ("take photos"
+    // became one verb; the clause used to read "brali fotografije".)
+    expect(text).toMatch(/\bfotografovali\b/);
+    expect(text).not.toMatch(/\bfotografoval\b/);
   });
 });
 

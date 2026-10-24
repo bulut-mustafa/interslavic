@@ -78,6 +78,7 @@ import {
 import { functionWordFor } from '../../rules/src/function-words.ts';
 import { codeBelongsToPreposition } from '../../rules/src/prepositions.ts';
 import { negativeCounterparts } from '../../rules/src/negation.ts';
+import { rewriteLightVerbs } from '../../rules/src/light-verbs.ts';
 
 /**
  * ORDERING CONSTRAINTS - these are load-bearing, do not reorder casually:
@@ -157,13 +158,16 @@ export interface TranslateOptions {
 }
 
 export function translate(
-  sentence: ParsedSentence,
+  parsed: ParsedSentence,
   lex: Lexicon,
   opts: TranslateOptions = {},
 ): Translation {
+  // "take photos" -> "photograph": rewritten before anything reads the tree,
+  // so every stage sees one verb with its object (rules/src/light-verbs.ts).
+  const { sentence, absorbed } = rewriteLightVerbs(parsed);
   const orth: Orthography = opts.orthography ?? 'standard';
   const adapter = adapterFor(sentence);
-  const dropped: Translation['dropped'] = [];
+  const dropped: Translation['dropped'] = [...absorbed];
   const unknown: string[] = [];
 
   /**

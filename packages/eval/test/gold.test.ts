@@ -84,8 +84,8 @@ const DIFFERENCES: Record<string, { status: Status; why: string }> = {
     why: 'the participle ("Iduči", the transgressive), the noun ("raboty", curated for work one goes to) and the comma are now right. Two choices remain, both faithful: "svojej" translates the English "her", which the page leaves unexpressed, and it is what the pronouns page prescribes: "Whenever the possessor is also the subject of the sentence, the reflexive svoj is used"; and "kuriti cigaretu" is the verb the dictionary marks transitive ("kuriti v.tr. ipf. smoke"), with its accusative object, where the page writes the intransitive "dymiti" ("v.intr. ipf. smoke") with an instrumental. Both verbs are type 1 and glossed exactly "smoke"',
   },
   g34: {
-    status: 'defect',
-    why: 'multiword - "take photos" should resolve to the single verb `fotografovati` rather than `brali fotografije`. Also "the Netherlands" is plural in English and singular in Interslavic (`Niderlandy` for `Niderlandiju`), which needs a lexical number override',
+    status: 'acceptable',
+    why: 'the construction and the verb are now right ("že by fotografovali tulipany": "take photos" is one verb, rules/src/light-verbs.ts). Two forms differ, both following our sources: "Niderlandy" is the dictionary\'s own entry ("Niderlandy m.pl. Netherlands"), and "Niderlandija" is not in it; and "Turisti" is the animate nominative plural the nouns page states ("animate nouns have the nominative plural ending -i"), which the page itself writes in the present-tense version of this sentence (g15)',
   },
   g35: {
     status: 'acceptable',
@@ -128,8 +128,8 @@ const DIFFERENCES: Record<string, { status: Status; why: string }> = {
     why: 'word order only. Every word is now right - "budu čitati" for the periphrastic future, "nijednu knigu" for the negated "a single book", and "uže" for "anymore" - but `uže` stays where the English "anymore" stood, at the end, where the gold puts it before the negation complex ("Ja uže nikogda ne"). The syntax page opens with "Word order is basically free", and g13 is classified the same way for the same reason, so this is not counted as a defect. The tighter reading of `uže ne` as "no longer" would be better served by the gold order, which is why it is listed here rather than ignored',
   },
   g15: {
-    status: 'defect',
-    why: 'the construction is now right ("..., že by brali ...") - what remains is lexical: "visit" resolves to "navědžajut" rather than "posětet", and "take photos" to "brali fotografije" rather than the single verb "fotografovali"',
+    status: 'acceptable',
+    why: 'the construction and "fotografovali tulipany" are now right. Two choices remain: "Niderlandy" is the dictionary\'s own entry (see g34); and the page writes the perfective present "posětet" for a general truth, where we keep every English present imperfective ("posěčajut"), because the verbs page warns that a perfective present reads as a future - the trade-off aspect.tense.presImp records',
   },
   g19: {
     status: 'acceptable',
@@ -208,7 +208,7 @@ describe("gold: van Steenbergen's own Interslavic", () => {
     // Not an assertion about quality - a tripwire, so that silently
     // reclassifying a defect as "acceptable" shows up as a failing test.
     expect({ acceptable: by('acceptable'), defect: by('defect'), unsupported: by('unsupported'), parser: by('parser') })
-      .toEqual({ acceptable: 11, defect: 6, unsupported: 0, parser: 3 });
+      .toEqual({ acceptable: 13, defect: 4, unsupported: 0, parser: 3 });
   });
 });
 

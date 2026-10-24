@@ -55,6 +55,7 @@ AUXRULES=packages/rules/src/auxiliaries.ts
 FNWORDS=packages/rules/src/function-words.ts
 PROPER=packages/rules/src/proper-nouns.ts
 TRANSG=packages/rules/src/transgressive.ts
+LIGHT=packages/rules/src/light-verbs.ts
 MODALS=packages/rules/src/modals.ts
 REFL=packages/rules/src/reflexives.ts
 DERIV=packages/rules/src/derivation.ts
@@ -88,7 +89,7 @@ FWJSON=packages/rules/data/function-words.json
 save "$CASE" case; save "$ASPECT" aspect; save "$READER" reader
 save "$REALIZE" realize; save "$ORTH" orth; save "$PIPE" pipe
 save "$PREP" prep; save "$NUM" num; save "$PREPRULES" preprules; save "$SPLIT" split
-save "$FULLFORM" fullform; save "$APP" app; save "$AUXRULES" auxrules; save "$FNWORDS" fnwords; save "$MODALS" modals; save "$REFL" refl; save "$DERIV" deriv; save "$PRON" pron; save "$NEG" neg; save "$COMPARE" compare; save "$MOTION" motion; save "$PARTIC" partic; save "$VERBPREP" verbprep; save "$EXPL" expl; save "$ANAPH" anaph; save "$XPOS" xpos; save "$ADAPT" adapt; save "$FWJSON" fwjson; save "$PROPER" proper; save "$TRANSG" transg
+save "$FULLFORM" fullform; save "$APP" app; save "$AUXRULES" auxrules; save "$FNWORDS" fnwords; save "$MODALS" modals; save "$REFL" refl; save "$DERIV" deriv; save "$PRON" pron; save "$NEG" neg; save "$COMPARE" compare; save "$MOTION" motion; save "$PARTIC" partic; save "$VERBPREP" verbprep; save "$EXPL" expl; save "$ANAPH" anaph; save "$XPOS" xpos; save "$ADAPT" adapt; save "$FWJSON" fwjson; save "$PROPER" proper; save "$TRANSG" transg; save "$LIGHT" light
 save "$LEXEME" lexeme; save "$AUXST" auxst; save "$PREPST" prepst
 save "$PHRASALST" phrasalst; save "$NEGST" negst; save "$GOVST" govst
 save "$REALST" realst; save "$AGRST" agrst; save "$PREDST" predst
@@ -507,6 +508,10 @@ mutate "agreement launders confidence"     agrst "s/^          hv.confidence,$/ 
 mutate "source comma dropped"              realst "s/^    if (commaOwed) appendComma();\$//"
 mutate "source comma owed by no word"      realst "s/^    commaOwed = commaAfter.has(token.id);\$/    commaOwed = false;/"
 mutate "work to the job sense removed"     fwjson "s/\"isv\": \"råbota\"/\"isv\": \"dělo\"/"
+mutate "light verb not rewritten"          light "s/^  if (removed.size === 0) return { sentence, absorbed };\$/  return { sentence, absorbed };/"
+mutate "light verb absorbs a modifier"     light "s/    if (rest.length > 0 || ofPhrases.length > 1) continue;/    if (ofPhrases.length > 1) continue;/"
+mutate "of-object left on the noun"        light "s/      changed.set(object.id, { head: verb.id, deprel: 'obj' });//"
+mutate "absorbed words unreported"         pipe  "s/  const dropped: Translation\\['dropped'\\] = \\[...absorbed\\];/  const dropped: Translation['dropped'] = [];/"
 
 echo
 echo "==================================================="
