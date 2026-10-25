@@ -1,3 +1,5 @@
+import { Lesson } from './learn/Lesson.tsx';
+import { LESSONS } from './learn/lessons.ts';
 import Translator from './pages/Translator.tsx';
 import { Link, usePath } from './router.tsx';
 
@@ -35,7 +37,9 @@ export default function App() {
         </nav>
       </header>
 
-      {path.startsWith('/learn') || path.startsWith('/phrasebook') ? (
+      {path.startsWith('/learn') ? (
+        <Lesson slug={path.replace(/^\/learn\/?/, '').replace(/\/$/, '') || LESSONS[0]!.slug} />
+      ) : path.startsWith('/phrasebook') ? (
         <main className="page">
           <p>Coming soon.</p>
         </main>

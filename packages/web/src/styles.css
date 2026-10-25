@@ -942,3 +942,341 @@ textarea::placeholder {
   border-top: 1px solid var(--rule);
   padding-top: var(--space-3);
 }
+
+/* ---------- learn ---------- */
+
+.learn {
+  display: grid;
+  grid-template-columns: 13rem minmax(0, 1fr) 11rem;
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.learn-nav,
+.toc {
+  position: sticky;
+  top: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-size: var(--text-sm);
+}
+
+.learn-nav-toggle {
+  display: none;
+}
+
+.learn-nav-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: var(--space-3);
+}
+
+.learn-nav-section,
+.toc-label,
+.lesson-section {
+  margin: 0 0 var(--space-1);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.learn-nav-link,
+.toc a {
+  padding: 0.15rem var(--space-2);
+  border-left: 2px solid transparent;
+  color: var(--ink-soft);
+  text-decoration: none;
+}
+
+.learn-nav-link:hover,
+.toc a:hover {
+  color: var(--ink);
+}
+
+.learn-nav-link.is-current {
+  border-left-color: var(--teal);
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.learn-nav-done {
+  color: var(--teal);
+}
+
+.lesson {
+  min-width: 0;
+  max-width: 44rem;
+  font-size: var(--text-base);
+}
+
+.lesson h1 {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: var(--text-2xl);
+  line-height: 1.2;
+}
+
+.lesson h2 {
+  margin: var(--space-5) 0 var(--space-2);
+  font-family: var(--serif);
+  font-size: var(--text-xl);
+  scroll-margin-top: var(--space-4);
+}
+
+.lesson a {
+  color: var(--teal);
+}
+
+.lesson-summary {
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-lg);
+  color: var(--ink-soft);
+}
+
+.lesson-draft {
+  margin: var(--space-3) 0 0;
+  font-size: var(--text-sm);
+  color: var(--ink-faint);
+}
+
+.lesson-note {
+  padding: var(--space-2) var(--space-3);
+  border-left: 3px solid var(--amber);
+  background: var(--paper-raised);
+}
+
+.lesson-source {
+  font-size: var(--text-sm);
+  color: var(--ink-faint);
+}
+
+.lesson-source q {
+  display: block;
+  margin-top: var(--space-1);
+  font-style: italic;
+}
+
+.isv {
+  font-family: var(--serif);
+  font-weight: 500;
+}
+
+.example {
+  margin: var(--space-3) 0;
+  padding: var(--space-3);
+  border-radius: var(--radius);
+  background: var(--paper-raised);
+  border: 1px solid var(--rule);
+}
+
+.example p {
+  margin: 0;
+}
+
+.example-isv {
+  font-family: var(--serif);
+  font-size: var(--text-lg);
+}
+
+.example-cyr {
+  font-family: var(--serif);
+  color: var(--ink-soft);
+}
+
+.example figcaption {
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+}
+
+.example-try {
+  display: inline-block;
+  margin-left: var(--space-3);
+  font-weight: 600;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  margin: var(--space-3) 0;
+}
+
+.lesson table {
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.lesson caption {
+  text-align: left;
+  padding-bottom: var(--space-1);
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+
+.lesson th,
+.lesson td {
+  padding: var(--space-1) var(--space-3);
+  border-bottom: 1px solid var(--rule);
+  text-align: left;
+  vertical-align: top;
+}
+
+.lesson thead th {
+  color: var(--ink-faint);
+  font-weight: 600;
+}
+
+.cell-cyr {
+  display: block;
+  font-size: var(--text-sm);
+  color: var(--ink-faint);
+}
+
+.exercise {
+  margin: var(--space-3) 0;
+  padding: var(--space-3);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+}
+
+.exercise legend,
+.exercise-prompt {
+  font-weight: 600;
+}
+
+.exercise-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.exercise-option {
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: var(--paper-raised);
+  font-family: var(--serif);
+  font-size: var(--text-base);
+  cursor: pointer;
+}
+
+.exercise-option.is-answer {
+  border-color: var(--teal);
+  color: var(--teal);
+}
+
+.exercise-option.is-wrong {
+  border-color: var(--plum);
+  color: var(--plum);
+}
+
+.exercise-fill {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.exercise-fill input {
+  flex: 1;
+  min-width: 0;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  font-family: var(--serif);
+  font-size: var(--text-base);
+}
+
+.exercise-fill .text-button {
+  margin-left: 0;
+}
+
+.exercise-result,
+.exercise-before {
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-sm);
+}
+
+.lesson-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--rule);
+}
+
+.lesson-foot .report {
+  flex-basis: 100%;
+}
+
+.lesson-done {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.prevnext {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.prevnext-link {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  text-decoration: none;
+  color: var(--ink);
+}
+
+.prevnext-link span {
+  font-size: var(--text-sm);
+  color: var(--ink-faint);
+}
+
+.prevnext-link.is-next {
+  margin-left: auto;
+  text-align: right;
+}
+
+@media (max-width: 64rem) {
+  .learn {
+    grid-template-columns: 12rem minmax(0, 1fr);
+  }
+  .toc {
+    display: none;
+  }
+}
+
+@media (max-width: 44rem) {
+  .learn {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-3);
+  }
+  .learn-nav {
+    position: static;
+  }
+  .learn-nav-toggle {
+    display: block;
+    align-self: flex-start;
+    padding: var(--space-1) var(--space-3);
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    background: var(--paper-raised);
+    font-size: var(--text-sm);
+    cursor: pointer;
+  }
+  .learn-nav-group {
+    display: none;
+  }
+  .learn-nav.is-open .learn-nav-group {
+    display: flex;
+  }
+}
