@@ -12,7 +12,7 @@ const LANGS: { value: Lang; label: string }[] = [
 ];
 
 const ORTHS: { value: Orthography; label: string }[] = [
-  { value: 'standard', label: 'Standard Latin' },
+  { value: 'standard', label: 'Latin' },
   { value: 'etymological', label: 'Etymological' },
   { value: 'simplified', label: 'Simplified' },
   { value: 'cyrillic', label: 'Cyrillic' },
@@ -26,6 +26,16 @@ const CONFIDENCE_ORDER = ['guess', 'default', 'high', 'certain'] as const;
 
 /** Sentence-final punctuation, which lives on the sentence rather than a word. */
 const terminalPunctuation = (text: string): string => text.match(/[.!?…]+$/)?.[0] ?? '';
+
+/**
+ * The words are bare forms; the sentence carries the capital, as it carries the
+ * full stop. Shown as-is the line read "žena pročitala ..." under a heading-cased
+ * Cyrillic "Жена прочитала ...".
+ */
+const asWritten = (surface: string, sentence: string, first: boolean): string =>
+  first && sentence.toLowerCase().startsWith(surface.toLowerCase())
+    ? sentence.slice(0, surface.length)
+    : surface;
 
 async function fetchTranslation(
   text: string,
@@ -140,113 +150,106 @@ export default function App() {
 
   return (
     <div className="shell">
-      <header className="masthead">
-        <div className="masthead-title">
-          <h1 className="wordmark">Medžuslovjansky</h1>
-          <p className="tagline">
-            Translates into Interslavic and shows its reasoning for every word, including
-            where it is guessing.
-          </p>
-        </div>
-        <div className="controls">
-          <label>
-            <span>From</span>
-            <select value={lang} onChange={(e) => setLang(e.target.value as Lang)}>
-              {LANGS.map((l) => (
-                <option key={l.value} value={l.value}>
-                  {l.label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            <span>Script</span>
-            <select value={orth} onChange={(e) => setOrth(e.target.value as Orthography)}>
-              {ORTHS.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
+      <header className="topbar">
+        <h1 className="wordmark">Medžuslovjansky</h1>
+        <p className="tagline">Interslavic translator that shows its reasoning for every word</p>
       </header>
 
-      <section className="block">
-        <h2 className="block-label">{lang === 'en' ? 'English' : 'Russian'}</h2>
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          spellCheck={false}
-          placeholder={lang === 'en' ? 'Type a sentence…' : 'Введите предложение…'}
-          aria-label="Text to translate"
-        />
-      </section>
+      <main className="translator">
+        <div className="langbar">
+          <Tabs label="Translate from" options={LANGS} value={lang} onChange={setLang} />
+          <span className="langbar-arrow" aria-hidden="true">
+            →
+          </span>
+          <div className="langbar-target">
+            <span className="target-lang">Interslavic</span>
+            <Tabs label="Script" options={ORTHS} value={orth} onChange={setOrth} />
+          </div>
+        </div>
 
-      <section className="block">
-        <h2 className="block-label">
-          Interslavic
-          {busy && <span className="working"> · translating</span>}
-        </h2>
+        <div className="panes">
+          <section className="pane pane-source">
+            <textarea
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              spellCheck={false}
+              placeholder={lang === 'en' ? 'Type a sentence…' : 'Введите предложение…'}
+              aria-label="Text to translate"
+            />
+            {text && (
+              <button
+                type="button"
+                className="icon-button pane-clear"
+                onClick={() => setText('')}
+                aria-label="Clear text"
+                title="Clear text"
+              >
+                ×
+              </button>
+            )}
+          </section>
 
-        {primary.length === 0 && !error ? (
-          <p className="placeholder">
-            Type a sentence above to see it translated — and to see why each word came out
-            the way it did.
-          </p>
-        ) : (
-          <>
-            <div className="output-lines">
-              {primary.map((s, i) => (
-                <p className="output" key={i}>
-                  {s.words.map((w, j) => (
-                    <Fragment key={`${i}-${j}`}>
-                      {/* An explicit space: adjacent JSX elements have none,
-                          so the words ran together as one string. */}
-                      {j > 0 ? ' ' : null}
-                      <button
-                        type="button"
-                        className={[
-                          'output-word',
-                          active === `${i}-${j}` ? 'is-active' : '',
-                          w.validation !== 'validated' ? 'is-flagged' : '',
-                        ]
-                          .filter(Boolean)
-                          .join(' ')}
-                        onClick={() => setActiveWord(`${i}-${j}`)}
-                        aria-pressed={active === `${i}-${j}`}
-                        title={`${w.lemma} · ${w.pos}`}
-                      >
-                        {w.surface}
-                      </button>
-                    </Fragment>
+          <section className={`pane pane-target${busy ? ' is-busy' : ''}`} aria-live="polite">
+            {primary.length === 0 && !error ? (
+              <p className="placeholder">{busy ? 'Translating…' : 'Translation'}</p>
+            ) : (
+              <>
+                <div className="output-lines">
+                  {primary.map((s, i) => (
+                    <p className="output" key={i}>
+                      {s.words.map((w, j) => (
+                        <Fragment key={`${i}-${j}`}>
+                          {/* An explicit space: adjacent JSX elements have none,
+                              so the words ran together as one string. */}
+                          {j > 0 ? ' ' : null}
+                          <button
+                            type="button"
+                            className={[
+                              'output-word',
+                              active === `${i}-${j}` ? 'is-active' : '',
+                              w.validation !== 'validated' ? 'is-flagged' : '',
+                            ]
+                              .filter(Boolean)
+                              .join(' ')}
+                            onClick={() => setActiveWord(`${i}-${j}`)}
+                            aria-pressed={active === `${i}-${j}`}
+                            title={`${w.lemma} · ${w.pos}`}
+                          >
+                            {asWritten(w.surface, s.text, j === 0)}
+                          </button>
+                        </Fragment>
+                      ))}
+                      {/* The words carry no punctuation; the sentence does. */}
+                      {terminalPunctuation(s.text)}
+                    </p>
                   ))}
-                  {/* The words carry no punctuation; the sentence does. */}
-                  {terminalPunctuation(s.text)}
-                </p>
-              ))}
-            </div>
+                </div>
 
-            {alternate.length > 0 && (
-              <p className="alt-script" aria-label="The same text in the other script">
-                {alternate.map((s) => s.text).join(' ')}
-              </p>
-            )}
+                {alternate.length > 0 && (
+                  <p className="alt-script" aria-label="The same text in the other script">
+                    {alternate.map((s) => s.text).join(' ')}
+                  </p>
+                )}
 
-            {rate !== null && (
-              <div className="meter">
-                <span className="meter-bar" aria-hidden="true">
-                  <span style={{ width: `${Math.round(rate * 100)}%` }} />
-                </span>
-                <span className="meter-label">
-                  {words.length - unresolved.length} of {words.length} words found in the
-                  lexicon
-                </span>
-              </div>
+                <div className="pane-foot">
+                  {rate !== null && (
+                    <div className="meter">
+                      <span className="meter-bar" aria-hidden="true">
+                        <span style={{ width: `${Math.round(rate * 100)}%` }} />
+                      </span>
+                      <span className="meter-label">
+                        {words.length - unresolved.length} of {words.length} words found in the
+                        lexicon
+                      </span>
+                    </div>
+                  )}
+                  <CopyButton text={primary.map((s) => s.text).join(' ')} />
+                </div>
+              </>
             )}
-          </>
-        )}
-      </section>
+          </section>
+        </div>
+      </main>
 
       {error && (
         <div className="error">
@@ -339,6 +342,57 @@ export default function App() {
 }
 
 /**
+ * A row of tabs in place of a dropdown. There are two source languages and four
+ * scripts - few enough to show them all, so choosing one is one click and the
+ * current choice is always visible, as in any translator's language bar.
+ */
+function Tabs<T extends string>({
+  label,
+  options,
+  value,
+  onChange,
+}: {
+  label: string;
+  options: { value: T; label: string }[];
+  value: T;
+  onChange: (value: T) => void;
+}) {
+  return (
+    <div className="tabs" role="group" aria-label={label}>
+      {options.map((o) => (
+        <button
+          key={o.value}
+          type="button"
+          className={`tab${o.value === value ? ' is-selected' : ''}`}
+          aria-pressed={o.value === value}
+          onClick={() => onChange(o.value)}
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // Clipboard access can be refused; the text is still selectable.
+    }
+  };
+  return (
+    <button type="button" className="text-button" onClick={() => void copy()} disabled={!text}>
+      {copied ? 'Copied' : 'Copy'}
+    </button>
+  );
+}
+
+/**
  * What says so.
  *
  * The confidence rail already told the reader how sure the engine is. This
@@ -415,33 +469,37 @@ function WordDetail({
         )}
       </div>
 
-      <div className="entry-features">
-        {word.features.map((f) => (
-          <div className="feature" data-confidence={f.confidence} key={f.name}>
-            <span className="feature-value">{readable(f.name, f.value)}</span>
-            <span className="feature-why">{f.because}</span>
-            {f.alternatives.length > 0 && (
-              <ul className="alts">
-                {f.alternatives.map((a, i) => (
-                  <li key={i}>
-                    could also be {readable(f.name, a.value)} — {a.because}
-                  </li>
-                ))}
-              </ul>
-            )}
-            <Citation citation={citations[f.ruleId]} ruleId={f.ruleId} />
-          </div>
-        ))}
+      {/* An untranslated word has no features; an empty block left two rules
+          with nothing between them. */}
+      {(word.features.length > 0 || word.aspect) && (
+        <div className="entry-features">
+          {word.features.map((f) => (
+            <div className="feature" data-confidence={f.confidence} key={f.name}>
+              <span className="feature-value">{readable(f.name, f.value)}</span>
+              <span className="feature-why">{f.because}</span>
+              {f.alternatives.length > 0 && (
+                <ul className="alts">
+                  {f.alternatives.map((a, i) => (
+                    <li key={i}>
+                      could also be {readable(f.name, a.value)} — {a.because}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <Citation citation={citations[f.ruleId]} ruleId={f.ruleId} />
+            </div>
+          ))}
 
-        {word.aspect && (
-          <div className="feature" data-confidence="high">
-            <span className="feature-value">
-              {word.aspect.chosen === 'Imp' ? 'imperfective' : 'perfective'}
-            </span>
-            <span className="feature-why">{word.aspect.because}</span>
-          </div>
-        )}
-      </div>
+          {word.aspect && (
+            <div className="feature" data-confidence="high">
+              <span className="feature-value">
+                {word.aspect.chosen === 'Imp' ? 'imperfective' : 'perfective'}
+              </span>
+              <span className="feature-why">{word.aspect.because}</span>
+            </div>
+          )}
+        </div>
+      )}
 
       {(word.lexicalChoice || word.notes.length > 0) && (
         <div className="entry-notes">

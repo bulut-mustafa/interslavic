@@ -44,6 +44,8 @@
   --text-xl: 1.5rem;
   /* Scales down rather than wrapping mid-sentence on a narrow screen. */
   --text-2xl: clamp(1.75rem, 5vw, 2.25rem);
+  /* Both panes: big enough to be the point, small enough for a paragraph. */
+  --text-output: clamp(1.25rem, 2.4vw, 1.6rem);
 
   --radius: 6px;
 }
@@ -83,34 +85,25 @@ textarea {
 
 /* ---------- shell ---------- */
 
-/* One column. A translator shows short text, so a measure wide enough to read
-   comfortably beats filling the window - and it means the phone layout and the
-   desktop layout are the same layout, got right once. */
+/* Source and translation side by side, as in any translator: the eye goes
+   left to right from what was typed to what it became. The reasoning sits
+   below both, full width. On a phone the panes stack. */
 .shell {
-  max-width: 44rem;
+  max-width: 72rem;
   margin: 0 auto;
-  padding: var(--space-5) var(--space-4) var(--space-6);
+  padding: var(--space-4) var(--space-4) var(--space-6);
   display: flex;
   flex-direction: column;
-  gap: var(--space-5);
+  gap: var(--space-4);
 }
 
-/* ---------- masthead ---------- */
+/* ---------- top bar ---------- */
 
-.masthead {
+.topbar {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: var(--space-3) var(--space-4);
-  padding-bottom: var(--space-3);
-  border-bottom: 1px solid var(--rule);
-}
-
-.masthead-title {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
 }
 
 .wordmark {
@@ -123,35 +116,159 @@ textarea {
 
 .tagline {
   margin: 0;
-  color: var(--ink-soft);
+  color: var(--ink-faint);
   font-size: var(--text-sm);
-  max-width: 32rem;
 }
 
-.controls {
+/* ---------- the translator card ---------- */
+
+.translator {
+  background: var(--paper-raised);
+  border: 1px solid var(--rule);
+  border-radius: calc(var(--radius) * 2);
+  overflow: hidden;
+}
+
+/* The language bar spans both panes, split at the same line they are, so
+   each pane's language sits above it. */
+.langbar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: end;
+  border-bottom: 1px solid var(--rule);
+  padding: 0 var(--space-3);
+}
+
+.langbar-arrow {
+  color: var(--ink-faint);
+  padding: 0 var(--space-3) var(--space-2);
+}
+
+.langbar-target {
   display: flex;
   flex-wrap: wrap;
+  align-items: end;
+  gap: 0 var(--space-3);
+}
+
+.target-lang {
+  font-weight: 600;
+  color: var(--ink);
+  padding: var(--space-2) 0;
+  border-bottom: 2px solid transparent;
+}
+
+/* Tabs, not dropdowns: every choice is visible and one click away, and the
+   current one is marked the way translator language bars mark it. */
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.tab {
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  padding: var(--space-2) var(--space-3);
+  min-height: 2.75rem;
+  cursor: pointer;
+  color: var(--ink-soft);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  transition: color 0.12s ease, border-color 0.12s ease, background-color 0.12s ease;
+}
+
+.tab:hover {
+  color: var(--ink);
+  background: var(--paper);
+}
+
+.tab.is-selected {
+  color: var(--teal);
+  border-bottom-color: var(--teal);
+}
+
+.langbar-target .tab {
+  font-weight: 400;
+}
+
+.panes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.pane {
+  position: relative;
+  min-height: 14rem;
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* The output side is tinted, so the two halves read as "yours" and "ours". */
+.pane-target {
+  background: var(--paper);
+  border-left: 1px solid var(--rule);
+}
+
+.pane-target.is-busy .output-lines {
+  opacity: 0.55;
+  transition: opacity 0.2s ease;
+}
+
+.pane-foot {
+  margin-top: auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
   gap: var(--space-2) var(--space-3);
 }
 
-.controls label {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.controls label span {
-  font-size: var(--text-sm);
+.icon-button {
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 0;
+  border-radius: 50%;
+  background: none;
   color: var(--ink-faint);
+  font-size: var(--text-xl);
+  line-height: 1;
+  cursor: pointer;
 }
 
-select {
-  background: var(--paper-raised);
+.icon-button:hover {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.pane-clear {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+}
+
+.text-button {
+  margin-left: auto;
+  background: none;
   border: 1px solid var(--rule);
-  border-radius: var(--radius);
-  /* Tall enough to tap. */
-  padding: var(--space-2);
-  min-height: 2.5rem;
+  border-radius: 999px;
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.text-button:hover:not(:disabled) {
+  color: var(--ink);
+  border-color: var(--ink-faint);
+  background: var(--paper-raised);
+}
+
+.text-button:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 
 /* ---------- blocks ---------- */
@@ -179,17 +296,23 @@ select {
   text-transform: none;
 }
 
+/* The pane is the field: no box inside a box. Same type as the output, so a
+   sentence and its translation line up across the divide. */
 textarea {
+  flex: 1;
   width: 100%;
-  border: 1px solid var(--rule);
-  border-radius: var(--radius);
-  background: var(--paper-raised);
-  padding: var(--space-3);
-  resize: vertical;
-  min-height: 6rem;
+  min-height: 10rem;
+  border: 0;
+  background: transparent;
+  padding: 0 var(--space-5) 0 0;
+  resize: none;
   font-family: var(--serif);
-  font-size: var(--text-lg);
-  line-height: 1.5;
+  font-size: var(--text-output);
+  line-height: 1.4;
+}
+
+textarea:focus-visible {
+  outline: none;
 }
 
 textarea::placeholder {
@@ -199,8 +322,9 @@ textarea::placeholder {
 .placeholder {
   margin: 0;
   color: var(--ink-faint);
-  font-size: var(--text-base);
-  max-width: 32rem;
+  font-family: var(--serif);
+  font-size: var(--text-output);
+  line-height: 1.4;
 }
 
 /* ---------- the translation ---------- */
@@ -214,7 +338,7 @@ textarea::placeholder {
 /* The hero. Everything else on the page is in service of this line. */
 .output {
   font-family: var(--serif);
-  font-size: var(--text-2xl);
+  font-size: var(--text-output);
   line-height: 1.4;
   margin: 0;
 }
@@ -432,6 +556,11 @@ textarea::placeholder {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
+}
+
+/* A rule only between features and notes: straight after the meta line, which
+   has its own, it doubled up. */
+.entry-features + .entry-notes {
   padding-top: var(--space-3);
   border-top: 1px solid var(--rule);
 }
@@ -632,27 +761,57 @@ textarea::placeholder {
 
 /* ---------- narrow screens ---------- */
 
+/* Side by side stops paying for itself below this width: each pane would be
+   a few words wide. */
+@media (max-width: 48rem) {
+  .panes {
+    grid-template-columns: 1fr;
+  }
+
+  .pane {
+    min-height: 9rem;
+  }
+
+  .pane-target {
+    border-left: 0;
+    border-top: 1px solid var(--rule);
+  }
+
+  textarea {
+    min-height: 6rem;
+  }
+
+  /* The bar becomes two rows: source tabs, then target and script. */
+  .langbar {
+    grid-template-columns: 1fr;
+    padding: 0 var(--space-2);
+  }
+
+  .langbar-arrow {
+    display: none;
+  }
+
+  .langbar-target {
+    border-top: 1px solid var(--rule);
+  }
+}
+
 @media (max-width: 34rem) {
   .shell {
-    padding: var(--space-4) var(--space-3) var(--space-5);
-    gap: var(--space-4);
+    padding: var(--space-3) var(--space-3) var(--space-5);
+    gap: var(--space-3);
   }
 
-  /* The controls stop competing with the wordmark for the same line. */
-  .masthead {
-    align-items: flex-start;
+  /* Four scripts do not fit one row on a phone; they scroll rather than wrap,
+     so the bar keeps its height. */
+  .langbar-target .tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
   }
 
-  .controls {
-    width: 100%;
-  }
-
-  .controls label {
-    flex: 1 1 8rem;
-  }
-
-  select {
-    width: 100%;
+  .tab {
+    white-space: nowrap;
   }
 
   /* Generous leading so padded word buttons on consecutive lines do not touch. */

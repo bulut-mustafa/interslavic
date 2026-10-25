@@ -165,7 +165,7 @@ describe('translator UI', () => {
     // every word is a stronger check than the old single sweep: it proves both
     // that the attribute is set AND that selecting a word changes the panel.
     const levels: (string | null)[] = [];
-    for (const surface of ['žena', 'čitala', 'knigu']) {
+    for (const surface of ['Žena', 'čitala', 'knigu']) {
       await selectWord(container, surface);
       levels.push(
         ...[...container.querySelectorAll('.feature')].map((el) =>
@@ -312,7 +312,8 @@ describe('the output line reads as a sentence', () => {
     await waitFor(() => expect(container.querySelector('.output')).toBeTruthy(), {
       timeout: 3000,
     });
-    expect(container.querySelector('.output')?.textContent).toBe('žena čitala knigu.');
+    // ...and the capital the sentence starts with: the words are bare forms.
+    expect(container.querySelector('.output')?.textContent).toBe('Žena čitala knigu.');
   });
 
   it('keeps the sentence-final punctuation', async () => {
@@ -354,7 +355,7 @@ describe('what says so', () => {
 
     // The two tiers sit on different words, so this walks the sentence.
     const tiers: (string | null)[] = [];
-    for (const surface of ['žena', 'čitala']) {
+    for (const surface of ['Žena', 'čitala']) {
       await selectWord(container, surface);
       tiers.push(
         ...[...container.querySelectorAll('.citation > summary')].map((el) =>
@@ -399,5 +400,55 @@ describe('what says so', () => {
     expect(container.querySelector('.citation-missing')?.textContent ?? '').toMatch(
       /no source recorded/,
     );
+  });
+});
+
+/**
+ * The language and script are tabs rather than dropdowns: every choice is on
+ * screen, and the current one is marked. The request must carry what is
+ * marked, or the bar would show one thing and translate another.
+ */
+describe('the language bar', () => {
+  const lastBody = () => {
+    const calls = (fetch as unknown as { mock: { calls: [string, { body: string }][] } }).mock.calls;
+    return JSON.parse(calls[calls.length - 1]![1].body) as { lang: string; orthography: string };
+  };
+
+  it('marks the current language and translates from the one clicked', async () => {
+    const { container } = render(<App />);
+    await settled(container);
+    const russian = screen.getByRole('button', { name: 'Russian' });
+    expect(screen.getByRole('button', { name: 'English' }).getAttribute('aria-pressed')).toBe('true');
+
+    await act(async () => {
+      fireEvent.click(russian);
+    });
+    expect(russian.getAttribute('aria-pressed')).toBe('true');
+    await waitFor(() => expect(lastBody().lang).toBe('ru'), { timeout: 3000 });
+  });
+
+  it('switches the script with one click', async () => {
+    const calls = (fetch as unknown as { mock: { calls: [string, { body: string }][] } }).mock.calls;
+    const { container } = render(<App />);
+    await settled(container);
+    // Cyrillic is already requested as the quiet second line, so what proves
+    // the switch is the MAIN request - the first one sent after the click.
+    const before = calls.length;
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Cyrillic' }));
+    });
+    await waitFor(() => expect(calls.length).toBeGreaterThan(before), { timeout: 3000 });
+    expect(JSON.parse(calls[before]![1].body).orthography).toBe('cyrillic');
+    expect(screen.getByRole('button', { name: 'Cyrillic' }).getAttribute('aria-pressed')).toBe('true');
+  });
+
+  it('clears the input', async () => {
+    const { container } = render(<App />);
+    await settled(container);
+    await act(async () => {
+      fireEvent.click(screen.getByLabelText('Clear text'));
+    });
+    expect((screen.getByLabelText('Text to translate') as HTMLTextAreaElement).value).toBe('');
+    expect(screen.queryByLabelText('Clear text')).toBeNull();
   });
 });
