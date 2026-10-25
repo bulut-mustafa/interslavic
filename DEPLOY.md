@@ -1,83 +1,67 @@
 # Putting the translator online for testers
 
 The whole app runs in one container: the Stanza parser, the engine, and the web
-page, all on one address. The target is a free **Hugging Face Space** (Docker),
-because the parser needs a few GB of memory and the free CPU tier has 16 GB.
+page, all on one address. It is hosted on **Google Cloud Run**, which builds the
+container in Google's cloud (nothing heavy runs on the laptop) and runs it only
+while someone is using it.
 
-## One-time setup (about 10 minutes)
+Why Cloud Run: the parser needs about 1.7 GB of memory at its peak (measured:
+parser 1.2 GB, engine 0.5 GB), which rules out free hosts with 512 MB or 1 GB.
+Hugging Face made Docker Spaces paid in July 2026, and Oracle's free Ampere
+servers were out of capacity in the account's home region.
 
-1. **Make an account.** Sign up at https://huggingface.co/join.
-2. **Create the Space.**
-   - Open https://huggingface.co/new-space.
-   - Name: e.g. `interslavic-translator`.
-   - SDK: **Docker**, template **Blank**.
-   - Hardware: **CPU basic (free)**.
-   - Visibility: **Public**, so testers can open it without an account.
-3. **Create an access token.**
-   - Go to https://huggingface.co/settings/tokens and choose **New token**.
-   - Role: **Write**. Copy it.
-4. **Choose a password for reading reports.** In the Space, open **Settings → Variables
-   and secrets → New secret**:
-   - Name: `FEEDBACK_TOKEN`.
-   - Value: any long random string. Keep it; you need it to download the reports.
+## What is running
 
-## Publish (and re-publish after every change)
+| | |
+|---|---|
+| Project | `interslavic-translator-08rmc` |
+| Service | `interslavic`, region `europe-west1` |
+| Link for testers | https://interslavic-8578650623.europe-west1.run.app |
+| Size | 1 CPU, 2 GiB, at most **one** copy running (caps the cost) |
+| Tester reports | bucket `interslavic-translator-08rmc-reports`, mounted at `/data` |
+| Budget alert | 150 TRY (about 3 USD) a month, emails at 25%, 50% and 100% |
+
+## Re-publish after a change
 
 From the project folder:
 
 ```
-sh deploy/huggingface.sh <your-username>/interslavic-translator
+gcloud run deploy interslavic --source . --region europe-west1
 ```
 
-When git asks, give your Hugging Face **username** and paste the **token** as the
-password.
-
-The Space then builds itself.
-- The first build takes roughly 10–20 minutes, mostly downloading PyTorch and the
-  Stanza models.
-- The **Logs** tab shows progress.
-- When it says *Running*, the app is at:
-
-```
-https://<your-username>-interslavic-translator.hf.space
-```
-
-That is the link to send testers.
+The build takes about 10–15 minutes and keeps every setting above.
+- What is uploaded is decided by `.gcloudignore`, which reads `.dockerignore`.
+  It is the same set of files as `git ls-files`; check with
+  `gcloud meta list-files-for-upload`.
+- The dictionary is never uploaded: the build fetches it from its public source.
 
 ## Reading the testers' reports
 
-Every report from the page's **Report a problem** button is one line in a file. To
-download them, open:
+Each report from the page's **Report a problem** button is one line in a file
+that survives restarts. Open:
 
 ```
-https://<your-username>-interslavic-translator.hf.space/api/feedback?token=<FEEDBACK_TOKEN>
+https://interslavic-8578650623.europe-west1.run.app/api/feedback?token=<FEEDBACK_TOKEN>
 ```
 
-Save the result and hand it to Claude: each line has the sentence, our output, and
-what the tester said is wrong.
-
-**Reports survive only while the Space keeps running.**
-- On the free tier, the Space sleeps after about 48 hours without visitors. On restart,
-  the report file is lost.
-- So download the reports regularly.
-- Or add **persistent storage** in Settings (paid, the smallest tier is enough). The
-  app then keeps reports in `/data` automatically.
+`FEEDBACK_TOKEN` is set on the service; read it with
+`gcloud run services describe interslavic --region europe-west1 --format=export | grep -A1 FEEDBACK_TOKEN`.
+Without the right token the address answers 404.
 
 ## Things to know
 
-- **First visit after a sleep is slow.** The parser loads its models on the first
-  request, which takes up to a minute. The page says so if it is not ready yet.
-- **The dictionary is fetched at build time** from its public source, so it may
-  include edits made after the snapshot the tests were run on.
-- **The dictionary is never copied into the Space's repository or served as a file.**
-  It is Jan van Steenbergen's material, licensed for non-commercial use with
-  attribution (see `docs/dictionary-provenance.md`). The page shows the attribution.
-  - A free test site fits that.
-  - Because the site is public, it is courteous to tell the dictionary's maintainers
-    (interslavic-dictionary.com).
-- **The Docker image has not been built on this machine.** Docker was not running,
-  and the build would strain an 8 GB laptop. Every part of it was run directly
-  instead: the production server serving the page, the API, the parser, and the
-  feedback routes.
-  - If the first build on Hugging Face fails, the **Logs** tab shows why.
-  - Paste the log to Claude.
+- **First visit after a quiet spell is slow.** The service sleeps after about 15
+  idle minutes. The first request then starts it and loads the language models;
+  the page says it may still be starting up.
+- **Cost.** Cloud Run's monthly free allowance covers testing use. The image
+  storage (several GB, with 0.5 GB free) costs a few cents a month. The budget
+  alert warns by email; it does not stop the service.
+- **To stop all costs**, delete the project:
+  `gcloud projects delete interslavic-translator-08rmc`.
+- **The dictionary is fetched at build time**, so it may include edits made after
+  the snapshot the tests were run on.
+- **The dictionary is never served as a file.** It is Jan van Steenbergen's
+  material, licensed for non-commercial use with attribution (see
+  `docs/dictionary-provenance.md`). The page shows the attribution. Because the
+  site is public, it is courteous to tell the dictionary's maintainers
+  (interslavic-dictionary.com).

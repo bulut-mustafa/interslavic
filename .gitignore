@@ -16,4 +16,4 @@ services/parser/.venv/
 .claude/
 
 # tester reports collected by the server
-data/
+/data/

@@ -99,7 +99,7 @@ import { rewriteSource } from '../../rules/src/source-rewrites.ts';
 
 
 
-export type { GlossedFeature, GlossedWord, Translation } from './result.ts';
+export type { GlossedFeature, GlossedWord, RuleCitation, Translation } from './result.ts';
 
 
 

@@ -277,11 +277,16 @@ export default function App() {
         <div className="error">
           <h2>The translator is not answering</h2>
           <p>It may still be starting up - please try again in a minute.</p>
-          <p>{error}</p>
-          <p>
-            The parser and engine both need to be running: <code>npm run parser</code> in one
-            terminal, <code>npm run server</code> in another.
-          </p>
+          {/* How to start the services is for whoever runs it locally, not for testers. */}
+          {import.meta.env.DEV && (
+            <>
+              <p>{error}</p>
+              <p>
+                The parser and engine both need to be running: <code>npm run parser</code> in one
+                terminal, <code>npm run server</code> in another.
+              </p>
+            </>
+          )}
         </div>
       )}
 

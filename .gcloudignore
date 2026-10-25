@@ -1,0 +1,4 @@
+# What `gcloud run deploy --source .` uploads to Cloud Build: the same as
+# .dockerignore, so the dictionary is never uploaded (the build fetches it).
+.gcloudignore
+#!include:.dockerignore

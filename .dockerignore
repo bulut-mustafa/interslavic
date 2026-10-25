@@ -6,5 +6,5 @@ services/parser/.venv
 packages/web/dist
 packages/lexicon/data/raw
 packages/lexicon/data/built
-data
+/data
 .mutation-backup
