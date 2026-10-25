@@ -23,6 +23,20 @@ const ROOT = path.resolve(import.meta.dirname, '../../..');
 const lex = Lexicon.fromTsv(path.join(ROOT, 'packages/lexicon/data/raw/words.tsv'));
 const index = buildFullFormIndex(lex);
 
+/**
+ * Forms the grammar pages state that the generated lexicon does not hold,
+ * each with where it is stated. Kept short on purpose: anything else a page
+ * shows must be found by the lexicon.
+ */
+const STATED_BY_THE_GRAMMAR: Record<string, string> = {
+  // the conditional of byti: "ja byh dělal(a)", "ty bys dělal(a)", "my byhmo
+  // dělali", "vy byste dělali" - http://steen.free.fr/interslavic/verbs.html
+  byh: 'verbs.html, conditional',
+  bys: 'verbs.html, conditional',
+  byhmo: 'verbs.html, conditional',
+  byste: 'verbs.html, conditional',
+};
+
 const SOURCES = ['http://steen.free.fr/interslavic', 'https://interslavic-dictionary.com', 'https://tatoeba.org'];
 
 /** The Interslavic strings a block shows. */
@@ -64,7 +78,7 @@ const unknownWords = (lesson: LessonPage): string[] => {
   return lesson.blocks
     .flatMap(isvTexts)
     .flatMap(words)
-    .filter((w) => !names.has(w.toLowerCase()) && !index.has(w));
+    .filter((w) => !names.has(w.toLowerCase()) && !index.has(w) && !(w.toLowerCase() in STATED_BY_THE_GRAMMAR));
 };
 
 describe.each(LESSONS.map((l) => [l.slug, l] as const))('lesson "%s"', (_slug, lesson) => {
@@ -75,17 +89,14 @@ describe.each(LESSONS.map((l) => [l.slug, l] as const))('lesson "%s"', (_slug, l
   it('builds every inflection table the way the engine does', () => {
     for (const block of lesson.blocks) {
       if (block.kind !== 'forms') continue;
-      const entry = lex.lookupLemma(block.lemma).find((e) => e.pos.xpos === block.xpos);
-      expect(entry, `${block.lemma} (${block.xpos}) is a dictionary entry`).toBeDefined();
       for (const row of block.rows) {
         for (const cell of row.cells) {
-          const made = realize({
-            lemma: block.lemma,
-            xpos: block.xpos,
-            feats: cell.feats,
-            principalParts: entry!.addition.principalParts,
-          });
-          expect(made.ok && toStandard(made.form), `${block.lemma} ${JSON.stringify(cell.feats)}`).toBe(cell.form);
+          const lemma = cell.lemma ?? block.lemma;
+          const xpos = cell.xpos ?? block.xpos;
+          const entry = lex.lookupLemma(lemma).find((e) => e.pos.xpos === xpos);
+          expect(entry, `${lemma} (${xpos}) is a dictionary entry`).toBeDefined();
+          const made = realize({ lemma, xpos, feats: cell.feats, principalParts: entry!.addition.principalParts });
+          expect(made.ok && toStandard(made.form), `${lemma} ${JSON.stringify(cell.feats)}`).toBe(cell.form);
         }
       }
     }

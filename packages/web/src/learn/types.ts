@@ -41,7 +41,8 @@ export type Block =
       /** The dictionary's part-of-speech code, e.g. "f." or "v.tr. ipf.". */
       xpos: string;
       head: string[];
-      rows: { label: string; cells: { form: string; feats: Feats }[] }[];
+      /** A cell may name its own word, so several verbs can share one table. */
+      rows: { label: string; cells: { form: string; feats: Feats; lemma?: string; xpos?: string }[] }[];
     }
   | {
       kind: 'choice';
