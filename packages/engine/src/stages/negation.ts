@@ -48,8 +48,18 @@ export function planNegation(
       if (!isParticle && !isNegativeWord) continue;
 
       // Negate the copula when the predicate has one, else the head itself.
-      const head = sentence.tokens.find((t) => t.id === token.head);
+      let head = sentence.tokens.find((t) => t.id === token.head);
       if (!head) continue;
+      /**
+       * A negative DETERMINER negates the clause, not the noun it modifies:
+       * "No one loves Trump" (`nikto`) negated the noun too, "Ne nikto ne
+       * ljubi". The verb above the noun is the one that takes "ne".
+       */
+      if (token.deprel === 'det') {
+        const nominal: UdToken = head;
+        head = sentence.tokens.find((t) => t.id === nominal.head);
+        if (!head) continue;
+      }
       // `ne` goes before the finite verb, which with a modal IS the modal:
       // "Otec ne mogl najdti...", not "Otec mogl ne najdti...".
       const modalId = modalOfHead.get(head.id);

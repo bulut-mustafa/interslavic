@@ -46,6 +46,12 @@ export interface FunctionWord {
    * party won" keeps `partija`.
    */
   whenDependent?: { deprel: string; lemmas?: string[] };
+  /**
+   * When set, this entry applies only when the word's HEAD is not one of
+   * these parts of speech. "too" modifying an adjective is a degree ("too
+   * big", `zamnogo`); modifying anything else it means "also" (`takože`).
+   */
+  unlessHeadIs?: string[];
   isv: string;
   why: string;
   evidence: string;
@@ -77,10 +83,12 @@ export function functionWordFor(
   lang = 'en',
   negated = false,
   dependents: { deprel: string; lemma: string }[] = [],
+  headUpos?: string,
 ): FunctionWord | null {
   const candidates = index()
     .get(`${lang}|${lemma.trim().toLowerCase()}`)
-    ?.filter((w) => w.upos.includes(upos)) ?? [];
+    ?.filter((w) => w.upos.includes(upos))
+    .filter((w) => !(w.unlessHeadIs && headUpos && w.unlessHeadIs.includes(headUpos))) ?? [];
   const hasDependent = ({ whenDependent: want }: FunctionWord) =>
     want !== undefined &&
     dependents.some(

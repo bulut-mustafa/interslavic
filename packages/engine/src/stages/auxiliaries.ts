@@ -420,6 +420,22 @@ export function planAuxiliaries(
     imperatives.set(token.id, { person: '2', number });
   }
 
+  /**
+   * A negative imperative carries the mood on "do", not on the verb: in
+   * "don't show" the verb is a bare infinitive, so it was conjugated as a
+   * present - "Kažite, ne pokazyvaje". The verb "do" governs is the
+   * imperative, negated by the "not" it keeps.
+   */
+  if (sentence.lang === 'en') {
+    for (const token of sentence.tokens) {
+      if (token.upos !== 'AUX' || token.lemma.toLowerCase() !== 'do' || token.feats['Mood'] !== 'Imp') continue;
+      const verb = sentence.tokens.find((t) => t.id === token.head);
+      if (verb?.upos === 'VERB' && verb.feats['VerbForm'] === 'Inf') {
+        imperatives.set(verb.id, { person: '2', number: 'Plur' });
+      }
+    }
+  }
+
   if (sentence.lang === 'en') {
     for (const token of sentence.tokens) {
       // "May he live long!" - the auxiliary PRECEDES the subject, which is what
@@ -452,7 +468,9 @@ export function planAuxiliaries(
          * person. When such a form is needed, the optative particle nehaj is
          * used"). Without this split, "Let us go" became "Nehaj ide".
          */
-        if ((object.feats['Person'] ?? '3') === '1') {
+        // "us", not "me": "Let me know" is no first-person PLURAL, and was
+        // coming out "Znajmo", "let's know".
+        if ((object.feats['Person'] ?? '3') === '1' && object.feats['Number'] === 'Plur') {
           imperatives.set(verb.id, { person: '1', number: 'Plur' });
           droppedAux.add(token.id);
           droppedAux.add(object.id);
@@ -466,6 +484,20 @@ export function planAuxiliaries(
         if (pronounLemmaFor(object.feats, sentence)) droppedAux.add(object.id);
       }
     }
+  }
+
+  /**
+   * "I'll BE outside": `budu` already is the future of byti, so the copula it
+   * governs is not said again - "ja budu vně", not "ja budu jesm vně". Not in
+   * a finite purpose clause, where "will" becomes the conditional and the
+   * copula carries it as byti's l-participle ("da by děti byli zdrave").
+   */
+  for (const [head, role] of auxRoleForHead) {
+    if (role !== 'future' || !futureAuxToken.has(head)) continue;
+    const copula = sentence.tokens.find(
+      (t) => t.head === head && t.deprel === 'cop' && t.lemma.toLowerCase() === 'be' && t.feats['VerbForm'] === 'Inf',
+    );
+    if (copula && !finitePurposeCarriers.has(copula.id)) droppedAux.add(copula.id);
   }
 
   return {

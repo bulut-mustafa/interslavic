@@ -63,7 +63,9 @@ describe('the placeholder "one"', () => {
   });
 
   it('leaves "one of them" alone, which is the numeral with a partitive', () => {
-    expect(out('one-of-them-is-broken.conllu')).toContain('Jedna');
+    // The numeral survives; its gender is now the headword's own (jedin)
+    // rather than a tie-break's.
+    expect(out('one-of-them-is-broken.conllu')).toMatch(/^Jedin /);
   });
 
   it('keeps the word when only an article would be left', () => {

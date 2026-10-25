@@ -29,7 +29,8 @@ describe('comparatives and superlatives', () => {
   it('builds the superlative as naj- plus the comparative', () => {
     // The page allows naj- + positive ("najveliky") only "as a means of
     // simplification"; naj- + comparative is the rule.
-    expect(out('biggest-house.conllu')).toBe('Tutoj jest največši dom.');
+    // ("This is" presents a noun, so it is "To jest", as Tatoeba writes it.)
+    expect(out('biggest-house.conllu')).toBe('To jest največši dom.');
     expect(out('he-is-the-best.conllu')).toBe('On jest najlěpši.');
   });
 

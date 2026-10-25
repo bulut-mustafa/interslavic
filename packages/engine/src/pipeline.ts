@@ -26,6 +26,8 @@ import { predicateAgreementStage } from './stages/predicate-agreement.ts';
 import { copulaStage } from './stages/copula.ts';
 import { pastParticipleStage } from './stages/past-participle.ts';
 import {
+  capitalised,
+  glossedAsProperNoun,
   Lexicon,
   normalizeGloss,
   normalizeRussian,
@@ -203,6 +205,17 @@ export function translate(
     if (token.feats['Poss'] !== 'Yes') return false;
     const subject = subjectOfClause(token, sentence);
     if (!subject || subject.id === token.id) return false;
+    /**
+     * A possessive INSIDE the subject cannot refer back to it: in "His
+     * brother is tall" the subject is "his brother" itself, and the matching
+     * person and number made it "Svoj brat jest vysoky". Walk up from the
+     * possessive; reaching the subject means it is part of it.
+     */
+    for (let up = sentence.tokens.find((t) => t.id === token.head), hops = 0; up && hops < 8; hops++) {
+      if (up.id === subject.id) return false;
+      const here: UdToken = up;
+      up = sentence.tokens.find((t) => t.id === here.head);
+    }
     return (
       personOf(token) === personOf(subject) &&
       (token.feats['Number'] ?? 'Sing') === (subject.feats['Number'] ?? 'Sing')
@@ -311,6 +324,18 @@ export function translate(
     }
     const base = adverbBase(token);
     if (base) return base;
+    /**
+     * A Russian short adjective the parser lemmatises as itself - "прав",
+     * "готов" - while the dictionary lists the long form: "Том был во всём
+     * прав" left "прав" untranslated. Tried as the long form only on a miss,
+     * and only where that form exists.
+     */
+    if (sentence.lang === 'ru' && token.upos === 'ADJ' && token.feats['Variant'] === 'Short' &&
+        lex.lookup(token.lemma, 'ru').length === 0) {
+      for (const ending of ['ый', 'ий', 'ой']) {
+        if (lex.lookup(token.lemma + ending, 'ru').some((e) => e.pos.upos === 'ADJ')) return token.lemma + ending;
+      }
+    }
     if (token.upos !== 'VERB') return token.lemma;
     /**
      * Only as a FALLBACK. Many reflexive lemmas are dictionary headwords in
@@ -354,16 +379,56 @@ export function translate(
     }
   }
 
+  /**
+   * An English noun used as a modifier - "the NORTH Wind", "a SCHOOL bag" - is
+   * an adjective in Interslavic, and the dictionary glosses those adjectives
+   * with the noun itself: `sěverny` "northern, north", `škoľny` "school",
+   * `grådsky` "city". Ranked as one, it is preferred where it exists and the
+   * noun still wins where it does not. Without this "the North Wind" was two
+   * nouns, "sěver větr", where van Steenbergen writes "Sěverny Větr".
+   */
+  const isNounModifier = (token: UdToken): boolean =>
+    sentence.lang === 'en' &&
+    token.deprel === 'compound' &&
+    (token.upos === 'NOUN' || token.upos === 'PROPN') &&
+    ['NOUN', 'PROPN'].includes(sentence.tokens.find((h) => h.id === token.head)?.upos ?? '');
+
+  /**
+   * A capitalised Russian proper noun takes only an entry glossed with the
+   * capital. Russian only: English capitalises common nouns it treats as
+   * names - "Father", "the Sun", "the North Wind", "God" - and Stanza tags
+   * them PROPN, so gating English left them untranslated.
+   */
+  const candidatesFor = (token: UdToken): Entry[] => {
+    const word = lookupLemmaOf(token);
+    const all = lex.lookup(word, sentence.lang);
+    return sentence.lang === 'ru' && token.upos === 'PROPN' && capitalised(word)
+      ? all.filter((e) => glossedAsProperNoun(e, word, sentence.lang))
+      : all;
+  };
+
+  /**
+   * UD's PronType in the dictionary's own subtype names. UD writes `Prs` for
+   * a personal pronoun and marks the possessive with `Poss=Yes`; the
+   * dictionary writes `pron.pers.` and `pron.poss.`. Compared raw, "prs"
+   * matched neither, so "Her grandmother" took the PERSONAL `jej` - whose
+   * nominative is "ona" - over the possessive `jej`: "Ona baba".
+   */
+  const dictionaryPronType = (token: UdToken): string => {
+    if (token.feats['Poss'] === 'Yes') return 'poss';
+    return (token.feats['PronType'] ?? '').replace(/\bPrs\b/, 'pers');
+  };
+
   const rankedFor = (token: UdToken, aspect: AspectOutcome | null): Entry[] =>
-    rank(lex.lookup(lookupLemmaOf(token), sentence.lang), {
-      upos: token.upos,
+    rank(candidatesFor(token), {
+      upos: isNounModifier(token) ? 'ADJ' : token.upos,
       gloss: lookupLemmaOf(token),
       lang: sentence.lang,
       sourceIsSingleWord: !/\s/.test(token.form.trim()),
       contextWords,
       // The dictionary marks pronoun subtypes and UD marks PronType; both were
       // unread. See RankContext.pronType.
-      ...(token.feats['PronType'] ? { pronType: token.feats['PronType'] } : {}),
+      ...(token.feats['PronType'] ? { pronType: dictionaryPronType(token) } : {}),
       /**
        * Transitivity is only evidence in an ACTIVE clause. A passive has no
        * direct object because the patient was promoted to subject, not because

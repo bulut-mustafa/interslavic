@@ -124,7 +124,9 @@ describe('a predicate noun', () => {
       lex,
       { orthography: 'standard' },
     );
-    expect(r.text).toBe('Ono jest dobra kniga.');
+    // The subject is the presenting "To" now; what this guards is kniga's own
+    // feminine, below.
+    expect(r.text).toBe('To jest dobra kniga.');
     const book = r.words.find((w) => w.sourceForm === 'book');
     const gender = book?.features.find((f) => f.name === 'Gender');
     expect(gender?.value).toBe('Fem');

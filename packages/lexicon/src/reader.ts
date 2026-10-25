@@ -389,7 +389,22 @@ function effectiveFrequency(e: Entry, ctx: RankContext): number {
  * (up to 50): a capital is a hint about the sense, not a different word.
  */
 const CASE_CONTRADICTED = 10;
-const capitalised = (text: string): boolean => /^\p{Lu}/u.test(text);
+export const capitalised = (text: string): boolean => /^\p{Lu}/u.test(text);
+
+/**
+ * Whether an entry is glossed by this word WITH its capital: "Earth" for
+ * `Zemja`, "Земля" - not "том" for "Том". A proper noun only takes an entry
+ * glossed as a proper noun; matching ignores case, so the Russian name "Тома"
+ * was translated as `tom` "volume" ("starějši od toma").
+ */
+export function glossedAsProperNoun(e: Entry, word: string, lang: string): boolean {
+  if (lang === 'ru') {
+    const key = normalizeRussian(word);
+    return e.ruGlosses.some((g) => normalizeRussian(g.text) === key && capitalised(g.text));
+  }
+  const key = normalizeGloss(word);
+  return e.glosses.some((g) => normalizeGloss(g.text) === key && capitalised(g.text));
+}
 
 export function compareEntries(a: Entry, b: Entry, ctx: RankContext = {}): number {
   const score = (e: Entry) => {

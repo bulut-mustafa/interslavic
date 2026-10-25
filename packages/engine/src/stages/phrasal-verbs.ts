@@ -192,7 +192,9 @@ export function planPhrasalVerbs(sentence: ParsedSentence, lex: Lexicon): Phrasa
    */
   for (const word of sentence.tokens) {
     if (phrasalVerbs.has(word.id)) continue;
-    const children = sentence.tokens.filter((t) => t.head === word.id);
+    // Punctuation does not count: "At home, we only speak Dutch" hangs the
+    // comma off "home" too, which hid "doma".
+    const children = sentence.tokens.filter((t) => t.head === word.id && t.upos !== 'PUNCT');
     const prep = children[0];
     if (children.length !== 1 || prep?.deprel !== 'case' || prep.id !== word.id - 1) continue;
     const phrase = `${prep.form} ${word.form}`.toLowerCase();
@@ -203,6 +205,30 @@ export function planPhrasalVerbs(sentence: ParsedSentence, lex: Lexicon): Phrasa
     if (!best) continue;
     phrasalVerbs.set(word.id, best);
     phrasalParticles.add(prep.id);
+  }
+
+  /**
+   * ---- determiner + word the dictionary lists as ONE pronoun ---------------
+   *
+   * "no one" is `nikto`, glossed "no one, nobody"; word by word "No one loves
+   * Trump" became "Ne ne jedin ne ljubi", where the syntax page writes "Nikto
+   * ne prijehal na zabavu". Same bare-phrase and exact-gloss gates.
+   */
+  if (sentence.lang === 'en') {
+    for (const word of sentence.tokens) {
+      if (phrasalVerbs.has(word.id) || word.upos !== 'PRON') continue;
+      const children = sentence.tokens.filter((t) => t.head === word.id);
+      const det = children[0];
+      if (children.length !== 1 || det?.deprel !== 'det' || det.id !== word.id - 1) continue;
+      const phrase = `${det.form} ${word.form}`.toLowerCase();
+      const hits = lex
+        .lookup(phrase, 'en')
+        .filter((e) => e.pos.upos === 'PRON' && !/\s/.test(e.lemma));
+      const best = rank(hits, { upos: 'PRON', gloss: phrase, lang: 'en', contextWords })[0];
+      if (!best) continue;
+      phrasalVerbs.set(word.id, best);
+      phrasalParticles.add(det.id);
+    }
   }
 
   return { phrasalVerbs, phrasalParticles };

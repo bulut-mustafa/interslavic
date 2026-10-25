@@ -144,8 +144,26 @@ export function rewriteExceptives(sentence: ParsedSentence): SourceRewrite {
 }
 
 /** Every rewrite, in order. Each returns the parse untouched when it declines. */
+/**
+ * Every "буд-" form of быть is FUTURE - буду, будешь, будет, будем, будете,
+ * будут - but Stanza tags "Я буду с тобой" as Tense=Pres, and the copula came
+ * out present: "Ja jesm s toboju" for "I will be with you". A fact of Russian
+ * morphology, corrected before anything reads the tense.
+ */
+export function correctRussianFuture(sentence: ParsedSentence): ParsedSentence {
+  if (sentence.lang !== 'ru') return sentence;
+  return {
+    ...sentence,
+    tokens: sentence.tokens.map((t) =>
+      t.lemma.toLowerCase() === 'быть' && /^буд/i.test(t.form) && t.feats['Tense'] !== 'Fut'
+        ? { ...t, feats: { ...t.feats, Tense: 'Fut' } }
+        : t,
+    ),
+  };
+}
+
 export function rewriteSource(sentence: ParsedSentence): SourceRewrite {
-  const light = rewriteLightVerbs(sentence);
+  const light = rewriteLightVerbs(correctRussianFuture(sentence));
   const exceptive = rewriteExceptives(light.sentence);
   return { sentence: exceptive.sentence, absorbed: [...light.absorbed, ...exceptive.absorbed] };
 }

@@ -2,6 +2,23 @@ import { decide } from '../../../types/index.ts';
 import { AGREEING_DEPRELS } from '../resolvers/case.ts';
 import { baseDeprel } from '../tree.ts';
 import type { StageContext } from './context.ts';
+import { paradigm } from '../../../morph/src/realize.ts';
+import type { Entry } from '../../../lexicon/src/reader.ts';
+
+/**
+ * The gender of the nominative singular form that IS the headword, when the
+ * paradigm has exactly one such form - `vse` in `veś`'s paradigm is neuter.
+ * Undefined for an ambiguous or absent match, so nothing is guessed.
+ */
+function headwordGender(entry: Entry): string | undefined {
+  const genders = new Set(
+    paradigm(entry.lemma, entry.pos.xpos)
+      .filter((t) => t.form === entry.lemma && t.feats?.['Case'] === 'Nom' && t.feats?.['Number'] === 'Sing')
+      .map((t) => t.feats?.['Gender'])
+      .filter((g): g is string => g !== undefined),
+  );
+  return genders.size === 1 ? [...genders][0] : undefined;
+}
 
 /**
  * Agreement propagation, plus the default animacy an accusative needs when it
@@ -18,7 +35,11 @@ export function agreementStage(ctx: StageContext): void {
   // syncretic with the genitive (novogo vs novy), and that one rule shows up in
   // nouns, adjectives and numerals alike.
   for (const node of plan) {
+    // A noun modifier agrees once it has become an adjective ("Sěverny Větr");
+    // kept as a noun, it has its own gender and must not take the head's.
+    const adjectivalCompound = node.token.deprel === 'compound' && node.entry?.pos.upos === 'ADJ';
     if (
+      !adjectivalCompound &&
       !AGREEING_DEPRELS.has(node.token.deprel) &&
       !AGREEING_DEPRELS.has(baseDeprel(node.token.deprel))
     ) {
@@ -41,7 +62,12 @@ export function agreementStage(ctx: StageContext): void {
     const head = byTokenId.get(node.token.head);
     if (!head?.entry) continue;
 
+    // A word with its own preposition takes its case from that preposition:
+    // in "во всём прав" the parser hangs "всём" off "прав", and agreeing it
+    // turned the locative "v vsem" into the nominative "v vse".
+    const ownPreposition = ctx.sentence.tokens.some((t) => t.head === node.token.id && t.deprel === 'case');
     for (const f of ['Case', 'Gender', 'Number', 'Animacy'] as const) {
+      if (f === 'Case' && ownPreposition) continue;
       const hv = head.feats.get(f);
       if (!hv) continue;
       // A placeholder "one" is not emitted, so its modifier is the only place
@@ -85,12 +111,26 @@ export function agreementStage(ctx: StageContext): void {
         'the reciprocal formula "jedin drugogo" is masculine'));
       continue;
     }
-    if (!['ADJ', 'DET', 'NUM'].includes(node.token.upos)) continue;
+    if (!['ADJ', 'DET', 'NUM', 'PRON'].includes(node.token.upos)) continue;
     if (node.feats.has('Gender') || node.entry?.pos.gender) continue;
     const marked = node.token.feats['Gender'];
-    if (!marked) continue;
-    node.feats.set('Gender', decide(marked, 'gender.source', 'high',
-      `no noun to agree with, so the gender the source marks (${marked})`));
+    if (marked) {
+      node.feats.set('Gender', decide(marked, 'gender.source', 'high',
+        `no noun to agree with, so the gender the source marks (${marked})`));
+      continue;
+    }
+    /**
+     * Nothing to agree with and nothing in the source: the dictionary's own
+     * headword decides. English "everything" reaches `vse` "all, everything",
+     * which declines like `veś` - and `vse` IS its neuter singular, so the
+     * entry names the gender. Unrequested, the tie-break gave the masculine
+     * "Ja jesm kupil skoro veś".
+     */
+    const own = node.entry ? headwordGender(node.entry) : undefined;
+    if (own) {
+      node.feats.set('Gender', decide(own, 'gender.headword', 'high',
+        `"${node.entry!.lemma}" is itself the ${own === 'Neut' ? 'neuter' : own === 'Fem' ? 'feminine' : 'masculine'} form`));
+    }
   }
 
   /**

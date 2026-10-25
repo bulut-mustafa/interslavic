@@ -1862,3 +1862,67 @@ Left open:
 - causative "make X do";
 - "of the two" -> "iz njih dvoh";
 - the "out" particle read as "von".
+
+## VERIFIED: four batches of ordinary modern sentences, then stop (2026-10-25)
+
+The rule for calling this round done:
+1. Run real everyday sentences.
+2. Fix only the GENERAL bugs, meaning patterns that break many ordinary sentences.
+3. Log rare constructions instead of building them.
+4. Stop when the batches stop turning up general bugs.
+
+The source is Tatoeba (https://tatoeba.org, CC BY 2.0 FR). Each batch was drawn at
+random: Interslavic sentences of 4-12 words, Latin script, with a human English or
+Russian translation. The Interslavic is community-written, so it was read as evidence
+of usage, not as a target. Every rule below cites the grammar pages, the dictionary,
+van Steenbergen's own texts, or Tatoeba usage counts. The tests (and their Tatoeba
+IDs) are in packages/engine/test/everyday-sentences.test.ts.
+
+| batch | sentences | exact matches | general bugs found (all fixed) |
+|---|---|---|---|
+| 1 | 30 | 4 -> 6 | 6: "It's a/This is a/Это" -> To jest (Tatoeba: 39 "To jest" vs 2 "Ono jest", 0 "Tuto/Tutoj jest"); "-ing" complement -> infinitive (his "prěstali budovati"); "let me" no longer read as "let us"; Russian name "Том" no longer the noun "том"; "everything"/"всё" neuter vse; Russian short adjective "прав" |
+| 2 | 25 | 6 | 2: "his X" INSIDE the subject is not svoj ("Jego brat jest vysoky"), and a possessive no longer ranks as the PERSONAL pronoun (UD "Prs" never matched the dictionary's "pers"/"poss"), which turned "Her grandmother" into "Ona baba"; ne before an inserted copula ("My ne jesmo idioti"; syntax page "Tuto avto ne jest drago") |
+| 3 | 25 | 5 | 6: "will be" -> budu, not "budu jesm"; Russian "буду" is future (Stanza tags it present); the impersonal past is neuter ("bylo zimno"); the copula follows a fronted phrase AND the subject; "don't X" is an imperative; "no one" -> nikto with one ne |
+| 4 | 25 | 4 | 3: "to be"/"can be" -> byti; "too" = takože unless it modifies an adjective (zamnogo); "At home," -> doma despite the comma |
+
+Also fixed along the way:
+- English noun modifiers become adjectives ("Sěverny větr", as he writes it).
+- UD's PronType "Prs" never matched the dictionary's "pers"/"poss", so possessives
+  ranked as personal pronouns.
+- A curated "tutoj" never matched the dictionary's "tutȯj".
+- Agreement no longer overwrites the case a word's own preposition gives it.
+
+Every change was measured against all fixtures and the gold set:
+- Gold holds at 31 exact.
+- The only other outputs that changed:
+  - "It is a good book" -> To jest;
+  - "This is the biggest house" -> To jest;
+  - "One of them" -> Jedin;
+  - g52/g53 -> koj, ktory, drugy (his masculine);
+  - g23-ru "moj" -> "moju" (a parser misreading either way).
+
+**The trend: 6, 2, 6, 3 general bugs per batch.** That does not converge cleanly. Each
+batch still finds a few common constructions, but they get narrower:
+- batch 4's were a single word sense, an infinitive copula and a comma.
+- The exact-match rate on random community sentences holds at about 20%.
+- Most of the rest differ only in equally valid words, the T-V choice, or the speaker's
+  gender (which the source does not give).
+
+Stopped here, per that rule.
+
+Known and left open:
+- **Rare constructions:**
+  - "let me + verb" (one Tatoeba example only);
+  - the correlative comparative ("čim ..., tym ...");
+  - "the one who";
+  - causatives;
+  - "jedin k drugomu" with an inner preposition;
+  - "of the two";
+  - idioms ("how about you", "the hell", "chickens out", "are we there yet").
+- **Names:** English names Stanza tags PROPN can still match a common noun ("Trump" ->
+  kozyr). English capitalises common nouns too, so a gate there broke "Father", "the
+  Sun" and "God". Russian names stay in Cyrillic.
+- **Word sense:** "fix" -> naznačati, "time" -> raz, "once" -> raz, "yet" -> jednako.
+- **Parser** (Stanza): mis-lemmatised Russian verbs (смешаем, обожжем, рассеемся),
+  "сойдем" tagged 2nd person, "Отче" as an interjection.
+- **Dictionary gaps:** Господь, бессрочный, эфиопка, пицца, "asleep", "concerned".

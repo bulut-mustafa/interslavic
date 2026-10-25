@@ -261,11 +261,23 @@
       "quote": "Oni sųt obdarjeni razumom i svěstjų i imajųt postųpati jedin k drugomu v duhu bratstva.",
       "why": "the pronouns page's table heads oni \"masc.anim.\" and one \"other\"; van Steenbergen's own UDHR translation agrees the predicate animate with oni"
     },
+    "pronoun.presentational": {
+      "tier": "corpus",
+      "source": "https://tatoeba.org/en/sentences/search?from=isv&query=%22To+jest%22",
+      "quote": "To jest nosorog.",
+      "why": "a subject that only presents a noun ('It's a poem', 'Это животное') is the neuter demonstrative to: 39 'To jest' sentences in Tatoeba's Interslavic against 2 'Ono jest', both 'Kde ono jest?' about a specific thing"
+    },
     "reciprocal.formula": {
       "tier": "normative",
       "source": "http://steen.free.fr/interslavic/pronouns.html",
       "quote": "To be more explicit about the meaning \u201eeach other\u201d, you can add the formula jedin drugogo: \u201eOni bijut se jedin drugogo\u201d.",
       "why": "the reciprocal is the fixed masculine formula jedin + drugy, drugy in the case its position takes"
+    },
+    "gender.headword": {
+      "tier": "dictionary",
+      "source": "packages/lexicon/data/raw/words.tsv",
+      "quote": null,
+      "why": "with nothing to agree with, a word takes the gender of the paradigm form its dictionary headword is (vse = neuter of veś)"
     },
     "gender.source": {
       "tier": "transfer",

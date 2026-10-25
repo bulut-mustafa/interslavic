@@ -161,7 +161,15 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
 
     // "will go" -> "bųdų idti": this token is the auxiliary, rewritten.
     const futureHead = [...futureAuxToken.entries()].find(([, auxId]) => auxId === token.id);
-    if (futureHead) {
+    /**
+     * A Russian future COPULA - "Я буду с тобой" - is byti's future itself,
+     * `budu`, which the morphology cannot build (it has no future of byti), so
+     * it takes the same path as the future auxiliary.
+     */
+    const russianFutureCopula =
+      sentence.lang === 'ru' && token.deprel === 'cop' && token.lemma.toLowerCase() === 'быть' &&
+      token.feats['Tense'] === 'Fut';
+    if (futureHead || russianFutureCopula) {
       // Walk to the subject rather than looking only under the infinitive: with
       // "going to" the subject hangs off the participle, and for "you" the
       // number comes from the Interslavic lemma (`vy` is plural), not from the
@@ -174,7 +182,7 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
         : subject?.feats['Number'] === 'Plur'
           ? 'Plur'
           : 'Sing';
-      const conditional = auxRoleForHead.get(futureHead[0]) === 'conditional';
+      const conditional = futureHead !== undefined && auxRoleForHead.get(futureHead[0]) === 'conditional';
       futureForms.set(token.id, {
         form: conditional
           ? conditionalAuxiliary(person, number)
@@ -225,6 +233,7 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
       sentence.lang,
       inNegatedClause(token),
       sentence.tokens.filter((t) => t.head === token.id),
+      sentence.tokens.find((t) => t.id === token.head)?.upos,
     );
     /**
      * A curated lemma need not be a candidate for the source word, for the
@@ -270,7 +279,27 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
     // the parser's features identify instead.
     // Not English-only: the Russian column glosses oblique forms as entries in
     // exactly the same way, and Russian "они" had no usable key at all.
-    const pronounLemma = isReflexive ? null : pronounLemmaFor(token.feats, sentence);
+    /**
+     * "It's a beautiful poem", "This is a car", "Это красивое животное": the
+     * subject only points at the thing the noun names, and Interslavic writes
+     * the demonstrative `to` for all three - Tatoeba's "To jest nosorog" is
+     * "This is a rhinoceros", "To jest linijka" "That's a ruler", "To jest
+     * ryba" "It's a fish" (39 "To jest" against 2 "Ono jest", both "Kde ono
+     * jest?" about a specific thing, and no "Tuto jest" or "Tutoj jest"). The personal pronoun gave "Ono jest
+     * krasiva poema", and Russian "это" the "this here" of "Tutoj jest". Only
+     * before a NOUN predicate: "It is important to read" stays impersonal.
+     */
+    const predicateHead = sentence.tokens.find((t) => t.id === token.head);
+    const presentational =
+      token.upos === 'PRON' &&
+      token.deprel === 'nsubj' &&
+      (predicateHead?.upos === 'NOUN' || predicateHead?.upos === 'PROPN') &&
+      (sentence.lang === 'ru'
+        ? token.lemma.toLowerCase() === 'это'
+        : ['it', 'this', 'that'].includes(token.lemma.toLowerCase()) &&
+          sentence.tokens.some((t) => t.head === predicateHead.id && t.deprel === 'cop'));
+    const presentationalEntry = presentational ? lex.lookupLemma('to', 'PRON')[0] : undefined;
+    const pronounLemma = isReflexive || presentationalEntry ? null : pronounLemmaFor(token.feats, sentence);
     const pronounEntry = pronounLemma ? lex.lookupLemma(pronounLemma, 'PRON')[0] : undefined;
 
     /**
@@ -340,6 +369,7 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
       negativeEntry ??
       reflexiveEntry ??
       svojEntry ??
+      presentationalEntry ??
       pronounEntry ??
       modalEntry ??
       curatedEntry ??
@@ -648,6 +678,14 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
         feats.set('Animacy', decide(animacy, 'anaphora.one', 'high',
           `stands for "${antecedentToken!.form}" (Animacy = ${animacy})`));
       }
+    }
+
+    // The presentational demonstrative is the neuter "to", not the "toj" its
+    // paradigm leads with.
+    if (presentationalEntry && entry === presentationalEntry) {
+      const why = 'the demonstrative that presents a noun is the neuter "to" ("To jest nosorog")';
+      feats.set('Gender', decide('Neut', 'pronoun.presentational', 'high', why));
+      feats.set('Number', decide('Sing', 'pronoun.presentational', 'high', why));
     }
 
     if (pronounLemma) {
@@ -972,8 +1010,31 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
        */
       const auxAfterModal =
         token.deprel === 'aux:pass' && token.feats['VerbForm'] === 'Inf' && modalOfHead.has(token.head);
+      /**
+       * The same for the copula: "I want TO BE a good artist" is "hoču byti",
+       * and "can be" is "mogu byti". The "to" hangs off the predicate, not off
+       * "be", so the complement test below never saw it: "Ja hoču jesm dobry
+       * artist".
+       */
+      const copulaInfinitive =
+        sentence.lang === 'en' &&
+        token.deprel === 'cop' &&
+        token.feats['VerbForm'] === 'Inf' &&
+        (modalOfHead.has(token.head) ||
+          sentence.tokens.some((t) => t.head === token.head && t.deprel === 'mark' && t.lemma.toLowerCase() === 'to'));
+      /**
+       * An English "-ing" complement of a verb - "I love DOING nothing",
+       * "they stopped BUILDING" - is an infinitive in Interslavic: van
+       * Steenbergen's Tower of Babel has "a oni prěstali budovati grad", his
+       * North Wind "načel duti", and Tatoeba "Ljubju ničego ne dělati".
+       * Conjugated, it gave "Ja ljubju ne dělaju ničto".
+       */
+      const gerundComplement =
+        sentence.lang === 'en' && token.deprel === 'xcomp' && token.feats['VerbForm'] === 'Ger';
       const isInfinitiveComplement =
         auxAfterModal ||
+        copulaInfinitive ||
+        gerundComplement ||
         (token.feats['VerbForm'] === 'Inf' &&
           (token.deprel === 'xcomp' ||
             token.deprel === 'ccomp' ||

@@ -133,7 +133,7 @@ const DIFFERENCES: Record<string, { status: Status; why: string }> = {
   },
   g52: {
     status: 'defect',
-    why: 'a free translation, but three things are ours: "the North Wind" is an English noun compound and comes out as two nouns, "Sěver větr", where Interslavic makes the modifier an adjective ("Sěverny Větr"); "which was the stronger" gives "koja byl", feminine against masculine, where he keeps the present "koj ... jest"; and "came along" gives "prihodil po". Right now: "osparjali" is plural for the two subjects (was "osparjal"), and "traveler" is translated (was left in English). "putujuči", "ovivany" and "osparjati" against his "putovatelj", "ovineny", "sporiti se" are dictionary alternatives',
+    why: 'a free translation, but two things are ours: "which was the stronger" gives "koja byl", feminine against masculine, where he keeps the present "koj ... jest"; and "came along" gives "prihodil po". Right now: "Sěverny větr" makes the noun modifier an adjective as he does (was two nouns, "sěver větr"), "osparjali" is plural for the two subjects (was "osparjal"), and "traveler" is translated (was left in English). "putujuči", "ovivany" and "osparjati" against his "putovatelj", "ovineny", "sporiti se" are dictionary alternatives',
   },
   g53: {
     status: 'defect',
@@ -141,7 +141,7 @@ const DIFFERENCES: Record<string, { status: Status; why: string }> = {
   },
   g54: {
     status: 'unsupported',
-    why: '"the more he blew the more closely" is the correlative comparative "čim močněje ..., tym bolje", which is not built ("vyše on vějal vyše"); also "Sěver větr" as in g52, and "hard" takes "tvrdo" (hard to the touch) where he writes "močno". Right now: "kak on mogl" (was the raw English "could") and "i nakonec" (was "na poslědnjej"), both exactly his',
+    why: '"the more he blew the more closely" is the correlative comparative "čim močněje ..., tym bolje", which is not built ("vyše on vějal vyše"); also "hard" takes "tvrdo" (hard to the touch) where he writes "močno". Right now: "kak on mogl" (was the raw English "could") and "i nakonec" (was "na poslědnjej"), both exactly his',
   },
   g55: {
     status: 'defect',
@@ -149,7 +149,7 @@ const DIFFERENCES: Record<string, { status: Status; why: string }> = {
   },
   g56: {
     status: 'defect',
-    why: '"Sěver větr" as in g52, and "the stronger of the two" drops the "of" entirely ("silnějše dvoh") where he writes "silnějše iz njih dvoh". "byl obvezyvany izpovědati" against his "iměl priznati" is a faithful rendering of "was obliged to confess"',
+    why: '"the stronger of the two" drops the "of" entirely ("silnějše dvoh") where he writes "silnějše iz njih dvoh". "byl obvezyvany izpovědati" against his "iměl priznati" is a faithful rendering of "was obliged to confess"',
   },
   g13: {
     status: 'defect',

@@ -46,8 +46,10 @@ describe('an expletive subject is deleted', () => {
   it('keeps a REFERENTIAL "it", which is ambiguous in the parse', () => {
     // "It is a good book" and "It is cold" get the same parse - nsubj, 3rd
     // person neuter - so an nsubj "it" is only dropped for a verb that cannot
-    // take a real subject. Deleting this one would lose the subject.
-    expect(out('it-is-a-good-book.conllu')).toBe('Ono jest dobra kniga.');
+    // take a real subject. Deleting this one would lose the subject. (It is
+    // the demonstrative "To" since a presenting "it" became one - "To jest
+    // nosorog" in Tatoeba - but it is kept, which is what this guards.)
+    expect(out('it-is-a-good-book.conllu')).toBe('To jest dobra kniga.');
   });
 
   it('lists only verbs that cannot take a referential subject', () => {

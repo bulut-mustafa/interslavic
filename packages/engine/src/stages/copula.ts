@@ -82,7 +82,27 @@ export function copulaStage(ctx: StageContext): void {
         subject && subject.token.id < node.token.id ? subject.token.id : node.token.id,
         sentence,
       );
-      const after = plan.find((n) => !opening.has(n.token.id)) ?? node;
+      /**
+       * After the opening constituent, not merely outside it: "В Индии коровы
+       * - священные животные" fronts a phrase before the subject, and the
+       * first word outside "коровы" is that phrase, which put the copula at
+       * the very start - "Sut v Indiji kravy svečene životiny".
+       */
+      const openingEnd = Math.max(...plan.map((n, i) => (opening.has(n.token.id) ? i : -1)));
+      let after = plan.find((n, i) => i > openingEnd && !opening.has(n.token.id)) ?? node;
+      /**
+       * A negated predicate puts "ne" before the copula, which is then the
+       * negated word: "Tuto avto ne jest drago" (syntax page: "the particle ne
+       * 'not' preceding the word being negated, usually the verb"). Inserted
+       * at the constituent boundary it landed before "ne": "My jesmo ne
+       * idioti" for "Мы не идиоты".
+       */
+      const negation = plan.find(
+        (n) => n.token.head === node.token.id && n.token.upos === 'PART' && n.token.feats['Polarity'] === 'Neg',
+      );
+      if (negation && plan.indexOf(negation) >= plan.indexOf(after)) {
+        after = plan[plan.indexOf(negation) + 1] ?? node;
+      }
       insertedCopulas.set(after.token.id, { form: cop.form, person, number });
     }
   }
