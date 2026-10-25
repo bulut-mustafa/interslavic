@@ -26,6 +26,12 @@ npm run web                 # interface    (127.0.0.1:5174)
 Then open <http://127.0.0.1:5174>. The server builds the lexicon and the 743k-form
 index once at boot, so translations are fast after that.
 
+**Learn** - beside the translator, the site has 17 lessons (alphabet to word formation)
+and a phrasebook with flashcards, in `packages/web/src/learn/`. Lessons are data, and
+`packages/web/test/lessons.test.ts` checks every Interslavic word on them against the
+lexicon, every table cell against the engine, and every "Try it" example against the
+translator's own output.
+
 **Online, for testers** — one container serves the page, the engine and the parser
 on one address, with a *Report a problem* button whose reports the server keeps.
 See [DEPLOY.md](DEPLOY.md): it runs on Google Cloud Run.

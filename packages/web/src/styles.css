@@ -1291,3 +1291,130 @@ textarea::placeholder {
     display: flex;
   }
 }
+
+/* ---------- phrasebook ---------- */
+
+.phrasebook {
+  max-width: 44rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.phrasebook h1 {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: var(--text-2xl);
+}
+
+.phrasebook h2 {
+  margin: var(--space-4) 0 var(--space-2);
+  font-family: var(--serif);
+  font-size: var(--text-xl);
+}
+
+.phrase {
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.phrase p {
+  margin: 0;
+}
+
+.phrase-isv {
+  font-family: var(--serif);
+  font-size: var(--text-lg);
+}
+
+.phrase-cyr {
+  font-family: var(--serif);
+  color: var(--ink-soft);
+}
+
+.phrase-en {
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+}
+
+.phrase-note {
+  color: var(--ink-faint);
+}
+
+.phrase-source {
+  margin-left: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--ink-faint);
+}
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.cards-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+}
+
+.cards-group select {
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--paper-raised);
+  font: inherit;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  min-height: 14rem;
+  padding: var(--space-4);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--paper-raised);
+  cursor: pointer;
+  text-align: center;
+}
+
+.card-isv {
+  font-family: var(--serif);
+  font-size: var(--text-2xl);
+}
+
+.card-cyr {
+  font-family: var(--serif);
+  color: var(--ink-soft);
+}
+
+.card-en {
+  margin-top: var(--space-3);
+  color: var(--ink-faint);
+}
+
+.card.is-shown .card-en {
+  color: var(--teal);
+  font-size: var(--text-lg);
+}
+
+.cards-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cards-nav .text-button {
+  margin-left: 0;
+}
+
+.cards-count {
+  font-size: var(--text-sm);
+  color: var(--ink-faint);
+}

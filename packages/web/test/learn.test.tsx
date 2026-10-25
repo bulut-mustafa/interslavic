@@ -90,3 +90,33 @@ describe('a lesson page', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'Page not found' })).toBeTruthy();
   });
 });
+
+describe('the phrasebook', () => {
+  it('lists phrases with their Cyrillic and their source', () => {
+    window.history.replaceState({}, '', '/phrasebook');
+    render(<App />);
+    expect(screen.getByRole('heading', { level: 1, name: 'Phrasebook' })).toBeTruthy();
+    expect(screen.getByText('Do viděnja!')).toBeTruthy();
+    expect(screen.getByText('До видєња!')).toBeTruthy();
+    expect(screen.getAllByRole('link', { name: 'Tatoeba 12977828' }).length).toBe(1);
+  });
+
+  it('flips a flashcard and moves to the next one', async () => {
+    window.history.replaceState({}, '', '/phrasebook');
+    const { container } = render(<App />);
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Flashcards' }));
+    });
+    const first = container.querySelector('.card-isv')!.textContent;
+    expect(screen.getByText('Tap to see the meaning')).toBeTruthy();
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Show the meaning' }));
+    });
+    expect(screen.queryByText('Tap to see the meaning')).toBeNull();
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Next ›' }));
+    });
+    expect(container.querySelector('.card-isv')!.textContent).not.toBe(first);
+    expect(screen.getByText('Tap to see the meaning')).toBeTruthy();
+  });
+});

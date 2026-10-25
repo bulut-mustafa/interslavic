@@ -8,6 +8,7 @@ import { toStandard } from '../../morph/src/orthography.ts';
 import { parseConllu } from '../../engine/src/conllu.ts';
 import { translate } from '../../engine/src/pipeline.ts';
 import { LESSONS } from '../src/learn/lessons.ts';
+import { PHRASEBOOK, PHRASE_NAMES } from '../src/learn/phrasebook.ts';
 import { parseInline } from '../src/learn/inline.ts';
 import { tryItExamples, tryItFixture } from '../src/learn/try-it.ts';
 import type { Block, LessonPage } from '../src/learn/types.ts';
@@ -140,5 +141,24 @@ describe('"Try it" examples', () => {
     expect(fs.existsSync(file), `no frozen parse - run packages/web/scripts/lesson-fixtures.ts`).toBe(true);
     const out = translate(parseConllu(fs.readFileSync(file, 'utf8')), lex, { orthography: 'standard' }).text;
     expect(out).toBe(e.isv);
+  });
+});
+
+describe('the phrasebook', () => {
+  it('shows only real Interslavic forms', () => {
+    const names = new Set(PHRASE_NAMES.map((n) => n.toLowerCase()));
+    // A set phrase the dictionary lists as one entry ("Dobrodošli!", "čao!")
+    // is found whole; anything else word by word.
+    const unknown = PHRASEBOOK.flatMap((g) => g.phrases)
+      .filter((p) => !index.has(p.isv) && !index.has(p.isv.replace(/\.$/, '')))
+      .flatMap((p) => words(p.isv))
+      .filter((w) => !names.has(w.toLowerCase()) && !index.has(w));
+    expect(unknown).toEqual([]);
+  });
+
+  it('says where every phrase comes from', () => {
+    for (const p of PHRASEBOOK.flatMap((g) => g.phrases)) {
+      expect(p.source === 'dictionary' || Number.isInteger(p.source), p.isv).toBe(true);
+    }
   });
 });
