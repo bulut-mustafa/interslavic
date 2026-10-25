@@ -99,6 +99,8 @@ const sentence = (overrides: Partial<Translation> = {}): Translation => ({
 });
 
 beforeEach(() => {
+  // The address is page state now; every test starts on the translator.
+  window.history.replaceState({}, '', '/');
   vi.stubGlobal(
     'fetch',
     vi.fn(async () => ({
@@ -483,5 +485,30 @@ describe('reporting a problem', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Report a problem' }));
     });
     expect((screen.getByRole('button', { name: 'Send report' }) as HTMLButtonElement).disabled).toBe(true);
+  });
+});
+
+describe('the site around the translator', () => {
+  it('moves between sections without reloading, and back', async () => {
+    render(<App />);
+    expect(screen.getByRole('link', { name: 'Translate' }).getAttribute('aria-current')).toBe('page');
+    await act(async () => {
+      fireEvent.click(screen.getByRole('link', { name: 'Learn' }));
+    });
+    expect(window.location.pathname).toBe('/learn');
+    expect(screen.getByRole('link', { name: 'Learn' }).getAttribute('aria-current')).toBe('page');
+    expect(screen.queryByLabelText('Text to translate')).toBeNull();
+    await act(async () => {
+      window.history.back();
+      await new Promise((r) => setTimeout(r, 50));
+    });
+    expect(screen.getByLabelText('Text to translate')).toBeTruthy();
+  });
+
+  it('opens the translator on the sentence a lesson links to', () => {
+    window.history.replaceState({}, '', '/?lang=ru&text=%D0%AF%20%D0%B1%D1%83%D0%B4%D1%83');
+    render(<App />);
+    expect((screen.getByLabelText('Text to translate') as HTMLTextAreaElement).value).toBe('Я буду');
+    expect(screen.getByRole('button', { name: 'Russian' }).getAttribute('aria-pressed')).toBe('true');
   });
 });
