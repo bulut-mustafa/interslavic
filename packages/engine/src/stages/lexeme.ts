@@ -331,17 +331,36 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
      * jest?" about a specific thing, and no "Tuto jest" or "Tutoj jest"). The personal pronoun gave "Ono jest
      * krasiva poema", and Russian "это" the "this here" of "Tutoj jest". Only
      * before a NOUN predicate: "It is important to read" stays impersonal.
+     * Asking what or who the thing is presents it the same way: Tatoeba's
+     * "Čto jest to?" is "What's that?" - word by word it was "Čto jest toj?".
      */
     const predicateHead = sentence.tokens.find((t) => t.id === token.head);
     const presentational =
       token.upos === 'PRON' &&
       token.deprel === 'nsubj' &&
-      (predicateHead?.upos === 'NOUN' || predicateHead?.upos === 'PROPN') &&
+      (predicateHead?.upos === 'NOUN' ||
+        predicateHead?.upos === 'PROPN' ||
+        (predicateHead?.upos === 'PRON' && (predicateHead.feats['PronType'] ?? '').split(',').includes('Int'))) &&
       (sentence.lang === 'ru'
         ? token.lemma.toLowerCase() === 'это'
         : ['it', 'this', 'that'].includes(token.lemma.toLowerCase()) &&
           sentence.tokens.some((t) => t.head === predicateHead.id && t.deprel === 'cop'));
     const presentationalEntry = presentational ? lex.lookupLemma('to', 'PRON')[0] : undefined;
+
+    /**
+     * Slavic asks a name with "how", not "what": Russian "Как ваше имя?",
+     * Croatian "Kako je vaše ime?", Czech "Jak se jmenujete?", and Tatoeba's
+     * Interslavic "kak on se imenuje" (12987096). Word by word "What is your
+     * name?" was "Čto jest vaše ime?", while the Russian already gave "Kak
+     * jest vaše ime?".
+     */
+    const asksName =
+      sentence.lang === 'en' &&
+      token.lemma.toLowerCase() === 'what' &&
+      token.feats['PronType'] === 'Int' &&
+      sentence.tokens.some((t) => t.head === token.id && t.deprel === 'cop') &&
+      sentence.tokens.some((t) => t.head === token.id && t.deprel === 'nsubj' && t.lemma.toLowerCase() === 'name');
+    const nameQuestionEntry = asksName ? lex.lookupLemma('kak', 'ADV')[0] : undefined;
     const pronounLemma = isReflexive || presentationalEntry ? null : pronounLemmaFor(token.feats, sentence);
     const pronounEntry = pronounLemma ? lex.lookupLemma(pronounLemma, 'PRON')[0] : undefined;
 
@@ -433,6 +452,7 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
       reflexiveEntry ??
       svojEntry ??
       presentationalEntry ??
+      nameQuestionEntry ??
       pronounEntry ??
       modalEntry ??
       curatedEntry ??
@@ -460,6 +480,9 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
     }
     if (modalMissing) {
       notes.push(`curated modal "${modalPlan?.isv}" is not among the dictionary candidates`);
+    }
+    if (nameQuestionEntry && entry === nameQuestionEntry) {
+      notes.push('a name is asked with "how" in Slavic - "Kak jest vaše ime?", like Russian "Как ваше имя?"');
     }
     if (negativeEntry) {
       notes.push(

@@ -283,7 +283,7 @@
       "tier": "corpus",
       "source": "https://tatoeba.org/en/sentences/search?from=isv&query=%22To+jest%22",
       "quote": "To jest nosorog.",
-      "why": "a subject that only presents a noun ('It's a poem', 'Это животное') is the neuter demonstrative to: 39 'To jest' sentences in Tatoeba's Interslavic against 2 'Ono jest', both 'Kde ono jest?' about a specific thing"
+      "why": "a subject that only presents a noun ('It's a poem', 'Это животное') is the neuter demonstrative to: 39 'To jest' sentences in Tatoeba's Interslavic against 2 'Ono jest', both 'Kde ono jest?' about a specific thing; asking what it is presents it the same way, 'Čto jest to?' for 'What's that?' (12984803)"
     },
     "reciprocal.formula": {
       "tier": "normative",

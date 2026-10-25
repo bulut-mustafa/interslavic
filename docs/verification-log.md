@@ -1958,3 +1958,26 @@ Left open, with the reason:
 - **Causative "make X do":** one example ("pričiniti, že ... sojme"), and the clause
   restructuring it needs is not general.
 - **Idioms** ("how about you", "the hell"): phrase-by-phrase, no rule.
+
+## VERIFIED: asking someone's name (2026-10-25)
+
+"What is your name" was compared with another tool's "Kak se ty
+zoveš?". Ours was "Čto jest vaše ime".
+
+- **"vaše" (polite you) is right** for a stranger: "vy is a universal second person
+  pronoun for both numbers, whereas the second person singular ty is used only for
+  addressing friends, relatives and children" (pronouns page). The other tool's "ty"
+  is the familiar form.
+- **"čto" was a calque.** Slavic asks a name with "how": Russian "Как ваше имя?",
+  Croatian "Kako je vaše ime?", Czech "Jak se jmenujete?", Tatoeba's Interslavic "kak
+  on se imenuje" (12987096). Our own Russian path already gave "Kak jest vaše ime?".
+  Now "What is your name?" is "Kak jest vaše ime?"; only a name - "What is your
+  address?" stays "Čto jest vaš adres?".
+- **Found on the way: "What is this/that?"** was "Čto jest tutoj/toj?", masculine.
+  Tatoeba writes "Čto jest to?" for "What's that?" (12984803), the neuter
+  presentational "to" the engine already used before a noun. Now "Čto jest to?" and
+  "Kto jest to?".
+
+Left as is: with no question mark typed, none is added - the output keeps the
+source's punctuation. "Kak se zovete?" (reflexive verb) is the other natural way to
+ask; "Kak jest vaše ime?" mirrors the English and the Russian it is translated from.

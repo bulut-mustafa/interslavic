@@ -39,6 +39,23 @@ describe('a subject that only presents a noun is "to"', () => {
   it('for Russian "это" (10119367 / 13507106)', () => {
     expect(out('ru/tatoeba-krasivoe-zhivotnoe.conllu')).toBe('To jest krasiva životina.');
   });
+
+  it('when asking what or who it is (12984803)', () => {
+    // Tatoeba 12984803: "What's that?" -> "Čto jest to?". It was "toj".
+    expect(out('en/tatoeba-whats-that.conllu')).toBe('Čto jest to?');
+    expect(out('en/who-is-this.conllu')).toBe('Kto jest to?');
+    expect(out('ru/chto-eto.conllu')).toBe('Čto jest to?');
+  });
+});
+
+describe('a name is asked with "how"', () => {
+  it('as Russian "Как ваше имя?" and Tatoeba\'s "kak on se imenuje" (12987096)', () => {
+    expect(out('en/what-is-your-name.conllu')).toBe('Kak jest vaše ime?');
+  });
+
+  it('but only a name: other things are still "what"', () => {
+    expect(out('en/what-is-your-address.conllu')).toBe('Čto jest vaš adres?');
+  });
 });
 
 describe('verb complements and imperatives', () => {
