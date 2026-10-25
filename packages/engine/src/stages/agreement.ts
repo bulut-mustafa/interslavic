@@ -67,6 +67,33 @@ export function agreementStage(ctx: StageContext): void {
   }
 
   /**
+   * A word that agrees but has no noun to agree with - "так чтобы ОДИН не
+   * понимал речи другого", where "один" stands alone - still needs a gender,
+   * and a Russian source states it (Gender=Masc). Without it the paradigm's
+   * tie-break gave the feminine "jedna". English marks no gender on these
+   * words, so nothing changes there.
+   */
+  for (const node of plan) {
+    /**
+     * The reciprocal is a fixed formula, "jedin drugogo" (pronouns page), and
+     * its halves are masculine whatever they refer to: "I oni govorili jedin k
+     * drugomu" (his Tower of Babel). Russian "друг другу" carries no gender
+     * to read, and the tie-break gave "jedna drugomu".
+     */
+    if (node.token.feats['PronType'] === 'Rcp' && !node.feats.has('Gender')) {
+      node.feats.set('Gender', decide('Masc', 'reciprocal.formula', 'certain',
+        'the reciprocal formula "jedin drugogo" is masculine'));
+      continue;
+    }
+    if (!['ADJ', 'DET', 'NUM'].includes(node.token.upos)) continue;
+    if (node.feats.has('Gender') || node.entry?.pos.gender) continue;
+    const marked = node.token.feats['Gender'];
+    if (!marked) continue;
+    node.feats.set('Gender', decide(marked, 'gender.source', 'high',
+      `no noun to agree with, so the gender the source marks (${marked})`));
+  }
+
+  /**
    * An accusative that agrees with no masculine animate noun takes the plain
    * form. The adjectives page states the condition explicitly:
    *

@@ -181,5 +181,29 @@ export function planPhrasalVerbs(sentence: ParsedSentence, lex: Lexicon): Phrasa
     phrasalParticles.add(modifier.id);
   }
 
+  /**
+   * ---- preposition + word the dictionary lists as ONE adverb ---------------
+   *
+   * "at last" is `nakonėc`, glossed exactly that; word by word it became "na
+   * poslědnjej", "on the last (one)", where van Steenbergen's North Wind and
+   * the Sun has "I nakonec". Only a bare phrase - the preposition and one word
+   * with nothing else attached - so "at last year's party" is left alone, and
+   * only a one-word adverb, by the same exact-gloss gate as above.
+   */
+  for (const word of sentence.tokens) {
+    if (phrasalVerbs.has(word.id)) continue;
+    const children = sentence.tokens.filter((t) => t.head === word.id);
+    const prep = children[0];
+    if (children.length !== 1 || prep?.deprel !== 'case' || prep.id !== word.id - 1) continue;
+    const phrase = `${prep.form} ${word.form}`.toLowerCase();
+    const hits = lex
+      .lookup(phrase, sentence.lang)
+      .filter((e) => e.pos.upos === 'ADV' && !/\s/.test(e.lemma));
+    const best = rank(hits, { upos: 'ADV', gloss: phrase, lang: sentence.lang, contextWords })[0];
+    if (!best) continue;
+    phrasalVerbs.set(word.id, best);
+    phrasalParticles.add(prep.id);
+  }
+
   return { phrasalVerbs, phrasalParticles };
 }

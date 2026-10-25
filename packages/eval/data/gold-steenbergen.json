@@ -7,10 +7,11 @@
     "pronouns": "http://steen.free.fr/interslavic/pronouns.html",
     "adjectives": "http://steen.free.fr/interslavic/adjectives.html",
     "numerals": "http://steen.free.fr/interslavic/numerals.html",
-    "udhr": "https://cals.no/translation/udhr-art-1/language/interslavic"
+    "udhr": "http://steen.free.fr/interslavic/declaration.html",
+    "northwind": "http://steen.free.fr/interslavic/northwind.html"
   },
   "_retrieved": "2026-10-18",
-  "_note": "Pairs 1-10 were the original set, retrieved 2026-10-17 from the syntax page alone. 11-29 widen coverage to the constructions that page never exercised: prepositional case contrast, reflexives, svoj, predicate adjectives, numeral government, purpose clauses and the optative. Many of them are expected to fail - that is the point of measuring.  Harvest status (2026-10-23): the grammar pages are now exhausted for en->isv SENTENCE pairs. A sweep of nouns/adjectives/pronouns/numerals/verbs/prepositions/conjunctions/syntax/word_formation/derivation yields 40 ISV-with-English-gloss candidates, of which 23 were already here and 11 are word-level examples or prose fragments rather than sentences. The plan's 60-80 target assumed ~150 candidates; most of those are single words. 35 is the realistic ceiling from tier 1.  Russian gold (2026-10-23): the TARGET of each ru- pair is van Steenbergen's own Interslavic, taken from the English pair it mirrors; only the SOURCE changes. The Russian source sentences were authored for this repo and are NOT his - that is the weak half of these pairs, and a Russian speaker should review them. They are still worth having: they test the Russian pipeline against an authoritative target rather than against our own English output, which is the only independent check available without a Russian speaker. UDHR Article 1 (2026-10-25): the one pair set where BOTH sides are independent of this repo - van Steenbergen's own Interslavic (credited \"IJzeren Jan\", in etymological spelling, converted here with toStandard), against the official UN English and Russian texts.",
+  "_note": "Pairs 1-10 were the original set, retrieved 2026-10-17 from the syntax page alone. 11-29 widen coverage to the constructions that page never exercised: prepositional case contrast, reflexives, svoj, predicate adjectives, numeral government, purpose clauses and the optative. Many of them are expected to fail - that is the point of measuring.  Harvest status (2026-10-23): the grammar pages are now exhausted for en->isv SENTENCE pairs. A sweep of nouns/adjectives/pronouns/numerals/verbs/prepositions/conjunctions/syntax/word_formation/derivation yields 40 ISV-with-English-gloss candidates, of which 23 were already here and 11 are word-level examples or prose fragments rather than sentences. The plan's 60-80 target assumed ~150 candidates; most of those are single words. 35 is the realistic ceiling from tier 1.  Russian gold (2026-10-23): the TARGET of each ru- pair is van Steenbergen's own Interslavic, taken from the English pair it mirrors; only the SOURCE changes. The Russian source sentences were authored for this repo and are NOT his - that is the weak half of these pairs, and a Russian speaker should review them. They are still worth having: they test the Russian pipeline against an authoritative target rather than against our own English output, which is the only independent check available without a Russian speaker. UDHR Article 1 (2026-10-25): the one pair set where BOTH sides are independent of this repo - van Steenbergen's own Interslavic (credited \"IJzeren Jan\", in etymological spelling, converted here with toStandard), against the official UN English and Russian texts. North Wind and the Sun (2026-10-25): van Steenbergen's own Interslavic from his site, against the standard English text of the IPA handbook (Wikipedia's orthographic version). His sentences 3 and 4 render the one English sentence 3. A free translation, so it is measured for defects, not expected to match word for word. The UDHR source now points at his own page, which carries the same text.",
   "pairs": [
     {
       "id": "g01",
@@ -587,6 +588,51 @@
         "zero copula before a passive participle",
         "reciprocal",
         "oni is masculine animate"
+      ]
+    },
+    {
+      "id": "g52",
+      "en": "The North Wind and the Sun were disputing which was the stronger, when a traveler came along wrapped in a warm cloak.",
+      "isv": "Sěverny Větr i Solnce sporili se o tom, koj iz njih jest silnějši, kogda prohodil putovatelj ovineny v teplom plašču.",
+      "page": "northwind",
+      "tests": [
+        "free translation of a running text"
+      ]
+    },
+    {
+      "id": "g53",
+      "en": "They agreed that the one who first succeeded in making the traveler take his cloak off should be considered stronger than the other.",
+      "isv": "Oni dogovorili se, že togo, kto prvy uspěje pričiniti, že putovatelj sojme svoj plašč, trěba jest uznati za silnějšego od drugogo.",
+      "page": "northwind",
+      "tests": [
+        "free translation of a running text"
+      ]
+    },
+    {
+      "id": "g54",
+      "en": "Then the North Wind blew as hard as he could, but the more he blew the more closely did the traveler fold his cloak around him; and at last the North Wind gave up the attempt.",
+      "isv": "Na čto Sěverny Větr načel duti tako močno kako mogl, ale čim močněje on dul, tym bolje putovatelj ovival se v plašču. I nakonec Sěverny Větr byl prinudženy, da by poddal se.",
+      "page": "northwind",
+      "tests": [
+        "free translation of a running text"
+      ]
+    },
+    {
+      "id": "g55",
+      "en": "Then the Sun shined out warmly, and immediately the traveler took off his cloak.",
+      "isv": "Potom Solnce načelo blěskati goreče, a putovatelj směsta sjel svoj plašč.",
+      "page": "northwind",
+      "tests": [
+        "free translation of a running text"
+      ]
+    },
+    {
+      "id": "g56",
+      "en": "And so the North Wind was obliged to confess that the Sun was the stronger of the two.",
+      "isv": "Togda Sěverny Větr iměl priznati, že Solnce jest silnějše iz njih dvoh.",
+      "page": "northwind",
+      "tests": [
+        "free translation of a running text"
       ]
     }
   ]

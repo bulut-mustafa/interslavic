@@ -548,6 +548,18 @@ mutate "objectless penalty also for Russian" reader  "s/ \&\& e.pos.transitive \
 mutate "semicolon not carried"               realst  "s/  const INTERIOR_MARKS = new Set(\[',', ';', ':', '!', '?'\]);/  const INTERIOR_MARKS = new Set([',']);/"
 mutate "final mark carried as interior"      realst  "s/^    if (!sentence.tokens.some((p) => p.id > t.id \&\& p.upos !== 'PUNCT')) continue;\$//"
 mutate "should left unhandled"               modals  "s/^  should: {\$/  should_unhandled: {/"
+mutate "and-subjects stay singular"          treest  "s/^    if (isCoordinatedByAnd(subject, sentence)) return 'Plur';\$//"
+mutate "Russian verb borrows outer subject"  treest  "s/^  sentence.lang === 'ru' \&\&\$/  false \&\&/"
+mutate "spelling variants not tried"         reader  "s/    for (const variant of spellingVariants(key)) {/    for (const variant of [] as string[]) {/"
+mutate "bare modal left unplanned"           auxst   "s/^          modalPlans.set(token.id, bare);\$//"
+mutate "-ly adverb not derived"              pipe    "s/^    if (base) return base;\$//"
+mutate "derived adverb not neuter"           lexeme  "s/      feats.set('Gender', decide('Neut', 'adverb.fromAdjective', 'certain', why));/      feats.set('Gender', decide('Masc', 'adverb.fromAdjective', 'certain', why));/"
+mutate "preposition+word adverb ignored"     phrasalst "s/    if (children.length !== 1 || prep?.deprel !== 'case' || prep.id !== word.id - 1) continue;/    continue;/"
+mutate "reciprocal head not jedin"           fwjson  "s/\"isv\": \"jedin\",/\"isv\": \"drug\",/"
+mutate "reciprocal not masculine"            agrst   "s/      node.feats.set('Gender', decide('Masc', 'reciprocal.formula', 'certain',/      node.feats.set('Gender', decide('Fem', 'reciprocal.formula', 'certain',/"
+mutate "standalone word ignores source gender" agrst "s/^    if (!\['ADJ', 'DET', 'NUM'\].includes(node.token.upos)) continue;\$/    continue;/"
+mutate "то not curated"                      fwjson  "s/\"en\": \"то\",/\"en\": \"то_\",/"
+mutate "passive be after modal conjugated"   lexeme  "s/^        auxAfterModal ||\$//"
 
 echo
 echo "==================================================="

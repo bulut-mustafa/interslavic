@@ -96,3 +96,66 @@ describe('found through the Lord\'s Prayer', () => {
     expect(out('ru/chitaet-pishet.conllu')).not.toContain('piša');
   });
 });
+
+/**
+ * Van Steenbergen's North Wind and the Sun (http://steen.free.fr/interslavic/northwind.html)
+ * against the standard English text: gold g52-g56. A free translation, so the
+ * pairs do not match, and these assert the parts that are now right.
+ */
+describe('The North Wind and the Sun, from English', () => {
+  it('makes a verb plural for subjects joined by "and"', () => {
+    // "Sěverny Větr i Solnce sporili se" - was the singular "osparjal"
+    expect(out('gold/g52.conllu')).toContain('i solnce osparjali');
+  });
+
+  it('finds a word the dictionary spells the other way', () => {
+    // "traveler"; the dictionary has "traveller"
+    expect(out('en/he-is-a-traveler.conllu')).toBe('On jest putujuči.');
+  });
+
+  it('translates a modal whose verb is left out', () => {
+    // "as hard as he could" - he writes "kako mogl"
+    expect(out('gold/g54.conllu')).toContain('kak on mogl,');
+  });
+
+  it('reads "at last" as the adverb nakonec', () => {
+    expect(out('gold/g54.conllu')).toContain('i nakonec ');
+  });
+
+  it('forms a missing -ly adverb as its adjective\'s neuter singular', () => {
+    expect(out('en/sun-shined-warmly.conllu')).toContain('světilo teplo');
+  });
+
+  it('keeps the passive "be" an infinitive after a modal', () => {
+    expect(out('gold/g53.conllu')).toContain('imaje byti razvažany');
+  });
+});
+
+/**
+ * His Tower of Babel is a retelling, not a translation of the Synodal text, so
+ * it is not gold; its verses went through as the Lord's Prayer did, to find
+ * defects. (The verbs Stanza mis-lemmatised - "смешаем" as "смесать",
+ * "обожжем" as "обождать" - and "сойдем" tagged 2nd person are the parser's.)
+ */
+describe('the Tower of Babel, from Russian', () => {
+  it('keeps the person a subjectless Russian verb states', () => {
+    // "И сказали они: построим ... и сделаем" - first person, not "sbudujut"
+    expect(out('ru/babel-4.conllu')).toContain('sbudujemo sobě grad');
+    expect(out('ru/babel-4.conllu')).toContain('sdělajemo sobě ime');
+  });
+
+  it('builds the reciprocal in any case, masculine like the formula', () => {
+    // "друг другу" - he writes "jedin k drugomu"; was "prijatelj prijatelju"
+    expect(out('ru/babel-3.conllu')).toContain('skazali jedin drugomu');
+  });
+
+  it('gives a standalone "один" the gender the source marks', () => {
+    // "так чтобы один не понимал" - was "jedna"
+    expect(out('ru/babel-7.conllu')).toContain('aby jedin ne razuměl');
+  });
+
+  it('takes the plain demonstrative for "того"', () => {
+    // pronouns page: "The primary demonstrative pronoun is toj"; was "tamtogo"
+    expect(out('ru/babel-6.conllu')).toContain('od togo,');
+  });
+});

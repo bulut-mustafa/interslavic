@@ -169,7 +169,20 @@ export function planAuxiliaries(
 
   if (sentence.lang === 'en') {
     for (const token of sentence.tokens) {
-      if (token.upos !== 'AUX' || token.deprel !== 'aux') continue;
+      if (token.upos !== 'AUX') continue;
+      /**
+       * A modal whose verb is left out - "as hard as he COULD" - heads its own
+       * clause instead of hanging off a verb as `aux`. It is still the modal,
+       * and van Steenbergen writes it as one: "tako močno kako mogl" (North
+       * Wind and the Sun). Unplanned, it was emitted raw: "kak on could".
+       */
+      if (token.deprel !== 'aux') {
+        const bare = modalFor(token.lemma);
+        if (bare && !sentence.tokens.some((t) => t.id === token.head && t.deprel === 'aux')) {
+          modalPlans.set(token.id, bare);
+        }
+        continue;
+      }
       const modal = modalFor(token.lemma);
       if (modal) {
         modalPlans.set(token.id, modal);

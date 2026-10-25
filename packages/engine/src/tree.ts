@@ -69,13 +69,43 @@ function pronounLemmaFor(
   return personalPronounLemma(feats, adapterFor(sentence).marksSecondPersonNumber);
 }
 
+/**
+ * Subjects joined by "and" are plural together: "Sěverny Větr i Solnce
+ * sporili se" (van Steenbergen's North Wind and the Sun), where reading the
+ * first conjunct alone gave the singular "osparjal".
+ */
+const AND = new Set(['and', 'и']);
+const isCoordinatedByAnd = (subject: UdToken, sentence: ParsedSentence): boolean =>
+  sentence.tokens.some(
+    (c) =>
+      c.head === subject.id &&
+      c.deprel === 'conj' &&
+      sentence.tokens.some((cc) => cc.head === c.id && cc.deprel === 'cc' && AND.has(cc.lemma.toLowerCase())),
+  );
+
+/**
+ * A Russian verb states its own person and number, so a verb with no subject
+ * of its own keeps them rather than borrowing the outer clause's subject: in
+ * "И сказали они: построим себе город" the hortative "построим" is FIRST
+ * person, and walking up to "они" gave "sbudujut". English verbs mostly mark
+ * neither, which is why walking up exists at all.
+ */
+const ownRussianAgreement = (verb: UdToken, sentence: ParsedSentence, feature: 'Person' | 'Number') =>
+  sentence.lang === 'ru' &&
+  !sentence.tokens.some((t) => t.head === verb.id && t.deprel.startsWith('nsubj'))
+    ? verb.feats[feature]
+    : undefined;
+
 export function subjectNumber(verb: UdToken, sentence: ParsedSentence, fallback?: string): string {
+  const own = ownRussianAgreement(verb, sentence, 'Number');
+  if (own) return own;
   const subject =
     sentence.tokens.find((t) => t.head === verb.id && t.deprel.startsWith('nsubj')) ??
     // A copula has no subject of its own: "you are right" hangs `you` off
     // `right`. Without walking up, "vy jesi prave" came out 2nd SINGULAR.
     subjectOfClause(verb, sentence);
   if (subject) {
+    if (isCoordinatedByAnd(subject, sentence)) return 'Plur';
     const pronoun = pronounLemmaFor(subject.feats, sentence);
     if (pronoun) return personalPronounNumber(pronoun);
     if (subject.feats['Number']) return subject.feats['Number'];
@@ -84,6 +114,8 @@ export function subjectNumber(verb: UdToken, sentence: ParsedSentence, fallback?
 }
 
 export function subjectPerson(verb: UdToken, sentence: ParsedSentence): string {
+  const own = ownRussianAgreement(verb, sentence, 'Person');
+  if (own) return own;
   const subject =
     sentence.tokens.find((t) => t.head === verb.id && t.deprel.startsWith('nsubj')) ??
     subjectOfClause(verb, sentence);

@@ -131,6 +131,26 @@ const DIFFERENCES: Record<string, { status: Status; why: string }> = {
     status: 'unsupported',
     why: 'the reciprocal with a preposition, as g51: "в отношении друг друга" comes out "v odnošenju jedin drugogo" where he writes "jedin k drugomu". The rest differs only in equally valid dictionary words: "dolžni" for Russian "должны" (dȯlžny, "should, ought to") where he uses "imajut", and "svědomje" where he uses "svěsť" - both glossed "conscience"',
   },
+  g52: {
+    status: 'defect',
+    why: 'a free translation, but three things are ours: "the North Wind" is an English noun compound and comes out as two nouns, "Sěver větr", where Interslavic makes the modifier an adjective ("Sěverny Větr"); "which was the stronger" gives "koja byl", feminine against masculine, where he keeps the present "koj ... jest"; and "came along" gives "prihodil po". Right now: "osparjali" is plural for the two subjects (was "osparjal"), and "traveler" is translated (was left in English). "putujuči", "ovivany" and "osparjati" against his "putovatelj", "ovineny", "sporiti se" are dictionary alternatives',
+  },
+  g53: {
+    status: 'defect',
+    why: '"the one who" gives "jedna ktora" where he writes "togo, kto"; "making the traveler take" has no causative construction ("v dělaje ... snimaje" against "pričiniti, že ... sojme"); "the other" is feminine "druga" against "drugogo". Right now: "should be considered" is "imaje byti razvažany" (was "imaje jest"), with van Steenbergen\'s own modal for "should"',
+  },
+  g54: {
+    status: 'unsupported',
+    why: '"the more he blew the more closely" is the correlative comparative "čim močněje ..., tym bolje", which is not built ("vyše on vějal vyše"); also "Sěver větr" as in g52, and "hard" takes "tvrdo" (hard to the touch) where he writes "močno". Right now: "kak on mogl" (was the raw English "could") and "i nakonec" (was "na poslědnjej"), both exactly his',
+  },
+  g55: {
+    status: 'defect',
+    why: '"shined out" gives "světilo von", the particle as "outside", where he writes "načelo blěskati". Right now: "warmly" is "teplo", the adjective\'s neuter singular as the adjectives page forms adverbs (was left in English); his "goreče" is a different word. "Solnce" capitalised is his styling of the character',
+  },
+  g56: {
+    status: 'defect',
+    why: '"Sěver větr" as in g52, and "the stronger of the two" drops the "of" entirely ("silnějše dvoh") where he writes "silnějše iz njih dvoh". "byl obvezyvany izpovědati" against his "iměl priznati" is a faithful rendering of "was obliged to confess"',
+  },
   g13: {
     status: 'defect',
     why: 'the modal, the possessive and the negative concord are now right ("ne mogl ... svoje ... nikde"); two causes remain - the verb is imperfective "nahoditi" where the gold has perfective "najdti" (UD gives "could" no Tense, and treating the object of every past modal as completed would make the ABILITY reading - "He could read books", "mogl čitati" - wrongly perfective, so this stays the visible aspect guess), and "nikde" sits after the object rather than before the verb (word order is free, but the gold reads better). Our "ključe" is NOT a defect: the nouns page states "animate nouns have the nominative plural ending -i instead of the ending -y/-e of inanimate nouns" and tables inanimate soft kraj -> kraje, so ključe is table-conformant; the gold\'s "ključi" appears in no paradigm table, and the reference engine gives ključe too',
@@ -164,7 +184,7 @@ const DIFFERENCES: Record<string, { status: Status; why: string }> = {
 describe("gold: van Steenbergen's own Interslavic", () => {
   it('has a fixture for every gold pair', () => {
     // A floor, not an equality: adding a pair must never fail the suite.
-    expect(GOLD.pairs.length).toBeGreaterThanOrEqual(53);
+    expect(GOLD.pairs.length).toBeGreaterThanOrEqual(58);
     for (const p of GOLD.pairs) {
       expect(fs.existsSync(path.join(FIXTURES, `${p.id}.conllu`)), p.id).toBe(true);
     }
@@ -218,7 +238,7 @@ describe("gold: van Steenbergen's own Interslavic", () => {
     // Not an assertion about quality - a tripwire, so that silently
     // reclassifying a defect as "acceptable" shows up as a failing test.
     expect({ acceptable: by('acceptable'), defect: by('defect'), unsupported: by('unsupported'), parser: by('parser') })
-      .toEqual({ acceptable: 15, defect: 1, unsupported: 2, parser: 4 });
+      .toEqual({ acceptable: 15, defect: 5, unsupported: 3, parser: 4 });
   });
 });
 

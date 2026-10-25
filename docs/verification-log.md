@@ -1815,3 +1815,50 @@ Left open, with the reason:
 - "endowed with" keeping a comitative `s`;
 - the archaic Russian of the prayer (сущий, Царствие, приидет);
 - the parser's `да`.
+
+## VERIFIED: two more of van Steenbergen's own texts (2026-10-25)
+
+Sources:
+- **"The North Wind and the Sun"** (http://steen.free.fr/interslavic/northwind.html),
+  against the standard IPA-handbook English. Added as gold g52-g56. His sentences 3
+  and 4 render English sentence 3.
+- **"Věža Babelja"** (http://steen.free.fr/interslavic/babel_text.html), against the
+  Synodal Russian of Genesis 11:1-9. Not gold: his text is a retelling, not a
+  translation of the Synodal. The Russian verses were used to find defects, as the
+  Lord's Prayer was.
+- The UDHR gold source now points at his own page,
+  http://steen.free.fr/interslavic/declaration.html. Its text is identical to the
+  Conlang Atlas copy.
+
+| defect | fix and source | before -> after |
+|---|---|---|
+| verb singular for "X and Y" | subjects joined by and/и are plural; his "Sěverny Větr i Solnce sporili se" | osparjal -> osparjali |
+| "traveler" untranslated | a miss is retried in the other spelling (the dictionary mixes "color" and "traveller") | traveler -> putujuči |
+| "as hard as he could" left "could" raw | a bare modal is still the modal; his "kako mogl" | kak on could -> kak on mogl |
+| "warmly" untranslated | adjectives page: "Adverbs can be derived from adjectives by using the ending -o ... identical to the neuter singular" | warmly -> teplo |
+| "at last" word by word | preposition + word as an exact one-adverb gloss | na poslědnjej -> nakonec (his "I nakonec") |
+| "should be considered" conjugated "be" | the passive "be" after a modal stays infinitive | imaje jest -> imaje byti |
+| Russian hortative "построим" took the outer clause's person | a subjectless Russian verb keeps its own Person/Number | sbudujut -> sbudujemo |
+| "друг другу" -> prijatelj prijatelju | reciprocal halves -> jedin + drugy in its own case, masculine; pronouns page "the formula jedin drugogo", his Babel "jedin k drugomu" | -> jedin drugomu |
+| standalone "один" feminine | an agreeing word with no noun takes the gender the source marks | jedna -> jedin |
+| "того" -> tamtogo "that over there" | curated тот/то -> tȯj; pronouns page "The primary demonstrative pronoun is toj" | tamtogo -> togo |
+
+Each fix was measured against every fixture and the gold set. Only its target changed,
+plus g23-ru: the parser misreads "Я мою себя", and the output went "moj" -> "moju".
+The gold score holds at 31 exact; the new North Wind pairs are classified.
+
+The engine cannot fix these, because they are the parser's:
+- smešat'/obžeč' are lemmatised as "смесать"/"обождать";
+- рассеяться is lemmatised as "рассеваться";
+- "сойдем" is tagged 2nd person;
+- "один у всех язык" is parsed with "один" as the subject.
+
+"Господь" is not in the dictionary.
+
+Left open:
+- English noun compounds: "North Wind" should be an adjective + noun, "Sěverny Větr";
+- the correlative comparative ("čim ..., tym ...");
+- "the one who" -> "togo, kto";
+- causative "make X do";
+- "of the two" -> "iz njih dvoh";
+- the "out" particle read as "von".

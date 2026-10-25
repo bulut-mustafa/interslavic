@@ -445,6 +445,22 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
       continue;
     }
 
+    /**
+     * An adverb reached through its adjective ("warmly" -> `teply`) is that
+     * adjective's neuter singular: "Adverbs can be derived from adjectives by
+     * using the ending -o (-e after a soft consonant). In other words, they
+     * are identical to the neuter singular" (adjectives page). The positive
+     * only; comparative adverbs take "-ěje" and keep the degree path.
+     */
+    if (token.upos === 'ADV' && entry.pos.upos === 'ADJ' && !feats.has('Degree')) {
+      const why = 'an adverb is the neuter singular of its adjective ("dobro", "svěže")';
+      feats.set('Case', decide('Nom', 'adverb.fromAdjective', 'certain', why));
+      feats.set('Gender', decide('Neut', 'adverb.fromAdjective', 'certain', why));
+      feats.set('Number', decide('Sing', 'adverb.fromAdjective', 'certain', why));
+      plan.push({ token, entry, ranked, aspect, feats, notes });
+      continue;
+    }
+
     if (CASE_BEARING.has(token.upos)) {
       const governed = governedCase.get(token.id);
       const byVerb = verbGovernedCase.get(token.id);
@@ -948,14 +964,23 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
       // ujdemo" instead of "My dolžni ujdti". Where the source's morphology is
       // trusted for case and aspect, it is trusted for this too.
       const infinitiveNeedsMarker = !adapter.copyAspect;
+      /**
+       * The passive "be" after a modal is an infinitive too: "should BE
+       * considered" is "imaje byti ...". It hangs off the participle with the
+       * modal, so none of the complement relations below reach it, and it was
+       * conjugated: "imaje jest razvažany".
+       */
+      const auxAfterModal =
+        token.deprel === 'aux:pass' && token.feats['VerbForm'] === 'Inf' && modalOfHead.has(token.head);
       const isInfinitiveComplement =
-        token.feats['VerbForm'] === 'Inf' &&
-        (token.deprel === 'xcomp' ||
-          token.deprel === 'ccomp' ||
-          token.deprel === 'acl' ||
-          token.deprel === 'csubj') &&
-        (!infinitiveNeedsMarker ||
-          sentence.tokens.some((t) => t.head === token.id && t.deprel === 'mark'));
+        auxAfterModal ||
+        (token.feats['VerbForm'] === 'Inf' &&
+          (token.deprel === 'xcomp' ||
+            token.deprel === 'ccomp' ||
+            token.deprel === 'acl' ||
+            token.deprel === 'csubj') &&
+          (!infinitiveNeedsMarker ||
+            sentence.tokens.some((t) => t.head === token.id && t.deprel === 'mark')));
       if (isInfinitiveComplement) {
         feats.set(
           'VerbForm',

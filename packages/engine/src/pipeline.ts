@@ -274,6 +274,25 @@ export function translate(
    * Only applied when stripping actually finds a verb, so a lemma that merely
    * ends in those letters is left alone.
    */
+  /**
+   * An English "-ly" adverb the dictionary does not list, reached through its
+   * adjective: "Adverbs can be derived from adjectives by using the ending -o
+   * (-e after a soft consonant). In other words, they are identical to the
+   * neuter singular: dobro, svěže" (adjectives page). "the Sun shined out
+   * warmly" left "warmly" untranslated; `teply` gives `teplo`. Only when the
+   * adverb itself finds nothing, and only to an adjective that exists.
+   */
+  const adverbBase = (token: UdToken): string | null => {
+    if (sentence.lang !== 'en' || token.upos !== 'ADV') return null;
+    const word = token.lemma.toLowerCase();
+    if (!word.endsWith('ly') || lex.lookup(word, 'en').length > 0) return null;
+    const stem = word.slice(0, -2);
+    for (const candidate of [stem, `${stem.replace(/i$/, 'y')}`, `${stem}e`, stem.replace(/l$/, 'le')]) {
+      if (lex.lookup(candidate, 'en').some((e) => e.pos.upos === 'ADJ')) return candidate;
+    }
+    return null;
+  };
+
   const lookupLemmaOf = (token: UdToken): string => {
     /**
      * A plural noun whose OWN form the dictionary glosses is looked up by that
@@ -290,6 +309,8 @@ export function translate(
         return form;
       }
     }
+    const base = adverbBase(token);
+    if (base) return base;
     if (token.upos !== 'VERB') return token.lemma;
     /**
      * Only as a FALLBACK. Many reflexive lemmas are dictionary headwords in

@@ -67,6 +67,25 @@ export function normalizeGloss(g: string): string {
 }
 
 /**
+ * The other spelling of an English word, American <-> British: the doubled l
+ * before a suffix (traveler / traveller), -or / -our, a final -er / -re, and
+ * -ize / -ise.
+ */
+export function spellingVariants(word: string): string[] {
+  const swaps: [RegExp, string][] = [
+    [/([aeiou])l(er|ers|ed|ing)$/, '$1ll$2'],
+    [/([aeiou])ll(er|ers|ed|ing)$/, '$1l$2'],
+    [/([^aeiou])or$/, '$1our'],
+    [/our$/, 'or'],
+    [/([^aeiou])er$/, '$1re'],
+    [/([^aeiou])re$/, '$1er'],
+    [/ize$/, 'ise'],
+    [/ise$/, 'ize'],
+  ];
+  return [...new Set(swaps.map(([re, to]) => word.replace(re, to)).filter((v) => v !== word))];
+}
+
+/**
  * Normalise a Russian gloss. The `ru` column carries stress marks on some
  * entries (e.g. "пода́ть"), which no parser's lemma will contain, so combining
  * accents are stripped via NFD before comparison.
@@ -213,7 +232,20 @@ export class Lexicon {
 
   /** All entries whose English gloss matches `word`. */
   lookupEnglish(word: string): Entry[] {
-    return this.byGloss.get(normalizeGloss(word)) ?? [];
+    const key = normalizeGloss(word);
+    const exact = this.byGloss.get(key);
+    if (exact) return exact;
+    /**
+     * The dictionary's English mixes spellings - "color", "center",
+     * "organize", but "traveller" - so a word missing in one spelling is tried
+     * in the other: "a traveler came along" left "traveler" untranslated.
+     * Only on a miss, so an exact gloss always wins.
+     */
+    for (const variant of spellingVariants(key)) {
+      const hits = this.byGloss.get(variant);
+      if (hits) return hits;
+    }
+    return [];
   }
 
   /** All entries whose Russian gloss matches `word`. */

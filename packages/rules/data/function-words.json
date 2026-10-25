@@ -43,6 +43,55 @@
       "source": "steenbergen-syntax"
     },
     {
+      "en": "тот",
+      "lang": "ru",
+      "upos": [
+        "DET",
+        "PRON"
+      ],
+      "isv": "tȯj",
+      "why": "the plain demonstrative. `tamtȯj` ('that over there', type 3) won on the exact gloss 'тот', where tȯj is glossed 'этот, тот'",
+      "evidence": "steenbergen-pronouns: 'The primary demonstrative pronoun is toj \u201cthis, that\u201d, and it should be used whenever there is no need to distinguish explicitly between this one over here and that one over there.' The English 'that' is curated the same way",
+      "source": "steenbergen-pronouns"
+    },
+    {
+      "en": "друг",
+      "lang": "ru",
+      "upos": [
+        "PRON"
+      ],
+      "whenDependent": {
+        "deprel": "fixed"
+      },
+      "isv": "jedin",
+      "why": "the first half of the reciprocal 'друг друга/другу/...' (PronType=Rcp): the formula is 'jedin drugogo', with drugy in the case the second half carries. The dictionary glosses only the genitive 'друг друга', so 'друг другу' became 'prijatelj prijatelju'",
+      "evidence": "steenbergen-pronouns: 'you can add the formula jedin drugogo: \u201eOni bijut se jedin drugogo\u201d'; his Tower of Babel: 'I oni govorili jedin k drugomu', 'da by oni ne razuměli se jedin drugogo'",
+      "source": "steenbergen-pronouns"
+    },
+    {
+      "en": "друг",
+      "lang": "ru",
+      "upos": [
+        "PRON"
+      ],
+      "isv": "drugy",
+      "why": "the second half of the reciprocal, in its own case: 'другу' -> 'drugomu'",
+      "evidence": "steenbergen-pronouns: 'jedin drugogo'; his Tower of Babel: 'jedin k drugomu'",
+      "source": "steenbergen-pronouns"
+    },
+    {
+      "en": "то",
+      "lang": "ru",
+      "upos": [
+        "DET",
+        "PRON"
+      ],
+      "isv": "tȯj",
+      "why": "the neuter of 'тот', which the parser lemmatises separately ('от того, что задумали' -> lemma 'то'); the same plain demonstrative",
+      "evidence": "steenbergen-pronouns: 'The primary demonstrative pronoun is toj \u201cthis, that\u201d'",
+      "source": "steenbergen-pronouns"
+    },
+    {
       "en": "весь",
       "lang": "ru",
       "upos": [

@@ -249,11 +249,29 @@
       "quote": null,
       "why": "the noun’s gender, from its partOfSpeech cell"
     },
+    "adverb.fromAdjective": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/adjectives.html",
+      "quote": "Adverbs can be derived from adjectives by using the ending -o (-e after a soft consonant). In other words, they are identical to the neuter singular: dobro \u201ewell\u201d, svěže \u201efreshly\u201d.",
+      "why": "an English -ly adverb the dictionary lacks is its adjective's neuter singular"
+    },
     "animacy.pronounLemma": {
       "tier": "corpus",
       "source": "https://cals.no/translation/udhr-art-1/language/interslavic",
       "quote": "Oni sųt obdarjeni razumom i svěstjų i imajųt postųpati jedin k drugomu v duhu bratstva.",
       "why": "the pronouns page's table heads oni \"masc.anim.\" and one \"other\"; van Steenbergen's own UDHR translation agrees the predicate animate with oni"
+    },
+    "reciprocal.formula": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/pronouns.html",
+      "quote": "To be more explicit about the meaning \u201eeach other\u201d, you can add the formula jedin drugogo: \u201eOni bijut se jedin drugogo\u201d.",
+      "why": "the reciprocal is the fixed masculine formula jedin + drugy, drugy in the case its position takes"
+    },
+    "gender.source": {
+      "tier": "transfer",
+      "source": "the source parse (UD Gender)",
+      "quote": null,
+      "why": "an agreeing word with no noun to agree with takes the gender the source marks on it"
     },
     "gender.pronounLemma": {
       "tier": "dictionary",
