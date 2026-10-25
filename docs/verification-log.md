@@ -1981,3 +1981,23 @@ zoveš?". Ours was "Čto jest vaše ime".
 Left as is: with no question mark typed, none is added - the output keeps the
 source's punctuation. "Kak se zovete?" (reflexive verb) is the other natural way to
 ask; "Kak jest vaše ime?" mirrors the English and the Russian it is translated from.
+
+## FOUND: while writing the Learn pages (2026-10-25)
+
+Every lesson example was run through the translator; where the output matched the
+attested sentence the example got a "Try it" link (10 do, each held to it by a test).
+These did not match, and are translator defects to fix:
+
+- "Interslavic is my new obsession." -> "Medžuslovjanska jest ..." - feminine; Tatoeba
+  12994632 writes "Medžuslovjansky", the language name being masculine.
+- "You'll go home and stay home." -> "Vy budete idti domov i ostavajete domov" - the
+  verb coordinated with an infinitive after "budete" became finite; it stays an
+  infinitive ("ostati"), Tatoeba 13525474.
+- "He stayed in the house." -> "On ostaval v domu" - imperfective where Tatoeba
+  13467063 has perfective "ostal".
+- "She's at school." -> "Ona jest na školě" - Tatoeba 12999978 has "v školě".
+- "Where is the train station?" -> "Kde jest trenovala stancija?" - noun-noun
+  compound read as a participle (found earlier the same day).
+
+Not defects (the grammar allows both): "prihodi iz" for "comes from" beside "jest iz";
+"dětetu" beside "děteti".
