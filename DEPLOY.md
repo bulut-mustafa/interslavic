@@ -16,10 +16,22 @@ servers were out of capacity in the account's home region.
 |---|---|
 | Project | `interslavic-translator-08rmc` |
 | Service | `interslavic`, region `europe-west1` |
-| Link for testers | https://interslavic-8578650623.europe-west1.run.app |
+| Link for testers | **https://interslavic.web.app** |
+| Direct Cloud Run address | https://interslavic-8578650623.europe-west1.run.app |
 | Size | 1 CPU, 2 GiB, at most **one** copy running (caps the cost) |
 | Tester reports | bucket `interslavic-translator-08rmc-reports`, mounted at `/data` |
 | Budget alert | 150 TRY (about 3 USD) a month, emails at 25%, 50% and 100% |
+
+## The web.app address
+
+`interslavic.web.app` is a Firebase Hosting site in the same project. It holds no
+files: one rewrite sends every request to the Cloud Run service, so re-publishing
+the service is all a change needs. Firebase gives up on a request after 60
+seconds; a cold start measured 39 seconds through it.
+
+The rewrite was released with the Firebase Hosting REST API (`sites/interslavic`,
+config `{"rewrites":[{"glob":"**","run":{"serviceId":"interslavic","region":"europe-west1"}}]}`).
+Only a change to that routing needs a new release.
 
 ## Re-publish after a change
 
@@ -41,7 +53,7 @@ Each report from the page's **Report a problem** button is one line in a file
 that survives restarts. Open:
 
 ```
-https://interslavic-8578650623.europe-west1.run.app/api/feedback?token=<FEEDBACK_TOKEN>
+https://interslavic.web.app/api/feedback?token=<FEEDBACK_TOKEN>
 ```
 
 `FEEDBACK_TOKEN` is set on the service; read it with
