@@ -87,7 +87,7 @@ function LearnNav({ current }: { current: string | null }) {
       <button type="button" className="learn-nav-toggle" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
         All lessons
       </button>
-      {SECTIONS.map((section) => (
+      {SECTIONS.filter((section) => LESSONS.some((l) => l.section === section)).map((section) => (
         <div key={section} className="learn-nav-group">
           <p className="learn-nav-section">{section}</p>
           {LESSONS.filter((l) => l.section === section).map((l) => (

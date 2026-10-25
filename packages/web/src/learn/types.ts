@@ -56,7 +56,8 @@ export type Block =
       kind: 'fill';
       prompt: string;
       answer: string;
-      /** Other spellings that are also right (e.g. etymological). */
+      /** Other forms the grammar also allows, e.g. the locative "domě" beside "domu".
+       *  Not checked against the lexicon, which holds only the recommended form. */
       accept?: string[];
       why: string;
     }

@@ -42,9 +42,13 @@ function isvTexts(block: Block): string[] {
     case 'forms':
       return block.rows.flatMap((r) => r.cells.map((c) => c.form));
     case 'choice':
-      return [...inline(block.prompt), ...(block.english ? [] : block.options)];
+      // The wrong options are meant to be wrong - often a plausible mistake,
+      // like "syny" for "syni" - so only the answer must be a real form.
+      return [...inline(block.prompt), ...inline(block.why), ...(block.english ? [] : [block.answer])];
     case 'fill':
-      return [...inline(block.prompt), block.answer, ...(block.accept ?? [])];
+      // `accept` lists alternatives the grammar allows but the generated
+      // lexicon does not hold, such as the locative "domě" beside "domu".
+      return [...inline(block.prompt), ...inline(block.why), block.answer];
     default:
       return [];
   }

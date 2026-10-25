@@ -1146,6 +1146,17 @@ textarea::placeholder {
   font-weight: 600;
 }
 
+/* A legend sits on the fieldset's border by default; inside the box it reads as the question. */
+.exercise legend {
+  float: left;
+  width: 100%;
+  padding: 0;
+}
+
+.exercise legend + * {
+  clear: both;
+}
+
 .exercise-options {
   display: flex;
   flex-wrap: wrap;
