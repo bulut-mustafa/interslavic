@@ -148,6 +148,21 @@ export function predicateAgreementStage(ctx: StageContext): void {
         `"${subject.token.form}" is a person, so the predicate is animate`));
     }
 
+    /**
+     * An untranslated subject has no entry, but the source may still mark its
+     * gender morphologically - Russian "Зульфия" is Gender=Fem - and that is a
+     * fact about the referent, the same one the l-participle already reads
+     * ("Зульфия spala"). Ignoring it gave "Зульфия jest ščestlivy".
+     */
+    const sourceGender = subjectFeats['Gender'];
+    if (!node.feats.has('Gender') && sourceGender) {
+      node.feats.set(
+        'Gender',
+        decide(sourceGender, 'agreement.predicate', 'certain',
+          `agrees with the subject "${subjectName}" (Gender = ${sourceGender}, marked in the source)`),
+      );
+    }
+
     if (!node.feats.has('Gender')) {
       node.feats.set(
         'Gender',

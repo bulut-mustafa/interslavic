@@ -119,8 +119,9 @@ export function governmentFor(value: number): NumeralGovernment {
  *
  * "Can": optional, so the cardinal stays and the collective is named as the
  * equally correct alternative. The dictionary marks `ljudi` and `děti` f.pl.,
- * so the plural-only test covers them - except that English "children" has
- * the lemma "child" and reaches `dětę`, whose plural IS `děti`.
+ * so the plural-only test covers them - except that Russian "детей" has the
+ * lemma `ребенок` and reaches `dětę`, whose plural IS `děti`. (English
+ * "children" reaches `děti` itself, by its form.)
  */
 const COLLECTIVES = ['dvoje', 'troje', 'četvero', 'petero', 'šestero', 'sedmero', 'osmero', 'devetero', 'desetero'];
 

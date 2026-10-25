@@ -301,6 +301,7 @@ mutate "retry drops the derived lemma"     realst      "s/        lemma: derived
 mutate "superlative built on the positive" compare "s/  return fromComparative ?? superlatives\[0\] ?? null;/  return superlatives[superlatives.length - 1] ?? null;/"
 mutate "predicate gender default removed"  predst      "s/    if (!node.feats.has('Gender')) {/    if (false) {/"
 mutate "predicate skips untranslated subject" predst    "s/    const subjectName = subject.entry?.lemma ?? subject.token.form;/    if (!subject.entry) continue;\n    const subjectName = subject.entry.lemma;/"
+mutate "predicate ignores source gender"     predst    "s/    if (!node.feats.has('Gender') \&\& sourceGender) {/    if (false \&\& sourceGender) {/"
 echo "=== negative concord ==="
 mutate "negative concord disabled"         lexeme      "s/    if (sentence.lang === 'en' \&\& rankedFirst \&\& inNegatedClause(token)) {/    if (false) {/"
 mutate "negated clause not recorded"       negst       "s/      negatedClauses.add(head.id);//"

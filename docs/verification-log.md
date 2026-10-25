@@ -1748,3 +1748,22 @@ reading wrong: "He could read books" is `mogl čitati`, imperfective. No page st
 which reading to pick, and a guess shown as a guess is better than a rule that is
 wrong half the time. It stays classified `defect` because the output is wrong for
 this sentence, not `acceptable`.
+
+## VERIFIED: full mutation audit against the final code (2026-10-25)
+
+All 316 mutations were run against the code at a8ec0e4, in chunks of 40 on 2 workers.
+The tests caught 313 and 3 got through. Each one was a missing test, and one of them hid a real defect:
+
+| survivor | why no test caught it | resolution |
+|---|---|---|
+| `collective: children not covered` | English "children" now reaches the plural-only `děti` by its form, so only Russian still reaches `dětę` (Stanza lemma for "детей" is `ребенок`) | Russian fixture "Я вижу четырёх детей.", test asserts the "četvero" note |
+| `past gender ignores pronoun feats` | no fixture had an untranslated subject whose gender is marked in the source | "Зульфия спала." -> "Зульфия spala." |
+| `predicate skips untranslated subject` | same gap, and it hid a **defect**: the predicate ignored the source's Gender and defaulted to masculine, "Зульфия jest ščestlivy" | the predicate now reads the source's gender, as the l-participle did: "Зульфия jest ščestliva", "Рустам jest ščestlivy" |
+
+All four fixtures are live Stanza parses. Each of the 3 mutations, plus a new
+one for the fix (`predicate ignores source gender`), was rerun and caught. The audit
+now has 317 mutations, 0 stale. 431 tests pass, and typecheck is clean.
+
+Known and left alone: an unknown Russian name stays in Cyrillic. The orthography page
+defines Latin<->Cyrillic only for Interslavic's own letters, and gives no mapping for
+Russian-only letters (я, ю, щ, ь, ъ, э, ё, й), so a transliteration would be invented.

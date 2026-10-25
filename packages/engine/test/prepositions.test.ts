@@ -202,7 +202,7 @@ describe('collective numerals', () => {
     expect(collectiveNote('i-see-two-doors.conllu', 'doors')).toContain('"dvoje"');
   });
 
-  it('does so for children too, which reach the noun through "child"', () => {
+  it('does so for children too, which reach the plural-only "děti" by their form', () => {
     expect(out('four-children.conllu').text).toBe('Ja imaju četyri děti.');
     expect(collectiveNote('four-children.conllu', 'children')).toContain('"četvero"');
   });

@@ -436,3 +436,38 @@ describe('the reflexive clitic Russian fuses onto the verb', () => {
     expect(text).toBe('Ja ne hoču idti v kino.');
   });
 });
+
+/**
+ * Russian "детей" is lemmatised as `ребенок`, which reaches the singular entry
+ * `dětę` - not the plural-only `děti` that English "children" now reaches by
+ * its form. So the explicit `dětę` case in `takesCollective` is what names the
+ * collective here, and only this source exercises it ("četvero dětij",
+ * http://steen.free.fr/interslavic/numerals.html).
+ */
+describe('collective numerals from Russian', () => {
+  it('names the collective for children reached through the singular', () => {
+    const r = result('ja-vizhu-chetyreh-detej.conllu');
+    expect(r.text).toBe('Ja vidžu četyri děti.');
+    expect(r.words.find((w) => w.sourceForm === 'детей')?.notes.some((n) => n.includes('"četvero"'))).toBe(true);
+  });
+});
+
+/**
+ * A name the dictionary does not have gets no entry, so no lexical gender -
+ * but Russian marks it in the source ("Зульфия" is Gender=Fem), and that is a
+ * fact about the referent. The l-participle read it already; the predicate
+ * adjective fell through to the masculine default, "Зульфия jest ščestlivy".
+ * (The name itself stays as written: the pages give no rule for Russian-only
+ * letters such as я.)
+ */
+describe('an untranslated subject keeps the gender the source marks', () => {
+  it('in the past participle', () => {
+    expect(out('zulfija-spala.conllu')).toBe('Зульфия spala.');
+  });
+
+  it('in a predicate adjective', () => {
+    expect(out('zulfija-schastliva.conllu')).toBe('Зульфия jest ščestliva.');
+    // and the masculine, which the tie-break would not have given
+    expect(out('rustam-schastliv.conllu')).toBe('Рустам jest ščestlivy.');
+  });
+});
