@@ -159,3 +159,30 @@ describe('the Tower of Babel, from Russian', () => {
     expect(out('ru/babel-6.conllu')).toContain('od togo,');
   });
 });
+
+/**
+ * Constructions his texts use, built from them and from the Interslavic
+ * Wikipedia's counts.
+ */
+describe('constructions from his texts', () => {
+  it('puts the preposition inside the reciprocal: "jedin k drugomu"', () => {
+    // UDHR "imajųt postųpati jedin k drugomu", Babel "govorili jedin k drugomu"
+    expect(out('gold/g51.conllu')).toContain('imajut postupati jedin k drugomu v duhu bratstva');
+  });
+
+  it('builds "the more ..., the more ..." as "čim ..., tym ..."', () => {
+    // North Wind "čim močněje on dul, tym bolje"
+    expect(out('gold/g54.conllu')).toContain('čim vyše on vějal, tym vyše');
+  });
+
+  it('makes "the one who" the demonstrative and kto', () => {
+    // North Wind "togo, kto prvy uspěje"; Wikipedia "toj, kto", "tyh, kto"
+    expect(out('gold/g53.conllu')).toContain('že toj kto ');
+  });
+
+  it('makes a partitive "of" iz with the genitive', () => {
+    // "silnějše iz njih dvoh"; 142 "jedin iz" in the Interslavic Wikipedia
+    expect(out('en/one-of-them-is-broken.conllu')).toBe('Jedin iz njih jest lamany.');
+    expect(out('gold/g56.conllu')).toContain('silnějše iz dvoh');
+  });
+});

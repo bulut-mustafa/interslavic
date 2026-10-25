@@ -457,17 +457,17 @@ describe('collective numerals from Russian', () => {
  * but Russian marks it in the source ("Зульфия" is Gender=Fem), and that is a
  * fact about the referent. The l-participle read it already; the predicate
  * adjective fell through to the masculine default, "Зульфия jest ščestlivy".
- * (The name itself stays as written: the pages give no rule for Russian-only
- * letters such as я.)
+ * The name itself is written in Latin by the pages' letter tables: the
+ * flavourisation page's East Slavic row gives я = ja, ль = lj ("Zuljfija").
  */
 describe('an untranslated subject keeps the gender the source marks', () => {
   it('in the past participle', () => {
-    expect(out('zulfija-spala.conllu')).toBe('Зульфия spala.');
+    expect(out('zulfija-spala.conllu')).toBe('Zuljfija spala.');
   });
 
   it('in a predicate adjective', () => {
-    expect(out('zulfija-schastliva.conllu')).toBe('Зульфия jest ščestliva.');
+    expect(out('zulfija-schastliva.conllu')).toBe('Zuljfija jest ščestliva.');
     // and the masculine, which the tie-break would not have given
-    expect(out('rustam-schastliv.conllu')).toBe('Рустам jest ščestlivy.');
+    expect(out('rustam-schastliv.conllu')).toBe('Rustam jest ščestlivy.');
   });
 });

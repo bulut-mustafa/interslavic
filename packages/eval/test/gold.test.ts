@@ -124,8 +124,8 @@ const DIFFERENCES: Record<string, { status: Status; why: string }> = {
     why: 'as g50, plus "svojem": the Russian source says "в СВОЕМ достоинстве" and the pronouns page prescribes svoj for a possessor that is the subject. The Russian instrumental "свободными и равными" now comes out nominative, as he writes it',
   },
   g51: {
-    status: 'unsupported',
-    why: 'the reciprocal with a preposition: he writes "jedin K drugomu", the preposition INSIDE the formula, with drugy in the case it governs; we emit the dictionary\'s fixed "jedin drugogo" after the preposition, and "towards" ranks do (the prepositions page: "do - to, towards, till") over k ("to, towards (direction)"). Also open: "obdarjani" is the imperfective participle where he uses perfective "obdarjeni" (English "endowed" carries no aspect), and "endowed WITH" keeps the comitative "s" where the instrumental needs none. "imajut postupati" (should), "Oni sut ... obdar-i" (animate oni) and "rodet se" (g50) are right',
+    status: 'defect',
+    why: 'the reciprocal is now his "jedin k drugomu" and "should" his "imajut postupati"; what remains is ours: "obdarjani" is the imperfective participle where he uses perfective "obdarjeni" (English "endowed" carries no aspect), and "endowed WITH" keeps the comitative "s" where the instrumental needs none. "svědomje" against his "svěsť" is an equally valid dictionary word for "conscience"',
   },
   'g51-ru': {
     status: 'unsupported',
@@ -137,11 +137,11 @@ const DIFFERENCES: Record<string, { status: Status; why: string }> = {
   },
   g53: {
     status: 'defect',
-    why: '"the one who" gives "jedna ktora" where he writes "togo, kto"; "making the traveler take" has no causative construction ("v dělaje ... snimaje" against "pričiniti, že ... sojme"); "the other" is feminine "druga" against "drugogo". Right now: "should be considered" is "imaje byti razvažany" (was "imaje jest"), with van Steenbergen\'s own modal for "should"',
+    why: '"the one who" is now the demonstrative and kto ("toj kto"), and "should be considered" "imaje byti razvažany"; he restructures the clause ("trěba jest uznati za silnějšego"), hence his accusative "togo, kto". Ours still lacks a causative for "making the traveler take" ("v dělaje ... snimaje" against "pričiniti, že ... sojme")',
   },
   g54: {
-    status: 'unsupported',
-    why: '"the more he blew the more closely" is the correlative comparative "čim močněje ..., tym bolje", which is not built ("vyše on vějal vyše"); also "hard" takes "tvrdo" (hard to the touch) where he writes "močno". Right now: "kak on mogl" (was the raw English "could") and "i nakonec" (was "na poslědnjej"), both exactly his',
+    status: 'defect',
+    why: '"the more ..., the more ..." is now his correlative ("čim vyše on vějal, tym vyše"), "could" is "mogl" and "at last" "nakonec". Still ours: "hard" takes "tvrdo" (hard to the touch) where he writes "močno", and "more closely" stays analytic ("vyše těsno") where he writes "bolje"',
   },
   g55: {
     status: 'defect',
@@ -149,7 +149,7 @@ const DIFFERENCES: Record<string, { status: Status; why: string }> = {
   },
   g56: {
     status: 'defect',
-    why: '"the stronger of the two" drops the "of" entirely ("silnějše dvoh") where he writes "silnějše iz njih dvoh". "byl obvezyvany izpovědati" against his "iměl priznati" is a faithful rendering of "was obliged to confess"',
+    why: '"the stronger of the two" is now partitive "silnějše iz dvoh" (he adds "njih": "iz njih dvoh"). "byl obvezyvany izpovědati" against his "iměl priznati" is a faithful rendering of "was obliged to confess"; the verb "bylo" stays agreed with "solnce" where he writes the present "jest"',
   },
   g13: {
     status: 'defect',
@@ -238,7 +238,7 @@ describe("gold: van Steenbergen's own Interslavic", () => {
     // Not an assertion about quality - a tripwire, so that silently
     // reclassifying a defect as "acceptable" shows up as a failing test.
     expect({ acceptable: by('acceptable'), defect: by('defect'), unsupported: by('unsupported'), parser: by('parser') })
-      .toEqual({ acceptable: 15, defect: 5, unsupported: 3, parser: 4 });
+      .toEqual({ acceptable: 15, defect: 7, unsupported: 1, parser: 4 });
   });
 });
 

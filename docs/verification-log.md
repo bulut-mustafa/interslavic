@@ -1926,3 +1926,35 @@ Known and left open:
 - **Parser** (Stanza): mis-lemmatised Russian verbs (смешаем, обожжем, рассеемся),
   "сойдем" tagged 2nd person, "Отче" as an interjection.
 - **Dictionary gaps:** Господь, бессрочный, эфиопка, пицца, "asleep", "concerned".
+
+## VERIFIED: the rare constructions and the names (2026-10-25)
+
+Built, each from a source:
+
+- **Russian names in Latin.** The flavourisation page's East Slavic row (я ю йо/ьо
+  (й)е/ье и/ьи ль нь = ja ju jo je ji lj nj, http://steen.free.fr/interslavic/flavorizacija.html),
+  its "šč ... can also be written щ", and the orthography page's shared letters give a
+  complete table: Зульфия -> Zuljfija, Том -> Tom, Наталья -> Natalja, Елена -> Jelena.
+  Where a letter is not covered (э, ъ, a soft sign elsewhere: Эдуард, Господь), the name
+  stays in Cyrillic, not guessed.
+- **"jedin k drugomu".** The preposition goes inside the reciprocal (his UDHR and Tower
+  of Babel). "towards one another" -> "jedin k drugomu", exactly his g51 phrase.
+- **"the more ..., the more ..." -> "čim ..., tym ..."** (his North Wind):
+  "čim vyše on vějal, tym vyše ...".
+- **"the one who" -> demonstrative + kto.** His North Wind has "togo, kto"; the Wikipedia
+  has toj, kto 2, togo, kto 5, tyh, kto 3, ti, kto 2.
+- **Partitive "of" -> iz + genitive.** His North Wind "koj iz njih", "iz njih dvoh"; the
+  Wikipedia has 142 "jedin iz" and 46 "iz njih". "One of them" -> "Jedin iz njih".
+
+Left open, with the reason:
+
+- **English names that are also words** ("Trump" -> kozyr): tried and reverted. A
+  narrower gate (no determiner, not sentence-initial, no capitalised gloss) still broke
+  "North Wind", "God" and a misparsed "Winter". Telling a name from a capitalised
+  common noun needs named-entity recognition (Stanza's NER model). That is an extra
+  download and memory cost on this machine, so it was not added.
+- **"let me + verb":** the only evidence is one Tatoeba sentence ("Daj mi znati"), with
+  nothing in the pages or the Wikipedia.
+- **Causative "make X do":** one example ("pričiniti, že ... sojme"), and the clause
+  restructuring it needs is not general.
+- **Idioms** ("how about you", "the hell"): phrase-by-phrase, no rule.

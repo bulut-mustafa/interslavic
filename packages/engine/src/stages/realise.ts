@@ -2,6 +2,7 @@ import { decide, type Decision } from '../../../types/index.ts';
 import { realize } from '../../../morph/src/realize.ts';
 import { compared, type Degree } from '../../../morph/src/comparison.ts';
 import { pastPassiveParticiple, presentActiveParticiple } from '../../../morph/src/participles.ts';
+import { russianNameToLatin } from '../../../morph/src/orthography.ts';
 import { conditionalAuxiliary, futureAuxiliary } from '../../../rules/src/auxiliaries.ts';
 import { isOneAnaphor, antecedentOf } from '../../../rules/src/anaphora.ts';
 import { isExpletiveSubject } from '../../../rules/src/expletives.ts';
@@ -167,6 +168,8 @@ export function realiseStage(input: RealiseInput): RealiseOutput {
     const { token, entry, feats, notes } = node;
     if (owed) appendPunctuation(owed);
     owed = punctuationAfter.get(token.id);
+    // "čim močněje on dul, tym bolje ..." - the second half is set off.
+    if (feats.get('Case')?.ruleId === 'comparison.correlative' && entry?.lemma === 'tȯj') appendComma();
 
     /**
      * Words the source left out are emitted FIRST, before any branch that can
@@ -380,9 +383,18 @@ export function realiseStage(input: RealiseInput): RealiseOutput {
     }
 
     if (!entry) {
-      surfaces.push(token.form);
+      /**
+       * A Russian name the dictionary does not have is written in Latin by
+       * the pages' own letter tables (russianNameToLatin) - "Зульфия" ->
+       * "Zuljfija" - and kept as it was where they do not cover a letter.
+       */
+      const latinName =
+        sentence.lang === 'ru' && token.upos === 'PROPN' ? russianNameToLatin(token.form) : null;
+      if (latinName) notes.push(`a name, written in Latin by the Interslavic letter tables (${token.form})`);
+      const surface = latinName ?? token.form;
+      surfaces.push(surface);
       words.push({
-        surface: token.form,
+        surface,
         lemma: token.lemma,
         sourceForm: token.form,
         pos: token.upos,

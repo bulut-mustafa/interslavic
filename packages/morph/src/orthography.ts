@@ -126,6 +126,56 @@ export function toCyrillic(text: string): string {
   return out.split(SEPARATE_J).join('');
 }
 
+/**
+ * A Russian name in Latin letters, by the pages' own tables, or null where
+ * they do not cover a letter - such a name is left as it was rather than
+ * guessed.
+ *
+ * - The letters Russian shares with standard Interslavic Cyrillic map as
+ *   LAT_TO_CYR does (orthography page).
+ * - The rest come from the flavourisation page's East Slavic row, which writes
+ *   standard ја ју јо је ји љ њ ы as я ю йо/ьо (й)е/ье и/ьи ль нь ы
+ *   (http://steen.free.fr/interslavic/flavorizacija.html), plus "šč ... can
+ *   also be written щ".
+ * - "(й)е" is je; read so where Russian writes it - at the start or after a
+ *   vowel - and e (the shared letter) after a consonant.
+ * - Not covered, so the name stays: э, ъ, and ь anywhere but in ль нь or before
+ *   a vowel (ьо ье ьи are jo je ji; ья ью ьё are ja ju jo, the vowel carrying the j).
+ */
+const RU_LETTERS: Record<string, string> = Object.fromEntries([
+  ...LAT_TO_CYR.filter(([lat]) => lat.length === 1 && lat !== 'j' && lat !== 'ě' && lat !== 'y' && lat !== 'e')
+    .map(([lat, cyr]) => [cyr, lat]),
+  ['й', 'j'], ['я', 'ja'], ['ю', 'ju'], ['ё', 'jo'], ['ы', 'y'], ['щ', 'šč'],
+]);
+const RU_VOWELS = new Set([...'аеёиоуыэюя']);
+
+export function russianNameToLatin(word: string): string | null {
+  const lower = word.toLowerCase();
+  let out = '';
+  for (let i = 0; i < lower.length; i++) {
+    const c = lower[i]!;
+    const next = lower[i + 1];
+    const afterSoft = lower[i + 2];
+    // ль/нь, unless the soft sign is the j of a following vowel ("Наталья").
+    if ((c === 'л' || c === 'н') && next === 'ь' && !(afterSoft && RU_VOWELS.has(afterSoft))) {
+      out += c === 'л' ? 'lj' : 'nj'; i++; continue;
+    }
+    // ьо ье ьи are jo je ji; before я ю ё the vowel already carries the j.
+    if (c === 'ь' && next && RU_VOWELS.has(next)) {
+      out += next === 'о' ? 'jo' : next === 'е' ? 'je' : next === 'и' ? 'ji' : RU_LETTERS[next] ?? '';
+      if (!'оеияюё'.includes(next)) return null;
+      i++; continue;
+    }
+    if (c === 'е') { out += i === 0 || RU_VOWELS.has(lower[i - 1]!) ? 'je' : 'e'; continue; }
+    const latin = RU_LETTERS[c];
+    if (latin === undefined) return null;
+    out += latin;
+  }
+  return word[0] === word[0]!.toUpperCase() && word[0] !== word[0]!.toLowerCase()
+    ? out.charAt(0).toUpperCase() + out.slice(1)
+    : out;
+}
+
 export function render(text: string, orth: Orthography): string {
   switch (orth) {
     case 'etymological': return text;

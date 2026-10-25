@@ -1,4 +1,4 @@
-import { decide, type Case, type Decision, type UdToken } from '../../../types/index.ts';
+import { decide, type Case, type Decision, type ParsedSentence, type UdToken } from '../../../types/index.ts';
 import { normalizeGloss, rank, type Entry } from '../../../lexicon/src/reader.ts';
 import { resolveAspect, type AspectOutcome } from '../resolvers/aspect.ts';
 import { resolveCase } from '../resolvers/case.ts';
@@ -45,6 +45,25 @@ import type { LexemeInput } from './lexeme-input.ts';
  * marking and the verb government, and writes the `plan` that agreement and
  * realisation then work on.
  */
+/**
+ * Position of a correlative "the" (0 = first, 1 = second) or null: an English
+ * "the" right before a comparative that no noun follows, in a sentence with
+ * two of them. One alone is an ordinary article ("the bigger house" has its
+ * noun).
+ */
+function correlativeIndexer(sentence: ParsedSentence): (token: UdToken) => number | null {
+  if (sentence.lang !== 'en') return () => null;
+  const byId = new Map(sentence.tokens.map((t) => [t.id, t]));
+  const hits = sentence.tokens.filter((t) => {
+    if (t.upos !== 'DET' || t.lemma.toLowerCase() !== 'the') return false;
+    const next = byId.get(t.id + 1);
+    if (!next || next.feats['Degree'] !== 'Cmp' || (next.upos !== 'ADV' && next.upos !== 'ADJ')) return false;
+    return byId.get(t.id + 2)?.upos !== 'NOUN';
+  });
+  if (hits.length !== 2) return () => null;
+  return (token) => (token.id === hits[0]!.id ? 0 : token.id === hits[1]!.id ? 1 : null);
+}
+
 export function lexemeStage(input: LexemeInput): PlanNode[] {
   const {
     sentence, adapter, lex, dropped, unknown,
@@ -60,6 +79,7 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
 
   const plan: PlanNode[] = [];
 
+  const correlativeIndex = correlativeIndexer(sentence);
   for (const token of sentence.tokens) {
     if (token.deprel === 'punct' || token.upos === 'PUNCT') continue;
     /**
@@ -78,6 +98,29 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
           : 'part of a phrase the dictionary lists as one entry',
       });
       continue;
+    }
+    /**
+     * "THE more he blew, THE more closely ...": "the" before a comparative
+     * with no noun after it is the correlative, "čim ..., tym ..." - van
+     * Steenbergen's North Wind has "čim močněje on dul, tym bolje putovatelj
+     * ovival se". The first such "the" is `čim` (instrumental of čto), the
+     * second `tym` (of toj). Dropped as an article, the sentence read "vyše on
+     * vějal vyše těsno ...".
+     */
+    const correlative = correlativeIndex(token);
+    if (correlative !== null) {
+      const lemma = correlative === 0 ? 'čto' : 'tȯj';
+      const corrEntry = lex.lookupLemma(lemma, 'PRON')[0];
+      if (corrEntry) {
+        const why = 'the correlative comparative "čim ..., tym ..."';
+        const corrFeats = new Map<string, Decision<string>>([
+          ['Case', decide('Ins', 'comparison.correlative', 'high', why)],
+          ['Gender', decide('Neut', 'comparison.correlative', 'high', why)],
+          ['Number', decide('Sing', 'comparison.correlative', 'high', why)],
+        ]);
+        plan.push({ token, entry: corrEntry, ranked: [corrEntry], aspect: null, feats: corrFeats, notes: [] });
+        continue;
+      }
     }
     if (adapter.dropsArticles && isArticle(token)) {
       dropped.push({ form: token.form, why: 'Interslavic has no articles' });
@@ -318,9 +361,28 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
     const antecedent = relativeHead
       ? sentence.tokens.find((t) => t.id === relativeHead.head)
       : undefined;
+    /**
+     * "the one who ..." is a demonstrative and `kto`, not a numeral and
+     * `ktory`: van Steenbergen's North Wind has "togo, kto prvy uspěje", and
+     * the Interslavic Wikipedia "toj, kto" (2), "togo, kto" (5), "tyh, kto"
+     * (3), "ti, kto" (2). Word by word it was "jedna ktory".
+     */
+    const isOneWho = (one: UdToken): boolean =>
+      sentence.lang === 'en' &&
+      one.lemma.toLowerCase() === 'one' &&
+      sentence.tokens.some(
+        (c) =>
+          c.head === one.id &&
+          c.deprel === 'acl:relcl' &&
+          sentence.tokens.some((r) => r.head === c.id && r.lemma.toLowerCase() === 'who'),
+      );
     const relativeEntry = relativeHead
-      ? lex.lookupLemma(RELATIVE_PRONOUN, 'PRON')[0]
+      ? lex.lookupLemma(
+          antecedent && isOneWho(antecedent) && token.lemma.toLowerCase() === 'who' ? 'kto' : RELATIVE_PRONOUN,
+          'PRON',
+        )[0]
       : undefined;
+    const demonstrativeHeadEntry = isOneWho(token) ? lex.lookupLemma('tȯj', 'PRON')[0] : undefined;
 
     // "that" joining two clauses is the conjunction `že`, not a demonstrative.
     const complementizerEntry =
@@ -365,6 +427,7 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
     const entry =
       phrasalVerbs.get(token.id) ??
       complementizerEntry ??
+      demonstrativeHeadEntry ??
       relativeEntry ??
       negativeEntry ??
       reflexiveEntry ??
@@ -678,6 +741,13 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
         feats.set('Animacy', decide(animacy, 'anaphora.one', 'high',
           `stands for "${antecedentToken!.form}" (Animacy = ${animacy})`));
       }
+    }
+
+    // "the one who": a person, so the masculine "toj" in the case of its place.
+    if (demonstrativeHeadEntry && entry === demonstrativeHeadEntry) {
+      const why = '"the one who" is the demonstrative standing for a person ("toj, kto", "togo, kto")';
+      feats.set('Gender', decide('Masc', 'pronoun.oneWho', 'high', why));
+      feats.set('Number', decide('Sing', 'pronoun.oneWho', 'high', why));
     }
 
     // The presentational demonstrative is the neuter "to", not the "toj" its

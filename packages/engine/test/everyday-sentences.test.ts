@@ -99,7 +99,7 @@ describe('pronouns and possessives', () => {
   });
 
   it('keeps "всём" neuter and locative, and finds a short adjective (13509804)', () => {
-    expect(out('ru/tatoeba-vo-vsem-prav.conllu')).toBe('Том byl v vsem pravy.');
+    expect(out('ru/tatoeba-vo-vsem-prav.conllu')).toBe('Tom byl v vsem pravy.');
   });
 
   it('reads "no one" as nikto, negating the verb once (10101206)', () => {
@@ -107,7 +107,8 @@ describe('pronouns and possessives', () => {
   });
 
   it('does not translate the name "Том" as "том", a volume (13001945)', () => {
-    expect(out('ru/tatoeba-starshe-toma.conllu')).toContain('od Тома');
+    // kept as a name, and written in Latin by the letter tables
+    expect(out('ru/tatoeba-starshe-toma.conllu')).toContain('od Toma');
   });
 });
 

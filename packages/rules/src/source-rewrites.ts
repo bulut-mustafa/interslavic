@@ -162,8 +162,39 @@ export function correctRussianFuture(sentence: ParsedSentence): ParsedSentence {
   };
 }
 
+/**
+ * "towards one another" is "jedin k drugomu": the preposition goes INSIDE the
+ * reciprocal, governing its second half - van Steenbergen's UDHR "imajųt
+ * postųpati jedin k drugomu", his Tower of Babel "I oni govorili jedin k
+ * drugomu". English puts the preposition first and parses "one another" as
+ * one word ("one" + fixed "another"), so the parse is reordered to the
+ * Interslavic shape: "one" stands alone, then the preposition, then
+ * "another" as its object. Both halves are marked reciprocal (PronType=Rcp),
+ * which is what makes them the masculine formula.
+ */
+export function rewriteReciprocalPreposition(sentence: ParsedSentence): ParsedSentence {
+  if (sentence.lang !== 'en') return sentence;
+  const one = sentence.tokens.find(
+    (t) =>
+      t.lemma.toLowerCase() === 'one' &&
+      sentence.tokens.some((f) => f.head === t.id && f.deprel === 'fixed' && f.lemma.toLowerCase() === 'another' && f.id === t.id + 1) &&
+      sentence.tokens.some((p) => p.head === t.id && p.deprel === 'case' && p.id === t.id - 1),
+  );
+  if (!one) return sentence;
+  const prep = sentence.tokens.find((p) => p.head === one.id && p.deprel === 'case')!;
+  const another = sentence.tokens.find((f) => f.head === one.id && f.deprel === 'fixed')!;
+  const rcp = (feats: Record<string, string>) => ({ ...feats, PronType: 'Rcp' });
+  const tokens = sentence.tokens.map((t) => {
+    if (t.id === one.id) return { ...t, id: prep.id, head: another.id, deprel: 'dep', feats: rcp(t.feats) };
+    if (t.id === prep.id) return { ...t, id: one.id, head: another.id };
+    if (t.id === another.id) return { ...t, head: one.head, deprel: one.deprel, upos: 'PRON', feats: rcp(t.feats) };
+    return t;
+  });
+  return { ...sentence, tokens: tokens.sort((a, b) => a.id - b.id) };
+}
+
 export function rewriteSource(sentence: ParsedSentence): SourceRewrite {
-  const light = rewriteLightVerbs(correctRussianFuture(sentence));
+  const light = rewriteLightVerbs(rewriteReciprocalPreposition(correctRussianFuture(sentence)));
   const exceptive = rewriteExceptives(light.sentence);
   return { sentence: exceptive.sentence, absorbed: [...light.absorbed, ...exceptive.absorbed] };
 }

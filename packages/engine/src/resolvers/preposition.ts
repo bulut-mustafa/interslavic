@@ -73,6 +73,36 @@ const MARKER_REASON: Record<string, string> = {
 export function planPreposition(adp: UdToken, sentence: ParsedSentence): PrepPlan {
   const lemma = adp.lemma.toLowerCase();
 
+  /**
+   * A PARTITIVE "of" - a part out of a whole - is `iz` with the genitive, not
+   * a bare genitive: "one of them" is "jedin iz njih" (142 "jedin iz" and 46
+   * "iz njih" in the Interslavic Wikipedia: "Mnoge iz njih", "vsaky iz
+   * njih"), and van Steenbergen's North Wind writes "koj iz njih jest
+   * silnějši" and "silnějše iz njih dvoh". It is partitive when it depends on
+   * a numeral, a comparative or superlative, or a quantifying or
+   * interrogative pronoun; "the book of my brother" keeps the bare genitive.
+   */
+  if (lemma === 'of') {
+    const complement = sentence.tokens.find((t) => t.id === adp.head);
+    const whole = complement && sentence.tokens.find((t) => t.id === complement.head);
+    const partitive =
+      whole !== undefined &&
+      (whole.upos === 'NUM' ||
+        whole.feats['Degree'] === 'Cmp' ||
+        whole.feats['Degree'] === 'Sup' ||
+        ((whole.upos === 'PRON' || whole.upos === 'DET') &&
+          ['Int', 'Ind', 'Tot', 'Neg'].includes(whole.feats['PronType'] ?? '')));
+    if (partitive) {
+      return {
+        kind: 'preposition',
+        prep: 'iz',
+        case: decide<Case>('Gen', 'case.prep.partitive', 'high',
+          'a part out of a whole: "iz" with the genitive ("jedin iz njih", "silnějše iz njih dvoh")'),
+        alternatives: [],
+      };
+    }
+  }
+
   // Case markers: delete the word, keep the case.
   const marker = CASE_MARKER_PREPOSITIONS[lemma];
   if (marker && (lemma !== 'to' || isRecipientTo(adp, sentence))) {
@@ -129,6 +159,22 @@ export function planPreposition(adp: UdToken, sentence: ParsedSentence): PrepPla
             alternatives: [],
           };
     }
+  }
+
+  /**
+   * "towards" governing the second half of a reciprocal is `k` with the
+   * dative: "jedin k drugomu", as van Steenbergen writes it in both his UDHR
+   * and his Tower of Babel. The prepositions page lists "do - to, towards,
+   * till" and "k - to, towards (direction)"; his texts choose k here.
+   */
+  if (lemma === 'towards' && complement?.feats['PronType'] === 'Rcp') {
+    return {
+      kind: 'preposition',
+      prep: 'k',
+      case: decide<Case>('Dat', 'reciprocal.formula', 'high',
+        'towards each other: "jedin k drugomu", k with the dative'),
+      alternatives: [],
+    };
   }
 
   /** "driving around in Moscow" -> "jezdil po Moskvě" (rules/src/motion.ts). */

@@ -183,6 +183,18 @@
       "quote": "Tutoj hlěb jest nedragy. „This bread is inexpensive.”",
       "why": "a predicate complement takes the nominative"
     },
+    "comparison.correlative": {
+      "tier": "corpus",
+      "source": "http://steen.free.fr/interslavic/northwind.html",
+      "quote": "Na čto Sěverny Větr načel duti tako močno kako mogl, ale čim močněje on dul, tym bolje putovatelj ovival se v plašču.",
+      "why": "'the more ..., the more ...' is čim ..., tym ... (instrumentals of čto and toj)"
+    },
+    "case.prep.partitive": {
+      "tier": "corpus",
+      "source": "http://steen.free.fr/interslavic/northwind.html",
+      "quote": "Togda Sěverny Větr iměl priznati, že Solnce jest silnějše iz njih dvoh.",
+      "why": "a partitive 'of' (out of a whole: after a numeral, a comparative/superlative or a quantifying pronoun) is iz + genitive; the Interslavic Wikipedia has 142 'jedin iz' and 46 'iz njih'"
+    },
     "case.prep.around": {
       "tier": "normative",
       "source": "http://steen.free.fr/interslavic/verbs.html",
@@ -260,6 +272,12 @@
       "source": "https://cals.no/translation/udhr-art-1/language/interslavic",
       "quote": "Oni sųt obdarjeni razumom i svěstjų i imajųt postųpati jedin k drugomu v duhu bratstva.",
       "why": "the pronouns page's table heads oni \"masc.anim.\" and one \"other\"; van Steenbergen's own UDHR translation agrees the predicate animate with oni"
+    },
+    "pronoun.oneWho": {
+      "tier": "corpus",
+      "source": "http://steen.free.fr/interslavic/northwind.html",
+      "quote": "Oni dogovorili se, že togo, kto prvy uspěje pričiniti, že putovatelj sojme svoj plašč, trěba jest uznati za silnějšego od drugogo.",
+      "why": "'the one who' is the demonstrative toj with kto; the Interslavic Wikipedia has toj, kto (2), togo, kto (5), tyh, kto (3), ti, kto (2)"
     },
     "pronoun.presentational": {
       "tier": "corpus",

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { realize, selectForm } from '../src/realize.ts';
+import { russianNameToLatin } from '../src/orthography.ts';
 
 /**
  * These tests exist because a mutation audit found that the variant-preference
@@ -153,5 +154,27 @@ describe('a feature the slot does not mark', () => {
     // Nom Sing Fem exists outright, so the fallback never replaces it.
     expect(realize({ lemma: 'dobry', xpos: 'adj.', feats: { Case: 'Nom', Number: 'Sing', Gender: 'Fem' } }))
       .toMatchObject({ ok: true, form: 'dobra' });
+  });
+});
+
+/**
+ * Russian names in Latin, by the pages' own tables: the flavourisation page's
+ * East Slavic row (я ю йо/ьо (й)е/ье и/ьи ль нь = ja ju jo je ji lj nj) and
+ * "šč ... can also be written щ". A letter they do not cover leaves the name
+ * as it was.
+ */
+describe('a Russian name in Latin letters', () => {
+  it('follows the tables', () => {
+    expect(russianNameToLatin('Зульфия')).toBe('Zuljfija');
+    expect(russianNameToLatin('Наталья')).toBe('Natalja');
+    expect(russianNameToLatin('Елена')).toBe('Jelena');
+    expect(russianNameToLatin('Фёдор')).toBe('Fjodor');
+    expect(russianNameToLatin('Щукин')).toBe('Ščukin');
+    expect(russianNameToLatin('Сергей')).toBe('Sergej');
+  });
+
+  it('declines a letter the tables do not cover', () => {
+    expect(russianNameToLatin('Эдуард')).toBeNull();
+    expect(russianNameToLatin('Господь')).toBeNull();
   });
 });
