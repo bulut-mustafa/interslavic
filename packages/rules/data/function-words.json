@@ -43,6 +43,17 @@
       "source": "steenbergen-syntax"
     },
     {
+      "en": "весь",
+      "lang": "ru",
+      "upos": [
+        "DET"
+      ],
+      "isv": "vėś",
+      "why": "the universal 'all'. `cěly` is 'whole, entire' and won on the gloss 'весь', which the dictionary lists for both",
+      "evidence": "steenbergen-pronouns: 'ves (f. vsa, n. vse “whole, entire; all”)', nominative plural masculine animate 'vsi'; van Steenbergen's UDHR Article 1: 'Vsi ljudi rodęt sę svobodni'",
+      "source": "steenbergen-pronouns"
+    },
+    {
       "en": "его",
       "lang": "ru",
       "upos": [

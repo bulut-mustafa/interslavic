@@ -249,6 +249,12 @@
       "quote": null,
       "why": "the noun’s gender, from its partOfSpeech cell"
     },
+    "animacy.pronounLemma": {
+      "tier": "corpus",
+      "source": "https://cals.no/translation/udhr-art-1/language/interslavic",
+      "quote": "Oni sųt obdarjeni razumom i svěstjų i imajųt postųpati jedin k drugomu v duhu bratstva.",
+      "why": "the pronouns page's table heads oni \"masc.anim.\" and one \"other\"; van Steenbergen's own UDHR translation agrees the predicate animate with oni"
+    },
     "gender.pronounLemma": {
       "tier": "dictionary",
       "source": "packages/lexicon/data/raw/words.tsv",

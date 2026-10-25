@@ -6,10 +6,11 @@
     "verbs": "http://steen.free.fr/interslavic/verbs.html",
     "pronouns": "http://steen.free.fr/interslavic/pronouns.html",
     "adjectives": "http://steen.free.fr/interslavic/adjectives.html",
-    "numerals": "http://steen.free.fr/interslavic/numerals.html"
+    "numerals": "http://steen.free.fr/interslavic/numerals.html",
+    "udhr": "https://cals.no/translation/udhr-art-1/language/interslavic"
   },
   "_retrieved": "2026-10-18",
-  "_note": "Pairs 1-10 were the original set, retrieved 2026-10-17 from the syntax page alone. 11-29 widen coverage to the constructions that page never exercised: prepositional case contrast, reflexives, svoj, predicate adjectives, numeral government, purpose clauses and the optative. Many of them are expected to fail - that is the point of measuring.  Harvest status (2026-10-23): the grammar pages are now exhausted for en->isv SENTENCE pairs. A sweep of nouns/adjectives/pronouns/numerals/verbs/prepositions/conjunctions/syntax/word_formation/derivation yields 40 ISV-with-English-gloss candidates, of which 23 were already here and 11 are word-level examples or prose fragments rather than sentences. The plan's 60-80 target assumed ~150 candidates; most of those are single words. 35 is the realistic ceiling from tier 1.  Russian gold (2026-10-23): the TARGET of each ru- pair is van Steenbergen's own Interslavic, taken from the English pair it mirrors; only the SOURCE changes. The Russian source sentences were authored for this repo and are NOT his - that is the weak half of these pairs, and a Russian speaker should review them. They are still worth having: they test the Russian pipeline against an authoritative target rather than against our own English output, which is the only independent check available without a Russian speaker.",
+  "_note": "Pairs 1-10 were the original set, retrieved 2026-10-17 from the syntax page alone. 11-29 widen coverage to the constructions that page never exercised: prepositional case contrast, reflexives, svoj, predicate adjectives, numeral government, purpose clauses and the optative. Many of them are expected to fail - that is the point of measuring.  Harvest status (2026-10-23): the grammar pages are now exhausted for en->isv SENTENCE pairs. A sweep of nouns/adjectives/pronouns/numerals/verbs/prepositions/conjunctions/syntax/word_formation/derivation yields 40 ISV-with-English-gloss candidates, of which 23 were already here and 11 are word-level examples or prose fragments rather than sentences. The plan's 60-80 target assumed ~150 candidates; most of those are single words. 35 is the realistic ceiling from tier 1.  Russian gold (2026-10-23): the TARGET of each ru- pair is van Steenbergen's own Interslavic, taken from the English pair it mirrors; only the SOURCE changes. The Russian source sentences were authored for this repo and are NOT his - that is the weak half of these pairs, and a Russian speaker should review them. They are still worth having: they test the Russian pipeline against an authoritative target rather than against our own English output, which is the only independent check available without a Russian speaker. UDHR Article 1 (2026-10-25): the one pair set where BOTH sides are independent of this repo - van Steenbergen's own Interslavic (credited \"IJzeren Jan\", in etymological spelling, converted here with toStandard), against the official UN English and Russian texts.",
   "pairs": [
     {
       "id": "g01",
@@ -540,6 +541,53 @@
       ],
       "of": "g28",
       "en_of_target": "two students"
+    },
+    {
+      "id": "g50",
+      "en": "All human beings are born free and equal in dignity and rights.",
+      "isv": "Vsi ljudi rodet se svobodni i ravni v dostojnosti i pravah.",
+      "page": "udhr",
+      "tests": [
+        "universal quantifier",
+        "be born",
+        "predicate adjectives after a verb"
+      ]
+    },
+    {
+      "id": "g51",
+      "en": "They are endowed with reason and conscience and should act towards one another in a spirit of brotherhood.",
+      "isv": "Oni sut obdarjeni razumom i svěstju i imajut postupati jedin k drugomu v duhu bratstva.",
+      "page": "udhr",
+      "tests": [
+        "passive participle",
+        "reciprocal",
+        "modal should"
+      ]
+    },
+    {
+      "id": "g50-ru",
+      "ru": "Все люди рождаются свободными и равными в своем достоинстве и правах.",
+      "lang": "ru",
+      "of": "g50",
+      "isv": "Vsi ljudi rodet se svobodni i ravni v dostojnosti i pravah.",
+      "page": "udhr",
+      "tests": [
+        "universal quantifier",
+        "predicate instrumental"
+      ]
+    },
+    {
+      "id": "g51-ru",
+      "ru": "Они наделены разумом и совестью и должны поступать в отношении друг друга в духе братства.",
+      "lang": "ru",
+      "of": "g51",
+      "isv": "Oni sut obdarjeni razumom i svěstju i imajut postupati jedin k drugomu v duhu bratstva.",
+      "page": "udhr",
+      "tests": [
+        "zero copula before a passive participle",
+        "reciprocal",
+        "oni is masculine animate"
+      ]
     }
   ]
 }

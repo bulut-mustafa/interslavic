@@ -24,6 +24,7 @@ import {
 } from '../../../rules/src/reflexives.ts';
 import {
   COMPLEMENTIZER,
+  personalPronounAnimacy,
   personalPronounGender,
   personalPronounNumber,
   prepCaseFor,
@@ -68,12 +69,13 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
      * otherwise takes the preposition branch below and is emitted there.
      */
     if (phrasalParticles.has(token.id)) {
-      const verbEntry = phrasalVerbs.get(token.head);
+      // The same holds for the rest of a fixed expression ("друг друга" -> `jedin drugogo`).
+      const phraseEntry = phrasalVerbs.get(token.head);
       dropped.push({
         form: token.form,
-        why: verbEntry
-          ? `part of the phrasal verb translated by "${verbEntry.lemma}"`
-          : 'part of a phrasal verb',
+        why: phraseEntry
+          ? `part of the ${phraseEntry.pos.upos === 'VERB' ? 'phrasal verb' : 'phrase'} translated by "${phraseEntry.lemma}"`
+          : 'part of a phrase the dictionary lists as one entry',
       });
       continue;
     }
@@ -645,6 +647,10 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
           ),
         );
       }
+      if (personalPronounAnimacy(pronounLemma)) {
+        feats.set('Animacy', decide('Anim', 'animacy.pronounLemma', 'certain',
+          `"${pronounLemma}" is the masculine animate plural (the pronouns page's table)`));
+      }
       // The pronoun's number belongs to the lemma we chose, not to the English
       // source: `vy` has no singular, so copying "you"'s unmarked number asked
       // for a form that does not exist.
@@ -748,7 +754,18 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
     if (needsVerbFeatures(token) && aspect) {
       // A deleted auxiliary carried the tense and person; UD leaves the main
       // verb as a bare infinitive, so take them from the auxiliary.
-      const fromAux = auxFeatsForHead.get(token.id);
+      /**
+       * The same when the dictionary absorbed a passive "be" into the verb
+       * itself - "be born" is `roditi sę` (phrasal-verbs.ts). The verb is then
+       * an ordinary finite one, so it takes "are"'s tense and person instead
+       * of the passive participle's agreement: "rodet se", not "rodihmo se".
+       */
+      const absorbedPassive = phrasalVerbs.has(token.id)
+        ? sentence.tokens.find(
+            (t) => t.head === token.id && t.deprel === 'aux:pass' && phrasalParticles.has(t.id),
+          )
+        : undefined;
+      const fromAux = auxFeatsForHead.get(token.id) ?? absorbedPassive?.feats;
       const src = { ...token.feats, ...(fromAux ?? {}) };
       const via = fromAux ? ' (via the deleted auxiliary)' : '';
 
@@ -765,7 +782,7 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
        * Previously the verb took the active l-participle and the copula the
        * literary imperfect.
        */
-      if (token.feats['Voice'] === 'Pass' && token.feats['VerbForm'] === 'Part') {
+      if (token.feats['Voice'] === 'Pass' && token.feats['VerbForm'] === 'Part' && !absorbedPassive) {
         const subject = sentence.tokens.find(
           (t) => t.head === token.id && t.deprel.startsWith('nsubj'),
         );

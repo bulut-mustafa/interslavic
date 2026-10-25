@@ -1,4 +1,5 @@
-import { decide } from '../../../types/index.ts';
+import { decide, type UdToken } from '../../../types/index.ts';
+import type { PlanNode } from '../result.ts';
 import { subjectPerson } from '../tree.ts';
 import type { StageContext } from './context.ts';
 
@@ -13,19 +14,49 @@ export function predicateAgreementStage(ctx: StageContext): void {
   // "Water is cold" makes the ADJECTIVE the root, with the subject hanging off
   // it, so a predicate adjective has to agree with its subject rather than with
   // a head noun it does not have.
+  const subjectOf = (id: number) =>
+    plan.find((n) => n.token.head === id && n.token.deprel.startsWith('nsubj'));
+  const sharesHeadSubject = (t: UdToken): boolean =>
+    (t.deprel === 'conj' && t.upos !== 'NOUN') || (t.deprel === 'xcomp' && t.upos === 'ADJ');
+  // Up the chain: "svobodni i ravni" - "ravni" hangs off "svobodni", which
+  // hangs off the verb that has the subject.
+  const subjectFor = (t: UdToken, hops = 0): PlanNode | undefined => {
+    const own = subjectOf(t.id);
+    if (own || hops >= 4 || !sharesHeadSubject(t)) return own;
+    const head = sentence.tokens.find((h) => h.id === t.head);
+    return head ? subjectFor(head, hops + 1) : undefined;
+  };
+
   for (const node of plan) {
-    if (node.token.upos !== 'ADJ' && node.token.upos !== 'NOUN') continue;
+    // A passive participle is predicative like an adjective - "Oni sųt
+    // obdarjeni" - and Stanza tags the Russian short form VERB.
+    // The plan's decision, not the source's tag: "be born" is a finite verb
+    // once the dictionary has absorbed its "be" (phrasal-verbs.ts).
+    const passiveParticiple =
+      node.token.upos === 'VERB' && node.feats.get('Voice')?.value === 'Pass';
+    if (node.token.upos !== 'ADJ' && node.token.upos !== 'NOUN' && !passiveParticiple) continue;
     /**
      * A predicate is a nominal that HAS a subject - which is the real test,
      * and covers a subordinate clause as well as the sentence root. Requiring
      * `root` left "...da by děti byli zdrava" with a feminine singular
      * adjective for a plural subject.
+     *
+     * A second predicate joined by "and" shares the first one's subject:
+     * "Oni sųt obdarjeni råzumom ... i dolžni" - reading only its own
+     * dependents left "dolžne" agreeing with nothing. Nouns are left out: a
+     * coordinated noun keeps its own gender anyway, and is far more often a
+     * second object than a second predicate.
+     *
+     * An adjective complement of a verb (`xcomp`) is a predicate of that
+     * verb's subject, and van Steenbergen's UDHR puts it in the nominative,
+     * agreeing: "Vsi ljudi rodęt sę svobodni i råvni" - where Russian has the
+     * instrumental "свободными и равными" and English no agreement at all
+     * ("svobodna i ravna"). Adjectives only: a noun complement keeps the case
+     * its verb governs ("Ona stala lěkarem").
      */
     const isRoot = node.token.deprel === 'root';
-    const hasSubject = plan.some(
-      (n) => n.token.head === node.token.id && n.token.deprel.startsWith('nsubj'),
-    );
-    if (!isRoot && !hasSubject) continue;
+    const subject = subjectFor(node.token);
+    if (!isRoot && !subject) continue;
 
     /**
      * A nominal governed by a preposition is not the predicate - the whole
@@ -37,9 +68,6 @@ export function predicateAgreementStage(ctx: StageContext): void {
      */
     if (sentence.tokens.some((t) => t.head === node.token.id && t.deprel === 'case')) continue;
 
-    const subject = plan.find(
-      (n) => n.token.head === node.token.id && n.token.deprel.startsWith('nsubj'),
-    );
     /**
      * An impersonal predicate has no nominal subject to agree with - either a
      * placeholder was deleted ("it is important", "it is clear") or the subject

@@ -293,6 +293,27 @@ export interface RankContext {
   femaleEquivalents?: ReadonlySet<string>;
 }
 
+/** Whether any word of a gloss's sense label occurs in the source sentence. */
+const senseSupported = (sense: string, ctx: RankContext): boolean =>
+  [...sense.toLowerCase().matchAll(/[\p{L}]{3,}/gu)].some((m) => ctx.contextWords?.has(m[0]) ?? false);
+
+/**
+ * An abbreviated DOMAIN label - "(pol.)", "(med.)", "(mil.)" - rather than a
+ * sense hint like "(clothes)". It says the gloss holds only inside that field,
+ * so with nothing in the sentence pointing there it must not outrank a plain
+ * gloss on position alone: `pravica` "right (pol.), right wing" came first for
+ * "rights" over `pravo` "law, right", giving "v dostojenstvu i pravicah" where
+ * van Steenbergen's UDHR has "pravah".
+ *
+ * A point on the score, unlike the frequency discount below, because the
+ * position term decides first. Narrow on purpose: a flat penalty for EVERY
+ * label was measured and rejected (verification log), and the domain labels
+ * are a few dozen glosses.
+ */
+const isDomainLabel = (sense: string | undefined): sense is string =>
+  sense !== undefined && /^[a-z]{2,6}\.$/.test(sense.trim());
+const DOMAIN_LABEL_UNSUPPORTED = 2;
+
 /** Discount applied to frequency, not a flat penalty - see `effectiveFrequency`. */
 const UNSUPPORTED_SENSE_LABEL = 0.75;
 const FEMALE_EQUIVALENT = 0.5;
@@ -315,12 +336,7 @@ function effectiveFrequency(e: Entry, ctx: RankContext): number {
   if (ctx.gloss && ctx.lang !== 'ru') {
     const key = normalizeGloss(ctx.gloss);
     const matched = e.glosses.find((g) => normalizeGloss(g.text) === key);
-    if (matched?.sense) {
-      const supported = [...matched.sense.toLowerCase().matchAll(/[\p{L}]{3,}/gu)].some(
-        (m) => ctx.contextWords?.has(m[0]) ?? false,
-      );
-      if (!supported) f *= UNSUPPORTED_SENSE_LABEL;
-    }
+    if (matched?.sense && !senseSupported(matched.sense, ctx)) f *= UNSUPPORTED_SENSE_LABEL;
   }
 
   if (ctx.femaleEquivalents?.has(e.lemma)) f *= FEMALE_EQUIVALENT;
@@ -332,6 +348,17 @@ function effectiveFrequency(e: Entry, ctx: RankContext): number {
  * lexicographic) guarantee a total order, so output is reproducible.
  * Returns negative when `a` should be preferred.
  */
+/**
+ * A gloss whose capital the source contradicts. Matching ignores case, so the
+ * planet `Zemja` ("Земля") and the soil `zemja` ("земля") both matched "земля"
+ * equally and the planet won on a tie: "na Zemji" for "на земле". The source
+ * lemma keeps the distinction - the parser capitalises a proper noun's lemma
+ * and lowercases a common one - so it decides. Less than a later gloss position
+ * (up to 50): a capital is a hint about the sense, not a different word.
+ */
+const CASE_CONTRADICTED = 10;
+const capitalised = (text: string): boolean => /^\p{Lu}/u.test(text);
+
 export function compareEntries(a: Entry, b: Entry, ctx: RankContext = {}): number {
   const score = (e: Entry) => {
     let s = 0;
@@ -384,17 +411,30 @@ export function compareEntries(a: Entry, b: Entry, ctx: RankContext = {}): numbe
     ) {
       s += 100;
     }
-    if (ctx.hasDirectObject === false && e.pos.transitive) s += 200;
+    /**
+     * English only. It exists for English polysemy - "leave" is `ostavjati`
+     * (abandon) or `odhoditi` (go away), and only the missing object tells
+     * them apart. A Russian verb mostly carries that difference in the word
+     * itself (оставить / уйти), and where it does not, the match is a
+     * homograph: "она пишет" matched the transitive `pisati` "write" and
+     * `pišati` "pee" through the same unstressed gloss "писать", and this
+     * penalty handed it to "pee" - "ona pišaje". Writing, reading and eating
+     * are routinely used without an object.
+     */
+    if (ctx.hasDirectObject === false && e.pos.transitive && ctx.lang !== 'ru') s += 200;
     if (ctx.gloss) {
       if (ctx.lang === 'ru') {
         const key = normalizeRussian(ctx.gloss);
         const idx = e.ruGlosses.findIndex((g) => normalizeRussian(g.text) === key);
         s += idx < 0 ? 50 : idx;
+        if (idx >= 0 && capitalised(e.ruGlosses[idx]!.text) !== capitalised(ctx.gloss)) s += CASE_CONTRADICTED;
       } else {
         const key = normalizeGloss(ctx.gloss);
         const exact = e.glosses.find((g) => normalizeGloss(g.text) === key);
         if (!exact) s += 50;
         else s += exact.index; // earlier sense wins
+        if (exact && isDomainLabel(exact.sense) && !senseSupported(exact.sense, ctx)) s += DOMAIN_LABEL_UNSUPPORTED;
+        if (exact && capitalised(exact.text) !== capitalised(ctx.gloss)) s += CASE_CONTRADICTED;
       }
     }
     s += e.type; // flavor rank, coarse but still a signal

@@ -127,6 +127,25 @@ export function selectForm(
     }
   }
 
+  /**
+   * The same, slot by slot. A key can be distinguished in SOME forms and not in
+   * others: adjectives mark Gender in the singular and not in the oblique
+   * plural, so `naš` asked for Dat Plur Masc Anim matched nothing - the dative
+   * plural `našim` carries no Gender - and "должникам нашим" came out
+   * "dolžnikam naš". A form that does not carry a key is not contradicting it.
+   * Among such forms the one stating the most of the request wins, so a form
+   * that actually marks the wanted gender still beats one that merely omits it.
+   */
+  if (hits.length === 0) {
+    const wanted = Object.entries(want);
+    const lenient = tokens.filter((t) =>
+      wanted.every(([k, v]) => t.feats?.[k] === undefined || matches(t, k, v)),
+    );
+    const stated = (t: MorphToken) => wanted.filter(([k]) => t.feats?.[k] !== undefined).length;
+    const most = Math.max(0, ...lenient.map(stated));
+    hits = most > 0 ? lenient.filter((t) => stated(t) === most) : [];
+  }
+
   if (hits.length === 0) return null;
 
   if (hits.length > 1 && preferred && preferred.length > 0) {

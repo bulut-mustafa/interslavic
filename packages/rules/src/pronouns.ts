@@ -122,6 +122,17 @@ export function personalPronounGender(lemma: string): 'Masc' | 'Fem' | 'Neut' | 
 }
 
 /**
+ * The animacy of the chosen pronoun, where Interslavic fixes one. The pronouns
+ * page's table heads the two third-person plurals "masc.anim." (`oni`) and
+ * "other" (`one`), so a predicate agreeing with `oni` takes the animate plural:
+ * "Oni sųt obdarjeni råzumom" (van Steenbergen's UDHR Article 1), where the
+ * gender alone gave "obdarjene".
+ */
+export function personalPronounAnimacy(lemma: string): 'Anim' | null {
+  return lemma === 'oni' ? 'Anim' : null;
+}
+
+/**
  * The `PrepCase` value to request: `Pre` gives the `n-` form, `Npr` the plain
  * one. Only third-person paradigms carry the feature at all; for `ja`/`ty`/
  * `my`/`vy` the request is simply not satisfiable and is dropped, because no

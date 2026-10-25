@@ -120,16 +120,17 @@ export function realiseStage(input: RealiseInput): RealiseOutput {
   const surfaces: string[] = [];
 
   /**
-   * A comma attaches to the preceding word, so it renders without a space.
+   * A mark attaches to the preceding word, so it renders without a space.
    * Never doubled: a final clause the source already set off keeps one.
    */
-  const appendComma = (): void => {
+  const appendPunctuation = (mark: string): void => {
     const last = surfaces.length - 1;
-    if (last < 0 || surfaces[last]!.endsWith(',')) return;
-    surfaces[last] += ',';
+    if (last < 0 || /[,;:!?]$/.test(surfaces[last]!)) return;
+    surfaces[last] += mark;
     const lastWord = words[words.length - 1];
-    if (lastWord) lastWord.surface += ',';
+    if (lastWord) lastWord.surface += mark;
   };
+  const appendComma = (): void => appendPunctuation(',');
 
   /**
    * A final clause is set off by a comma. No page states the rule outright,
@@ -146,19 +147,26 @@ export function realiseStage(input: RealiseInput): RealiseOutput {
    * English has its comma in the same place). Each is owed by the word before
    * it and paid once that word's node has been emitted - after any `ne`,
    * auxiliary or clitic the node carries.
+   *
+   * The other clause-separating marks travel the same way: the semicolons of
+   * a text like the Lord's Prayer ("da svjatitsja imja Tvoje; da priidet...")
+   * were dropped and its clauses ran together. Only INTERIOR marks - the
+   * final one is the sentence's own and is added with the text.
    */
-  const commaAfter = new Set<number>();
+  const INTERIOR_MARKS = new Set([',', ';', ':', '!', '?']);
+  const punctuationAfter = new Map<number, string>();
   for (const t of sentence.tokens) {
-    if (t.upos !== 'PUNCT' || t.form !== ',') continue;
+    if (t.upos !== 'PUNCT' || !INTERIOR_MARKS.has(t.form)) continue;
+    if (!sentence.tokens.some((p) => p.id > t.id && p.upos !== 'PUNCT')) continue;
     const before = sentence.tokens.filter((p) => p.id < t.id && p.upos !== 'PUNCT').at(-1);
-    if (before) commaAfter.add(before.id);
+    if (before) punctuationAfter.set(before.id, t.form);
   }
-  let commaOwed = false;
+  let owed: string | undefined;
 
   for (const node of plan) {
     const { token, entry, feats, notes } = node;
-    if (commaOwed) appendComma();
-    commaOwed = commaAfter.has(token.id);
+    if (owed) appendPunctuation(owed);
+    owed = punctuationAfter.get(token.id);
 
     /**
      * Words the source left out are emitted FIRST, before any branch that can
@@ -640,7 +648,7 @@ export function realiseStage(input: RealiseInput): RealiseOutput {
       }
     }
   }
-  if (commaOwed) appendComma();
+  if (owed) appendPunctuation(owed);
 
   return { words, surfaces };
 }

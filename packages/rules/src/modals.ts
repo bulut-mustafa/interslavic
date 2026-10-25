@@ -67,16 +67,25 @@ const MODALS: Record<string, ModalPlan> = {
     evidence:
       'musěti is positive in 6 languages (be+ cs+ hr+ pl+ sk+ uk+) against morati\'s 2 (hr+ sr+); "iměti, imati" is type 1 but its primary sense is "have, possess"',
   },
+  should: {
+    gloss: 'must',
+    isv: 'imati',
+    tense: 'Pres',
+    why: 'the dictionary\'s auxiliary entry "iměti, imati (v.aux. ipf.) must, have to", with the complement in the infinitive',
+    evidence:
+      'van Steenbergen\'s UDHR Article 1 translates "should act" as "imajųt postųpati" (https://cals.no/translation/udhr-art-1/language/interslavic)',
+  },
 };
 
 /**
- * Deliberately absent: "should", "ought to" and "would". The natural
+ * Deliberately absent: "ought to", "would" and "shall". The natural
  * Interslavic for them uses the conditional (`by` + l-participle) or the
- * predicate adjective `dȯlžny`, neither of which is built yet. Guessing a
+ * predicate adjective `dȯlžny`, neither of which is built yet. ("should" has
+ * van Steenbergen's own rendering, above.) Guessing a
  * finite verb for them would produce confident nonsense, so they keep falling
  * through to ordinary lookup and stay visible as a defect.
  */
-export const UNHANDLED_MODALS = ['should', 'ought', 'would', 'shall'] as const;
+export const UNHANDLED_MODALS = ['ought', 'would', 'shall'] as const;
 
 export function modalFor(lemma: string): ModalPlan | null {
   return MODALS[lemma.toLowerCase()] ?? null;

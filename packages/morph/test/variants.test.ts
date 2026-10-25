@@ -134,3 +134,24 @@ describe('a form the dictionary publishes', () => {
     expect(r.ok && r.form).toBe('materi');
   });
 });
+
+/**
+ * A key distinguished in some forms and not in others. Adjectives mark Gender
+ * in the singular but not in the oblique plural, so a request agreeing with a
+ * masculine animate noun - Dat Plur Masc Anim - matched no form at all, and the
+ * Lord's Prayer's "должникам нашим" came out "dolžnikam naš". A form that does
+ * not carry a key does not contradict it.
+ */
+describe('a feature the slot does not mark', () => {
+  it('realises an oblique plural agreeing with a gendered noun', () => {
+    const want = { Case: 'Dat', Number: 'Plur', Gender: 'Masc', Animacy: 'Anim' };
+    expect(realize({ lemma: 'naš', xpos: 'pron.poss.', feats: want })).toMatchObject({ ok: true, form: 'našim' });
+    expect(realize({ lemma: 'dobry', xpos: 'adj.', feats: want })).toMatchObject({ ok: true, form: 'dobrym' });
+  });
+
+  it('still prefers a form that does mark the wanted gender', () => {
+    // Nom Sing Fem exists outright, so the fallback never replaces it.
+    expect(realize({ lemma: 'dobry', xpos: 'adj.', feats: { Case: 'Nom', Number: 'Sing', Gender: 'Fem' } }))
+      .toMatchObject({ ok: true, form: 'dobra' });
+  });
+});

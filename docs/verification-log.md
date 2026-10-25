@@ -1767,3 +1767,51 @@ now has 317 mutations, 0 stale. 431 tests pass, and typecheck is clean.
 Known and left alone: an unknown Russian name stays in Cyrillic. The orthography page
 defines Latin<->Cyrillic only for Interslavic's own letters, and gives no mapping for
 Russian-only letters (я, ю, щ, ь, ъ, э, ё, й), so a transliteration would be invented.
+
+## VERIFIED: a real parallel text - UDHR Article 1 and the Lord's Prayer (2026-10-25)
+
+The first test against text written outside this repo on BOTH sides: van Steenbergen's
+own Interslavic of UDHR Article 1 (credited "IJzeren Jan",
+https://cals.no/translation/udhr-art-1/language/interslavic), against the official UN
+English and Russian. Added as gold g50, g51, g50-ru, g51-ru. The Lord's Prayer
+(Synodal Russian, Interslavic from Simple English Wikipedia) was tried too. Its
+Church-style Russian defeats the parser ("Отче" INTJ root, "да" as CCONJ, "будет"
+Tense=Pres), so it is not gold, but it surfaced three general defects.
+
+Correction: an earlier entry said no Russian gold existed. 14 Russian
+pairs were already there. Their TARGETS are van Steenbergen's, but their Russian
+SOURCES were written in this repo. The UDHR pairs are the first whose Russian is
+independent.
+
+| defect | fix and source | before -> after |
+|---|---|---|
+| "Все" -> `cěly` "whole" | curated `vėś`; pronouns page "ves ... all", plural `vsi` | Cěli ljudi -> Vsi ljudi |
+| Russian zero copula before a short passive participle | copula stage; verbs page "byti + passive participle" | Oni obdarjene -> Oni sut obdarjeni |
+| predicate agreeing with `oni` not animate | pronouns page table: oni "masc.anim.", one "other" | obdarjene -> obdarjeni; "They are tired" -> utomljeni |
+| a second predicate ("i должны") agreed with nothing | the subject is shared up a conj/xcomp chain | dolžne -> dolžni |
+| adjective complement copied the Russian instrumental / got no agreement in English | nominative, agreeing; his "rodęt sę svobodni i råvni" (one authoritative example, no counter-example in pages or corpus; nouns excluded, so "stala lěkarem" keeps its instrumental) | svobodnymi i ravnymi / svobodna i ravna -> svobodni i ravni |
+| fixed expressions translated word by word | exact-gloss lookup of the whole `fixed` phrase | prijatelj prijatelja -> jedin drugogo (dictionary pron.rec., pronouns page formula) |
+| "human beings" as adjective + noun | exact gloss "human being" = `člověk`, one-word targets only | člověčje jestestvo -> ljudi |
+| "are born" as a passive of "bear" | exact gloss "be born" = `roditi sę`, finite, tense from "are" | sut trpěni -> rodet se |
+| "should" unhandled | `imati` (dictionary v.aux. "must, have to"); his "imajųt postųpati" | dolžnogo postupajut -> imajut postupati |
+| "rights" -> `pravica` "right (pol.)" | an unsupported abbreviated domain label no longer outranks a plain gloss on position | pravicah -> pravah |
+| adjective in a slot that marks no gender failed to inflect | form selection treats a key a form does not carry as undistinguished there | dolžnikam naš -> dolžnikam našim |
+| planet `Zemja` for lowercase "земле" | the source lemma's capital decides between case-variant glosses | na Zemji -> na zemji |
+| semicolons and an interior "!" dropped | carried over like commas | clauses no longer run together |
+| "она пишет" -> `pišati` "pee" | the objectless-transitive penalty is English-only (it exists for "leave"); Russian homograph "писать" | ona pišaje -> ona piše |
+
+Every change was measured against all 238 fixtures and the gold set. Each changed only
+its target outputs, plus "Oni sut utomljeni" (the oni rule). The gold score held at 31
+exact. The new pairs are classified:
+- g50 and g50-ru are acceptable: only the dictionary's type-1 `dostojenstvo`
+  where he writes `dostojnost`, and `svojem` from Russian "своём".
+- g51 and g51-ru are unsupported: the reciprocal with a preposition, "jedin K
+  drugomu", needs the preposition inside the formula.
+
+Left open, with the reason:
+- the reciprocal with an inner preposition;
+- `do` vs `k` for "towards" (the prepositions page lists both);
+- the English participle's aspect (obdarjani/obdarjeni);
+- "endowed with" keeping a comitative `s`;
+- the archaic Russian of the prayer (сущий, Царствие, приидет);
+- the parser's `да`.

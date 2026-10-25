@@ -61,15 +61,18 @@ describe('a predicate agreeing with a person', () => {
     expect(out('the-women-are-tired.conllu')).toBe('Ženy sut utomljene.');
   });
 
-  it('does not extend the rule to the third person, which English leaves open', () => {
+  it('agrees with oni as the masculine animate plural the pronouns page makes it', () => {
     /**
-     * "I" and "you" are the speaker and the addressee, so they are people.
-     * "They" is not: it stands for a group of anything, and the dictionary
-     * glosses `oni` "they (masculine or mixed)", which covers masculine things
-     * as well as people. Claiming animacy here would be a guess dressed as a
-     * fact, so the third person keeps the plural that serves every gender.
+     * This used to assert "Oni sut utomljene", reasoning from the dictionary's
+     * gloss "they (masculine or mixed)" that `oni` may stand for things. The
+     * pronouns page outranks that gloss, and its table heads the two plurals
+     * "masc.anim." (`oni`) and "other" (`one`); van Steenbergen's UDHR writes
+     * "Oni sųt obdarjeni". So the predicate agrees with the pronoun actually
+     * written. Whether a "they" for things should be `one` instead is the open
+     * question - the engine never chooses `one` - but that is the pronoun's
+     * choice, not the predicate's.
      */
-    expect(out('they-are-tired.conllu')).toBe('Oni sut utomljene.');
+    expect(out('they-are-tired.conllu')).toBe('Oni sut utomljeni.');
   });
 });
 

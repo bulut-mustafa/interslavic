@@ -13,7 +13,16 @@ export function copulaStage(ctx: StageContext): void {
   if (adapter.omitsPresentCopula) {
     for (const node of plan) {
       if (node.token.deprel !== 'root') continue;
-      if (node.token.upos === 'VERB' || node.token.upos === 'AUX') continue;
+      /**
+       * A short passive participle is predicative too - "Они наделены
+       * разумом" - and Stanza tags it VERB. "The passive voice is created by
+       * combining a form of the verb byti 'to be' with a passive participle"
+       * (verbs page), so it takes the copula: "Oni sųt obdarjeni råzumom"
+       * (van Steenbergen's UDHR Article 1).
+       */
+      const passiveParticiple =
+        node.token.feats['VerbForm'] === 'Part' && node.token.feats['Voice'] === 'Pass';
+      if ((node.token.upos === 'VERB' || node.token.upos === 'AUX') && !passiveParticiple) continue;
       const hasVerb = sentence.tokens.some(
         (t) => t.head === node.token.id && (t.deprel === 'cop' || t.deprel.startsWith('aux')),
       );

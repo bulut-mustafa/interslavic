@@ -4,9 +4,9 @@ import { resolveAspect } from '../resolvers/aspect.ts';
 import { contextWordsOf } from '../gloss.ts';
 
 export interface PhrasalVerbPlan {
-  /** Verb token id -> the multiword entry chosen for it. */
+  /** Head token id -> the multiword entry chosen for it: a phrasal verb, or a fixed expression. */
   phrasalVerbs: Map<number, Entry>;
-  /** Particle tokens, which the Interslavic verb absorbs and so are deleted. */
+  /** Tokens the multiword entry absorbs - a particle, the rest of a fixed expression - and so are deleted. */
   phrasalParticles: Set<number>;
 }
 
@@ -95,6 +95,90 @@ export function planPhrasalVerbs(sentence: ParsedSentence, lex: Lexicon): Phrasa
         break;
       }
     }
+  }
+
+  /**
+   * ---- fixed expressions --------------------------------------------------
+   *
+   * UD marks a multiword expression that works as one word with `fixed`:
+   * Russian "друг друга" is `друг` + fixed `друга`. Word by word it became
+   * "prijatelj prijatelja", "friend of a friend", where the dictionary has the
+   * phrase itself - `jedin drugogo` (pron.rec.), glossed "друг друга" - and
+   * the pronouns page gives the same formula: "Oni bijut se jedin drugogo".
+   *
+   * The same gate as above: only an EXACT gloss of the whole surface phrase
+   * counts, so nothing is assembled that the dictionary does not list. Forms,
+   * not lemmas: both halves of "друг друга" have the lemma "друг".
+   */
+  for (const head of sentence.tokens) {
+    if (phrasalVerbs.has(head.id)) continue;
+    const parts = sentence.tokens.filter((t) => t.head === head.id && t.deprel === 'fixed');
+    if (parts.length === 0) continue;
+    const phrase = [head, ...parts]
+      .sort((a, b) => a.id - b.id)
+      .map((t) => t.form)
+      .join(' ')
+      .toLowerCase();
+    const best = rank(lex.lookup(phrase, sentence.lang), { gloss: phrase, lang: sentence.lang, contextWords })[0];
+    if (!best) continue;
+    phrasalVerbs.set(head.id, best);
+    for (const p of parts) phrasalParticles.add(p.id);
+  }
+
+  /**
+   * ---- "be" + participle the dictionary lists as ONE verb ------------------
+   *
+   * "be born" is `roditi sę`. Read as a passive of "bear" it became "sut
+   * trpěni", "are endured", where van Steenbergen's UDHR has "rodet se". The
+   * passive auxiliary is absorbed like a particle, and the verb is looked up
+   * by its participle FORM, since the lemma "bear" is what misleads.
+   */
+  if (sentence.lang === 'en') {
+    for (const verb of sentence.tokens) {
+      if (verb.upos !== 'VERB' || phrasalVerbs.has(verb.id)) continue;
+      const aux = sentence.tokens.find(
+        (t) => t.head === verb.id && t.deprel === 'aux:pass' && t.lemma.toLowerCase() === 'be',
+      );
+      if (!aux) continue;
+      const phrase = `be ${verb.form}`.toLowerCase();
+      const hits = lex.lookup(phrase, 'en').filter((e) => e.pos.upos === 'VERB');
+      const aspect = resolveAspect({ token: verb, sentence });
+      const best = rank(hits, {
+        upos: 'VERB',
+        gloss: phrase,
+        lang: 'en',
+        contextWords,
+        ...(aspect ? { aspect: aspect.decision.value } : {}),
+      })[0];
+      if (!best) continue;
+      phrasalVerbs.set(verb.id, best);
+      phrasalParticles.add(aux.id);
+    }
+  }
+
+  /**
+   * ---- adjective + noun the dictionary lists as ONE noun -------------------
+   *
+   * "human being" is `člověk`, glossed exactly that; word by word "All human
+   * beings" became "Vse člověčje jestestvo", "all human essence", where van
+   * Steenbergen's UDHR has "Vsi ljudi". Same exact-gloss gate, and only for a
+   * single-word Interslavic noun, so a phrase the dictionary itself translates
+   * as adjective + noun keeps being built from its parts.
+   */
+  for (const noun of sentence.tokens) {
+    if (noun.upos !== 'NOUN' || phrasalVerbs.has(noun.id)) continue;
+    const modifier = sentence.tokens.find(
+      (t) => t.head === noun.id && t.deprel === 'amod' && t.id === noun.id - 1,
+    );
+    if (!modifier) continue;
+    const phrase = `${modifier.lemma} ${noun.lemma}`.toLowerCase();
+    const hits = lex
+      .lookup(phrase, sentence.lang)
+      .filter((e) => e.pos.upos === 'NOUN' && !/\s/.test(e.lemma));
+    const best = rank(hits, { upos: 'NOUN', gloss: phrase, lang: sentence.lang, contextWords })[0];
+    if (!best) continue;
+    phrasalVerbs.set(noun.id, best);
+    phrasalParticles.add(modifier.id);
   }
 
   return { phrasalVerbs, phrasalParticles };
