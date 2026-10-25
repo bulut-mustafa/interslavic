@@ -452,3 +452,36 @@ describe('the language bar', () => {
     expect(screen.queryByLabelText('Clear text')).toBeNull();
   });
 });
+
+/**
+ * Testers report what is wrong from the page itself; the report carries the
+ * sentence, our output and their comment, and nothing about them.
+ */
+describe('reporting a problem', () => {
+  it('sends the sentence, the output and the comment', async () => {
+    const calls = (fetch as unknown as { mock: { calls: [string, { body: string }][] } }).mock.calls;
+    const { container } = render(<App />);
+    await settled(container);
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Report a problem' }));
+    });
+    fireEvent.change(screen.getByLabelText('What is wrong?'), { target: { value: 'wrong ending' } });
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Send report' }));
+    });
+    const sent = calls.find(([url]) => url.endsWith('/api/feedback'));
+    expect(sent).toBeDefined();
+    const body = JSON.parse(sent![1].body);
+    expect(body).toMatchObject({ source: 'The woman read a new book.', output: 'Žena čitala knigu.', comment: 'wrong ending' });
+    await waitFor(() => expect(screen.getByText(/report was sent/)).toBeTruthy());
+  });
+
+  it('will not send an empty report', async () => {
+    const { container } = render(<App />);
+    await settled(container);
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Report a problem' }));
+    });
+    expect((screen.getByRole('button', { name: 'Send report' }) as HTMLButtonElement).disabled).toBe(true);
+  });
+});

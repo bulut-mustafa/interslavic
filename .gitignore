@@ -14,3 +14,6 @@ __pycache__/
 # uv writes its own .gitignore inside .venv; do not rely on it alone (713 MB)
 services/parser/.venv/
 .claude/
+
+# tester reports collected by the server
+data/

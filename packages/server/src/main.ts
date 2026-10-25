@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
 import { Lexicon } from '../../lexicon/src/reader.ts';
@@ -22,6 +23,23 @@ import type { Orthography } from '../../morph/src/orthography.ts';
 const ROOT = path.resolve(import.meta.dirname, '../../..');
 const PORT = Number(process.env['PORT'] ?? 8766);
 const PARSER_URL = process.env['PARSER_URL'] ?? DEFAULT_PARSER_URL;
+/** 127.0.0.1 locally; a hosted container sets HOST=0.0.0.0. */
+const HOST = process.env['HOST'] ?? '127.0.0.1';
+/**
+ * The built web app, served from the same address in production so testers
+ * need one link. Unset in development, where Vite serves it.
+ */
+const STATIC_DIR = process.env['STATIC_DIR'];
+/** Where tester reports are appended, one JSON object per line. */
+const FEEDBACK_FILE = process.env['FEEDBACK_FILE'] ?? path.join(ROOT, 'data/feedback.jsonl');
+/** Reading the reports back needs this token; unset, reading is disabled. */
+const FEEDBACK_TOKEN = process.env['FEEDBACK_TOKEN'];
+/**
+ * A public page should not let one request tie up the parser: a paragraph is
+ * plenty for testing a translator.
+ */
+const MAX_TEXT = 2000;
+const MAX_FIELD = 2000;
 
 const ORTHOGRAPHIES = new Set<Orthography>(['standard', 'etymological', 'simplified', 'cyrillic']);
 
@@ -122,6 +140,10 @@ const server = http.createServer((req, res) => {
           json(res, 200, { sentences: [] });
           return;
         }
+        if (text.length > MAX_TEXT) {
+          json(res, 413, { error: `please keep it under ${MAX_TEXT} characters` });
+          return;
+        }
 
         const { lex, validator } = boot();
         const parsed = await parseText(text, lang, { url: PARSER_URL });
@@ -140,11 +162,85 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  /**
+   * A tester's report: what they typed, what came out, and what is wrong.
+   * Appended to a file rather than a database - one line per report is all
+   * this needs, and the file is plain to read and to download.
+   */
+  if (req.method === 'POST' && url.pathname === '/api/feedback') {
+    void (async () => {
+      try {
+        const body = JSON.parse(await readBody(req)) as Record<string, unknown>;
+        const field = (k: string): string =>
+          typeof body[k] === 'string' ? (body[k] as string).trim().slice(0, MAX_FIELD) : '';
+        const report = {
+          at: new Date().toISOString(),
+          lang: field('lang'),
+          orthography: field('orthography'),
+          source: field('source'),
+          output: field('output'),
+          comment: field('comment'),
+          suggestion: field('suggestion'),
+        };
+        if (!report.source || (!report.comment && !report.suggestion)) {
+          json(res, 400, { error: 'say what is wrong, or give a better translation' });
+          return;
+        }
+        fs.mkdirSync(path.dirname(FEEDBACK_FILE), { recursive: true });
+        fs.appendFileSync(FEEDBACK_FILE, JSON.stringify(report) + '\n');
+        json(res, 200, { ok: true });
+      } catch (err) {
+        json(res, 400, { error: err instanceof Error ? err.message : String(err) });
+      }
+    })();
+    return;
+  }
+
+  if (req.method === 'GET' && url.pathname === '/api/feedback') {
+    if (!FEEDBACK_TOKEN || url.searchParams.get('token') !== FEEDBACK_TOKEN) {
+      json(res, 404, { error: 'not found' });
+      return;
+    }
+    const text = fs.existsSync(FEEDBACK_FILE) ? fs.readFileSync(FEEDBACK_FILE, 'utf8') : '';
+    res.writeHead(200, { 'content-type': 'application/x-ndjson; charset=utf-8' });
+    res.end(text);
+    return;
+  }
+
+  if (STATIC_DIR && req.method === 'GET' && !url.pathname.startsWith('/api/')) {
+    serveStatic(STATIC_DIR, url.pathname, res);
+    return;
+  }
+
   json(res, 404, { error: `no route for ${req.method} ${url.pathname}` });
 });
 
+const CONTENT_TYPES: Record<string, string> = {
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.svg': 'image/svg+xml',
+  '.png': 'image/png',
+  '.ico': 'image/x-icon',
+  '.json': 'application/json; charset=utf-8',
+};
+
+/** The built page and its assets; any other path is the page itself. */
+function serveStatic(dir: string, pathname: string, res: http.ServerResponse): void {
+  const root = path.resolve(dir);
+  const wanted = path.resolve(root, '.' + decodeURIComponent(pathname));
+  const inside = wanted === root || wanted.startsWith(root + path.sep);
+  const file =
+    inside && fs.existsSync(wanted) && fs.statSync(wanted).isFile() ? wanted : path.join(root, 'index.html');
+  res.writeHead(200, {
+    'content-type': CONTENT_TYPES[path.extname(file)] ?? 'application/octet-stream',
+    'cache-control': file.endsWith('index.html') ? 'no-cache' : 'public, max-age=31536000, immutable',
+  });
+  fs.createReadStream(file).pipe(res);
+}
+
 boot();
-server.listen(PORT, '127.0.0.1', () => {
-  process.stdout.write(`engine listening on http://127.0.0.1:${PORT}\n`);
+server.listen(PORT, HOST, () => {
+  process.stdout.write(`engine listening on http://${HOST}:${PORT}\n`);
   process.stdout.write(`parser expected at ${PARSER_URL}\n`);
 });

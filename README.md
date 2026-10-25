@@ -26,6 +26,10 @@ npm run web                 # interface    (127.0.0.1:5174)
 Then open <http://127.0.0.1:5174>. The server builds the lexicon and the 743k-form
 index once at boot, so translations are fast after that.
 
+**Online, for testers** — one container serves the page, the engine and the parser
+on one address, with a *Report a problem* button whose reports the server keeps.
+See [DEPLOY.md](DEPLOY.md) for putting it on a free Hugging Face Space.
+
 **Command line** — needs only the parser:
 
 ```bash

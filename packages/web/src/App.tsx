@@ -2,7 +2,8 @@ import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'rea
 import type { GlossedWord, RuleCitation, Translation } from '../../engine/src/pipeline.ts';
 import type { Orthography } from '../../morph/src/orthography.ts';
 
-const API = 'http://127.0.0.1:8766';
+// Same origin: the engine serves the page in production, Vite proxies in dev.
+const API = '';
 
 type Lang = 'en' | 'ru';
 
@@ -61,6 +62,7 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [activeWord, setActiveWord] = useState<string | null>(null);
+  const [reporting, setReporting] = useState(false);
   const requestId = useRef(0);
 
   const run = useCallback(async () => {
@@ -243,7 +245,17 @@ export default function App() {
                       </span>
                     </div>
                   )}
-                  <CopyButton text={primary.map((s) => s.text).join(' ')} />
+                  <div className="pane-actions">
+                    <button
+                      type="button"
+                      className="text-button"
+                      onClick={() => setReporting((r) => !r)}
+                      aria-expanded={reporting}
+                    >
+                      Report a problem
+                    </button>
+                    <CopyButton text={primary.map((s) => s.text).join(' ')} />
+                  </div>
                 </div>
               </>
             )}
@@ -251,9 +263,20 @@ export default function App() {
         </div>
       </main>
 
+      {reporting && primary.length > 0 && (
+        <ReportForm
+          source={text}
+          output={primary.map((s) => s.text).join(' ')}
+          lang={lang}
+          orthography={orth}
+          onClose={() => setReporting(false)}
+        />
+      )}
+
       {error && (
         <div className="error">
-          <h2>Nothing is answering</h2>
+          <h2>The translator is not answering</h2>
+          <p>It may still be starting up - please try again in a minute.</p>
           <p>{error}</p>
           <p>
             The parser and engine both need to be running: <code>npm run parser</code> in one
@@ -337,7 +360,98 @@ export default function App() {
           )}
         </section>
       )}
+
+      <footer className="site-footer">
+        An experimental, rule-based translator - it can be wrong, and says where it is
+        guessing. Dictionary and grammar: the Interslavic dictionary
+        (interslavic-dictionary.com) and Jan van Steenbergen&rsquo;s grammar pages
+        (steen.free.fr/interslavic), used non-commercially with thanks.
+      </footer>
     </div>
+  );
+}
+
+/**
+ * What testers send back: the sentence, our output, and what is wrong with it.
+ * The server appends it to a file the maintainer downloads; nothing else is
+ * collected - no name, no address.
+ */
+function ReportForm({
+  source,
+  output,
+  lang,
+  orthography,
+  onClose,
+}: {
+  source: string;
+  output: string;
+  lang: Lang;
+  orthography: Orthography;
+  onClose: () => void;
+}) {
+  const [comment, setComment] = useState('');
+  const [suggestion, setSuggestion] = useState('');
+  const [state, setState] = useState<'idle' | 'sending' | 'sent' | 'failed'>('idle');
+
+  const send = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setState('sending');
+    try {
+      const res = await fetch(`${API}/api/feedback`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ source, output, lang, orthography, comment, suggestion }),
+      });
+      setState(res.ok ? 'sent' : 'failed');
+    } catch {
+      setState('failed');
+    }
+  };
+
+  if (state === 'sent') {
+    return (
+      <section className="report" aria-live="polite">
+        <p className="report-thanks">Thank you - the report was sent.</p>
+        <button type="button" className="text-button" onClick={onClose}>
+          Close
+        </button>
+      </section>
+    );
+  }
+
+  return (
+    <form className="report" onSubmit={(e) => void send(e)}>
+      <h2 className="block-label">Report a problem</h2>
+      <p className="report-context">
+        &ldquo;{source}&rdquo; &rarr; &ldquo;{output}&rdquo;
+      </p>
+      <label>
+        <span>What is wrong?</span>
+        <textarea
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          placeholder="e.g. wrong word, wrong ending, wrong word order…"
+          rows={3}
+        />
+      </label>
+      <label>
+        <span>Better translation (optional)</span>
+        <textarea value={suggestion} onChange={(e) => setSuggestion(e.target.value)} rows={2} />
+      </label>
+      {state === 'failed' && <p className="report-error">Could not send - please try again.</p>}
+      <div className="report-actions">
+        <button type="button" className="text-button" onClick={onClose}>
+          Cancel
+        </button>
+        <button
+          type="submit"
+          className="text-button is-primary"
+          disabled={state === 'sending' || (!comment.trim() && !suggestion.trim())}
+        >
+          {state === 'sending' ? 'Sending…' : 'Send report'}
+        </button>
+      </div>
+    </form>
   );
 }
 

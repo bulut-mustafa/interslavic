@@ -827,3 +827,98 @@ textarea::placeholder {
     align-items: flex-start;
   }
 }
+
+/* ---------- tester reports ---------- */
+
+.pane-actions {
+  margin-left: auto;
+  display: flex;
+  gap: var(--space-2);
+}
+
+.pane-actions .text-button {
+  margin-left: 0;
+}
+
+.text-button.is-primary {
+  background: var(--teal);
+  border-color: var(--teal);
+  color: var(--paper-raised);
+}
+
+.text-button.is-primary:hover:not(:disabled) {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper-raised);
+}
+
+.report {
+  background: var(--paper-raised);
+  border: 1px solid var(--rule);
+  border-radius: calc(var(--radius) * 2);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 44rem;
+}
+
+.report-context {
+  margin: 0;
+  font-family: var(--serif);
+  color: var(--ink-soft);
+  word-break: break-word;
+}
+
+.report label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+}
+
+/* The report's fields are ordinary boxed inputs, unlike the borderless pane. */
+.report textarea {
+  min-height: 0;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: var(--space-2);
+  font-family: var(--sans);
+  font-size: var(--text-base);
+  background: var(--paper);
+  resize: vertical;
+}
+
+.report textarea:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 1px;
+}
+
+.report-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.report-actions .text-button {
+  margin-left: 0;
+}
+
+.report-thanks {
+  margin: 0;
+  color: var(--teal);
+}
+
+.report-error {
+  margin: 0;
+  color: var(--guess);
+  font-size: var(--text-sm);
+}
+
+.site-footer {
+  font-size: var(--text-sm);
+  color: var(--ink-faint);
+  border-top: 1px solid var(--rule);
+  padding-top: var(--space-3);
+}

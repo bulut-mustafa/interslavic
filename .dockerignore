@@ -1,0 +1,10 @@
+.git
+.claude
+**/node_modules
+services/parser/.venv
+**/__pycache__
+packages/web/dist
+packages/lexicon/data/raw
+packages/lexicon/data/built
+data
+.mutation-backup
