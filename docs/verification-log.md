@@ -2001,3 +2001,33 @@ These did not match, and are translator defects to fix:
 
 Not defects (the grammar allows both): "prihodi iz" for "comes from" beside "jest iz";
 "dětetu" beside "děteti".
+
+### Then: what was fixed, and what was left on purpose
+
+Fixed (each with a test, and a mutation the test kills):
+
+- **train station** -> "Kde jest želěznična stancija?", and it inflects: "do
+  želězničnoj stancije". A noun + noun compound the dictionary glosses as one
+  adjective + noun phrase is used as its two entries, so agreement inflects both
+  (the one-lemma entry inflected only "stancija"). Separately, a noun modifier with
+  no adjective now ranks as the noun it is: "train ticket" took the verb
+  `trenovati` and now takes `pojezd`. "bus stop" became "avtobusna postojka" (it
+  was "avtobusny zajezd"). No other fixture or gold sentence changed.
+- **Interslavic** -> "Medžuslovjansky jest moja nova obsesija" (Tatoeba 12994632).
+  A source noun that becomes an adjective - a language's name - takes the gender
+  its headword names, like every other standalone adjective.
+- **one auxiliary for two verbs** -> "Ja budu čitati i pisati", "Ja byh čital i
+  pisal" (Tatoeba 13525474 "budete idti domu i ostati domu"); "I will read and she
+  writes" stays two clauses.
+
+Left, with the reason:
+
+- **"stayed" -> ostaval (Tatoeba: ostal).** An English simple past with no object
+  and no goal falls to the last-resort imperfective, shown as a guess. A wider
+  "simple past is perfective" rule was tried before and broke other sentences;
+  changing it needs a measured study, not one verb.
+- **"at school" -> na školě (Tatoeba: v školě).** The prepositions page gives "na
+  (+ loc.) - on, at"; which nouns take "v" for "at" is idiom, noun by noun.
+- **"I speak Interslavic" -> rěku.** The dictionary lists `rěkti` "speak, say"
+  before `govoriti` "say, speak, talk" and as more frequent; the dictionary outranks
+  a hunch.

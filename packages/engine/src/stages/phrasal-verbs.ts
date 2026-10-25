@@ -182,6 +182,39 @@ export function planPhrasalVerbs(sentence: ParsedSentence, lex: Lexicon): Phrasa
   }
 
   /**
+   * ---- noun + noun the dictionary translates as adjective + noun ----------
+   *
+   * "train station" is `želěznična stancija`, glossed exactly that. Word by
+   * word "train" has no adjective, so it became the verb `trenovati`:
+   * "Kde jest trenovala stancija?". The entry is one lemma, but it inflects
+   * only its last word ("želěznična stanciju"), so it is used as its two
+   * entries instead - the adjective `želězničny` on the modifier and the noun
+   * on the head - and agreement inflects both. Only when the dictionary has
+   * both: an adjective whose stem is the phrase's first word, and the noun.
+   */
+  for (const noun of sentence.tokens) {
+    if (noun.upos !== 'NOUN' || phrasalVerbs.has(noun.id)) continue;
+    const modifier = sentence.tokens.find(
+      (t) => t.head === noun.id && t.deprel === 'compound' && t.upos === 'NOUN' && t.id === noun.id - 1,
+    );
+    if (!modifier) continue;
+    const phrase = `${modifier.lemma} ${noun.lemma}`.toLowerCase();
+    const stem = (w: string) => w.replace(/[aoyieå]$/, '');
+    for (const hit of lex.lookup(phrase, sentence.lang)) {
+      const words = hit.lemma.split(' ');
+      if (hit.pos.upos !== 'NOUN' || words.length !== 2) continue;
+      // The dictionary cites adjectives in the masculine: -y, or -i after a soft stem.
+      const adjective = [`${stem(words[0]!)}y`, `${stem(words[0]!)}i`]
+        .flatMap((lemma) => lex.lookupLemma(lemma, 'ADJ'))[0];
+      const head = lex.lookupLemma(words[1]!, 'NOUN').find((e) => e.pos.xpos === hit.pos.xpos);
+      if (!adjective || !head) continue;
+      phrasalVerbs.set(modifier.id, adjective);
+      phrasalVerbs.set(noun.id, head);
+      break;
+    }
+  }
+
+  /**
    * ---- preposition + word the dictionary lists as ONE adverb ---------------
    *
    * "at last" is `nakonėc`, glossed exactly that; word by word it became "na

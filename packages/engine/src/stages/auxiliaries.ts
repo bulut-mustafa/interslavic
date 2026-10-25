@@ -487,6 +487,26 @@ export function planAuxiliaries(
   }
 
   /**
+   * One auxiliary for two verbs: "You will go home AND STAY home" says "will"
+   * once. The second verb shares it, so it is an infinitive too - Tatoeba
+   * 13525474 writes "Vy budete idti domu i ostati domu" - and `budu` is not
+   * said again. Without this the bare "stay" was conjugated: "Vy budete idti
+   * domov i ostavajete domov", "I will read and write" -> "budu čitati i pišu".
+   * Only a bare verb with no subject or auxiliary of its own: "I will read
+   * and she writes" is two clauses.
+   */
+  if (sentence.lang === 'en') {
+    for (const verb of sentence.tokens) {
+      if (verb.deprel !== 'conj' || verb.upos !== 'VERB' || verb.feats['VerbForm'] !== 'Inf') continue;
+      if (sentence.tokens.some((t) => t.head === verb.id && ['nsubj', 'aux', 'nsubj:pass'].includes(t.deprel))) continue;
+      const role = auxRoleForHead.get(verb.head);
+      if (role === 'future' || role === 'conditional') auxRoleForHead.set(verb.id, role);
+      const modalId = modalOfHead.get(verb.head);
+      if (modalId !== undefined) modalOfHead.set(verb.id, modalId);
+    }
+  }
+
+  /**
    * "I'll BE outside": `budu` already is the future of byti, so the copula it
    * governs is not said again - "ja budu vně", not "ja budu jesm vně". Not in
    * a finite purpose clause, where "will" becomes the conditional and the

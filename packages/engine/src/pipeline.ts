@@ -419,9 +419,17 @@ export function translate(
     return (token.feats['PronType'] ?? '').replace(/\bPrs\b/, 'pers');
   };
 
+  /**
+   * Ranked as an adjective only when there is one to find. With none, ranking
+   * for ADJ matched no candidate at all and frequency chose among the rest:
+   * "train station" took the VERB `trenovati` over the noun `pojezd`.
+   */
+  const rankAs = (token: UdToken, candidates: Entry[]): string =>
+    isNounModifier(token) && candidates.some((e) => e.pos.upos === 'ADJ') ? 'ADJ' : token.upos;
+
   const rankedFor = (token: UdToken, aspect: AspectOutcome | null): Entry[] =>
     rank(candidatesFor(token), {
-      upos: isNounModifier(token) ? 'ADJ' : token.upos,
+      upos: rankAs(token, candidatesFor(token)),
       gloss: lookupLemmaOf(token),
       lang: sentence.lang,
       sourceIsSingleWord: !/\s/.test(token.form.trim()),

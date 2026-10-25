@@ -45,7 +45,7 @@ describe('a lesson page', () => {
   it('links an example to the translator with its sentence', () => {
     render(<App />);
     const link = screen.getAllByRole('link', { name: 'Try it in the translator' })[0]!;
-    expect(link.getAttribute('href')).toBe('/?lang=en&text=You%20know%20that%20book.');
+    expect(link.getAttribute('href')).toBe('/?lang=en&text=Interslavic%20is%20my%20new%20obsession.');
   });
 
   it('marks a wrong answer, shows the right one, and remembers it', async () => {

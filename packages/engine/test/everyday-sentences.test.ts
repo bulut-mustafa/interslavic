@@ -152,3 +152,31 @@ describe('the fourth batch', () => {
     expect(out('en/tatoeba-at-home-dutch.conllu')).toMatch(/^Doma, /);
   });
 });
+
+describe('a noun used as a modifier', () => {
+  it('takes the dictionary\'s adjective + noun, and both inflect', () => {
+    // "train station" is glossed as `želěznična stancija`; word by word it
+    // was "trenovala stancija", the verb "to train".
+    expect(out('en/where-is-the-train-station.conllu')).toBe('Kde jest želěznična stancija?');
+    expect(out('en/going-to-the-train-station.conllu')).toBe('Ja idu do želězničnoj stancije.');
+  });
+
+  it('stays a noun, never a verb, when there is no adjective for it', () => {
+    // Not yet natural Interslavic ("pojezd bilet"), but the noun, not the verb.
+    const ticket = out('en/bought-a-train-ticket.conllu');
+    expect(ticket).toContain('pojezd');
+    expect(ticket).not.toMatch(/trenova/);
+  });
+});
+
+describe('one auxiliary for two verbs', () => {
+  it('shares "will" and "would" with a bare verb joined by "and" (13525474)', () => {
+    // Tatoeba 13525474: "Vy budete idti domu i ostati domu" - both infinitives.
+    expect(out('en/will-read-and-write.conllu')).toBe('Ja budu čitati i pisati.');
+    expect(out('en/would-read-and-write.conllu')).toBe('Ja byh čital i pisal.');
+  });
+
+  it('but not with a verb that has its own subject', () => {
+    expect(out('en/will-read-and-she-writes.conllu')).toBe('Ja budu čitati i ona piše.');
+  });
+});

@@ -26,7 +26,7 @@ const introduction: LessonPage = {
         'Slavs have always found when talking to their neighbours, written down with a grammar and ' +
         'a dictionary so that it is the same for everyone.',
     },
-    { kind: 'example', isv: 'Medžuslovjansky jest moja nova obsesija.', en: 'Interslavic is my new obsession.', note: 'Tatoeba 12994632' },
+    { kind: 'example', isv: 'Medžuslovjansky jest moja nova obsesija.', en: 'Interslavic is my new obsession.', note: 'Tatoeba 12994632', tryIt: true },
     { kind: 'example', isv: 'Vy znajete tu knigu.', en: 'You know that book.', note: 'Tatoeba 13125304', tryIt: true },
 
     { kind: 'h2', text: 'Where it comes from' },

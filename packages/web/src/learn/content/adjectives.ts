@@ -30,7 +30,7 @@ const adjectives: LessonPage = {
       isvColumns: [1],
     },
     { kind: 'example', isv: 'To jest krasiva poema.', en: "It's a beautiful poem.", note: 'Tatoeba 12989674', tryIt: true },
-    { kind: 'example', isv: 'Medžuslovjansky jest moja nova obsesija.', en: 'Interslavic is my new obsession.', note: 'Tatoeba 12994632' },
+    { kind: 'example', isv: 'Medžuslovjansky jest moja nova obsesija.', en: 'Interslavic is my new obsession.', note: 'Tatoeba 12994632', tryIt: true },
 
     { kind: 'h2', text: 'All the forms' },
     {

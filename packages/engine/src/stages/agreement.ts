@@ -111,7 +111,12 @@ export function agreementStage(ctx: StageContext): void {
         'the reciprocal formula "jedin drugogo" is masculine'));
       continue;
     }
-    if (!['ADJ', 'DET', 'NUM', 'PRON'].includes(node.token.upos)) continue;
+    // Also a source NOUN that became an adjective: a language's name is one,
+    // "Interslavic" -> `medžuslovjansky`, and with no gender the tie-break
+    // gave the feminine "Medžuslovjanska jest moja nova obsesija" where
+    // Tatoeba 12994632 writes "Medžuslovjansky".
+    const adjectival = ['ADJ', 'DET', 'NUM', 'PRON'].includes(node.token.upos) || node.entry?.pos.upos === 'ADJ';
+    if (!adjectival) continue;
     if (node.feats.has('Gender') || node.entry?.pos.gender) continue;
     const marked = node.token.feats['Gender'];
     if (marked) {
