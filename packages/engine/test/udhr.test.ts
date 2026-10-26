@@ -73,7 +73,7 @@ describe('UDHR Article 1, from English', () => {
   });
 
   it('agrees a participle with oni as masculine animate', () => {
-    expect(out('gold/g51.conllu')).toMatch(/^Oni sut obdarjani /);
+    expect(out('gold/g51.conllu')).toMatch(/^Oni sut obdarjeni /);
   });
 });
 
@@ -127,7 +127,7 @@ describe('The North Wind and the Sun, from English', () => {
   });
 
   it('keeps the passive "be" an infinitive after a modal', () => {
-    expect(out('gold/g53.conllu')).toContain('imaje byti razvažany');
+    expect(out('gold/g53.conllu')).toContain('imaje byti razvaženy');
   });
 });
 

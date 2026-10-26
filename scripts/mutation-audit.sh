@@ -613,6 +613,9 @@ mutate "towards a reciprocal is do"          prep    "s/  if (lemma === 'towards
 mutate "particle does not finish an event"    aspect "s/^  pastWithParticle,\$//"
 mutate "out finishes light and sound"         aspect "s/(t.lemma.toLowerCase() === 'out' \&\& isMotionVerb(token.lemma))/(t.lemma.toLowerCase() === 'out')/"
 mutate "away tagged advmod not phrasal"       phrasalst "s/        if (child.deprel === 'advmod' \&\& ADVERB_PARTICLES.includes(child.lemma.toLowerCase())) {/        if (false) {/"
+mutate "result verbs not perfective"         aspect "s/^  pastResult,\$//"
+mutate "prefixed perfective read as result"   aspect "s/  return !prefixed \&\& perf.some((p) => !p.endsWith('nuti'));/  return perf.some((p) => !p.endsWith('nuti'));/"
+mutate "semelfactive read as result"          aspect "s/  return !prefixed \&\& perf.some((p) => !p.endsWith('nuti'));/  return !prefixed \&\& perf.length > 0;/"
 
 echo
 echo "==================================================="

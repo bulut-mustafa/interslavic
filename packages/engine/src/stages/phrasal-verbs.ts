@@ -90,7 +90,7 @@ export function planPhrasalVerbs(sentence: ParsedSentence, lex: Lexicon): Phrasa
          */
         const hits = lex.lookup(phrase, 'en').filter((e) => e.pos.upos === 'VERB');
         if (hits.length === 0) continue;
-        const aspect = resolveAspect({ token: verb, sentence });
+        const aspect = resolveAspect({ token: verb, sentence, lex });
         const best = rank(hits, {
           upos: 'VERB',
           gloss: phrase,
@@ -151,7 +151,7 @@ export function planPhrasalVerbs(sentence: ParsedSentence, lex: Lexicon): Phrasa
       if (!aux) continue;
       const phrase = `be ${verb.form}`.toLowerCase();
       const hits = lex.lookup(phrase, 'en').filter((e) => e.pos.upos === 'VERB');
-      const aspect = resolveAspect({ token: verb, sentence });
+      const aspect = resolveAspect({ token: verb, sentence, lex });
       const best = rank(hits, {
         upos: 'VERB',
         gloss: phrase,

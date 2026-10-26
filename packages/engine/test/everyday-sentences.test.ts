@@ -190,6 +190,29 @@ describe('a particle marks a finished past event', () => {
   });
 });
 
+describe('a verb that names a result is perfective in a single past event', () => {
+  it('when its perfective is not built on its imperfective (verbs.html)', () => {
+    // Tatoeba 13467063: "He stayed in the house" -> "On ostal v domu".
+    expect(out('en/he-stayed-in-the-house.conllu')).toBe('On ostal v domu.');
+    expect(out('en/he-died-last-year.conllu')).toMatch(/^On umrl /);
+    expect(out('en/she-succeeded.conllu')).toBe('Ona uspěla.');
+    expect(out('en/they-agreed-that-he-was-right.conllu')).toMatch(/^Oni soglasili se /);
+    expect(out('en/we-arrived-yesterday.conllu')).toBe('My jesmo došli včera.');
+  });
+
+  it('but an activity or a state stays imperfective', () => {
+    expect(out('en/i-thought-that-he-was-right.conllu')).toMatch(/^Ja jesm myslil /);
+    expect(out('en/she-knew-that-he-was-right.conllu')).toMatch(/^Ona znala /);
+    expect(out('en/she-lived-in-prague.conllu')).toBe('Ona žila v Pragě.');
+    expect(out('en/ran-for-an-hour.conllu')).toBe('Ja jesm běgl časinu.');
+    expect(out('en/waited-for-an-hour.conllu')).toBe('Ja jesm čekal časinu.');
+  });
+
+  it('and so does a passive participle of one: "obdarjeni" in his UDHR', () => {
+    expect(out('gold/g51.conllu')).toMatch(/^Oni sut obdarjeni /);
+  });
+});
+
 describe('one auxiliary for two verbs', () => {
   it('shares "will" and "would" with a bare verb joined by "and" (13525474)', () => {
     // Tatoeba 13525474: "Vy budete idti domu i ostati domu" - both infinitives.

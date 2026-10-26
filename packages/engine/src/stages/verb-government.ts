@@ -1,7 +1,7 @@
 import type { Case, ParsedSentence, UdToken } from '../../../types/index.ts';
 import { resolveAspect, type AspectOutcome } from '../resolvers/aspect.ts';
 import { codeBelongsToPreposition } from '../../../rules/src/prepositions.ts';
-import type { Entry } from '../../../lexicon/src/reader.ts';
+import type { Entry, Lexicon } from '../../../lexicon/src/reader.ts';
 import { conjunctsOf } from '../tree.ts';
 import type { VerbGovernment } from '../plans.ts';
 
@@ -15,6 +15,7 @@ export function planVerbGovernment(
   sentence: ParsedSentence,
   rankedFor: (t: UdToken, aspect: AspectOutcome | null) => Entry[],
   needsVerbFeatures: (t: UdToken) => boolean,
+  lex: Lexicon,
 ): Map<number, VerbGovernment> {
   // 45 dictionary entries state the case their complement takes, in the same
   // numeric code the prepositions use:
@@ -31,7 +32,7 @@ export function planVerbGovernment(
 
   for (const token of sentence.tokens) {
     if (!needsVerbFeatures(token)) continue;
-    const entry = rankedFor(token, resolveAspect({ token, sentence }))[0];
+    const entry = rankedFor(token, resolveAspect({ token, sentence, lex }))[0];
     const governs = entry?.addition.governs;
     if (!entry || !governs) continue;
 

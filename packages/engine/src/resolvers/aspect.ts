@@ -1,6 +1,7 @@
 import { decide, type Aspect, type Decision, type ParsedSentence, type UdToken } from '../../../types/index.ts';
 import { isMotionVerb } from '../../../rules/src/motion.ts';
 import { candidatesForEnglish } from '../../../rules/src/prepositions.ts';
+import type { Lexicon } from '../../../lexicon/src/reader.ts';
 
 /**
  * Aspect selection is the hardest problem in the project: Interslavic requires
@@ -13,6 +14,8 @@ import { candidatesForEnglish } from '../../../rules/src/prepositions.ts';
 export interface AspectContext {
   token: UdToken;
   sentence: ParsedSentence;
+  /** Needed only by the rules that read the verb's aspect pair. */
+  lex?: Lexicon;
 }
 
 export interface AspectStrategy {
@@ -238,6 +241,53 @@ const pastWithParticle: AspectStrategy = {
   },
 };
 
+/**
+ * Some verbs name a result by their meaning - "stay", "die", "succeed",
+ * "agree", "arrive" - and a single past event of one is completed without any
+ * object or goal: "He stayed in the house" is `ostal` (Tatoeba 13467063).
+ *
+ * English gives no sign of this, but the dictionary's aspect pairs do. The
+ * verbs page: "Verbs without a prefix are imperfective almost by definition",
+ * a prefix makes the perfective (pisati > napisati), and only a perfective
+ * that is itself the starting point gets a "secondary" imperfective built
+ * from it (priznati > priznavati). So:
+ *
+ *   napisati = na + pisati, pročitati = pro + čitati  -> an activity
+ *   ostati > ostavati, uspěti > uspěvati, umrěti > umirati -> a result
+ *
+ * A verb counts as a result when at least one of its perfectives is not built
+ * on one of its imperfectives, and none is. A perfective in -nųti is set
+ * aside: it is one instance of an activity (kričati > kriknųti), not a result.
+ * Checked on 50 common verbs, 20 of each kind, before use; "say", "lose" and
+ * "understand" read as activities, because `skazati`, `izgubiti` and
+ * `sråzuměti` are built on `kazati`, `gubiti` and `råzuměti`.
+ */
+const bareLemma = (lemma: string): string =>
+  lemma.replace(/ s[ęe]$/, '').normalize('NFD').replace(/\p{M}/gu, '');
+
+export function namesAResult(englishLemma: string, lex: Lexicon): boolean {
+  const verbs = lex.lookup(englishLemma, 'en').filter((e) => e.pos.upos === 'VERB');
+  const perf = verbs.filter((e) => e.pos.aspect === 'Perf').map((e) => bareLemma(e.lemma));
+  const imp = verbs.filter((e) => e.pos.aspect === 'Imp').map((e) => bareLemma(e.lemma));
+  const prefixed = perf.some((p) => imp.some((i) => p !== i && p.endsWith(i)));
+  return !prefixed && perf.some((p) => !p.endsWith('nuti'));
+}
+
+const pastResult: AspectStrategy = {
+  id: 'aspect.pastResult',
+  decide({ token, sentence, lex }) {
+    if (!lex || effectiveTense(token, sentence) !== 'Past') return null;
+    if (token.feats['Aspect'] === 'Prog' || !namesAResult(token.lemma.toLowerCase(), lex)) return null;
+    return decide<Aspect>(
+      'Perf',
+      'aspect.pastResult',
+      'default',
+      `"${token.lemma}" names a result, and a single past event of it is completed: perfective`,
+      [{ value: 'Imp', because: 'imperfective if the action was repeated or still going on' }],
+    );
+  },
+};
+
 /** Last resort: imperfective is the lexically unmarked member of the pair. */
 const defaultImperfective: AspectStrategy = {
   id: 'aspect.default',
@@ -260,6 +310,7 @@ export const ASPECT_CHAIN: AspectStrategy[] = [
   pastWithObject,
   pastWithGoal,
   pastWithParticle,
+  pastResult,
   defaultImperfective,
 ];
 

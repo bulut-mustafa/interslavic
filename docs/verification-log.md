@@ -2064,3 +2064,32 @@ He was running away. / He always gave up. / She sits down.   (stay imperfective)
 ```
 
 No other fixture changed.
+
+### Group 2 fixed: verbs that name a result
+
+`aspect.pastResult`. English shows nothing, but the dictionary's aspect pairs
+do. The verbs page: unprefixed verbs are imperfective, a prefix makes the
+perfective (pisati > napisati), and only a perfective that is itself the
+starting point gets a secondary imperfective (priznati > priznavati). So a
+verb whose perfectives are NOT built on its imperfectives names a result
+(ostati > ostavati, uspěti > uspěvati, umrěti > umirati); one whose
+perfective is a prefix on the imperfective names an activity. Perfectives in
+-nųti (kriknųti) are one instance of an activity and are set aside.
+
+Checked on 50 verbs, 20 of each kind, before use: all 50 as expected.
+
+```
+He stayed in the house.   On ostaval v domu.  ->  On ostal v domu.   (Tatoeba 13467063)
+He died last year.        On umiral ...       ->  On umrl ...
+She succeeded.            Ona uspěvala.       ->  Ona uspěla.
+They agreed that...       soglašali se        ->  soglasili se
+We arrived yesterday.     dohodili            ->  došli
+UDHR "endowed"            obdarjani           ->  obdarjeni          (his text)
+thought / knew / lived / ran for an hour / waited for an hour   (unchanged, imperfective)
+```
+
+Left, and why: "say", "lose" and "understand" read as activities, because
+`skazati`, `izgubiti` and `sråzuměti` are built on `kazati`, `gubiti` and
+`råzuměti` - so "He said that..." stays `govoril`. North Wind "a traveler
+came along" became `prišel` where his text has `prohodil` ("was passing");
+it was wrong before too (`prihodil`), and the gold score is unchanged (31/58).

@@ -111,6 +111,12 @@
       "quote": "In short, perfective aspect focuses on the result of an action and not on the action itself. Depending on tense, it means that the action has been completed already or will be completed at some point.",
       "why": "an English particle such as \"away\", \"down\", \"off\" or \"up\" states that the event reached its result, which is what the perfective focuses on; stays at default confidence"
     },
+    "aspect.pastResult": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/verbs.html",
+      "quote": "Verbs without a prefix are imperfective almost by definition.",
+      "why": "a verb whose perfective is not built by a prefix on its imperfective (ostati > ostavati, not na + pisati) names a result, so a single past event of it is completed; stays at default confidence"
+    },
     "aspect.pastTelic": {
       "tier": "normative",
       "source": "http://steen.free.fr/interslavic/verbs.html",

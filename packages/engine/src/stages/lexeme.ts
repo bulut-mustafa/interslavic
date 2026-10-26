@@ -245,7 +245,7 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
     }
 
     // Aspect first, so it can filter verb candidates (constraint 1).
-    const aspect = needsVerbFeatures(token) ? resolveAspect({ token, sentence }) : null;
+    const aspect = needsVerbFeatures(token) ? resolveAspect({ token, sentence, lex }) : null;
 
     const modalPlan = modalPlans.get(token.id) ?? null;
     // "could" is not a dictionary gloss, so a modal is looked up by the gloss

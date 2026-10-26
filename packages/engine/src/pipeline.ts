@@ -455,7 +455,7 @@ export function translate(
     });
 
   // ---- Phase 0d: verb government ----------------------------------------
-  const verbGovernedCase = planVerbGovernment(sentence, rankedFor, needsVerbFeatures);
+  const verbGovernedCase = planVerbGovernment(sentence, rankedFor, needsVerbFeatures, lex);
 
   // ---- Phase A: lexeme + own features -----------------------------------
   const punctuation = sentencePunctuation(sentence);
