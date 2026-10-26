@@ -166,7 +166,7 @@ export function Text({ text }: { text: string }) {
             );
           case 'isv':
             return (
-              <span key={i} className="isv" title={toCyrillic(part.text)}>
+              <span key={i} className="isv" lang="isv" title={toCyrillic(part.text)}>
                 {part.text}
               </span>
             );
@@ -195,8 +195,8 @@ function BlockView({ block, id }: { block: Block; id: string }) {
     case 'example':
       return (
         <figure className="example">
-          <p className="example-isv">{block.isv}</p>
-          <p className="example-cyr">{toCyrillic(block.isv)}</p>
+          <p className="example-isv" lang="isv">{block.isv}</p>
+          <p className="example-cyr" lang="isv-Cyrl">{toCyrillic(block.isv)}</p>
           <figcaption>
             <span className="example-en">{block.en}</span>
             {block.note && (
@@ -236,10 +236,10 @@ function BlockView({ block, id }: { block: Block; id: string }) {
                         <Text text={cell} />
                       </th>
                     ) : (
-                      <td key={c} className={block.isvColumns?.includes(c) ? 'isv' : undefined}>
+                      <td key={c} className={block.isvColumns?.includes(c) ? 'isv' : undefined} lang={block.isvColumns?.includes(c) ? 'isv' : undefined}>
                         <Text text={cell} />
                         {block.isvColumns?.includes(c) && cell && (
-                          <span className="cell-cyr">{toCyrillic(cell)}</span>
+                          <span className="cell-cyr" lang="isv-Cyrl">{toCyrillic(cell)}</span>
                         )}
                       </td>
                     ),
@@ -269,9 +269,9 @@ function BlockView({ block, id }: { block: Block; id: string }) {
                 <tr key={row.label}>
                   <th scope="row">{row.label}</th>
                   {row.cells.map((cell, c) => (
-                    <td key={c} className="isv">
+                    <td key={c} className="isv" lang="isv">
                       {cell.form}
-                      <span className="cell-cyr">{toCyrillic(cell.form)}</span>
+                      <span className="cell-cyr" lang="isv-Cyrl">{toCyrillic(cell.form)}</span>
                     </td>
                   ))}
                 </tr>

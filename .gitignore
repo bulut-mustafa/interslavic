@@ -1,5 +1,6 @@
 node_modules/
 dist/
+dist-ssr/
 *.tsbuildinfo
 # dictionary snapshot is NOT redistributed - see docs/dictionary-provenance.md
 packages/lexicon/data/raw/

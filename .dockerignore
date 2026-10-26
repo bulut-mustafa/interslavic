@@ -4,6 +4,7 @@
 services/parser/.venv
 **/__pycache__
 packages/web/dist
+packages/web/dist-ssr
 packages/lexicon/data/raw
 packages/lexicon/data/built
 /data

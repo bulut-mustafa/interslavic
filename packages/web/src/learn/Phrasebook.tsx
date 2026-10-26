@@ -37,8 +37,8 @@ function PhraseList() {
           <h2>{group.title}</h2>
           {group.phrases.map((p) => (
             <div className="phrase" key={p.isv}>
-              <p className="phrase-isv">{p.isv}</p>
-              <p className="phrase-cyr">{toCyrillic(p.isv)}</p>
+              <p className="phrase-isv" lang="isv">{p.isv}</p>
+              <p className="phrase-cyr" lang="isv-Cyrl">{toCyrillic(p.isv)}</p>
               <p className="phrase-en">
                 {p.en}
                 {p.note && <span className="phrase-note"> - {p.note}</span>}
@@ -96,8 +96,8 @@ function Flashcards() {
         onClick={() => setShown((s) => !s)}
         aria-label={shown ? 'Hide the meaning' : 'Show the meaning'}
       >
-        <span className="card-isv">{card.isv}</span>
-        <span className="card-cyr">{toCyrillic(card.isv)}</span>
+        <span className="card-isv" lang="isv">{card.isv}</span>
+        <span className="card-cyr" lang="isv-Cyrl">{toCyrillic(card.isv)}</span>
         <span className="card-en" aria-live="polite">
           {shown ? card.en : 'Tap to see the meaning'}
         </span>

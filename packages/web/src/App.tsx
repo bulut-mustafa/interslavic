@@ -1,7 +1,9 @@
+import { useEffect } from 'react';
 import { Lesson } from './learn/Lesson.tsx';
 import { LESSONS } from './learn/lessons.ts';
 import { Phrasebook } from './learn/Phrasebook.tsx';
 import Translator from './pages/Translator.tsx';
+import { pageMeta } from './meta.ts';
 import { Link, usePath } from './router.tsx';
 
 /**
@@ -17,6 +19,14 @@ const SECTIONS = [
 
 export default function App() {
   const path = usePath();
+
+  // The prerendered head is right for the first page; keep it right after
+  // moving to another without a reload.
+  useEffect(() => {
+    const meta = pageMeta(path);
+    document.title = meta.title;
+    document.querySelector('meta[name="description"]')?.setAttribute('content', meta.description);
+  }, [path]);
 
   return (
     <div className="shell">
@@ -42,8 +52,10 @@ export default function App() {
         <Lesson slug={path.replace(/^\/learn\/?/, '').replace(/\/$/, '') || LESSONS[0]!.slug} />
       ) : path.startsWith('/phrasebook') ? (
         <Phrasebook />
-      ) : (
+      ) : path === '/' ? (
         <Translator />
+      ) : (
+        <NotFound />
       )}
 
       <footer className="site-footer">
@@ -53,5 +65,17 @@ export default function App() {
         (steen.free.fr/interslavic), used non-commercially with thanks.
       </footer>
     </div>
+  );
+}
+
+function NotFound() {
+  return (
+    <main className="not-found">
+      <h1>Page not found</h1>
+      <p>
+        There is nothing at this address. Try the <Link href="/">translator</Link> or the{' '}
+        <Link href={`/learn/${LESSONS[0]!.slug}`}>lessons</Link>.
+      </p>
+    </main>
   );
 }

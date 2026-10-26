@@ -17,6 +17,7 @@
     "fixtures:write": "cd services/parser && PYTHONPATH=src .venv/bin/python -m parser_service.fixtures --write",
     "server": "node --experimental-strip-types packages/server/src/main.ts",
     "web": "vite packages/web",
+    "web:build": "vite build packages/web && vite build packages/web --ssr src/entry-server.tsx --outDir dist-ssr && node --experimental-strip-types packages/web/scripts/prerender.ts",
     "dev": "npm run parser & npm run server & npm run web"
   },
   "devDependencies": {

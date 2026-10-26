@@ -57,7 +57,7 @@ async function fetchTranslation(
 
 /** A lesson's "Try it" link opens the translator with its sentence: /?lang=en&text=... */
 function fromAddress(): { text: string; lang: Lang } {
-  const q = new URLSearchParams(window.location.search);
+  const q = new URLSearchParams(typeof window === 'undefined' ? '' : window.location.search);
   return {
     text: q.get('text') ?? 'The woman read a new book.',
     lang: q.get('lang') === 'ru' ? 'ru' : 'en',
@@ -163,7 +163,7 @@ export default function Translator() {
 
   return (
     <>
-      <p className="tagline">Interslavic translator that shows its reasoning for every word</p>
+      <h1 className="tagline">Interslavic translator that shows its reasoning for every word</h1>
 
       <main className="translator">
         <div className="langbar">
@@ -206,7 +206,7 @@ export default function Translator() {
               <>
                 <div className="output-lines">
                   {primary.map((s, i) => (
-                    <p className="output" key={i}>
+                    <p className="output" lang="isv" key={i}>
                       {s.words.map((w, j) => (
                         <Fragment key={`${i}-${j}`}>
                           {/* An explicit space: adjacent JSX elements have none,

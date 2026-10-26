@@ -1418,3 +1418,14 @@ textarea::placeholder {
   font-size: var(--text-sm);
   color: var(--ink-faint);
 }
+
+/* The home page's heading: it was a paragraph, and keeps that look. */
+.tagline {
+  font: inherit;
+  margin: 1em 0;
+}
+
+.not-found {
+  max-width: 40rem;
+  margin: 3rem auto;
+}

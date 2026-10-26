@@ -27,7 +27,7 @@ RUN python3 -m venv /opt/venv \
 COPY . .
 RUN npm ci --ignore-scripts \
  && npm run lexicon:fetch \
- && npx vite build packages/web \
+ && npm run web:build \
  && chown -R node /app
 
 USER node

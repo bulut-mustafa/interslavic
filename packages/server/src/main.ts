@@ -223,18 +223,27 @@ const CONTENT_TYPES: Record<string, string> = {
   '.png': 'image/png',
   '.ico': 'image/x-icon',
   '.json': 'application/json; charset=utf-8',
+  '.xml': 'application/xml; charset=utf-8',
+  '.txt': 'text/plain; charset=utf-8',
 };
 
-/** The built page and its assets; any other path is the page itself. */
+/**
+ * The built site: every page is prerendered to `<path>/index.html`
+ * (packages/web/scripts/prerender.ts), so a path is served as that file, and
+ * a path with no file is a real 404 - not the home page under a 200, which
+ * search engines read as a duplicate of it.
+ */
 function serveStatic(dir: string, pathname: string, res: http.ServerResponse): void {
   const root = path.resolve(dir);
   const wanted = path.resolve(root, '.' + decodeURIComponent(pathname));
   const inside = wanted === root || wanted.startsWith(root + path.sep);
-  const file =
-    inside && fs.existsSync(wanted) && fs.statSync(wanted).isFile() ? wanted : path.join(root, 'index.html');
-  res.writeHead(200, {
+  const isFile = (f: string) => fs.existsSync(f) && fs.statSync(f).isFile();
+  const found = !inside ? undefined : isFile(wanted) ? wanted : isFile(path.join(wanted, 'index.html')) ? path.join(wanted, 'index.html') : undefined;
+  const notFound = path.join(root, '404.html');
+  const file = found ?? (isFile(notFound) ? notFound : path.join(root, 'index.html'));
+  res.writeHead(found ? 200 : 404, {
     'content-type': CONTENT_TYPES[path.extname(file)] ?? 'application/octet-stream',
-    'cache-control': file.endsWith('index.html') ? 'no-cache' : 'public, max-age=31536000, immutable',
+    'cache-control': file.endsWith('.html') ? 'no-cache' : 'public, max-age=31536000, immutable',
   });
   fs.createReadStream(file).pipe(res);
 }

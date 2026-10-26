@@ -3,11 +3,18 @@ import { useEffect, useState, type AnchorHTMLAttributes, type MouseEvent } from 
 /**
  * The few routes the site has - the translator, the lessons, the phrasebook -
  * need no router library: the address is the state, `pushState` changes it, and
- * `popstate` brings the back button along. Deep links work because the server
- * answers every unknown path with the page itself.
+ * `popstate` brings the back button along. Deep links work because every page
+ * is prerendered to its own HTML file (scripts/prerender.ts).
  */
 
 const CHANGE = 'locationchange';
+
+/** The page being prerendered at build time, where there is no `window`. */
+let serverPath = '/';
+export function setServerPath(path: string): void {
+  serverPath = path;
+}
+const currentPath = (): string => (typeof window === 'undefined' ? serverPath : window.location.pathname);
 
 export function navigate(to: string): void {
   window.history.pushState({}, '', to);
@@ -16,9 +23,9 @@ export function navigate(to: string): void {
 }
 
 export function usePath(): string {
-  const [path, setPath] = useState(() => window.location.pathname);
+  const [path, setPath] = useState(currentPath);
   useEffect(() => {
-    const update = () => setPath(window.location.pathname);
+    const update = () => setPath(currentPath());
     window.addEventListener('popstate', update);
     window.addEventListener(CHANGE, update);
     return () => {
