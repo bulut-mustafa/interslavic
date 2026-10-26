@@ -28,13 +28,13 @@ const out = (name: string) =>
  */
 describe('the imperative', () => {
   it('uses an imperative form, not the present tense', () => {
-    expect(out('open-the-window.conllu')).toContain('Otvarjajte');
-    expect(out('read-the-book.conllu')).toBe('Čitajte knigu.');
+    expect(out('open-the-window.conllu')).toContain('Otvorite'); // one act asked for: perfective
+    expect(out('read-the-book.conllu')).toBe('Pročitajte knigu.');
   });
 
   it('keeps verb government in the imperative', () => {
-    // pomagati takes the dative.
-    expect(out('help-me.conllu')).toBe('Pomagajte mně!');
+    // pomogti takes the dative.
+    expect(out('help-me.conllu')).toBe('Pomožite mně!');
   });
 
   it('uses the first-person plural for "let us"', () => {
@@ -192,8 +192,8 @@ describe('an accusative with no animate noun to agree with', () => {
  */
 describe("the source's commas", () => {
   it('keeps a comma after an address and before an appended word', () => {
-    expect(out('brother-help-me.conllu')).toBe('Brat, pomagajte mně!');
-    expect(out('open-the-window.conllu')).toBe('Otvarjajte okno, prosim.');
+    expect(out('brother-help-me.conllu')).toBe('Brat, pomožite mně!');
+    expect(out('open-the-window.conllu')).toBe('Otvorite okno, prosim.');
   });
 
   it('pays the comma once, after the whole node, and never doubles it', () => {

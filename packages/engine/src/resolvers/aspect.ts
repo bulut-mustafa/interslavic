@@ -147,13 +147,27 @@ const tenseCue: AspectStrategy = {
  * is progressive. Reported as `default`, not `certain`, with the imperfective
  * offered as the alternative.
  */
+/**
+ * The subject of a passive is the object of the active, so "The food was
+ * prepared by my grandmother" is the same completed event as "My grandmother
+ * prepared the food" and takes the same aspect. Only with a PAST "be": the
+ * verbs page gives the present passive with an imperfective ("ja jesm
+ * nesomy"), and the participle carries Tense=Past whatever the tense is. A
+ * bare plural subject leaves it open, as a bare plural object does.
+ */
+function isPastPassiveOfAnObject(token: UdToken, sentence: ParsedSentence): boolean {
+  const be = sentence.tokens.find((t) => t.head === token.id && t.deprel === 'aux:pass');
+  const subject = sentence.tokens.find((t) => t.head === token.id && t.deprel === 'nsubj:pass');
+  return be?.feats['Tense'] === 'Past' && subject !== undefined && !isBarePlural(subject, sentence);
+}
+
 const pastWithObject: AspectStrategy = {
   id: 'aspect.pastTelic',
   decide({ token, sentence }) {
     if (effectiveTense(token, sentence) !== 'Past') return null;
     if (token.feats['Aspect'] === 'Prog') return null;
     const hasObject = sentence.tokens.some((t) => t.head === token.id && t.deprel === 'obj');
-    if (!hasObject) return null;
+    if (!hasObject && !isPastPassiveOfAnObject(token, sentence)) return null;
     return decide<Aspect>(
       'Perf',
       'aspect.pastTelic',
@@ -288,6 +302,72 @@ const pastResult: AspectStrategy = {
   },
 };
 
+/**
+ * A single bounded act asked for or wanted is perfective too, not only one in
+ * the past: his "Otec nikde ne mogl NAJDTI svoje ključi", and on Tatoeba "Ja
+ * hočem kupiti jabloka", "On probuje najdti svoju olovku", "Otvori vse
+ * magaziny". The past rules required the past tense, so every infinitive and
+ * command fell to the imperfective default ("Otvarjajte okno").
+ *
+ * Bounded by a direct object or a completive particle - not by a verb that
+ * names a result: that test was measured on single past events, and on "should
+ * act towards one another", a general norm, it gave "postupiti" where his UDHR
+ * has "imajut postupati". Only an infinitive governed by a verb or a modal,
+ * and a positive command; left out on purpose:
+ * - "will"/"would": the verbs page shows the future only as "budu dělati",
+ *   and Tatoeba has "on bude pomagati";
+ * - after a phase or liking verb, which takes the imperfective: his Babel has
+ *   "prěstali budovati", Tatoeba "Ljubju ničego ne dělati";
+ * - a purpose clause, an `advcl`: his "že by fotografovali tulipany";
+ * - "going to", a future;
+ * - a negative command, tagged on "do", not on the verb - and the Slavic
+ *   negative command is imperfective ("Ne otvarjajte okno").
+ */
+/**
+ * A bare plural object leaves the act open: "He could read books" is ability,
+ * `mogl čitati`, where "find his keys" or "buy a car" is one act that ends.
+ * Plural with no determiner, possessive or number in front of it.
+ */
+function isBarePlural(noun: UdToken, sentence: ParsedSentence): boolean {
+  return noun.upos === 'NOUN' && noun.feats['Number'] === 'Plur' &&
+    !sentence.tokens.some((t) => t.head === noun.id && ['det', 'nmod:poss', 'nummod'].includes(t.deprel));
+}
+
+const MODALS = ['can', 'could', 'must', 'may', 'might', 'should'];
+const TAKES_IMPERFECTIVE = ['begin', 'start', 'stop', 'finish', 'continue', 'keep', 'like', 'love', 'enjoy', 'hate', 'prefer', 'learn'];
+
+const singleAct: AspectStrategy = {
+  id: 'aspect.singleAct',
+  decide({ token, sentence }) {
+    const command = token.feats['Mood'] === 'Imp';
+    if (!command) {
+      if (token.feats['VerbForm'] !== 'Inf') return null;
+      const head = sentence.tokens.find((t) => t.id === token.head);
+      const governed =
+        token.deprel === 'xcomp' &&
+        head !== undefined &&
+        head.lemma.toLowerCase() !== 'go' &&
+        !TAKES_IMPERFECTIVE.includes(head.lemma.toLowerCase());
+      const modal = sentence.tokens.some(
+        (t) => t.head === token.id && t.deprel === 'aux' && MODALS.includes(t.lemma.toLowerCase()),
+      );
+      if (!governed && !modal) return null;
+    }
+    const bounded = sentence.tokens.some(
+      (t) => t.head === token.id && ((t.deprel === 'obj' && !isBarePlural(t, sentence)) ||
+        (t.deprel === 'compound:prt' && COMPLETIVE_PARTICLES.includes(t.lemma.toLowerCase()))),
+    );
+    if (!bounded) return null;
+    return decide<Aspect>(
+      'Perf',
+      'aspect.singleAct',
+      'default',
+      command ? 'a request for one completed act: perfective' : 'one completed act is wanted or possible: perfective',
+      [{ value: 'Imp', because: 'imperfective if the act is meant as repeated or ongoing' }],
+    );
+  },
+};
+
 /** Last resort: imperfective is the lexically unmarked member of the pair. */
 const defaultImperfective: AspectStrategy = {
   id: 'aspect.default',
@@ -311,6 +391,7 @@ export const ASPECT_CHAIN: AspectStrategy[] = [
   pastWithGoal,
   pastWithParticle,
   pastResult,
+  singleAct,
   defaultImperfective,
 ];
 

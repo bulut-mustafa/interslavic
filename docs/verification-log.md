@@ -2093,3 +2093,56 @@ Left, and why: "say", "lose" and "understand" read as activities, because
 `råzuměti` - so "He said that..." stays `govoril`. North Wind "a traveler
 came along" became `prišel` where his text has `prohodil` ("was passing");
 it was wrong before too (`prihodil`), and the gold score is unchanged (31/58).
+
+### Group 3 fixed: one bounded act wanted, possible or asked for
+
+`aspect.singleAct`. An infinitive under a verb or modal, or a positive
+command, bounded by an object or a completive particle, is perfective: his
+"ne mogl najdti" (g13), Tatoeba "Ja hočem kupiti jabloka", "On probuje najdti
+svoju olovku", "Otvori vse magaziny".
+
+```
+Father could not find his keys.  nahoditi      ->  najdti          (his g13)
+I want to buy a car.             kupovati      ->  kupiti
+Can you help me?                 pomagati      ->  pomogti
+Open the window, please.         Otvarjajte    ->  Otvorite
+Help me! / Read the book.        Pomagajte / Čitajte -> Pomožite / Pročitajte
+Please close the door.           zaključajte ("lock") -> zatvorite
+```
+
+Left out, each with its evidence: "will" (the page shows only "budu dělati";
+Tatoeba "on bude pomagati"); phase and liking verbs (Babel "prěstali
+budovati"); purpose clauses (his "že by fotografovali"); negative commands
+("Ne otvarjajte"). A bare plural object leaves the act open - "He could read
+books" stays `mogl čitati`, the ability reading gold.test.ts warned about;
+"eat apples" `jesti`, "eat the apples" `sjesti`. The result-verb test is NOT
+used here: on "should act towards one another", a general norm, it gave
+"postupiti" against his UDHR "imajut postupati", so it was taken out.
+
+### Group 4 fixed: the past passive
+
+No new rule: the subject of a passive is the object of the active, so the
+object rule now reads a past "be" + participle with its subject. The present
+passive stays imperfective, as the page gives it ("ja jesm nesomy").
+
+```
+The food was prepared by my grandmother.  gotovjena -> prigotovjena
+The letter was written by him.            pisano    -> napisano
+The book is read by the woman.            čitana    (unchanged)
+```
+
+### Where the four groups leave it
+
+21 of the ~25 wrong verbs in the first scan are fixed; no gold or fixture
+sentence got worse (gold 31/58 unchanged). Still open, on purpose or as a
+different problem:
+
+- "I will come", "We must leave" (no object): the future and an unbounded
+  infinitive are left to the default for the reasons above.
+- "He said that..." / "She told me that...": `skazati` is built on `kazati`,
+  so the morphology reads "say" and "tell" as activities.
+- "The pizza is made", "One of them is broken": present, so imperfective by
+  the page's rule; a resultative state would want the perfective participle.
+- Found while checking, not aspect: "She began to write" takes the reflexive
+  `počęti sę` ("počela se pisati"); "letters" -> `pisemnosti`; the agent of
+  "written by him" is "od strany njego" where the page gives plain "od".

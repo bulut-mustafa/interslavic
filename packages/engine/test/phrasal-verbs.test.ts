@@ -34,7 +34,7 @@ describe('phrasal verbs', () => {
 
   it('drops the particle and says why', () => {
     const r = result('please-give-up.conllu');
-    expect(r.text).toContain('odrěkajte se');
+    expect(r.text).toContain('odrěčite se');
     const why = r.dropped.map((d) => d.why).join(' ');
     expect(why).toContain('phrasal verb');
   });

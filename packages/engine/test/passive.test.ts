@@ -92,7 +92,7 @@ describe('negation survives every realisation path', () => {
  */
 describe('a passive clause and verb transitivity', () => {
   it('does not read the missing object as intransitivity', () => {
-    expect(out('food-was-prepared.conllu')).toBe('Jeda byla gotovjena od mojej baby.');
+    expect(out('food-was-prepared.conllu')).toBe('Jeda byla prigotovjena od mojej baby.'); // past passive: perfective, as the active
   });
 
   /**

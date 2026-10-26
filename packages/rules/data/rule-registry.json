@@ -117,6 +117,12 @@
       "quote": "Verbs without a prefix are imperfective almost by definition.",
       "why": "a verb whose perfective is not built by a prefix on its imperfective (ostati > ostavati, not na + pisati) names a result, so a single past event of it is completed; stays at default confidence"
     },
+    "aspect.singleAct": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/verbs.html",
+      "quote": "In short, perfective aspect focuses on the result of an action and not on the action itself. Depending on tense, it means that the action has been completed already or will be completed at some point.",
+      "why": "one bounded act that is wanted, possible or asked for will be completed, so perfective: his \"ne mogl najdti\", Tatoeba \"hočem kupiti\", \"Otvori vse magaziny\"; not with will/would, phase or liking verbs, purpose clauses or negative commands"
+    },
     "aspect.pastTelic": {
       "tier": "normative",
       "source": "http://steen.free.fr/interslavic/verbs.html",

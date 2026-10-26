@@ -616,6 +616,12 @@ mutate "away tagged advmod not phrasal"       phrasalst "s/        if (child.dep
 mutate "result verbs not perfective"         aspect "s/^  pastResult,\$//"
 mutate "prefixed perfective read as result"   aspect "s/  return !prefixed \&\& perf.some((p) => !p.endsWith('nuti'));/  return perf.some((p) => !p.endsWith('nuti'));/"
 mutate "semelfactive read as result"          aspect "s/  return !prefixed \&\& perf.some((p) => !p.endsWith('nuti'));/  return !prefixed \&\& perf.length > 0;/"
+mutate "single act not perfective"           aspect "s/^  singleAct,\$//"
+mutate "liking verb takes perfective"         aspect "s/        !TAKES_IMPERFECTIVE.includes(head.lemma.toLowerCase());/        true;/"
+mutate "will counted as modal"                aspect "s/const MODALS = \['can',/const MODALS = ['will', 'can',/"
+mutate "bare plural object bounds the act"    aspect "s/(t.deprel === 'obj' \&\& !isBarePlural(t, sentence))/(t.deprel === 'obj')/"
+mutate "past passive keeps imperfective"      aspect "s/    if (!hasObject \&\& !isPastPassiveOfAnObject(token, sentence)) return null;/    if (!hasObject) return null;/"
+mutate "present passive made perfective"      aspect "s/  return be?.feats\['Tense'\] === 'Past' \&\& subject/  return be !== undefined \&\& subject/"
 
 echo
 echo "==================================================="

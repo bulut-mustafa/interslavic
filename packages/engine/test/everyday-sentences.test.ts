@@ -213,6 +213,54 @@ describe('a verb that names a result is perfective in a single past event', () =
   });
 });
 
+describe('one bounded act wanted, possible or asked for is perfective', () => {
+  it('after a modal or a verb like "want" (his g13; Tatoeba "hočem kupiti")', () => {
+    expect(out('gold/g13.conllu')).toMatch(/ne mogl najdti /);
+    expect(out('en/i-want-to-buy-a-car.conllu')).toBe('Ja hoču kupiti avto.');
+    expect(out('en/i-need-to-write-a-letter.conllu')).toBe('Ja potrěbuju napisati pismo.');
+    expect(out('en/can-you-help-me.conllu')).toBe('Vy možete pomogti mně?');
+  });
+
+  it('in a positive command (Tatoeba "Otvori vse magaziny")', () => {
+    expect(out('en/open-the-window.conllu')).toBe('Otvorite okno, prosim.');
+    expect(out('en/help-me.conllu')).toBe('Pomožite mně!');
+    expect(out('en/read-the-book.conllu')).toBe('Pročitajte knigu.');
+    expect(out('en/please-give-up.conllu')).toBe('Prosim odrěčite se.');
+  });
+
+  it('but not a negative command, the future, a liking verb, or a purpose clause', () => {
+    expect(out('en/dont-open-the-window.conllu')).toBe('Ne otvarjajte okno.');
+    expect(out('en/dont-tell-him.conllu')).toBe('Ne kažite jemu.');
+    expect(out('en/they-will-read.conllu')).toBe('Oni budut čitati knigy.');
+    expect(out('en/i-like-to-read-books.conllu')).toBe('Ja ljubju čitati knigy.');
+    // even with a bounded object (his Babel: "prěstali budovati")
+    expect(out('en/i-like-to-read-the-newspaper.conllu')).toBe('Ja ljubju čitati gazetu.');
+    expect(out('en/she-began-to-write-the-letter.conllu')).toMatch(/ pisati pismo\.$/);
+    expect(out('gold/g15.conllu')).toMatch(/že by fotografovali /);
+  });
+
+  it('nor an open-ended act with a bare plural object (ability: "mogl čitati")', () => {
+    expect(out('en/he-could-read-books.conllu')).toBe('On mogl čitati knigy.');
+    expect(out('en/i-want-to-eat-apples.conllu')).toBe('Ja hoču jesti jabloka.');
+    expect(out('en/i-want-to-eat-the-apples.conllu')).toBe('Ja hoču sjesti jabloka.');
+  });
+
+  it('nor a general norm with no object: his UDHR "imajut postupati"', () => {
+    expect(out('gold/g51.conllu')).toMatch(/imajut postupati /);
+  });
+});
+
+describe('a past passive takes the aspect of the active it comes from', () => {
+  it('"was prepared by my grandmother" = "my grandmother prepared it"', () => {
+    expect(out('en/food-was-prepared.conllu')).toBe('Jeda byla prigotovjena od mojej baby.');
+    expect(out('en/the-letter-was-written-by-him.conllu')).toMatch(/^Pismo bylo napisano /);
+  });
+
+  it('but a present passive stays imperfective (verbs.html: "ja jesm nesomy")', () => {
+    expect(out('en/book-is-read-by.conllu')).toBe('Kniga jest čitana od ženy.');
+  });
+});
+
 describe('one auxiliary for two verbs', () => {
   it('shares "will" and "would" with a bare verb joined by "and" (13525474)', () => {
     // Tatoeba 13525474: "Vy budete idti domu i ostati domu" - both infinitives.

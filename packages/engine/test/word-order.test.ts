@@ -29,7 +29,7 @@ const out = (name: string) =>
 describe('a yes/no question keeps declarative order', () => {
   it('puts the subject before the verb', () => {
     // Was "Možete vy pomagati mně?" and "Jeste vy utomljeni?".
-    expect(out('can-you-help-me.conllu')).toBe('Vy možete pomagati mně?');
+    expect(out('can-you-help-me.conllu')).toBe('Vy možete pomogti mně?');
     expect(out('are-you-tired.conllu')).toBe('Vy jeste utomljeni?');
   });
 
@@ -38,7 +38,7 @@ describe('a yes/no question keeps declarative order', () => {
   });
 
   it('does not reorder a statement', () => {
-    expect(out('read-the-book.conllu')).toBe('Čitajte knigu.');
+    expect(out('read-the-book.conllu')).toBe('Pročitajte knigu.');
   });
 });
 
