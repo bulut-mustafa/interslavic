@@ -2,6 +2,7 @@ import { decide, type Aspect, type Decision, type ParsedSentence, type UdToken }
 import { isMotionVerb } from '../../../rules/src/motion.ts';
 import { candidatesForEnglish } from '../../../rules/src/prepositions.ts';
 import type { Lexicon } from '../../../lexicon/src/reader.ts';
+import { isTimeUnit } from '../../../rules/src/verb-prepositions.ts';
 
 /**
  * Aspect selection is the hardest problem in the project: Interslavic requires
@@ -161,12 +162,37 @@ function isPastPassiveOfAnObject(token: UdToken, sentence: ParsedSentence): bool
   return be?.feats['Tense'] === 'Past' && subject !== undefined && !isBarePlural(subject, sentence);
 }
 
+/**
+ * A span of time as the object measures the action instead of completing it:
+ * "The trip took three days" is "Putovanje trvalo tri dni" - how long it went
+ * on, which the verbs page gives to the imperfective ("an ongoing process").
+ * The same reading as "ran for an hour" (`běgl časinu`), where English uses
+ * "for"; here the parser makes the span an object, and without this the
+ * object and result rules made it perfective ("potrvalo").
+ */
+const durationObject: AspectStrategy = {
+  id: 'aspect.duration',
+  decide({ token, sentence }) {
+    const span = sentence.tokens.find((t) => t.head === token.id && t.deprel === 'obj' && isTimeUnit(t.lemma));
+    if (!span) return null;
+    return decide<Aspect>(
+      'Imp',
+      'aspect.duration',
+      'high',
+      `"${span.form}" says how long it went on: imperfective`,
+      [{ value: 'Perf', because: 'perfective if the span is a result, not a duration' }],
+    );
+  },
+};
+
 const pastWithObject: AspectStrategy = {
   id: 'aspect.pastTelic',
   decide({ token, sentence }) {
     if (effectiveTense(token, sentence) !== 'Past') return null;
     if (token.feats['Aspect'] === 'Prog') return null;
-    const hasObject = sentence.tokens.some((t) => t.head === token.id && t.deprel === 'obj');
+    // A span of time is how long, not what: "took three days" is not a
+    // bounded object, and its verb is "last" - `trvalo`, imperfective.
+    const hasObject = sentence.tokens.some((t) => t.head === token.id && t.deprel === 'obj' && !isTimeUnit(t.lemma));
     if (!hasObject && !isPastPassiveOfAnObject(token, sentence)) return null;
     return decide<Aspect>(
       'Perf',
@@ -354,7 +380,7 @@ const singleAct: AspectStrategy = {
       if (!governed && !modal) return null;
     }
     const bounded = sentence.tokens.some(
-      (t) => t.head === token.id && ((t.deprel === 'obj' && !isBarePlural(t, sentence)) ||
+      (t) => t.head === token.id && ((t.deprel === 'obj' && !isBarePlural(t, sentence) && !isTimeUnit(t.lemma)) ||
         (t.deprel === 'compound:prt' && COMPLETIVE_PARTICLES.includes(t.lemma.toLowerCase()))),
     );
     if (!bounded) return null;
@@ -387,6 +413,7 @@ export const ASPECT_CHAIN: AspectStrategy[] = [
   perfectAuxiliary,
   adverbialCue,
   tenseCue,
+  durationObject,
   pastWithObject,
   pastWithGoal,
   pastWithParticle,

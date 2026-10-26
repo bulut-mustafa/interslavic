@@ -619,12 +619,16 @@ mutate "semelfactive read as result"          aspect "s/  return !prefixed \&\& 
 mutate "single act not perfective"           aspect "s/^  singleAct,\$//"
 mutate "liking verb takes perfective"         aspect "s/        !TAKES_IMPERFECTIVE.includes(head.lemma.toLowerCase());/        true;/"
 mutate "will counted as modal"                aspect "s/const MODALS = \['can',/const MODALS = ['will', 'can',/"
-mutate "bare plural object bounds the act"    aspect "s/(t.deprel === 'obj' \&\& !isBarePlural(t, sentence))/(t.deprel === 'obj')/"
+mutate "bare plural object bounds the act"    aspect "s/(t.deprel === 'obj' \&\& !isBarePlural(t, sentence) \&\& !isTimeUnit(t.lemma))/(t.deprel === 'obj' \&\& !isTimeUnit(t.lemma))/"
 mutate "past passive keeps imperfective"      aspect "s/    if (!hasObject \&\& !isPastPassiveOfAnObject(token, sentence)) return null;/    if (!hasObject) return null;/"
 mutate "present passive made perfective"      aspect "s/  return be?.feats\['Tense'\] === 'Past' \&\& subject/  return be !== undefined \&\& subject/"
 mutate "at a building is na"                  prep "s/    lemma === 'at' \&\&\$/    lemma === 'never' \&\&/"
 mutate "compound noun inherits v"             prep "s/    !sentence.tokens.some((t) => t.head === complement.id \&\& t.deprel === 'compound')/    true/"
 mutate "-ing noun left untranslated"          lexeme "s/      verbalNounEntry ??\$//"
+mutate "for is never za"                      verbprep "s/  'pay|for': {/  'never|for': {/"
+mutate "adjective cannot choose a preposition" prep "s/  if (governor \&\& \['VERB', 'AUX', 'ADJ', 'NOUN'\].includes(governor.upos)) {/  if (governor \&\& ['VERB', 'AUX'].includes(governor.upos)) {/"
+mutate "take a week is take"                   phrasalst "s/      if (objects.length !== 1 || !isTimeUnit(objects\[0\]!.lemma)) continue;/      continue;/"
+mutate "duration made perfective"              aspect "s/^  durationObject,\$//"
 
 echo
 echo "==================================================="

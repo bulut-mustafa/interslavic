@@ -297,6 +297,36 @@ describe('an "-ing" noun the dictionary lacks is its verb\'s verbal noun', () =>
   });
 });
 
+describe('"for" is za when it means in exchange, because of or in favour of', () => {
+  it('after thank, pay, vote, fight, responsible, prize (prepositions.html; Wp/isv)', () => {
+    expect(out('en/thank-you-for-your-help.conllu')).toBe('Blagodarju vas za vašu pomoč.');
+    expect(out('en/thank-you-for-your-understanding.conllu')).toBe('Blagodarju vas za vaše razuměnje.');
+    expect(out('en/thanks-for-the-gift.conllu')).toMatch(/ za dar\.$/);
+    expect(out('en/i-paid-for-the-tickets.conllu')).toBe('Ja jesm platil za bilety.');
+    expect(out('en/they-voted-for-him.conllu')).toBe('Oni glasovali za njego.');
+    expect(out('en/she-fought-for-freedom.conllu')).toMatch(/ za svobodu\.$/);
+    expect(out('en/he-is-responsible-for-the-project.conllu')).toBe('On jest odgovorny za projekt.');
+    expect(out('en/he-won-a-prize-for-his-book.conllu')).toMatch(/ nagradu za svoju knigu\.$/);
+  });
+
+  it('but stays dlja for whom or what something is for', () => {
+    expect(out('en/this-gift-is-for-you.conllu')).toBe('Tutoj dar jest dlja vas.');
+    expect(out('en/swimming-is-good-for-your-health.conllu')).toMatch(/ dlja vašego zdravja\.$/);
+  });
+});
+
+describe('"take" with a span of time is "last", and the span is a duration', () => {
+  it('takes trvati, imperfective (Wp/isv: "Eksperiment trval samo několiko lět")', () => {
+    expect(out('en/the-trip-took-three-days.conllu')).toBe('Putovanje trvalo tri dnje.');
+    expect(out('en/the-reading-of-this-book-took-a-week.conllu')).toBe('Čitanje tutoj knigy trvalo tydenj.');
+    expect(out('en/it-takes-an-hour.conllu')).toMatch(/ trvaje časinu\.$/);
+  });
+
+  it('but "take" with a thing is still take', () => {
+    expect(out('en/i-took-the-book.conllu')).toBe('Ja jesm vzel knigu.');
+  });
+});
+
 describe('one auxiliary for two verbs', () => {
   it('shares "will" and "would" with a bare verb joined by "and" (13525474)', () => {
     // Tatoeba 13525474: "Vy budete idti domu i ostati domu" - both infinitives.

@@ -2,6 +2,7 @@ import type { ParsedSentence, UdToken } from '../../../types/index.ts';
 import { rank, type Entry, type Lexicon } from '../../../lexicon/src/reader.ts';
 import { resolveAspect } from '../resolvers/aspect.ts';
 import { contextWordsOf } from '../gloss.ts';
+import { isTimeUnit } from '../../../rules/src/verb-prepositions.ts';
 
 export interface PhrasalVerbPlan {
   /** Head token id -> the multiword entry chosen for it: a phrasal verb, or a fixed expression. */
@@ -270,6 +271,35 @@ export function planPhrasalVerbs(sentence: ParsedSentence, lex: Lexicon): Phrasa
       if (!best) continue;
       phrasalVerbs.set(word.id, best);
       phrasalParticles.add(det.id);
+    }
+  }
+
+  /**
+   * ---- "take" + a stretch of time is "last" ---------------------------------
+   *
+   * "The trip took three days", "It takes an hour": the object is a span of
+   * time, and the verb means "last" - `trvati` "last, continue, endure, go on"
+   * - not `vzeti` "take (hold of)". Word by word it was "Putovanje vzelo tri
+   * dnje", "the trip grabbed three days", and "Ono bere časinu". The span then
+   * stays a bare accusative, as for any duration ("Eksperiment trval samo
+   * několiko lět", Wp/isv). Only with no other object ("take me an hour to"
+   * is a different construction) and only for a time unit.
+   */
+  if (sentence.lang === 'en') {
+    for (const verb of sentence.tokens) {
+      if (verb.upos !== 'VERB' || verb.lemma.toLowerCase() !== 'take' || phrasalVerbs.has(verb.id)) continue;
+      const deps = sentence.tokens.filter((t) => t.head === verb.id);
+      const objects = deps.filter((t) => ['obj', 'iobj'].includes(t.deprel));
+      if (objects.length !== 1 || !isTimeUnit(objects[0]!.lemma)) continue;
+      const aspect = resolveAspect({ token: verb, sentence, lex });
+      const best = rank(lex.lookup('last', 'en').filter((e) => e.pos.upos === 'VERB'), {
+        upos: 'VERB',
+        gloss: 'last',
+        lang: 'en',
+        contextWords,
+        ...(aspect ? { aspect: aspect.decision.value } : {}),
+      })[0];
+      if (best) phrasalVerbs.set(verb.id, best);
     }
   }
 

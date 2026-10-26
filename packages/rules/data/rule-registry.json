@@ -123,6 +123,12 @@
       "quote": "In short, perfective aspect focuses on the result of an action and not on the action itself. Depending on tense, it means that the action has been completed already or will be completed at some point.",
       "why": "one bounded act that is wanted, possible or asked for will be completed, so perfective: his \"ne mogl najdti\", Tatoeba \"hočem kupiti\", \"Otvori vse magaziny\"; not with will/would, phase or liking verbs, purpose clauses or negative commands"
     },
+    "aspect.duration": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/verbs.html",
+      "quote": "It can also express a an ongoing process, a habit or a repeated action",
+      "why": "a span of time as the object says how long the action went on - an ongoing process, so imperfective (\"trvalo tri dni\")"
+    },
     "aspect.pastTelic": {
       "tier": "normative",
       "source": "http://steen.free.fr/interslavic/verbs.html",

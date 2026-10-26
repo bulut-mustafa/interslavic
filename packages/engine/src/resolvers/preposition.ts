@@ -143,10 +143,11 @@ export function planPreposition(adp: UdToken, sentence: ParsedSentence): PrepPla
   }
 
   /**
-   * Some verbs pick the preposition themselves, and the English one is no
-   * guide: "wait FOR" is `čekati na`, "depend ON" is `zavisěti od`.
+   * Some words pick the preposition themselves, and the English one is no
+   * guide: "wait FOR" is `čekati na`, "depend ON" is `zavisěti od`,
+   * "responsible FOR" is `odgovorny za`.
    */
-  if (governor?.upos === 'VERB' || governor?.upos === 'AUX') {
+  if (governor && ['VERB', 'AUX', 'ADJ', 'NOUN'].includes(governor.upos)) {
     const governed = verbGovernedPhrase(governor.lemma, lemma);
     if (governed) {
       const because = `${governed.why} (${governed.evidence})`;

@@ -43,7 +43,8 @@ export function isTimeUnit(englishNounLemma: string): boolean {
 }
 
 /**
- * How a verb governs its complement when English uses a preposition.
+ * How a verb - or an adjective or noun ("responsible for", "thanks for") -
+ * governs its complement when English uses a preposition.
  *
  * `direct` deletes the preposition and leaves a bare case; `preposition`
  * replaces it with the Interslavic one the verb actually takes.
@@ -89,6 +90,59 @@ const GOVERNED: Record<string, VerbGovernedPhrase> = {
     case: 'Ins',
     why: 'as for "talk to": "s" with the instrumental, not "do"',
     evidence: '"ktory govoril s njim iz gorečego kusta" - Wp/isv/Mojsej; "kogda se govorit s neznakomcom" - Wp/isv/Brithenig',
+  },
+  /**
+   * "for" meaning in exchange for, because of, or in favour of is `za` with
+   * the accusative - the prepositions page: "za - for, because of, due to, in
+   * exchange for, in favour of" (+acc). Frequency ranking always gave the
+   * benefactive `dlja`: "platil dlja biletov", "glasovali dlja njego",
+   * "odgovorny dlja projekta". The deciding word may be a verb, an adjective
+   * ("responsible") or a noun ("thanks", "prize").
+   */
+  'thank|for': {
+    prep: 'za', case: 'Acc',
+    why: 'thanks are given FOR something in exchange: "za" with the accusative',
+    evidence: '"i hvala za prvo soobčenje v novoj Krčmě" - Wp/isv, Krčma',
+  },
+  'thanks|for': {
+    prep: 'za', case: 'Acc',
+    why: 'thanks are given FOR something in exchange: "za" with the accusative',
+    evidence: '"i hvala za prvo soobčenje v novoj Krčmě" - Wp/isv, Krčma',
+  },
+  'pay|for': {
+    prep: 'za', case: 'Acc',
+    why: 'one pays in exchange for something: "za" with the accusative',
+    evidence: '"platil za to medžugradsku stavku 3 kopeje" - Wp/isv',
+  },
+  'vote|for': {
+    prep: 'za', case: 'Acc',
+    why: 'a vote is in favour of something: "za" with the accusative',
+    evidence: '"obyvatelji Objedinjenogo Kraljevstva glasovali za izhod" - Wp/isv',
+  },
+  'fight|for': {
+    prep: 'za', case: 'Acc',
+    why: 'one fights in favour of something: "za" with the accusative',
+    evidence: '"Ja borju se za pravdy" - Tatoeba (isv)',
+  },
+  'die|for': {
+    prep: 'za', case: 'Acc',
+    why: 'one dies for (because of) something: "za" with the accusative',
+    evidence: '"Mnoge osoby umrli za tu vojnu" - Tatoeba (isv)',
+  },
+  'responsible|for': {
+    prep: 'za', case: 'Acc',
+    why: 'responsibility is FOR something: "za" with the accusative',
+    evidence: '"ktory byl odgovorny za zločiny protiv člověčstvu"; "byl odgovorny za izbavjenje" - Wp/isv',
+  },
+  'prize|for': {
+    prep: 'za', case: 'Acc',
+    why: 'a prize is given for (because of) something: "za" with the accusative',
+    evidence: '"Blagorodna Nagrada za „vsestrannost i genialnost"" - Wp/isv, Čaplin',
+  },
+  'award|for': {
+    prep: 'za', case: 'Acc',
+    why: 'an award is given for (because of) something: "za" with the accusative',
+    evidence: '"Blagorodna Nagrada za „vsestrannost i genialnost"" - Wp/isv, Čaplin',
   },
   'depend|on': {
     prep: 'od',

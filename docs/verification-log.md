@@ -2200,3 +2200,28 @@ The reading of this book  Reading ... vzel          ->  Čitanje ... vzelo
 Only when the noun finds nothing; no existing fixture changed. Noticed, not
 fixed: "Thank you for your understanding" gives "Blagodarju vas dlja ..." where
 thanks take "za"; "took a week" gives "vzelo" (take) where duration is "trajati".
+
+## "for" as za, and "take" + a span of time
+
+Both were classes, not sentences.
+
+**"for".** The dictionary has two: `dlja` (+gen) "for" and `za` (+acc) "for, because
+of, due to, in exchange for, in favour of". Ranking always chose `dlja`, so every
+exchange / reason / support "for" was wrong: "platil dlja biletov", "glasovali dlja
+njego", "odgovorny dlja projekta", "Blagodarju vas dlja". The deciding word picks it,
+so these went into the existing governed-preposition table, each attested:
+thank/thanks ("hvala za", Wp/isv), pay ("platil za", Wp/isv), vote ("glasovali za",
+Wp/isv), responsible ("odgovorny za", Wp/isv), prize/award ("Nagrada za", Wp/isv),
+fight and die ("borju se za", "umrli za", Tatoeba). The table now also takes an
+adjective or noun as the deciding word. `dlja` stays the default for whom/what
+something is for ("dar jest dlja vas", "dobro dlja vašego zdravja") - also how van
+Steenbergen and Tatoeba use it ("idealny jezyk dlja prěvoda").
+
+**"take" + time.** "took three days", "it takes an hour" mean "last" (`trvati`), not
+`vzeti`: "Putovanje vzelo tri dnje" -> "Putovanje trvalo tri dnje". It also exposed
+an aspect gap: a span of time parsed as the OBJECT counted as a bounded object
+(perfective "potrvalo"). New `aspect.duration`: a time-span object says how long it
+went on - imperfective, like "ran for an hour".
+
+No existing fixture changed. Noticed: "won a prize" gives `izigral` (win a game)
+where `dobyl` fits; "It takes an hour" keeps "Ono" for the dummy "it".
