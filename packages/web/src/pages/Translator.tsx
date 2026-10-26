@@ -59,7 +59,7 @@ async function fetchTranslation(
 function fromAddress(): { text: string; lang: Lang } {
   const q = new URLSearchParams(typeof window === 'undefined' ? '' : window.location.search);
   return {
-    text: q.get('text') ?? 'The woman read a new book.',
+    text: q.get('text') ?? '',
     lang: q.get('lang') === 'ru' ? 'ru' : 'en',
   };
 }

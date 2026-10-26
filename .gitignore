@@ -18,3 +18,7 @@ services/parser/.venv/
 
 # tester reports collected by the server
 /data/
+
+# Generated from the dictionary at build time (npm run lexicon:fetch), like the
+# dictionary itself - not redistributed. See docs/dictionary-provenance.md.
+packages/rules/data/preposition-government.json

@@ -19,7 +19,8 @@ const currentPath = (): string => (typeof window === 'undefined' ? serverPath : 
 export function navigate(to: string): void {
   window.history.pushState({}, '', to);
   window.dispatchEvent(new Event(CHANGE));
-  window.scrollTo?.(0, 0);
+  // A new page starts at its top at once; only in-page links glide (styles.css).
+  window.scrollTo?.({ top: 0, left: 0, behavior: 'instant' });
 }
 
 export function usePath(): string {

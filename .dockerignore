@@ -9,3 +9,6 @@ packages/lexicon/data/raw
 packages/lexicon/data/built
 /data
 .mutation-backup
+
+# generated from the dictionary at build time
+packages/rules/data/preposition-government.json

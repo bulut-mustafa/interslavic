@@ -104,6 +104,13 @@ const introduction: LessonPage = {
         'authors, from the Interslavic dictionary, and from real sentences written by its users. ' +
         'Each page names its sources.',
     },
+    {
+      kind: 'p',
+      text:
+        'The translator and these pages are open source: the rules behind every decision can be ' +
+        'read and checked [on GitHub](https://github.com/bulut-mustafa/interslavic), where ' +
+        'mistakes can also be reported.',
+    },
 
     { kind: 'h2', text: 'Check yourself' },
     {

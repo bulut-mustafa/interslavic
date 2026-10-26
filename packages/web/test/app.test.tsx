@@ -99,8 +99,10 @@ const sentence = (overrides: Partial<Translation> = {}): Translation => ({
 });
 
 beforeEach(() => {
-  // The address is page state now; every test starts on the translator.
-  window.history.replaceState({}, '', '/');
+  // The address is page state now; every test starts on the translator with a
+  // sentence in the box, as a lesson's "Try it" link opens it. A plain visit
+  // starts empty (tested below).
+  window.history.replaceState({}, '', '/?text=The%20woman%20read%20a%20new%20book.');
   vi.stubGlobal(
     'fetch',
     vi.fn(async () => ({
@@ -503,6 +505,14 @@ describe('the site around the translator', () => {
       await new Promise((r) => setTimeout(r, 50));
     });
     expect(screen.getByLabelText('Text to translate')).toBeTruthy();
+  });
+
+  it('starts empty on a plain visit, and translates nothing until asked', async () => {
+    window.history.replaceState({}, '', '/');
+    render(<App />);
+    expect((screen.getByLabelText('Text to translate') as HTMLTextAreaElement).value).toBe('');
+    await new Promise((r) => setTimeout(r, 50));
+    expect(fetch).not.toHaveBeenCalled();
   });
 
   it('opens the translator on the sentence a lesson links to', () => {

@@ -236,3 +236,10 @@ traces to CC BY-NC-ND material and carries no explicit license of its own, so th
 is for personal, non-commercial use with attribution. `packages/lexicon/data/provenance.json`
 records the exact source URL, checksum and row count instead. See
 [docs/dictionary-provenance.md](docs/dictionary-provenance.md).
+
+## License
+
+The code is [MIT](LICENSE). The dictionary is not included (it is fetched at build
+time), and the texts quoted from van Steenbergen and Tatoeba keep their own licenses -
+see [DATA-LICENSES.md](DATA-LICENSES.md). Reports of wrong translations are welcome as
+GitHub issues, or with "Report a problem" on the site.
