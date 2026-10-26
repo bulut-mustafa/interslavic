@@ -17,7 +17,6 @@ import json
 import pathlib
 import subprocess
 import sys
-import urllib.request
 
 PROJECT = 'interslavic-translator-08rmc'
 SITE = 'interslavic'
@@ -27,11 +26,14 @@ ALLOWED = {'.html', '.js', '.css', '.svg', '.png', '.ico', '.xml', '.txt', '.wof
 
 CONFIG = {
     'trailingSlashBehavior': 'REMOVE',
-    'redirects': [{'path': '/learn', 'location': '/learn/introduction', 'statusCode': 301}],
+    'redirects': [{'glob': '/learn', 'location': '/learn/introduction', 'statusCode': 301}],
     'rewrites': [{'glob': '/api/**', 'run': {'serviceId': 'interslavic', 'region': 'europe-west1'}}],
+    # Pages are asked for as /learn/cases, not .html, so "no-cache" goes on
+    # everything and the hashed /assets/ files override it: a page cached
+    # after a release would point at scripts that no longer exist.
     'headers': [
+        {'glob': '**', 'headers': {'Cache-Control': 'no-cache'}},
         {'glob': '/assets/**', 'headers': {'Cache-Control': 'public, max-age=31536000, immutable'}},
-        {'glob': '**/*.html', 'headers': {'Cache-Control': 'no-cache'}},
     ],
 }
 
@@ -39,15 +41,19 @@ token = subprocess.run(['gcloud', 'auth', 'print-access-token'], check=True, cap
 
 
 def call(method, url, body=None, raw=None):
-    data = raw if raw is not None else (json.dumps(body).encode() if body is not None else None)
-    req = urllib.request.Request(url, data=data, method=method, headers={
-        'Authorization': f'Bearer {token}',
-        'x-goog-user-project': PROJECT,
-        'Content-Type': 'application/octet-stream' if raw is not None else 'application/json',
-    })
-    with urllib.request.urlopen(req) as res:
-        text = res.read().decode()
-        return json.loads(text) if text else {}
+    """One API request through curl, which uses the system's certificates."""
+    data = raw if raw is not None else (json.dumps(body).encode() if body is not None else b'')
+    kind = 'application/octet-stream' if raw is not None else 'application/json'
+    out = subprocess.run(
+        ['curl', '-sS', '--fail-with-body', '-X', method, url,
+         '-H', f'Authorization: Bearer {token}', '-H', f'x-goog-user-project: {PROJECT}',
+         '-H', f'Content-Type: {kind}', '--data-binary', '@-'],
+        input=data, capture_output=True, check=False,
+    )
+    if out.returncode != 0:
+        sys.exit(f'{method} {url} failed: {out.stdout.decode()[:500]} {out.stderr.decode()[:300]}')
+    text = out.stdout.decode()
+    return json.loads(text) if text.strip() else {}
 
 
 files = sorted(p for p in DIST.rglob('*') if p.is_file())

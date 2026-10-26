@@ -24,18 +24,30 @@ servers were out of capacity in the account's home region.
 
 ## The web.app address
 
-`interslavic.web.app` is a Firebase Hosting site in the same project. It holds no
-files: one rewrite sends every request to the Cloud Run service, so re-publishing
-the service is all a change needs. Firebase gives up on a request after 60
-seconds; a cold start measured 39 seconds through it.
+`interslavic.web.app` is a Firebase Hosting site in the same project. It serves
+the **pages** itself from Firebase's CDN - every page prerendered to HTML, plus
+`sitemap.xml`, `robots.txt` and a real `404.html` - so a lesson opens at once
+even while Cloud Run is asleep. Only `/api/**` is passed on to the Cloud Run
+service (the translator and tester reports). Firebase gives up on a request
+after 60 seconds; a cold start of the API measured about 40 seconds.
 
-The rewrite was released with the Firebase Hosting REST API (`sites/interslavic`,
-config `{"rewrites":[{"glob":"**","run":{"serviceId":"interslavic","region":"europe-west1"}}]}`).
-Only a change to that routing needs a new release.
+The routing lives in `deploy/hosting.py` (`CONFIG`): the `/api/**` rewrite, a
+301 from `/learn` to `/learn/introduction`, no trailing slashes, and
+`no-cache` on pages with long caching only for the hashed `/assets/` files.
 
 ## Re-publish after a change
 
-From the project folder:
+**The pages** (lessons, phrasebook, anything in `packages/web`):
+
+```
+sh deploy/hosting.sh
+```
+
+Builds and prerenders the site and uploads it with the Firebase Hosting REST
+API, using the `gcloud` login. It refuses to upload anything that is not a web
+file, so the dictionary can never be published. Takes under a minute.
+
+**The translator API** (anything in `packages/engine`, `server`, `lexicon`, ...):
 
 ```
 gcloud run deploy interslavic --source . --region europe-west1
