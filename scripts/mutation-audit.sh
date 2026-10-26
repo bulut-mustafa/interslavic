@@ -495,7 +495,7 @@ mutate "word spaces removed"                app    "s/{j > 0 ? ' ' : null}//"
 mutate "sentence punctuation dropped"       app    "s/{terminalPunctuation(s.text)}//"
 mutate "lesson word misspelled"             intro  "s/isv: 'Dobry denj!'/isv: 'Dobry dennj!'/"
 mutate "try it not held to the translator"  intro  "s/isv: 'Vy znajete tu knigu.'/isv: 'Vy znajete toj knigu.'/"
-mutate "lesson Cyrillic not generated"      lesson "s/<p className=\"example-cyr\">{toCyrillic(block.isv)}<\/p>/<p className=\"example-cyr\">{block.isv}<\/p>/"
+mutate "lesson Cyrillic not generated"      lesson "s/<p className=\"example-cyr\" lang=\"isv-Cyrl\">{toCyrillic(block.isv)}<\/p>/<p className=\"example-cyr\" lang=\"isv-Cyrl\">{block.isv}<\/p>/"
 mutate "every answer marked right"          lesson "s/{picked === block.answer ? 'Right. '/{true ? 'Right. '/"
 mutate "lesson progress forgotten"          lprog  "s/    window.localStorage.setItem(KEY, JSON.stringify(p));//"
 mutate "unknown name not declined"         lexeme "s/^      properNounEntry ??$//"
@@ -624,6 +624,7 @@ mutate "past passive keeps imperfective"      aspect "s/    if (!hasObject \&\& 
 mutate "present passive made perfective"      aspect "s/  return be?.feats\['Tense'\] === 'Past' \&\& subject/  return be !== undefined \&\& subject/"
 mutate "at a building is na"                  prep "s/    lemma === 'at' \&\&\$/    lemma === 'never' \&\&/"
 mutate "compound noun inherits v"             prep "s/    !sentence.tokens.some((t) => t.head === complement.id \&\& t.deprel === 'compound')/    true/"
+mutate "-ing noun left untranslated"          lexeme "s/      verbalNounEntry ??\$//"
 
 echo
 echo "==================================================="

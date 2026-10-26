@@ -58,3 +58,22 @@ export function presentActiveParticiple(lemma: string, xpos: string): string | n
 
   return tokens.find((t) => t.xpos?.includes('prap'))?.form ?? null;
 }
+
+/**
+ * The verbal noun: "A verb can very simply be converted into a noun (gerund,
+ * verbal noun) by substituting the ending -ny of the perfect past participle by
+ * -nje (or -ty by tje). Examples: dělanje „(the act of) doing", pitje
+ * „drinking"" (verbs page). The library derives it, tagged as a noun; it is
+ * neuter, like every -nje noun.
+ */
+export function verbalNoun(lemma: string, xpos: string): string | null {
+  let tokens;
+  try {
+    tokens = derive({ form: lemma, xpos } as never) as { form: string; xpos?: string }[];
+  } catch {
+    return null;
+  }
+  if (!Array.isArray(tokens)) return null;
+
+  return tokens.find((t) => t.xpos?.startsWith('n.'))?.form ?? null;
+}

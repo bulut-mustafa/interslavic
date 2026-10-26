@@ -2179,3 +2179,24 @@ He is at work / at the station / at the concert / at the market   na (unchanged)
 
 No other fixture changed. The Prepositions lesson's "Ona jest v školě" now
 has a Try-it link: the translator agrees with the lesson.
+
+## "-ing" nouns the dictionary lacks
+
+The site's own tagline came out "...pokazyvaje svoje **reasoning** dlja vsakogo slova":
+"reasoning" is not a dictionary noun, and an unknown noun was passed through in
+English. The class: any English "-ing" noun the dictionary does not list (of 7 tried,
+reasoning, cooking and reading failed; swimming, thinking and understanding are listed).
+
+The grammar states the rule: "The act itself is represented by the verbal noun
+(gerund), ending on -nje: dělati > dělanje" (word_formation.html; verbs.html on
+-nje). Now such a noun is the verbal noun of its verb, imperfective preferred:
+
+```
+shows its reasoning     reasoning   ->  razumovanje   (råzumovati "reason")
+Her cooking is excellent  Jej cooking jest odličny  ->  Jej kuhanje jest odlično
+The reading of this book  Reading ... vzel          ->  Čitanje ... vzelo
+```
+
+Only when the noun finds nothing; no existing fixture changed. Noticed, not
+fixed: "Thank you for your understanding" gives "Blagodarju vas dlja ..." where
+thanks take "za"; "took a week" gives "vzelo" (take) where duration is "trajati".

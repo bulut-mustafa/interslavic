@@ -283,6 +283,20 @@ describe('"at" is v inside a building, na elsewhere', () => {
   });
 });
 
+describe('an "-ing" noun the dictionary lacks is its verb\'s verbal noun', () => {
+  it('takes the -nje noun of the imperfective verb (word_formation.html: dělati > dělanje)', () => {
+    expect(out('en/interslavic-translator-that-shows-its-reasoning-for-every-word.conllu'))
+      .toBe('Medžuslovjansky prěvoditelj ktory pokazyvaje svoje razumovanje dlja vsakogo slova');
+    expect(out('en/her-cooking-is-excellent.conllu')).toBe('Jej kuhanje jest odlično.');
+    expect(out('en/the-reading-of-this-book-took-a-week.conllu')).toMatch(/^Čitanje /);
+  });
+
+  it('but a noun the dictionary has keeps its own entry', () => {
+    expect(out('en/swimming-is-good-for-your-health.conllu')).toMatch(/^Plavanje /);
+    expect(out('en/his-thinking-is-clear.conllu')).toBe('Jego mysljenje jest jasno.');
+  });
+});
+
 describe('one auxiliary for two verbs', () => {
   it('shares "will" and "would" with a bare verb joined by "and" (13525474)', () => {
     // Tatoeba 13525474: "Vy budete idti domu i ostati domu" - both infinitives.
