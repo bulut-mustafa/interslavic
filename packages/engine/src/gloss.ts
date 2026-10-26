@@ -1,12 +1,12 @@
 import type { Decision, ParsedSentence, UdToken } from '../../types/index.ts';
-import { normalizeGloss, normalizeRussian, type Entry, type Gloss } from '../../lexicon/src/reader.ts';
+import { glossesIn, isSlavicSource, normalizeGloss, normalizeSource, type Entry, type Gloss } from '../../lexicon/src/reader.ts';
 import type { FullFormIndex } from '../../lexicon/src/full-forms.ts';
 import type { PrepPlan } from './resolvers/preposition.ts';
 import type { GlossedFeature } from './result.ts';
 import { toStandard } from '../../morph/src/orthography.ts';
 
 const normalizeFor = (s: string, lang: string): string =>
-  lang === 'ru' ? normalizeRussian(s) : normalizeGloss(s);
+  isSlavicSource(lang) ? normalizeSource(s, lang) : normalizeGloss(s);
 
 /**
  * Turning a decision into something a reader can check: which gloss matched,
@@ -24,9 +24,8 @@ function matchedGloss(entry: Entry, sourceLemma: string, lang: string): string {
     g ? (g.sense ? `${g.text} (${g.sense})` : g.text) : undefined;
   // Both columns are parsed the same way, so they are reported the same way -
   // a Russian sense label used to be lost inside the gloss string.
-  const glosses = lang === 'ru' ? entry.ruGlosses : entry.glosses;
-  const normalize = lang === 'ru' ? normalizeRussian : normalizeGloss;
-  const hit = glosses.find((g) => normalize(g.text) === key);
+  const glosses = glossesIn(entry, lang);
+  const hit = glosses.find((g) => normalizeFor(g.text, lang) === key);
   return show(hit) ?? show(glosses[0]) ?? '?';
 }
 
