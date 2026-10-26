@@ -1,4 +1,4 @@
-import type { ParsedSentence, UdToken } from '../../types/index.ts';
+import { isSourceLang, type ParsedSentence, type SourceLang, type UdToken } from '../../types/index.ts';
 
 /**
  * CoNLL-U text is the FIXTURE format, not the wire format. Freezing parser
@@ -9,7 +9,7 @@ import type { ParsedSentence, UdToken } from '../../types/index.ts';
 export function parseConllu(text: string): ParsedSentence {
   const tokens: UdToken[] = [];
   let sentText = '';
-  let lang: 'en' | 'ru' = 'en';
+  let lang: SourceLang = 'en';
 
   for (const line of text.split('\n')) {
     const l = line.trim();
@@ -17,7 +17,7 @@ export function parseConllu(text: string): ParsedSentence {
     if (l.startsWith('#')) {
       const m = l.match(/^#\s*(\w+)\s*=\s*(.*)$/);
       if (m?.[1] === 'text') sentText = m[2] ?? '';
-      if (m?.[1] === 'lang' && (m[2] === 'en' || m[2] === 'ru')) lang = m[2];
+      if (m?.[1] === 'lang' && isSourceLang(m[2])) lang = m[2];
       continue;
     }
     const f = l.split('\t');

@@ -6,6 +6,7 @@ import { parseConllu } from '../../engine/src/conllu.ts';
 import { translate, type Translation } from '../../engine/src/pipeline.ts';
 import { DEFAULT_PARSER_URL, parseText, parserHealthy } from '../../engine/src/source/parse-client.ts';
 import type { Orthography } from '../../morph/src/orthography.ts';
+import type { SourceLang } from '../../types/index.ts';
 
 const ROOT = path.resolve(import.meta.dirname, '../../..');
 const TSV = path.join(ROOT, 'packages/lexicon/data/raw/words.tsv');
@@ -119,7 +120,7 @@ async function main(): Promise<void> {
     return;
   }
 
-  const lang = (flag(args, 'lang') ?? 'en') as 'en' | 'ru';
+  const lang = (flag(args, 'lang') ?? 'en') as SourceLang;
   if (lang !== 'en' && lang !== 'ru') {
     console.error(`unsupported --lang "${lang}" (expected en or ru)`);
     process.exit(2);

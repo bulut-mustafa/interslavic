@@ -1,4 +1,5 @@
 import type { ParsedSentence } from '../../../types/index.ts';
+import { russianNameToLatin, ukrainianNameToLatin } from '../../../morph/src/orthography.ts';
 
 /**
  * A source language's profile. The seam exists so that adding a language is a
@@ -71,6 +72,28 @@ export interface SourceAdapter {
    * dělaje se" - http://steen.free.fr/interslavic/syntax.html
    */
   reflexiveVerbSuffixes: readonly string[];
+  /**
+   * The source's "be". Its future forms are the copula's future ("Я буду с
+   * тобой" -> "Ja budu s toboju"), which the parser sometimes tags present.
+   */
+  copulaLemma: string | null;
+  /**
+   * The pronoun that presents a noun - Russian "Это кошка", Ukrainian "Це
+   * кішка" - which Interslavic writes `to`: "To jest krasiva poema".
+   */
+  presentationalPronoun: string | null;
+  /** The source's "and", which makes coordinated subjects plural together. */
+  andWords: readonly string[];
+  /**
+   * Endings that turn a SHORT adjective lemma into the long form the
+   * dictionary lists: Russian "прав" -> "правый". Empty where there is none.
+   */
+  shortAdjectiveEndings: readonly string[];
+  /**
+   * Writes a name from the source's Cyrillic in Interslavic Latin letters, or
+   * null where it cannot. `null` for a source written in Latin.
+   */
+  nameToLatin: ((word: string) => string | null) | null;
 }
 
 export const EN: SourceAdapter = {
@@ -84,6 +107,11 @@ export const EN: SourceAdapter = {
   futureAuxiliaryLemma: null,
   analyticSuperlative: null,
   reflexiveVerbSuffixes: [],
+  copulaLemma: null,
+  presentationalPronoun: null,
+  andWords: ['and'],
+  shortAdjectiveEndings: [],
+  nameToLatin: null,
 };
 
 export const RU: SourceAdapter = {
@@ -98,9 +126,39 @@ export const RU: SourceAdapter = {
   futureAuxiliaryLemma: 'быть',
   analyticSuperlative: 'самый',
   reflexiveVerbSuffixes: ['ся', 'сь'],
+  copulaLemma: 'быть',
+  presentationalPronoun: 'это',
+  andWords: ['и'],
+  shortAdjectiveEndings: ['ый', 'ий', 'ой'],
+  nameToLatin: russianNameToLatin,
 };
 
-const BY_LANG: Record<string, SourceAdapter> = { en: EN, ru: RU };
+/**
+ * Ukrainian works like Russian at every point the adapter covers: it marks
+ * case and aspect, drops the present copula ("Він лікар"), fuses -ся/-сь,
+ * builds the future with "буду" + infinitive and the superlative with
+ * "найбільш". Its own words and letters are what differ.
+ */
+export const UK: SourceAdapter = {
+  lang: 'uk',
+  copyCase: true,
+  copyAspect: true,
+  dropsArticles: false,
+  marksSecondPersonNumber: true,
+  complementizers: ['що'],
+  omitsPresentCopula: true,
+  futureAuxiliaryLemma: 'бути',
+  analyticSuperlative: 'найбільш',
+  reflexiveVerbSuffixes: ['ся', 'сь'],
+  copulaLemma: 'бути',
+  presentationalPronoun: 'це',
+  andWords: ['і', 'й', 'та'],
+  // Ukrainian short forms ("повен", "зелен") are poetic; the long one ends -ий.
+  shortAdjectiveEndings: ['ий'],
+  nameToLatin: ukrainianNameToLatin,
+};
+
+const BY_LANG: Record<string, SourceAdapter> = { en: EN, ru: RU, uk: UK };
 
 export function adapterFor(sentence: ParsedSentence): SourceAdapter {
   const a = BY_LANG[sentence.lang];

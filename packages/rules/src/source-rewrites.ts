@@ -184,12 +184,19 @@ export function rewriteExceptives(sentence: ParsedSentence): SourceRewrite {
  * out present: "Ja jesm s toboju" for "I will be with you". A fact of Russian
  * morphology, corrected before anything reads the tense.
  */
+const FUTURE_COPULA: Record<string, { lemma: string; forms: RegExp }> = {
+  ru: { lemma: 'быть', forms: /^буд/i },
+  // Ukrainian conjugates the same stem: буду, будеш, буде, будемо, будете, будуть.
+  uk: { lemma: 'бути', forms: /^буд/i },
+};
+
 export function correctRussianFuture(sentence: ParsedSentence): ParsedSentence {
-  if (sentence.lang !== 'ru') return sentence;
+  const copula = FUTURE_COPULA[sentence.lang];
+  if (!copula) return sentence;
   return {
     ...sentence,
     tokens: sentence.tokens.map((t) =>
-      t.lemma.toLowerCase() === 'быть' && /^буд/i.test(t.form) && t.feats['Tense'] !== 'Fut'
+      t.lemma.toLowerCase() === copula.lemma && copula.forms.test(t.form) && t.feats['Tense'] !== 'Fut'
         ? { ...t, feats: { ...t.feats, Tense: 'Fut' } }
         : t,
     ),

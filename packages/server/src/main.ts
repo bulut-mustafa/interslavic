@@ -10,6 +10,16 @@ import {
   parserHealthy,
 } from '../../engine/src/source/parse-client.ts';
 import type { Orthography } from '../../morph/src/orthography.ts';
+import { ENABLED_LANGS, isSourceLang, type SourceLang } from '../../types/index.ts';
+
+/**
+ * The languages this server translates from: the public list, plus any named
+ * in EXTRA_LANGS (e.g. "uk") to test a language locally before it is enabled.
+ */
+const OFFERED: readonly SourceLang[] = [
+  ...ENABLED_LANGS,
+  ...(process.env['EXTRA_LANGS'] ?? '').split(',').map((l) => l.trim()).filter(isSourceLang),
+];
 
 /**
  * HTTP front end for the engine.
@@ -131,7 +141,12 @@ const server = http.createServer((req, res) => {
       try {
         const body = JSON.parse(await readBody(req)) as TranslateBody;
         const text = typeof body.text === 'string' ? body.text.trim() : '';
-        const lang = body.lang === 'ru' ? 'ru' : 'en';
+        const lang: SourceLang | null =
+          body.lang === undefined ? 'en' : isSourceLang(body.lang) && OFFERED.includes(body.lang) ? body.lang : null;
+        if (!lang) {
+          json(res, 400, { error: `translation from "${String(body.lang)}" is not available yet` });
+          return;
+        }
         const orthography: Orthography = ORTHOGRAPHIES.has(body.orthography as Orthography)
           ? (body.orthography as Orthography)
           : 'standard';

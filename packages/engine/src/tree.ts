@@ -74,14 +74,15 @@ function pronounLemmaFor(
  * sporili se" (van Steenbergen's North Wind and the Sun), where reading the
  * first conjunct alone gave the singular "osparjal".
  */
-const AND = new Set(['and', 'и']);
-const isCoordinatedByAnd = (subject: UdToken, sentence: ParsedSentence): boolean =>
-  sentence.tokens.some(
+const isCoordinatedByAnd = (subject: UdToken, sentence: ParsedSentence): boolean => {
+  const and = adapterFor(sentence).andWords;
+  return sentence.tokens.some(
     (c) =>
       c.head === subject.id &&
       c.deprel === 'conj' &&
-      sentence.tokens.some((cc) => cc.head === c.id && cc.deprel === 'cc' && AND.has(cc.lemma.toLowerCase())),
+      sentence.tokens.some((cc) => cc.head === c.id && cc.deprel === 'cc' && and.includes(cc.lemma.toLowerCase())),
   );
+};
 
 /**
  * A Russian verb states its own person and number, so a verb with no subject
@@ -91,7 +92,8 @@ const isCoordinatedByAnd = (subject: UdToken, sentence: ParsedSentence): boolean
  * neither, which is why walking up exists at all.
  */
 const ownRussianAgreement = (verb: UdToken, sentence: ParsedSentence, feature: 'Person' | 'Number') =>
-  sentence.lang === 'ru' &&
+  // Every Slavic source marks person and number on the verb, as Russian does.
+  sentence.lang !== 'en' &&
   !sentence.tokens.some((t) => t.head === verb.id && t.deprel.startsWith('nsubj'))
     ? verb.feats[feature]
     : undefined;

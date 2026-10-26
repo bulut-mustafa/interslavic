@@ -1,4 +1,4 @@
-import type { ParsedSentence, UdToken } from '../../../types/index.ts';
+import type { ParsedSentence, SourceLang, UdToken } from '../../../types/index.ts';
 
 /**
  * Client for the Python parsing service.
@@ -33,7 +33,7 @@ interface WireToken {
 }
 
 interface WireResponse {
-  sentences: { text: string; lang: 'en' | 'ru'; tokens: WireToken[] }[];
+  sentences: { text: string; lang: SourceLang; tokens: WireToken[] }[];
 }
 
 export interface ParseOptions {
@@ -44,7 +44,7 @@ export interface ParseOptions {
 
 export async function parseText(
   text: string,
-  lang: 'en' | 'ru',
+  lang: SourceLang,
   opts: ParseOptions = {},
 ): Promise<ParsedSentence[]> {
   const url = opts.url ?? DEFAULT_PARSER_URL;

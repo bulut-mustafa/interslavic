@@ -17,9 +17,26 @@ export interface UdToken {
   deprel: string;
 }
 
+/**
+ * The languages a sentence can be translated FROM. `sh` is
+ * Serbian/Croatian/Bosnian, one system in two scripts.
+ */
+export const SOURCE_LANGS = ['en', 'ru', 'uk', 'pl', 'sh'] as const;
+export type SourceLang = (typeof SOURCE_LANGS)[number];
+
+/**
+ * The source languages offered to users. A language is added here only once it
+ * reaches Russian's measured quality (docs/verification-log.md); the server
+ * refuses the rest and the interface does not list them.
+ */
+export const ENABLED_LANGS: readonly SourceLang[] = ['en', 'ru'];
+
+export const isSourceLang = (lang: unknown): lang is SourceLang =>
+  typeof lang === 'string' && (SOURCE_LANGS as readonly string[]).includes(lang);
+
 export interface ParsedSentence {
   text: string;
-  lang: 'en' | 'ru';
+  lang: SourceLang;
   tokens: UdToken[];
 }
 

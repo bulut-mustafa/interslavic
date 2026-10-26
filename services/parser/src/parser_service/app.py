@@ -20,7 +20,7 @@ from pydantic import BaseModel, Field
 
 logging.getLogger("stanza").setLevel(logging.WARNING)
 
-Lang = Literal["en", "ru"]
+Lang = Literal["en", "ru", "uk", "pl", "sh"]
 
 PROCESSORS = "tokenize,pos,lemma,depparse"
 

@@ -330,10 +330,10 @@ export function translate(
      * прав" left "прав" untranslated. Tried as the long form only on a miss,
      * and only where that form exists.
      */
-    if (sentence.lang === 'ru' && token.upos === 'ADJ' && token.feats['Variant'] === 'Short' &&
-        lex.lookup(token.lemma, 'ru').length === 0) {
-      for (const ending of ['ый', 'ий', 'ой']) {
-        if (lex.lookup(token.lemma + ending, 'ru').some((e) => e.pos.upos === 'ADJ')) return token.lemma + ending;
+    if (adapter.shortAdjectiveEndings.length > 0 && token.upos === 'ADJ' && token.feats['Variant'] === 'Short' &&
+        lex.lookup(token.lemma, sentence.lang).length === 0) {
+      for (const ending of adapter.shortAdjectiveEndings) {
+        if (lex.lookup(token.lemma + ending, sentence.lang).some((e) => e.pos.upos === 'ADJ')) return token.lemma + ending;
       }
     }
     if (token.upos !== 'VERB') return token.lemma;
@@ -411,7 +411,7 @@ export function translate(
   const candidatesFor = (token: UdToken): Entry[] => {
     const word = lookupLemmaOf(token);
     const all = lex.lookup(word, sentence.lang);
-    return sentence.lang === 'ru' && token.upos === 'PROPN' && capitalised(word)
+    return sentence.lang !== 'en' && token.upos === 'PROPN' && capitalised(word)
       ? all.filter((e) => glossedAsProperNoun(e, word, sentence.lang))
       : all;
   };

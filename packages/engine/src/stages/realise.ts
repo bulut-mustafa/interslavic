@@ -1,8 +1,8 @@
+import { adapterFor } from '../source/adapters.ts';
 import { decide, type Decision } from '../../../types/index.ts';
 import { realize } from '../../../morph/src/realize.ts';
 import { compared, type Degree } from '../../../morph/src/comparison.ts';
 import { pastPassiveParticiple, presentActiveParticiple } from '../../../morph/src/participles.ts';
-import { russianNameToLatin } from '../../../morph/src/orthography.ts';
 import { conditionalAuxiliary, futureAuxiliary } from '../../../rules/src/auxiliaries.ts';
 import { isOneAnaphor, antecedentOf } from '../../../rules/src/anaphora.ts';
 import { isExpletiveSubject } from '../../../rules/src/expletives.ts';
@@ -391,8 +391,8 @@ export function realiseStage(input: RealiseInput): RealiseOutput {
        * the pages' own letter tables (russianNameToLatin) - "Зульфия" ->
        * "Zuljfija" - and kept as it was where they do not cover a letter.
        */
-      const latinName =
-        sentence.lang === 'ru' && token.upos === 'PROPN' ? russianNameToLatin(token.form) : null;
+      const toLatin = adapterFor(sentence).nameToLatin;
+      const latinName = toLatin && token.upos === 'PROPN' ? toLatin(token.form) : null;
       if (latinName) notes.push(`a name, written in Latin by the Interslavic letter tables (${token.form})`);
       const surface = latinName ?? token.form;
       surfaces.push(surface);

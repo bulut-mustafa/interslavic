@@ -36,6 +36,19 @@ const RU_NUMERALS: Record<string, number> = {
   сто: 100, тысяча: 1000, миллион: 1000000,
 };
 
+const UK_NUMERALS: Record<string, number> = {
+  нуль: 0, один: 1, одна: 1, одне: 1, два: 2, дві: 2, три: 3, чотири: 4,
+  "п'ять": 5, шість: 6, сім: 7, вісім: 8, "дев'ять": 9, десять: 10,
+  одинадцять: 11, дванадцять: 12, тринадцять: 13, чотирнадцять: 14,
+  "п'ятнадцять": 15, шістнадцять: 16, сімнадцять: 17, вісімнадцять: 18,
+  "дев'ятнадцять": 19, двадцять: 20, тридцять: 30, сорок: 40, "п'ятдесят": 50,
+  шістдесят: 60, сімдесят: 70, вісімдесят: 80, "дев'яносто": 90,
+  сто: 100, тисяча: 1000, мільйон: 1000000,
+};
+
+/** The cardinal numbers of each source language, by lemma. */
+const NUMERALS: Record<string, Record<string, number>> = { en: EN_NUMERALS, ru: RU_NUMERALS, uk: UK_NUMERALS };
+
 /**
  * The indefinite cardinal numbers, named on the numerals page: "a category of
  * so-called indefinite cardinal numbers, consisting of words like mnogo „much,
@@ -61,8 +74,9 @@ export function numeralValue(lemma: string, form: string, lang: string): number 
   const digits = form.replace(/[\s.,]/g, '');
   if (/^\d+$/.test(digits)) return Number(digits);
 
-  const key = lemma.trim().toLowerCase();
-  const table = lang === 'ru' ? RU_NUMERALS : EN_NUMERALS;
+  // Ukrainian writes its apostrophe three ways: п'ять, пʼять, п’ять.
+  const key = lemma.trim().toLowerCase().replace(/[ʼ’‘`]/g, "'");
+  const table = NUMERALS[lang] ?? EN_NUMERALS;
   return table[key] ?? null;
 }
 

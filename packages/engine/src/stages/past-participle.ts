@@ -33,13 +33,13 @@ export function pastParticipleStage(ctx: StageContext): void {
     const subject =
       ownSubject ?? (walkedUp ? plan.find((n) => n.token.id === walkedUp.id) : undefined);
     // Gender is lexical for a noun subject and morphological for a pronoun.
-    // With no subject at all, a Russian past verb still states its gender:
+    // With no subject at all, a Slavic past verb still states its gender:
     // "Сегодня было очень холодно" is neuter, the impersonal "bylo zimno",
     // and the masculine default gave "byl".
     const gender =
       subject?.feats.get('Gender')?.value ??
       subject?.token.feats['Gender'] ??
-      (!subject && sentence.lang === 'ru' ? node.token.feats['Gender'] : undefined) ??
+      (!subject && sentence.lang !== 'en' ? node.token.feats['Gender'] : undefined) ??
       'Masc';
     const number = node.feats.get('Number')?.value ?? subject?.token.feats['Number'] ?? 'Sing';
 

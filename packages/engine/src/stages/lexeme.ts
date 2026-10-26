@@ -206,13 +206,14 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
     // "will go" -> "bųdų idti": this token is the auxiliary, rewritten.
     const futureHead = [...futureAuxToken.entries()].find(([, auxId]) => auxId === token.id);
     /**
-     * A Russian future COPULA - "Я буду с тобой" - is byti's future itself,
-     * `budu`, which the morphology cannot build (it has no future of byti), so
-     * it takes the same path as the future auxiliary.
+     * A Slavic future COPULA - Russian "Я буду с тобой", Ukrainian "Я буду з
+     * тобою" - is byti's future itself, `budu`, which the morphology cannot
+     * build (it has no future of byti), so it takes the same path as the
+     * future auxiliary.
      */
     const russianFutureCopula =
-      sentence.lang === 'ru' && token.deprel === 'cop' && token.lemma.toLowerCase() === 'быть' &&
-      token.feats['Tense'] === 'Fut';
+      adapter.copulaLemma !== null && token.deprel === 'cop' &&
+      token.lemma.toLowerCase() === adapter.copulaLemma && token.feats['Tense'] === 'Fut';
     if (futureHead || russianFutureCopula) {
       // Walk to the subject rather than looking only under the infinitive: with
       // "going to" the subject hangs off the participle, and for "you" the
@@ -342,8 +343,8 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
       (predicateHead?.upos === 'NOUN' ||
         predicateHead?.upos === 'PROPN' ||
         (predicateHead?.upos === 'PRON' && (predicateHead.feats['PronType'] ?? '').split(',').includes('Int'))) &&
-      (sentence.lang === 'ru'
-        ? token.lemma.toLowerCase() === 'это'
+      (adapter.presentationalPronoun !== null
+        ? token.lemma.toLowerCase() === adapter.presentationalPronoun
         : ['it', 'this', 'that'].includes(token.lemma.toLowerCase()) &&
           sentence.tokens.some((t) => t.head === predicateHead.id && t.deprel === 'cop'));
     const presentationalEntry = presentational ? lex.lookupLemma('to', 'PRON')[0] : undefined;

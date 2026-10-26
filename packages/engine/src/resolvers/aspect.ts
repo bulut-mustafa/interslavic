@@ -3,6 +3,7 @@ import { isMotionVerb } from '../../../rules/src/motion.ts';
 import { candidatesForEnglish } from '../../../rules/src/prepositions.ts';
 import type { Lexicon } from '../../../lexicon/src/reader.ts';
 import { isTimeUnit } from '../../../rules/src/verb-prepositions.ts';
+import { adapterFor } from '../source/adapters.ts';
 
 /**
  * Aspect selection is the hardest problem in the project: Interslavic requires
@@ -40,14 +41,14 @@ function effectiveTense(token: UdToken, sentence: ParsedSentence): string | unde
   return aux?.feats['Tense'];
 }
 
-/** Russian input already marks aspect - just copy it. */
+/** A Slavic source already marks aspect - just copy it. */
 const copyFromSource: AspectStrategy = {
   id: 'aspect.copy',
   decide({ token, sentence }) {
-    if (sentence.lang !== 'ru') return null;
+    if (!adapterFor(sentence).copyAspect) return null;
     const a = token.feats['Aspect'];
     if (a === 'Imp' || a === 'Perf') {
-      return decide<Aspect>(a, 'aspect.copy', 'certain', 'copied from the Russian source, which marks aspect explicitly');
+      return decide<Aspect>(a, 'aspect.copy', 'certain', `copied from the source, which marks aspect explicitly`);
     }
     return null;
   },

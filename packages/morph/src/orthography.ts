@@ -184,3 +184,37 @@ export function render(text: string, orth: Orthography): string {
     case 'cyrillic': return toCyrillic(text);
   }
 }
+
+/**
+ * A Ukrainian name in Interslavic Latin, as `russianNameToLatin` does for
+ * Russian. Ukrainian spells differently, so the letters differ: и is y and і
+ * is i, г is h and ґ is g, є is je, ї is ji, е is always e (the iotated sound
+ * is written є), and the apostrophe marks a j before я ю є ї ("Мар'яна" ->
+ * Marjana). ль нь are lj nj; any other soft sign is dropped, as Interslavic
+ * has no letter for it. Anything else unknown keeps the name as written.
+ */
+const UK_LETTERS: Record<string, string> = Object.fromEntries([
+  ...LAT_TO_CYR.filter(([lat]) => lat.length === 1 && !'jěyeghi'.includes(lat)).map(([lat, cyr]) => [cyr, lat]),
+  ['а', 'a'], ['е', 'e'], ['и', 'y'], ['і', 'i'], ['ї', 'ji'], ['є', 'je'], ['г', 'h'], ['ґ', 'g'],
+  ['й', 'j'], ['я', 'ja'], ['ю', 'ju'], ['щ', 'šč'], ['х', 'h'],
+]);
+const UK_APOSTROPHES = new Set(["'", '’', 'ʼ']);
+
+export function ukrainianNameToLatin(word: string): string | null {
+  const lower = word.toLowerCase();
+  let out = '';
+  for (let i = 0; i < lower.length; i++) {
+    const c = lower[i]!;
+    const next = lower[i + 1];
+    if ((c === 'л' || c === 'н') && next === 'ь') { out += c === 'л' ? 'lj' : 'nj'; i++; continue; }
+    if (c === 'ь') continue;
+    // The apostrophe only separates; the following я/ю/є/ї already carry the j.
+    if (UK_APOSTROPHES.has(c)) continue;
+    const latin = UK_LETTERS[c];
+    if (latin === undefined) return null;
+    out += latin;
+  }
+  return word[0] === word[0]!.toUpperCase() && word[0] !== word[0]!.toLowerCase()
+    ? out.charAt(0).toUpperCase() + out.slice(1)
+    : out;
+}
