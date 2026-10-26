@@ -1,5 +1,5 @@
 import { decide, type Case, type Decision, type ParsedSentence, type UdToken } from '../../../types/index.ts';
-import { CASE_MARKER_PREPOSITIONS, candidatesForEnglish } from '../../../rules/src/prepositions.ts';
+import { CASE_MARKER_PREPOSITIONS, candidatesForEnglish, isInsidePlace } from '../../../rules/src/prepositions.ts';
 import { isAroundAPlace, isMotionVerb } from '../../../rules/src/motion.ts';
 import { isTimeUnit, verbGovernedPhrase } from '../../../rules/src/verb-prepositions.ts';
 
@@ -185,6 +185,29 @@ export function planPreposition(adp: UdToken, sentence: ParsedSentence): PrepPla
       case: decide<Case>('Loc', 'case.prep.around', 'high',
         'moving around in a place covers it: "po" with the locative, "throughout, round, all over"'),
       alternatives: [],
+    };
+  }
+
+  /**
+   * "at" was always `na`: it is the only candidate glossed "at" with the
+   * locative, and frequency cannot tell "na stanciji" from "na školě". The
+   * page's "na - on, at" stays the default; a building or institution the
+   * Slavic languages all mark with "in" takes `v` (rules/data/at-inside.json,
+   * the grammar page's "majority solutions"). A compound ("post office") is
+   * a different noun - "na poště" - so only a bare noun is looked up.
+   */
+  if (
+    lemma === 'at' &&
+    complement &&
+    isInsidePlace(complement.lemma) &&
+    !sentence.tokens.some((t) => t.head === complement.id && t.deprel === 'compound')
+  ) {
+    return {
+      kind: 'preposition',
+      prep: 'v',
+      case: decide<Case>('Loc', 'case.prep.atInside', 'high',
+        `at a building or institution: "v" with the locative, as every Slavic language says "in" here`),
+      alternatives: ['na'],
     };
   }
 

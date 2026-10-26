@@ -112,11 +112,12 @@ describe('English case-marker prepositions are deleted, not translated', () => {
     // frequency ranking. "at" is one: the table says na (+Loc) while lexical
     // ranking prefers u, which governs the GENITIVE. Letting ranking win would
     // emit one preposition while applying another's case.
-    const r = out('man-works-at-house.conllu');
+    // (A building takes v instead - "v domu" - see at-inside.json.)
+    const r = out('they-met-at-the-station.conllu');
     expect(r.words.find((w) => w.sourceForm === 'at')?.surface).toBe('na');
-    expect(r.words.find((w) => w.sourceForm === 'house')?.features
+    expect(r.words.find((w) => w.sourceForm === 'station')?.features
       .find((f) => f.name === 'Case')?.value).toBe('Loc');
-    expect(r.text).toBe('Muž rabotaje na domu.');
+    expect(r.text).toBe('Oni strětli se na stanciji.');
   });
 
   it('marks an unambiguous preposition as certain', () => {

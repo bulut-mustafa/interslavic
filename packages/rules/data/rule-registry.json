@@ -524,6 +524,12 @@
       "source": "http://steen.free.fr/interslavic/nouns.html",
       "quote": "For this reason, the nominative can always be used instead of the vocative. However, if you prefer to use a real vocative anyway, then the following forms are recommended",
       "why": "the person addressed takes the nominative, which the page says can always replace the vocative; the real vocative is named as the equally correct alternative"
+    },
+    "case.prep.atInside": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/grammar.html",
+      "quote": "It is entirely based on forms common to the Slavic languages, and when no common forms exist, on majority solutions.",
+      "why": "English \"at\" with a building or institution is \"in\" in every Slavic language (ru в школе, pl w szkole, cs ve škole, hr u školi, bg в училище), so v + locative; na, the page's \"on, at\", stays the default for work, stations, streets and events"
     }
   }
 }

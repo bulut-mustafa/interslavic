@@ -1,0 +1,24 @@
+{
+  "_comment": "English \"at\" + these nouns is Interslavic v + locative, not na. The prepositions page gives \"na (+ loc.) - on, at\", so na stays the default; the grammar page settles the rest: Interslavic \"is entirely based on forms common to the Slavic languages, and when no common forms exist, on majority solutions\" (http://steen.free.fr/interslavic/grammar.html). Each noun is listed only where the Slavic languages agree on 'in' for it - the forms below, East (ru), West (pl, cs) and South (hr, bg) - and the corpus does not contradict it. Nouns where they split are left out: 'university' is v in ru/bg but na in pl/cs/hr.",
+  "nouns": {
+    "school":     { "ru": "в школе",       "pl": "w szkole",     "cs": "ve škole",    "hr": "u školi",      "bg": "в училище" },
+    "house":      { "ru": "в доме",        "pl": "w domu",       "cs": "v domě",      "hr": "u kući",       "bg": "в къщата" },
+    "hospital":   { "ru": "в больнице",    "pl": "w szpitalu",   "cs": "v nemocnici", "hr": "u bolnici",    "bg": "в болницата" },
+    "hotel":      { "ru": "в гостинице",   "pl": "w hotelu",     "cs": "v hotelu",    "hr": "u hotelu",     "bg": "в хотела" },
+    "restaurant": { "ru": "в ресторане",   "pl": "w restauracji","cs": "v restauraci","hr": "u restoranu",  "bg": "в ресторанта" },
+    "shop":       { "ru": "в магазине",    "pl": "w sklepie",    "cs": "v obchodě",   "hr": "u trgovini",   "bg": "в магазина" },
+    "store":      { "ru": "в магазине",    "pl": "w sklepie",    "cs": "v obchodě",   "hr": "u trgovini",   "bg": "в магазина" },
+    "cinema":     { "ru": "в кино",        "pl": "w kinie",      "cs": "v kině",      "hr": "u kinu",       "bg": "в киното" },
+    "theatre":    { "ru": "в театре",      "pl": "w teatrze",    "cs": "v divadle",   "hr": "u kazalištu",  "bg": "в театъра" },
+    "theater":    { "ru": "в театре",      "pl": "w teatrze",    "cs": "v divadle",   "hr": "u kazalištu",  "bg": "в театъра" },
+    "museum":     { "ru": "в музее",       "pl": "w muzeum",     "cs": "v muzeu",     "hr": "u muzeju",     "bg": "в музея" },
+    "library":    { "ru": "в библиотеке",  "pl": "w bibliotece", "cs": "v knihovně",  "hr": "u knjižnici",  "bg": "в библиотеката" },
+    "office":     { "ru": "в офисе",       "pl": "w biurze",     "cs": "v kanceláři", "hr": "u uredu",      "bg": "в офиса" },
+    "bank":       { "ru": "в банке",       "pl": "w banku",      "cs": "v bance",     "hr": "u banci",      "bg": "в банката" },
+    "church":     { "ru": "в церкви",      "pl": "w kościele",   "cs": "v kostele",   "hr": "u crkvi",      "bg": "в църквата" },
+    "cafe":       { "ru": "в кафе",        "pl": "w kawiarni",   "cs": "v kavárně",   "hr": "u kafiću",     "bg": "в кафенето" },
+    "prison":     { "ru": "в тюрьме",      "pl": "w więzieniu",  "cs": "ve vězení",   "hr": "u zatvoru",    "bg": "в затвора" },
+    "park":       { "ru": "в парке",       "pl": "w parku",      "cs": "v parku",     "hr": "u parku",      "bg": "в парка" },
+    "garden":     { "ru": "в саду",        "pl": "w ogrodzie",   "cs": "v zahradě",   "hr": "u vrtu",       "bg": "в градината" }
+  }
+}

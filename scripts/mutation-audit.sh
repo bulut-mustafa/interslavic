@@ -622,6 +622,8 @@ mutate "will counted as modal"                aspect "s/const MODALS = \['can',/
 mutate "bare plural object bounds the act"    aspect "s/(t.deprel === 'obj' \&\& !isBarePlural(t, sentence))/(t.deprel === 'obj')/"
 mutate "past passive keeps imperfective"      aspect "s/    if (!hasObject \&\& !isPastPassiveOfAnObject(token, sentence)) return null;/    if (!hasObject) return null;/"
 mutate "present passive made perfective"      aspect "s/  return be?.feats\['Tense'\] === 'Past' \&\& subject/  return be !== undefined \&\& subject/"
+mutate "at a building is na"                  prep "s/    lemma === 'at' \&\&\$/    lemma === 'never' \&\&/"
+mutate "compound noun inherits v"             prep "s/    !sentence.tokens.some((t) => t.head === complement.id \&\& t.deprel === 'compound')/    true/"
 
 echo
 echo "==================================================="

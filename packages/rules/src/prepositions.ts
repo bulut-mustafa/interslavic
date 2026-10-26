@@ -139,3 +139,16 @@ export const CASE_MARKER_PREPOSITIONS: Record<string, Case> = {
    */
   "'s": 'Gen',
 };
+
+const AT_INSIDE = path.resolve(import.meta.dirname, '../data/at-inside.json');
+let insideCache: Set<string> | null = null;
+
+/**
+ * Nouns that English "at" puts you INSIDE of, and that every Slavic language
+ * marks with "in": "at school" is в школе, w szkole, ve škole, u školi. The
+ * evidence per noun is in data/at-inside.json.
+ */
+export function isInsidePlace(englishNoun: string): boolean {
+  insideCache ??= new Set(Object.keys((JSON.parse(fs.readFileSync(AT_INSIDE, 'utf8')) as { nouns: object }).nouns));
+  return insideCache.has(englishNoun.toLowerCase());
+}

@@ -2146,3 +2146,36 @@ different problem:
 - Found while checking, not aspect: "She began to write" takes the reflexive
   `počęti sę` ("počela se pisati"); "letters" -> `pisemnosti`; the agent of
   "written by him" is "od strany njego" where the page gives plain "od".
+
+## "at": v inside a building, na elsewhere
+
+The cause: "at" has one locative candidate in the government table, `na`
+("on, at"), so EVERY "at + place" came out na - "na školě", "na boljnici",
+"na hotelu", "na restoranu". Frequency cannot separate "na stanciji" (right)
+from "na školě" (wrong).
+
+Corpus evidence per noun does not exist in quantity: the Tatoeba isv export
+is 1,605 sentences (1-4 examples per noun), van Steenbergen's texts fewer,
+and the Wikipedia search returned 0-3 hits per phrase before rate-limiting.
+What decides it is the grammar page's own principle: Interslavic "is entirely
+based on forms common to the Slavic languages, and when no common forms
+exist, on majority solutions". So:
+
+- `na` stays the default for "at", as the prepositions page lists it - right
+  for work, stations, streets, markets, events, "the end of";
+- a noun listed in `rules/data/at-inside.json` takes `v`: buildings and
+  institutions where ru, pl, cs, hr and bg all say "in" (в школе, w szkole,
+  ve škole, u školi, в училище), each with those five forms recorded;
+- split nouns are left out ("university": ru/bg в, pl/cs/hr na); a compound
+  ("post office", "na pošti") is not looked up as its head noun.
+
+```
+She is at school.           na školě     ->  v školě      (lesson's Tatoeba 12999978)
+I was at the hospital.      na boljnici  ->  v boljnici
+We ate at the restaurant.   na restoranu ->  v restoranu
+The man works at the house. na domu      ->  v domu
+He is at work / at the station / at the concert / at the market   na (unchanged)
+```
+
+No other fixture changed. The Prepositions lesson's "Ona jest v školě" now
+has a Try-it link: the translator agrees with the lesson.

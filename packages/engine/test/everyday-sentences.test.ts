@@ -261,6 +261,28 @@ describe('a past passive takes the aspect of the active it comes from', () => {
   });
 });
 
+describe('"at" is v inside a building, na elsewhere', () => {
+  it('v for a building or institution, as every Slavic language says "in"', () => {
+    expect(out('en/she-is-at-school.conllu')).toBe('Ona jest v školě.');
+    expect(out('en/i-was-at-the-hospital.conllu')).toBe('Ja jesm byl v boljnici.');
+    expect(out('en/they-met-at-the-hotel.conllu')).toBe('Oni strětli se v hotelu.');
+    expect(out('en/the-children-are-at-the-park.conllu')).toBe('Děti sut v parku.');
+    expect(out('en/man-works-at-house.conllu')).toBe('Muž rabotaje v domu.');
+  });
+
+  it('na for work, stations, events, streets and markets (prepositions.html: "na - on, at")', () => {
+    expect(out('en/he-is-at-work.conllu')).toBe('On jest na rabotě.');
+    expect(out('en/they-met-at-the-station.conllu')).toBe('Oni strětli se na stanciji.');
+    expect(out('en/we-were-at-the-concert.conllu')).toBe('My jesmo byli na koncertu.');
+    expect(out('en/i-saw-him-at-the-market.conllu')).toMatch(/ na trgu\.$/);
+    expect(out('en/he-lives-at-the-end-of-the-street.conllu')).toMatch(/ na koncu ulice\.$/);
+  });
+
+  it('and a compound noun is its own word: "post office" is na pošti, not v', () => {
+    expect(out('en/she-waited-at-the-post-office.conllu')).toMatch(/ na /);
+  });
+});
+
 describe('one auxiliary for two verbs', () => {
   it('shares "will" and "would" with a bare verb joined by "and" (13525474)', () => {
     // Tatoeba 13525474: "Vy budete idti domu i ostati domu" - both infinitives.

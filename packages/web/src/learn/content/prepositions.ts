@@ -71,7 +71,7 @@ const prepositions: LessonPage = {
         ['{pod}', '{pod stolom} - under the table', '{pod stol} - (to) under the table'],
       ],
     },
-    { kind: 'example', isv: 'Ona jest v školě.', en: "She's at school.", note: 'locative - Tatoeba 12999978' },
+    { kind: 'example', isv: 'Ona jest v školě.', en: "She's at school.", tryIt: true, note: 'locative - Tatoeba 12999978' },
     { kind: 'example', isv: 'Kot poběgl pod stol.', en: 'The cat ran under the table.', note: 'accusative: a movement', tryIt: true },
 
     { kind: 'h2', text: 'He, she, they after a preposition' },
