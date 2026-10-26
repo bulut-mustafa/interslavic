@@ -2341,3 +2341,13 @@ first for "работа"; English "at work" reached `råbota` through a curated,
 ("work one goes to, is at or comes from is the job"; van Steenbergen: "Iduči do
 raboty"). The same rule now has a Russian entry: работа after на/в/с/из/до ->
 `råbota` ("Он на работе" -> "On jest na rabotě").
+
+## "Excuse me": izvinite, by usage
+
+The dictionary glosses `izvini, izvinite` and `pomiluj` identically ("sorry, excuse
+me") and prefers neither; `pomiluj` won only on our intelligibility heuristic. With
+more evidence gathered, usage is one-sided: Wp/isv 4 (a phrase table "Izvinite!",
+"Nu izvini"), Tatoeba 2, pomiluj 0 in both. Where the dictionary is neutral the
+corpus decides, so a curated entry (function-words.json, cited) now picks
+`izvinite` - the vy form the translator uses throughout - and the phrase lookup
+consults curated entries like the single-word lookup does.

@@ -308,6 +308,17 @@
       "why": "driving around is going by transport with no single direction, which the verbs page gives as the non-directional `jezditi` (directional `jehati`, perfective `pojehati`). `voziti sę` is glossed 'drive (e.g. by car)' and is chosen otherwise; the page lists `voziti` as 'to transport'",
       "evidence": "steenbergen-verbs, the table of motion verbs (non-directional, directional, perfective): 'jezditi jehati pojehati'; 'Igor jezdil po Moskvě „Igor was driving around in Moscow”'",
       "source": "steenbergen-verbs"
+    },
+    {
+      "en": "excuse me",
+      "upos": [
+        "VERB",
+        "INTJ"
+      ],
+      "isv": "izvinite",
+      "why": "the dictionary glosses `izvini, izvinite` and `pomiluj` identically (\"sorry, excuse me\") and states no preference; ranking by intelligibility marks chose `pomiluj`. Where the dictionary is neutral, usage decides, and usage has izvini/izvinite 6 times and pomiluj never. The vy form, as the translator addresses the reader",
+      "evidence": "Wp/isv phrase table \"Извините! - Izvinite!\" and \"Nu izvini\" (talk page); Tatoeba (isv) \"Govori \\\"izvini\\\"!\", \"Govorite \\\"izvinite\\\"!\"; pomiluj: 0 in both",
+      "source": "corpus"
     }
   ]
 }

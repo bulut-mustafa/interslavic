@@ -349,7 +349,8 @@ describe('a phrase the dictionary lists whole is translated whole', () => {
   });
 
   it('keeping the comma of a word the phrase absorbed', () => {
-    expect(out('en/excuse-me-where-is-the-station.conllu')).toMatch(/^\S+, kde jest stancija\?$/);
+    // `izvinite`, as Interslavic writers say it (6 attestations, pomiluj 0)
+    expect(out('en/excuse-me-where-is-the-station.conllu')).toBe('Izvinite, kde jest stancija?');
   });
 
   it('but not across "to", tenses, or onto a word of another kind', () => {

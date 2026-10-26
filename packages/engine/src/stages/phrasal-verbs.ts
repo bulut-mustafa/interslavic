@@ -4,6 +4,7 @@ import { resolveAspect } from '../resolvers/aspect.ts';
 import { contextWordsOf } from '../gloss.ts';
 import { isTimeUnit } from '../../../rules/src/verb-prepositions.ts';
 import { formulaFor } from '../../../rules/src/formulas.ts';
+import { functionWordFor } from '../../../rules/src/function-words.ts';
 import { parseXpos } from '../../../lexicon/src/steen/parse-xpos.ts';
 import { parseAddition } from '../../../lexicon/src/steen/parse-addition.ts';
 
@@ -392,7 +393,12 @@ export function planPhrasalVerbs(sentence: ParsedSentence, lex: Lexicon): Phrasa
         if (candidates.length === 0) continue;
         const key = candidates[0]!.key;
         const aspect = head.upos === 'VERB' ? resolveAspect({ token: head, sentence, lex }) : null;
-        const best = rank(candidates.filter((c) => c.key === key).map((c) => c.e), {
+        const pool = candidates.filter((c) => c.key === key).map((c) => c.e);
+        // A curated, cited choice among the dictionary's own candidates wins,
+        // as it does for single words: "excuse me" is `izvinite`, not the
+        // equally glossed `pomiluj` (rules/data/function-words.json).
+        const curated = functionWordFor(key, head.upos, lang);
+        const best = pool.find((e) => curated && e.lemma === curated.isv) ?? rank(pool, {
           gloss: key,
           lang,
           contextWords,
