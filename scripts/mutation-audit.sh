@@ -230,7 +230,7 @@ mutate "curated words gated to english"    lexeme      "s/^      sentence.lang,$
 mutate "russian curated words removed"     fwjson "s/\"lang\": \"ru\"/\"lang\": \"xx\"/"
 mutate "fused clitic never stripped"       pipe   "s/      if (!token.lemma.toLowerCase().endsWith(suffix)) continue;/      continue;/"
 mutate "stripping preferred over headword" pipe   "s/    if (lex.lookup(token.lemma, sentence.lang).some((e) => e.pos.upos === .VERB.)) {/    if (false) {/"
-mutate "clitic keyed on Voice not the form" pipe  "s/    if (adapter.reflexiveVerbSuffixes.some((x) => form.endsWith(x))) {/    if (token.feats['Voice'] === 'Mid' || token.feats['Voice'] === 'Pass') {/"
+mutate "clitic keyed on Voice not the form" pipe  "s/    if (reflexive(form) \&\& !reflexive(lookupLemmaOf(token))) {/    if (token.feats['Voice'] === 'Mid' || token.feats['Voice'] === 'Pass') {/"
 mutate "clitic doubled on a reflexive lemma" realst    "s/      !splitMultiword(entry.lemma, .VERB.).reflexive \&\&//"
 mutate "reflexive lemma penalised as multiword" reader "s/      !splitMultiword(e.lemma, e.pos.upos).reflexive\$/      true/"
 mutate "noun ignores the counting numeral" lexeme      "s/        adapter.copyCase \&\& countingNumeral ? countingNumeral.feats\[.Case.\] : undefined;/        undefined;/"
@@ -631,7 +631,7 @@ mutate "take a week is take"                   phrasalst "s/      if (objects.le
 mutate "duration made perfective"              aspect "s/^  durationObject,\$//"
 mutate "dictionary phrases not looked up"     phrasalst "s/        if (candidates.length === 0) continue;/        continue;/"
 mutate "to-phrase looked up as one word"      phrasalst "s/        const isPhrase = (k: string) => normalizeGloss(k).includes(' ');/        const isPhrase = (k: string) => k.includes(' ');/"
-mutate "base forms match any formula"         phrasalst "s/            ? lex.lookup(baseForms, 'en').filter((e) => e.pos.upos === 'VERB')/            ? lex.lookup(baseForms, 'en')/"
+mutate "base forms match any formula"         phrasalst "s/            ? lex.lookup(baseForms, lang).filter((e) => e.pos.upos === 'VERB')/            ? lex.lookup(baseForms, lang)/"
 mutate "inflecting phrase on any word"        phrasalst "s/          !\['VERB', 'NOUN', 'ADJ'\].includes(e.pos.upos) || e.pos.upos === head.upos,/          true,/"
 mutate "phrase verb stems not borrowed"       realst "s/    const principalParts = derivedLemma ? undefined : (phraseVerbParts ?? ownParts);/    const principalParts = derivedLemma ? undefined : ownParts;/"
 mutate "comma lost with absorbed word"        realst "s/ \&\& p.upos !== 'PUNCT' \&\& written.has(p.id)).at(-1);/ \&\& p.upos !== 'PUNCT').at(-1);/"
@@ -640,6 +640,9 @@ mutate "formula inside a longer sentence"     phrasalst "s/        const wholeSe
 mutate "sourced formulas ignored"             phrasalst "s/          if (candidates.length === 0 \&\& extra) {/          if (false) {/"
 mutate "only the first light-verb rule"       light "s/    const rule = LIGHT_VERBS.find((r) => r.verb === verb.lemma.toLowerCase() \&\& objectOf(r));/    const rule = LIGHT_VERBS.find((r) => r.verb === verb.lemma.toLowerCase());/"
 mutate "idioms never flagged"                 rendst "s/    warnings: idiomWarnings(sentence),/    warnings: [],/"
+mutate "se added to every -sja verb"          pipe "s/    if (reflexive(form) \&\& !reflexive(lookupLemmaOf(token))) {/    if (reflexive(form)) {/"
+mutate "formula root takes a copula"          copst "s/      if (node.entry \&\& \['INTJ', 'X'\].includes(node.entry.pos.upos)) continue;//"
+mutate "one-word formulas ignored"            phrasalst "s/        if (len === 1 \&\& !wholeSentence) break;/        if (len === 1) break;/"
 
 echo
 echo "==================================================="

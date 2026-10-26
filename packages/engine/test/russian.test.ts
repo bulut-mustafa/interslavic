@@ -410,7 +410,7 @@ describe('the reflexive clitic Russian fuses onto the verb', () => {
    * "he tortures himself".
    */
   it('does not strip a reflexive into a verb that means something else', () => {
-    expect(out('on-muchitsja.conllu')).toBe('On agonizuje se.');
+    expect(out('on-muchitsja.conllu')).toBe('On agonizuje.'); // v.intr., glossed "мучиться" itself: no added se
     expect(out('on-muchit-sobaku.conllu')).toBe('On muči psa.');
   });
 

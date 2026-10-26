@@ -23,6 +23,9 @@ export function copulaStage(ctx: StageContext): void {
       const passiveParticiple =
         node.token.feats['VerbForm'] === 'Part' && node.token.feats['Voice'] === 'Pass';
       if ((node.token.upos === 'VERB' || node.token.upos === 'AUX') && !passiveParticiple) continue;
+      // A root translated as a formula or interjection is not a clause: "Как
+      // дела?" is the formula "Kako se imate?", not "Jest Kako se imate?".
+      if (node.entry && ['INTJ', 'X'].includes(node.entry.pos.upos)) continue;
       const hasVerb = sentence.tokens.some(
         (t) => t.head === node.token.id && (t.deprel === 'cop' || t.deprel.startsWith('aux')),
       );

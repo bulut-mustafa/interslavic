@@ -325,12 +325,17 @@ export function planPhrasalVerbs(sentence: ParsedSentence, lex: Lexicon): Phrasa
    *     form ("took place" -> "take place") or as written.
    * The head word takes the phrase's entry; the others are absorbed.
    */
-  if (sentence.lang === 'en') {
+  // Both source languages: the dictionary has 4,155 English and 2,271 Russian
+  // multi-word glosses ("не за что" -> nema za čto, "к сожалению" -> na žalosť).
+  {
+    const lang = sentence.lang;
     const words = sentence.tokens;
     const taken = (t: UdToken) => phrasalVerbs.has(t.id) || phrasalParticles.has(t.id);
     const join = (parts: string[]) => parts.join(' ').replace(/ (?=('|’|n't\b))/g, '').toLowerCase();
     for (let i = 0; i < words.length; i++) {
-      for (let len = Math.min(5, words.length - i); len >= 2; len--) {
+      // One word is enough for a whole-sentence formula ("Спасибо!" ->
+      // `Hvala!`); otherwise a phrase is at least two.
+      for (let len = Math.min(5, words.length - i); len >= 1; len--) {
         const run = words.slice(i, i + len);
         if (run.some((t) => t.upos === 'PUNCT' || taken(t))) continue;
         const ids = new Set(run.map((t) => t.id));
@@ -345,9 +350,9 @@ export function planPhrasalVerbs(sentence: ParsedSentence, lex: Lexicon): Phrasa
         // Base forms only for a verb entry, which then takes the source's
         // tense: "I thought that" must not become the formula "I think".
         const candidates = [
-          ...(isPhrase(asWritten) ? lex.lookup(asWritten, 'en').map((e) => ({ e, key: asWritten })) : []),
+          ...(isPhrase(asWritten) ? lex.lookup(asWritten, lang).map((e) => ({ e, key: asWritten })) : []),
           ...(isPhrase(baseForms) && baseForms !== asWritten
-            ? lex.lookup(baseForms, 'en').filter((e) => e.pos.upos === 'VERB').map((e) => ({ e, key: baseForms }))
+            ? lex.lookup(baseForms, lang).filter((e) => e.pos.upos === 'VERB').map((e) => ({ e, key: baseForms }))
             : []),
         ].filter(({ e }) =>
           // A word that inflects must land on a word of its own kind: a verb
@@ -364,9 +369,10 @@ export function planPhrasalVerbs(sentence: ParsedSentence, lex: Lexicon): Phrasa
          * source's own and is added back with the text.
          */
         const wholeSentence = words.filter((t) => t.upos !== 'PUNCT').length === len;
+        if (len === 1 && !wholeSentence) break;
         if (candidates.length === 0 && wholeSentence) {
           for (const mark of ['!', '?']) {
-            for (const e of lex.lookup(asWritten + mark, 'en')) {
+            for (const e of lex.lookup(asWritten + mark, lang)) {
               candidates.push({ e: { ...e, lemma: e.lemma.replace(/[!?.]+$/, '') }, key: asWritten + mark });
             }
           }
@@ -388,7 +394,7 @@ export function planPhrasalVerbs(sentence: ParsedSentence, lex: Lexicon): Phrasa
         const aspect = head.upos === 'VERB' ? resolveAspect({ token: head, sentence, lex }) : null;
         const best = rank(candidates.filter((c) => c.key === key).map((c) => c.e), {
           gloss: key,
-          lang: 'en',
+          lang,
           contextWords,
           ...(aspect ? { aspect: aspect.decision.value } : {}),
         })[0];

@@ -409,6 +409,37 @@ describe('an English idiom with no sourced equivalent is flagged, not passed off
   });
 });
 
+describe('from Russian, the same phrase and formula lookups', () => {
+  it('translates a phrase the dictionary lists whole, from its Russian column', () => {
+    expect(out('ru/ne-za-chto.conllu')).toBe('Nema za čto.');
+    expect(out('ru/kstati-gde-vokzal.conllu')).toBe('Mimohodom, kde jest stancija?');
+  });
+
+  it('takes a whole-sentence formula - one word is enough - with no copula added', () => {
+    expect(out('ru/spasibo.conllu')).toBe('Hvala!');
+    expect(out('ru/s-dnjom-rozhdenija.conllu')).toBe('Ščestnogo dnja rodženja!');
+    expect(out('ru/kak-dela.conllu')).toBe('Kako se imate?');
+    expect(out('ru/bolshoe-spasibo.conllu')).toBe('Velika hvala.');
+  });
+
+  it('but leaves an ordinary sentence alone', () => {
+    expect(out('ru/spasibo-za-pomoshch.conllu')).toBe('Blagodarim za pomoč.');
+    expect(out('ru/ona-v-shkole.conllu')).toBe('Ona jest v školě.');
+  });
+});
+
+describe('a Russian -ся verb takes "se" only if its Interslavic verb needs one', () => {
+  it('not when the dictionary lists the reflexive verb itself, without se', () => {
+    expect(out('ru/on-ostalsja-doma.conllu')).toBe('On ostal doma.');
+    expect(out('ru/poezdka-dlilas-tri-dnja.conllu')).toBe('Izlet trval tri dnje.');
+  });
+
+  it('but when the Interslavic verb is reflexive, or the verb was found without -ся', () => {
+    expect(out('ru/my-vstretilis-na-vokzale.conllu')).toBe('My jesmo strětli se na stanciji.');
+    expect(out('ru/ej-nravitsja-gotovit.conllu')).toMatch(/^Jej podobaje se /);
+  });
+});
+
 describe('one auxiliary for two verbs', () => {
   it('shares "will" and "would" with a bare verb joined by "and" (13525474)', () => {
     // Tatoeba 13525474: "Vy budete idti domu i ostati domu" - both infinitives.

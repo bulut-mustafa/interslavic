@@ -2299,3 +2299,27 @@ to meet you, see you later/tomorrow/soon, never mind, pay attention, take a show
 by word, it will not mean the same in Interslavic."). Matched on base forms or as
 written ("later" has the base form "late"). 12 of 271 English fixtures warn - the
 intended ones; none of the rest.
+
+## The same checks from Russian
+
+26 Russian sentences mirroring the English fixes. Most English rules are not
+needed from Russian, because Russian states the thing itself: в/на ("Ona jest v
+školě", "na stanciji"), за/для ("za pomoč", "dlja tebe"), aspect ("izgorěl", "ostal",
+"Otvorite", "kupiti") all came out right. Three gaps were Russian too:
+
+- **Phrase and formula lookups were English-only**, though the dictionary has 2,271
+  Russian multi-word glosses. Now both languages: "Не за что" -> "Nema za čto", "С днём
+  рождения!" -> "Ščestnogo dnja rodženja!", "Большое спасибо" -> "Velika hvala", "Как
+  дела?" -> "Kako se imate?" (formulas.json keys the same sourced forms by Russian).
+  A one-word sentence can be a formula ("Спасибо!" -> "Hvala!"), and a root that became
+  a formula takes no inserted copula ("Jest Kako se imate?"). No existing Russian
+  fixture changed - the lookup found no false matches.
+- **An extra `se` on reflexive verbs.** Every Russian -ся verb got the clitic, even
+  where the dictionary lists the reflexive verb itself with a non-reflexive gloss:
+  "остался" -> "ostal se", "длилась" -> "trval se". The clitic is now owed only when the
+  verb was found WITHOUT -ся ("читается" via "читать"). "мучиться" -> `agonizovati`
+  (v.intr.) lost its `se` accordingly.
+
+Not ours, left: "Льёт" is lemmatised by the parser as "листить" (dictionary has
+лить -> liti); "состояться" is not in the dictionary's Russian column; "работа" ranks
+`dělo` first among the dictionary's five.

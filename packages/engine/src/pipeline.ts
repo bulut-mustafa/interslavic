@@ -370,11 +370,20 @@ export function translate(
    * Restricted to a FINITE verb: a participle is the other way of expressing
    * the passive, so Russian "была приготовлена" must not take a clitic either.
    */
+  /**
+   * Only when the verb was found WITHOUT its suffix. Where the dictionary
+   * lists the reflexive verb itself, its Interslavic gloss already says
+   * everything: "остаться" is `ostati`, "длиться" `trvati` - neither takes
+   * `se` - and "встретиться" is `strěsti sę`, clitic included. Adding one
+   * anyway gave "On ostal se doma", "Izlet trval se tri dnje". The clitic is
+   * owed only when "читается" had to be looked up as "читать".
+   */
   const needsReflexiveClitic = new Set<number>();
   for (const token of sentence.tokens) {
     if (token.upos !== 'VERB' || token.feats['VerbForm'] !== 'Fin') continue;
     const form = token.form.trim().toLowerCase();
-    if (adapter.reflexiveVerbSuffixes.some((x) => form.endsWith(x))) {
+    const reflexive = (w: string) => adapter.reflexiveVerbSuffixes.some((x) => w.toLowerCase().endsWith(x));
+    if (reflexive(form) && !reflexive(lookupLemmaOf(token))) {
       needsReflexiveClitic.add(token.id);
     }
   }
