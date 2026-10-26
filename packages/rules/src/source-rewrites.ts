@@ -28,6 +28,40 @@ const LIGHT_VERBS: { verb: string; objects: string[]; as: string; evidence: stri
     as: 'photograph',
     evidence: '"že by fotografovali tulipany", syntax page',
   },
+  /**
+   * "made a decision" was "sdělal rěšenje", a calque; the dictionary's verb
+   * for it is `rěšiti` "decide", and the corpus uses it so: "on rěšil ostati".
+   */
+  {
+    verb: 'make',
+    objects: ['decision'],
+    as: 'decide',
+    evidence: '"on rěšil ostati i čekati na njego" - Wp/isv/Džok (pes); dictionary rěšiti "decide"',
+  },
+  /**
+   * "have" a meal is to eat it, and the dictionary has a verb for each meal,
+   * glossed exactly so: `snědati` "eat breakfast", `obědati` "dine, eat
+   * lunch", `večerjati` "eat dinner, eat supper". "We have breakfast" was "My
+   * imajemo snědanje".
+   */
+  {
+    verb: 'have',
+    objects: ['breakfast'],
+    as: 'eat breakfast',
+    evidence: 'dictionary: snědati "eat breakfast"',
+  },
+  {
+    verb: 'have',
+    objects: ['lunch'],
+    as: 'eat lunch',
+    evidence: 'dictionary: obědati "dine, eat lunch"',
+  },
+  {
+    verb: 'have',
+    objects: ['dinner', 'supper'],
+    as: 'eat dinner',
+    evidence: 'dictionary: večerjati "eat dinner, eat supper"',
+  },
 ];
 
 export interface SourceRewrite {
@@ -52,12 +86,12 @@ export function rewriteLightVerbs(sentence: ParsedSentence): SourceRewrite {
 
   for (const verb of sentence.tokens) {
     if (verb.upos !== 'VERB') continue;
-    const rule = LIGHT_VERBS.find((r) => r.verb === verb.lemma.toLowerCase());
+    // One verb can lead several rules ("have" breakfast / lunch / dinner).
+    const objectOf = (r: (typeof LIGHT_VERBS)[number]) =>
+      children(verb).find((c) => c.deprel === 'obj' && r.objects.includes(c.lemma.toLowerCase()));
+    const rule = LIGHT_VERBS.find((r) => r.verb === verb.lemma.toLowerCase() && objectOf(r));
     if (!rule) continue;
-    const noun = children(verb).find(
-      (c) => c.deprel === 'obj' && rule.objects.includes(c.lemma.toLowerCase()),
-    );
-    if (!noun) continue;
+    const noun = objectOf(rule)!;
 
     const ofPhrases = children(noun).filter(
       (c) => c.deprel === 'nmod' && children(c).some((p) => p.deprel === 'case' && p.lemma.toLowerCase() === 'of'),

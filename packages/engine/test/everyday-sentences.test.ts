@@ -370,6 +370,23 @@ describe('a whole sentence that is a set formula', () => {
   });
 });
 
+describe('an English light verb + noun that Interslavic says with one verb', () => {
+  it('make a decision -> rěšiti; have a meal -> the dictionary\'s meal verb', () => {
+    expect(out('en/i-made-a-decision.conllu')).toBe('Ja jesm rěšil.');
+    expect(out('en/we-have-breakfast-at-eight.conllu')).toMatch(/^My zautrakajemo /);
+    expect(out('en/she-had-lunch-at-home.conllu')).toBe('Ona obědala doma.');
+    expect(out('en/we-had-dinner-together.conllu')).toBe('My jesmo večerjali zajedno.');
+  });
+
+  it('and one the dictionary lists whole, "a" and all', () => {
+    expect(out('en/i-made-a-mistake.conllu')).toBe('Ja jesm pogrěšil.');
+  });
+
+  it('but not when the noun carries more, which the one verb would lose', () => {
+    expect(out('en/he-made-an-important-decision.conllu')).toMatch(/ važno rěšenje\.$/);
+  });
+});
+
 describe('one auxiliary for two verbs', () => {
   it('shares "will" and "would" with a bare verb joined by "and" (13525474)', () => {
     // Tatoeba 13525474: "Vy budete idti domu i ostati domu" - both infinitives.

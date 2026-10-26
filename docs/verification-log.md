@@ -2273,3 +2273,17 @@ lacks are in `rules/data/formulas.json`, each with a source: "How are you?" ->
 Left without a source, so not added: "Nice to meet you", "See you tomorrow",
 "Never mind" (no Tatoeba or Wp/isv hit). "Thanks for the gift" gives the stiff
 "Blagodarjenje za dar" where Wp/isv writes "hvala za".
+
+### 3. Light verb + noun
+
+"made a decision" was "sdělal rěšenje", "have breakfast" "imajemo snědanje". The
+existing light-verb rewrite (take photos -> fotografovati) gained, each cited:
+make + decision -> decide (`rěšiti`; "on rěšil ostati", Wp/isv), have + breakfast /
+lunch / dinner / supper -> the dictionary's own meal verbs, glossed "eat breakfast"
+(`zautrakati`, `snědati`), "eat lunch" (`obědati`), "eat dinner" (`večerjati`). One
+verb may now lead several rules. Phrases the dictionary lists with the article -
+"make a mistake" (`pogrěšiti`), "take a bath", "make a phone call", "take a nap",
+"make friends" - are reached by the phrase lookup of step 1.
+
+No source found, so not added (warned about instead, step 4): "pay attention",
+"take a shower". Noticed: "at eight" gives "na osmi" - clock times are not handled.
