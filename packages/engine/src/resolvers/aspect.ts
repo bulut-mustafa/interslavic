@@ -200,6 +200,44 @@ const pastWithGoal: AspectStrategy = {
   },
 };
 
+/**
+ * English marks a finished event with a particle: "ran AWAY", "burned DOWN",
+ * "took his cloak OFF", "gave UP". The particle states the result the
+ * perfective focuses on (verbs page), and the dictionary has the pairs:
+ * `utekti`/`utěkati`, `dogorěti`/`dogarjati`, `sjęti`/`snimati`. Without it
+ * every one of these fell to the imperfective default ("Dom dogarjal").
+ *
+ * "away" is tagged a plain adverb, not a particle, so both relations are read
+ * - but only on the verb itself, so "far away" or "up the hill" never count.
+ * "out" completes only a movement ("went out"); on a verb of light or sound it
+ * marks a beginning - "the Sun shined out" is "načelo blěskati" in his North
+ * Wind - so it counts only with a verb of motion.
+ */
+const COMPLETIVE_PARTICLES = ['away', 'down', 'off', 'up'];
+
+const pastWithParticle: AspectStrategy = {
+  id: 'aspect.pastParticle',
+  decide({ token, sentence }) {
+    if (effectiveTense(token, sentence) !== 'Past') return null;
+    if (token.feats['Aspect'] === 'Prog') return null;
+    const particle = sentence.tokens.find(
+      (t) =>
+        t.head === token.id &&
+        (t.deprel === 'compound:prt' || t.deprel === 'advmod') &&
+        (COMPLETIVE_PARTICLES.includes(t.lemma.toLowerCase()) ||
+          (t.lemma.toLowerCase() === 'out' && isMotionVerb(token.lemma))),
+    );
+    if (!particle) return null;
+    return decide<Aspect>(
+      'Perf',
+      'aspect.pastParticle',
+      'default',
+      `"${particle.form}" marks the event as finished, so perfective`,
+      [{ value: 'Imp', because: 'imperfective if the action was repeated or ongoing' }],
+    );
+  },
+};
+
 /** Last resort: imperfective is the lexically unmarked member of the pair. */
 const defaultImperfective: AspectStrategy = {
   id: 'aspect.default',
@@ -221,6 +259,7 @@ export const ASPECT_CHAIN: AspectStrategy[] = [
   tenseCue,
   pastWithObject,
   pastWithGoal,
+  pastWithParticle,
   defaultImperfective,
 ];
 

@@ -14,6 +14,9 @@ export interface PhrasalVerbPlan {
  * Match source verb+particle phrases against the dictionary's own multiword
  * glosses, before anything looks a verb up word by word.
  */
+/** Particles the parser tags `advmod` as often as `compound:prt`. */
+const ADVERB_PARTICLES = ['away', 'back'];
+
 export function planPhrasalVerbs(sentence: ParsedSentence, lex: Lexicon): PhrasalVerbPlan {
   const contextWords = contextWordsOf(sentence);
   /**
@@ -65,6 +68,12 @@ export function planPhrasalVerbs(sentence: ParsedSentence, lex: Lexicon): Phrasa
       for (const child of sentence.tokens) {
         if (child.head !== verb.id) continue;
         if (child.deprel === 'compound:prt') candidates.push({ particle: child });
+        // The parser often tags "away" and "back" as a plain adverb: "The
+        // dog ran away" has advmod `away`, so `utekti` ("run away") was never
+        // looked up and the result was "poběgl proč".
+        if (child.deprel === 'advmod' && ADVERB_PARTICLES.includes(child.lemma.toLowerCase())) {
+          candidates.push({ particle: child });
+        }
       }
 
       for (const { particle } of candidates) {

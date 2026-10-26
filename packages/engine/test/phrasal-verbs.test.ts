@@ -29,7 +29,7 @@ const out = (name: string) => result(name).text;
 describe('phrasal verbs', () => {
   it('translates the whole phrase as one verb', () => {
     expect(out('i-wake-up-early.conllu')).toBe('Ja budžu se rano.');
-    expect(out('the-house-burned-down.conllu')).toBe('Dom dogarjal.');
+    expect(out('the-house-burned-down.conllu')).toBe('Dom dogorěl.'); // "down" finishes it: perfective
   });
 
   it('drops the particle and says why', () => {

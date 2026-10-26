@@ -32,7 +32,7 @@ const out = (name: string) =>
 describe('a nominal possessor', () => {
   it('is a genitive after the noun, with no marker word', () => {
     expect(out('my-brothers-book-is-new.conllu')).toBe('Kniga mojego brata jest nova.');
-    expect(out('the-boys-dog-ran-away.conllu')).toBe('Pes hlapca běgl proč.');
+    expect(out('the-boys-dog-ran-away.conllu')).toBe('Pes hlapca uběgl.'); // "run away" is one verb
   });
 
   it('is the same thing as an "of"-phrase', () => {

@@ -169,6 +169,27 @@ describe('a noun used as a modifier', () => {
   });
 });
 
+describe('a particle marks a finished past event', () => {
+  it('takes the perfective with away, down, up, off, and out on a movement', () => {
+    expect(out('en/the-house-burned-down.conllu')).toBe('Dom dogorěl.');
+    expect(out('en/they-ran-away.conllu')).toBe('Oni uběgli.');
+    expect(out('en/he-gave-up.conllu')).toBe('On odrěkl se.');
+    expect(out('en/she-sat-down.conllu')).toBe('Ona usědla.');
+    expect(out('en/i-woke-up-early.conllu')).toBe('Ja jesm probudil se rano.');
+    expect(out('en/the-children-went-out.conllu')).toBe('Děti izšli.');
+  });
+
+  it('but not when the action is ongoing, habitual or present', () => {
+    expect(out('en/he-was-running-away.conllu')).toBe('On odtěkal.');
+    expect(out('en/he-always-gave-up.conllu')).toBe('On vsegda odrěkal se.');
+    expect(out('en/she-sits-down.conllu')).toBe('Ona sědaje.');
+  });
+
+  it('and "out" on a verb of light is a beginning, not an end (northwind.html)', () => {
+    expect(out('gold/g55.conllu')).toMatch(/^Potom solnce světilo /);
+  });
+});
+
 describe('one auxiliary for two verbs', () => {
   it('shares "will" and "would" with a bare verb joined by "and" (13525474)', () => {
     // Tatoeba 13525474: "Vy budete idti domu i ostati domu" - both infinitives.

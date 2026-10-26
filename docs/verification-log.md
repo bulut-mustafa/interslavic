@@ -2031,3 +2031,36 @@ Left, with the reason:
 - **"I speak Interslavic" -> rěku.** The dictionary lists `rěkti` "speak, say"
   before `govoriti` "say, speak, talk" and as more frequent; the dictionary outranks
   a hunch.
+
+## Aspect, measured as a class rather than sentence by sentence
+
+A scan of every English fixture found 102 verbs that fall to the last-resort
+imperfective (`aspect.default`). About 75 are right (no perfective partner,
+durative, habitual, modal); about 25 are wrong, in four groups, all from one
+cause - the perfective rules fired only on a PAST verb with a noun object or
+a goal:
+
+1. a particle that states the result ("burned down", "ran away");
+2. a verb whose meaning is a result, with no noun object ("stayed", "died",
+   "succeeded", "agreed that...");
+3. infinitives and commands, which never reached a perfective rule
+   ("could not find", "open the window");
+4. passive participles ("was prepared", "is broken").
+
+### Group 1 fixed: particles
+
+`aspect.pastParticle`: away, down, off, up - and "out" only on a verb of
+motion, because "the Sun shined out" is a beginning (northwind.html,
+"načelo blěskati"). "away" and "back" are often tagged `advmod`, so the
+phrasal-verb lookup now reads them too ("run away" -> `uběgti`).
+
+```
+The house burned down.   Dom dogarjal.        ->  Dom dogorěl.
+They ran away.           Oni běgli proč.      ->  Oni uběgli.
+He gave up.                                   ->  On odrěkl se.
+She sat down.                                 ->  Ona usědla.
+The children went out.                        ->  Děti izšli.
+He was running away. / He always gave up. / She sits down.   (stay imperfective)
+```
+
+No other fixture changed.

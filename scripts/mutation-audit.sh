@@ -610,6 +610,9 @@ mutate "correlative halves swapped"          lexeme  "s/      const lemma = corr
 mutate "no comma before tym"                 realst  "s/    if (feats.get('Case')?.ruleId === 'comparison.correlative' \&\& entry?.lemma === 'tȯj') appendComma();//"
 mutate "reciprocal preposition left outside" light   "s/  const light = rewriteLightVerbs(rewriteReciprocalPreposition(correctRussianFuture(sentence)));/  const light = rewriteLightVerbs(correctRussianFuture(sentence));/"
 mutate "towards a reciprocal is do"          prep    "s/  if (lemma === 'towards' \&\& complement?.feats\['PronType'\] === 'Rcp') {/  if (false) {/"
+mutate "particle does not finish an event"    aspect "s/^  pastWithParticle,\$//"
+mutate "out finishes light and sound"         aspect "s/(t.lemma.toLowerCase() === 'out' \&\& isMotionVerb(token.lemma))/(t.lemma.toLowerCase() === 'out')/"
+mutate "away tagged advmod not phrasal"       phrasalst "s/        if (child.deprel === 'advmod' \&\& ADVERB_PARTICLES.includes(child.lemma.toLowerCase())) {/        if (false) {/"
 
 echo
 echo "==================================================="
