@@ -1,5 +1,5 @@
 import type { ParsedSentence, UdToken } from '../../../types/index.ts';
-import { rank, type Entry, type Lexicon } from '../../../lexicon/src/reader.ts';
+import { normalizeGloss, rank, type Entry, type Lexicon } from '../../../lexicon/src/reader.ts';
 import { resolveAspect } from '../resolvers/aspect.ts';
 import { contextWordsOf } from '../gloss.ts';
 import { isTimeUnit } from '../../../rules/src/verb-prepositions.ts';
@@ -300,6 +300,73 @@ export function planPhrasalVerbs(sentence: ParsedSentence, lex: Lexicon): Phrasa
         ...(aspect ? { aspect: aspect.decision.value } : {}),
       })[0];
       if (best) phrasalVerbs.set(verb.id, best);
+    }
+  }
+
+  /**
+   * ---- any phrase the dictionary lists whole --------------------------------
+   *
+   * The shapes above cover about 2,200 of the dictionary's 4,155 multi-word
+   * English glosses. The rest were never looked up, so a fixed expression was
+   * translated a word at a time: "by the way" became "od strany dragy" where
+   * the dictionary has `mimohodom`, "took place" "vzela město" (`odbyti sę`),
+   * "makes sense" "dělaje smysl" (`iměti smysl`), "You're welcome" "Vy jeste
+   * vitahmo" (`nema za čto`).
+   *
+   * Longest first, up to five words, left to right. A run counts only when
+   *   - its words stand next to each other with no punctuation between,
+   *   - it hangs together: exactly one word has its head outside the run, so
+   *     "take his place" or a "take" and a "place" in different phrases never
+   *     match "take place";
+   *   - the dictionary has it as an EXACT gloss, with verbs in their base
+   *     form ("took place" -> "take place") or as written.
+   * The head word takes the phrase's entry; the others are absorbed.
+   */
+  if (sentence.lang === 'en') {
+    const words = sentence.tokens;
+    const taken = (t: UdToken) => phrasalVerbs.has(t.id) || phrasalParticles.has(t.id);
+    const join = (parts: string[]) => parts.join(' ').replace(/ (?=('|’|n't\b))/g, '').toLowerCase();
+    for (let i = 0; i < words.length; i++) {
+      for (let len = Math.min(5, words.length - i); len >= 2; len--) {
+        const run = words.slice(i, i + len);
+        if (run.some((t) => t.upos === 'PUNCT' || taken(t))) continue;
+        const ids = new Set(run.map((t) => t.id));
+        const heads = run.filter((t) => !ids.has(t.head));
+        if (heads.length !== 1) continue;
+        const head = heads[0]!;
+        const asWritten = join(run.map((t) => t.form));
+        const baseForms = join(run.map((t) => (t.upos === 'VERB' ? t.lemma : t.form)));
+        // The lookup drops a leading "to" (for infinitives), so "to Moscow"
+        // would be looked up as "Moscow": it must stay a phrase.
+        const isPhrase = (k: string) => normalizeGloss(k).includes(' ');
+        // Base forms only for a verb entry, which then takes the source's
+        // tense: "I thought that" must not become the formula "I think".
+        const candidates = [
+          ...(isPhrase(asWritten) ? lex.lookup(asWritten, 'en').map((e) => ({ e, key: asWritten })) : []),
+          ...(isPhrase(baseForms) && baseForms !== asWritten
+            ? lex.lookup(baseForms, 'en').filter((e) => e.pos.upos === 'VERB').map((e) => ({ e, key: baseForms }))
+            : []),
+        ].filter(({ e }) =>
+          // A word that inflects must land on a word of its own kind: a verb
+          // entry on "happy" in "can be happy" was "može radovala se". An
+          // unchanging one (mimohodom, nema za čto) can stand anywhere.
+          !['VERB', 'NOUN', 'ADJ'].includes(e.pos.upos) || e.pos.upos === head.upos,
+        );
+        if (candidates.length === 0) continue;
+        const key = candidates[0]!.key;
+        const aspect = head.upos === 'VERB' ? resolveAspect({ token: head, sentence, lex }) : null;
+        const best = rank(candidates.filter((c) => c.key === key).map((c) => c.e), {
+          gloss: key,
+          lang: 'en',
+          contextWords,
+          ...(aspect ? { aspect: aspect.decision.value } : {}),
+        })[0];
+        if (!best) continue;
+        phrasalVerbs.set(head.id, best);
+        for (const t of run) if (t !== head) phrasalParticles.add(t.id);
+        i += len - 1;
+        break;
+      }
     }
   }
 

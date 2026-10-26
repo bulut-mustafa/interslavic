@@ -327,6 +327,32 @@ describe('"take" with a span of time is "last", and the span is a duration', () 
   });
 });
 
+describe('a phrase the dictionary lists whole is translated whole', () => {
+  it('as one word or the dictionary\'s own phrase', () => {
+    expect(out('en/by-the-way-where-is-the-station.conllu')).toBe('Mimohodom, kde jest stancija?');
+    expect(out('en/the-meeting-took-place-yesterday.conllu')).toBe('Sustrěča odbyla se včera.');
+    expect(out('en/youre-welcome.conllu')).toBe('Nema za čto.');
+    expect(out('en/he-died-last-year.conllu')).toBe('On umrl v prošlom godu.');
+    // his "ona vsegda dymi cigaretoju" (verbs page), word for word
+    expect(out('gold/g33.conllu')).toMatch(/ona vsegda dymi cigaretoju$/);
+  });
+
+  it('conjugating a multi-word verb with its first verb\'s own stems', () => {
+    // iměti alone is "imaje"; the phrase entry has no stems of its own
+    expect(out('en/that-makes-sense.conllu')).toBe('Toj imaje smysl.');
+  });
+
+  it('keeping the comma of a word the phrase absorbed', () => {
+    expect(out('en/excuse-me-where-is-the-station.conllu')).toMatch(/^\S+, kde jest stancija\?$/);
+  });
+
+  it('but not across "to", tenses, or onto a word of another kind', () => {
+    expect(out('en/going-to-london.conllu')).toBe('Ja idu do Londona.');
+    expect(out('en/i-thought-that-he-was-right.conllu')).toMatch(/^Ja jesm myslil /);
+    expect(out('en/she-can-be-happy.conllu')).toBe('Ona može byti ščestliva.');
+  });
+});
+
 describe('one auxiliary for two verbs', () => {
   it('shares "will" and "would" with a bare verb joined by "and" (13525474)', () => {
     // Tatoeba 13525474: "Vy budete idti domu i ostati domu" - both infinitives.

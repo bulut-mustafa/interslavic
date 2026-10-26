@@ -156,10 +156,13 @@ export function realiseStage(input: RealiseInput): RealiseOutput {
    */
   const INTERIOR_MARKS = new Set([',', ';', ':', '!', '?']);
   const punctuationAfter = new Map<number, string>();
+  // Owed by the last word that is actually WRITTEN: a word absorbed into a
+  // phrase ("me" in "Excuse me," -> "Izvinite,") would take the comma with it.
+  const written = new Set(plan.map((n) => n.token.id));
   for (const t of sentence.tokens) {
     if (t.upos !== 'PUNCT' || !INTERIOR_MARKS.has(t.form)) continue;
     if (!sentence.tokens.some((p) => p.id > t.id && p.upos !== 'PUNCT')) continue;
-    const before = sentence.tokens.filter((p) => p.id < t.id && p.upos !== 'PUNCT').at(-1);
+    const before = sentence.tokens.filter((p) => p.id < t.id && p.upos !== 'PUNCT' && written.has(p.id)).at(-1);
     if (before) punctuationAfter.set(before.id, t.form);
   }
   let owed: string | undefined;
@@ -522,11 +525,24 @@ export function realiseStage(input: RealiseInput): RealiseOutput {
     }
 
     const derivedLemma = participleLemma ?? comparedLemma;
+    /**
+     * A multi-word verb conjugates its first word, but the phrase's own entry
+     * carries none of that verb's irregular stems: "iměti smysl" ("make
+     * sense") came out "iměje smysl" where `iměti` alone gives "imaje". So the
+     * stems are borrowed from the dictionary's entry for that first verb.
+     */
+    const ownParts = entry.addition.principalParts;
+    const phraseVerbParts =
+      !derivedLemma && entry.pos.upos === 'VERB' && /\s/.test(entry.lemma) && !ownParts?.flat().length
+        ? lex.lookupLemma(entry.lemma.split(/\s+/)[0]!, 'VERB').find((e) => e.addition.principalParts?.flat().length)
+            ?.addition.principalParts
+        : undefined;
+    const principalParts = derivedLemma ? undefined : (phraseVerbParts ?? ownParts);
     const result = realize({
       lemma: derivedLemma ?? entry.lemma,
       xpos: participleLemma ? 'adj.' : entry.pos.xpos,
       feats: request,
-      principalParts: derivedLemma ? undefined : entry.addition.principalParts,
+      principalParts,
     });
 
     let surface: string;
@@ -548,7 +564,7 @@ export function realiseStage(input: RealiseInput): RealiseOutput {
         lemma: derivedLemma ?? entry.lemma,
         xpos: participleLemma ? 'adj.' : entry.pos.xpos,
         feats: relaxed,
-        principalParts: derivedLemma ? undefined : entry.addition.principalParts,
+        principalParts,
       });
       if (second.ok) {
         surface = second.form;

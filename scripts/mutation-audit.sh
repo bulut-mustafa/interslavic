@@ -629,6 +629,12 @@ mutate "for is never za"                      verbprep "s/  'pay|for': {/  'neve
 mutate "adjective cannot choose a preposition" prep "s/  if (governor \&\& \['VERB', 'AUX', 'ADJ', 'NOUN'\].includes(governor.upos)) {/  if (governor \&\& ['VERB', 'AUX'].includes(governor.upos)) {/"
 mutate "take a week is take"                   phrasalst "s/      if (objects.length !== 1 || !isTimeUnit(objects\[0\]!.lemma)) continue;/      continue;/"
 mutate "duration made perfective"              aspect "s/^  durationObject,\$//"
+mutate "dictionary phrases not looked up"     phrasalst "s/        if (candidates.length === 0) continue;/        continue;/"
+mutate "to-phrase looked up as one word"      phrasalst "s/        const isPhrase = (k: string) => normalizeGloss(k).includes(' ');/        const isPhrase = (k: string) => k.includes(' ');/"
+mutate "base forms match any formula"         phrasalst "s/            ? lex.lookup(baseForms, 'en').filter((e) => e.pos.upos === 'VERB')/            ? lex.lookup(baseForms, 'en')/"
+mutate "inflecting phrase on any word"        phrasalst "s/          !\['VERB', 'NOUN', 'ADJ'\].includes(e.pos.upos) || e.pos.upos === head.upos,/          true,/"
+mutate "phrase verb stems not borrowed"       realst "s/    const principalParts = derivedLemma ? undefined : (phraseVerbParts ?? ownParts);/    const principalParts = derivedLemma ? undefined : ownParts;/"
+mutate "comma lost with absorbed word"        realst "s/ \&\& p.upos !== 'PUNCT' \&\& written.has(p.id)).at(-1);/ \&\& p.upos !== 'PUNCT').at(-1);/"
 
 echo
 echo "==================================================="

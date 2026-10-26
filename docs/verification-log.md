@@ -2225,3 +2225,38 @@ went on - imperfective, like "ran for an hour".
 
 No existing fixture changed. Noticed: "won a prize" gives `izigral` (win a game)
 where `dobyl` fits; "It takes an hour" keeps "Ono" for the dummy "it".
+
+## Expressions translated whole
+
+A test of 28 English expressions in sentences showed four causes, each fixed in turn.
+
+### 1. Phrases the dictionary lists whole
+
+The dictionary has 4,155 multi-word English glosses; the phrase rules covered ~2,200
+(verb + particle, preposition + word, two-word nouns). Now any run of up to five
+words that the dictionary glosses EXACTLY is translated whole, longest first, if
+the words are adjacent, hang together (one word heads the run), and stay a phrase
+after the lookup's "to" stripping. Base verb forms ("took place" -> "take place")
+only reach a verb entry, which keeps the source tense; an inflecting entry (verb,
+noun, adjective) only lands on a word of its kind.
+
+```
+By the way, where is ...     Od strany dragy, ...   ->  Mimohodom, ...
+The meeting took place       vzela město            ->  odbyla se
+That makes sense             dělaje smysl           ->  imaje smysl
+You're welcome               Vy jeste vitahmo       ->  Nema za čto
+He died last year            poslědnji rok          ->  v prošlom godu
+g33 (his text)               kuri cigaretu          ->  dymi cigaretoju  (= gold)
+```
+
+Two general fixes it needed: a multi-word verb now conjugates with its first
+verb's own irregular stems ("iměje smysl" -> "imaje smysl"); a comma owed by a word
+the phrase absorbed is kept ("Excuse me," lost its comma).
+
+The first version matched too much - "to Moscow" as "Moscow", "I thought that" as
+the formula "I think", the verb "be happy" landing on the adjective - and each was
+closed by one of the conditions above; the final diff shows only the two
+improvements. "Excuse me" gives `pomiluj`: the dictionary glosses it and
+`izvini/izvinite` identically and ranks by intelligibility (pomiluj marked not
+understood in 1 language, izvini in 4); Tatoeba has izvin- twice, pomiluj never -
+too little to override the dictionary.
