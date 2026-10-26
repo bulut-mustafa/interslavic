@@ -536,6 +536,12 @@
       "source": "http://steen.free.fr/interslavic/grammar.html",
       "quote": "It is entirely based on forms common to the Slavic languages, and when no common forms exist, on majority solutions.",
       "why": "English \"at\" with a building or institution is \"in\" in every Slavic language (ru в школе, pl w szkole, cs ve škole, hr u školi, bg в училище), so v + locative; na, the page's \"on, at\", stays the default for work, stations, streets and events"
+    },
+    "case.prep.clockTime": {
+      "tier": "corpus",
+      "source": "https://incubator.wikimedia.org/wiki/Wp/isv",
+      "quote": "On jest umrl 10 novembra 2017 goda v 9:15",
+      "why": "\"at\" a clock time is \"v\" with the accusative (\"v 9:15\", \"v 20:00\", \"v poldenj\"), as in Russian, Czech, Croatian and Bulgarian; frequency gave the locative \"na\""
     }
   }
 }

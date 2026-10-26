@@ -643,6 +643,8 @@ mutate "idioms never flagged"                 rendst "s/    warnings: idiomWarni
 mutate "se added to every -sja verb"          pipe "s/    if (reflexive(form) \&\& !reflexive(lookupLemmaOf(token))) {/    if (reflexive(form)) {/"
 mutate "formula root takes a copula"          copst "s/      if (node.entry \&\& \['INTJ', 'X'\].includes(node.entry.pos.upos)) continue;//"
 mutate "one-word formulas ignored"            phrasalst "s/        if (len === 1 \&\& !wholeSentence) break;/        if (len === 1) break;/"
+mutate "clock time takes na"                  prep "s/  if (lemma === 'at' \&\& complement \&\& (complement.upos === 'NUM' || TIMES_OF_DAY.has(complement.lemma.toLowerCase()))) {/  if (false) {/"
+mutate "o'clock left in"                      light "s/  const clock = rewriteOClock(exceptive.sentence);/  const clock = { sentence: exceptive.sentence, absorbed: [] };/"
 
 echo
 echo "==================================================="

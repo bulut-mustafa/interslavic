@@ -70,6 +70,9 @@ const MARKER_REASON: Record<string, string> = {
   "'s": 'the English possessive is a genitive marker - Interslavic uses a bare genitive, like "of"',
 };
 
+/** Times of day that English puts after "at" like a clock time. */
+const TIMES_OF_DAY = new Set(['noon', 'midday', 'midnight']);
+
 export function planPreposition(adp: UdToken, sentence: ParsedSentence): PrepPlan {
   const lemma = adp.lemma.toLowerCase();
 
@@ -185,6 +188,23 @@ export function planPreposition(adp: UdToken, sentence: ParsedSentence): PrepPla
       prep: 'po',
       case: decide<Case>('Loc', 'case.prep.around', 'high',
         'moving around in a place covers it: "po" with the locative, "throughout, round, all over"'),
+      alternatives: [],
+    };
+  }
+
+  /**
+   * "at" a clock time is `v` with the accusative: "umrl ... v 9:15",
+   * "nadavano ... v 20:00", "Solnce světi z juga v poldenj" (Wp/isv), as
+   * Russian "в восемь", Czech "v osm", Croatian "u osam" and Bulgarian "в осем"
+   * say it - Polish "o ósmej" is the one exception. Frequency gave the
+   * locative `na`: "Ja vstavaju na sedmi", "na polnoči".
+   */
+  if (lemma === 'at' && complement && (complement.upos === 'NUM' || TIMES_OF_DAY.has(complement.lemma.toLowerCase()))) {
+    return {
+      kind: 'preposition',
+      prep: 'v',
+      case: decide<Case>('Acc', 'case.prep.clockTime', 'high',
+        'at a clock time: "v" with the accusative ("v 9:15", "v poldenj")'),
       alternatives: [],
     };
   }

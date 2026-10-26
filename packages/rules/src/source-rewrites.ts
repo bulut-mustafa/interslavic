@@ -227,8 +227,32 @@ export function rewriteReciprocalPreposition(sentence: ParsedSentence): ParsedSe
   return { ...sentence, tokens: tokens.sort((a, b) => a.id - b.id) };
 }
 
+/**
+ * "o'clock" only marks a number as a clock time, which the number and its "at"
+ * already say; Interslavic has no such word, and the corpus writes the bare
+ * time: "umrl ... v 9:15", "nadavano ... v 20:00" (Wp/isv). Left in, it came
+ * through untranslated: "na 8 o'clock".
+ */
+export function rewriteOClock(sentence: ParsedSentence): SourceRewrite {
+  if (sentence.lang !== 'en') return { sentence, absorbed: [] };
+  const oclock = sentence.tokens.filter(
+    (t) => t.lemma.toLowerCase() === "o'clock" &&
+      sentence.tokens.some((h) => h.id === t.head && h.upos === 'NUM'),
+  );
+  if (oclock.length === 0) return { sentence, absorbed: [] };
+  const ids = new Set(oclock.map((t) => t.id));
+  return {
+    sentence: { ...sentence, tokens: sentence.tokens.filter((t) => !ids.has(t.id)) },
+    absorbed: oclock.map((t) => ({ form: t.form, why: 'only marks a clock time, which the number already says' })),
+  };
+}
+
 export function rewriteSource(sentence: ParsedSentence): SourceRewrite {
   const light = rewriteLightVerbs(rewriteReciprocalPreposition(correctRussianFuture(sentence)));
   const exceptive = rewriteExceptives(light.sentence);
-  return { sentence: exceptive.sentence, absorbed: [...light.absorbed, ...exceptive.absorbed] };
+  const clock = rewriteOClock(exceptive.sentence);
+  return {
+    sentence: clock.sentence,
+    absorbed: [...light.absorbed, ...exceptive.absorbed, ...clock.absorbed],
+  };
 }

@@ -2323,3 +2323,21 @@ needed from Russian, because Russian states the thing itself: в/на ("Ona jest
 Not ours, left: "Льёт" is lemmatised by the parser as "листить" (dictionary has
 лить -> liti); "состояться" is not in the dictionary's Russian column; "работа" ranks
 `dělo` first among the dictionary's five.
+
+## Clock times, and "работа" from Russian
+
+**Clock times.** "at" + a time came out with the locative `na` ("Ja vstavaju na
+sedmi", "na polnoči", "na 8 o'clock"). No grammar page covers it; the corpus writes
+"v 9:15", "v 20:00", "v poldenj" (Wp/isv), and Russian, Czech, Croatian and Bulgarian
+all use "in" + accusative (Polish "o" is the exception) - the majority principle of
+grammar.html. Now "at" + a number, noon, midday or midnight is `v` + accusative, and
+"o'clock" after a number is absorbed (Interslavic has no such word). "v sedm" now
+matches the Russian "в семь".
+
+**"работа" -> dělo.** Not a Russian ranking defect: on 60 common words Russian and
+English pick the same lemma 50 times, and where they differ the Russian choice is
+usually the more precise (время -> čas, рука -> rųka). The dictionary lists `dělo`
+first for "работа"; English "at work" reached `råbota` through a curated, cited rule
+("work one goes to, is at or comes from is the job"; van Steenbergen: "Iduči do
+raboty"). The same rule now has a Russian entry: работа after на/в/с/из/до ->
+`råbota` ("Он на работе" -> "On jest na rabotě").

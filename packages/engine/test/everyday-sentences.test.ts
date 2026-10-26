@@ -440,6 +440,31 @@ describe('a Russian -ся verb takes "se" only if its Interslavic verb needs one
   });
 });
 
+describe('"at" a clock time is v with the accusative (Wp/isv: "v 9:15", "v poldenj")', () => {
+  it('for a number, noon and midnight; "o\'clock" says nothing more', () => {
+    expect(out('en/i-get-up-at-seven.conllu')).toBe('Ja vstavaju v sedm.');
+    expect(out('en/the-train-leaves-at-9-15.conllu')).toMatch(/ v 9:15\.$/);
+    expect(out('en/we-meet-at-8-oclock.conllu')).toMatch(/ v 8\.$/);
+    expect(out('en/he-came-home-at-midnight.conllu')).toMatch(/ v polnoč\.$/);
+    expect(out('en/we-have-breakfast-at-eight.conllu')).toBe('My zautrakajemo v osm.');
+  });
+
+  it('as Russian states it', () => {
+    expect(out('ru/ja-vstaju-v-sem.conllu')).toBe('Ja vstavaju v sedm.');
+  });
+
+  it('but "at" a place keeps its own rule', () => {
+    expect(out('en/they-met-at-the-station.conllu')).toBe('Oni strětli se na stanciji.');
+  });
+});
+
+describe('the work one goes to or is at is the job, råbota, from Russian too', () => {
+  it('na rabotě for "на работе" (curated, as for English "at work")', () => {
+    expect(out('ru/on-na-rabote.conllu')).toBe('On jest na rabotě.');
+    expect(out('en/he-is-at-work.conllu')).toBe('On jest na rabotě.');
+  });
+});
+
 describe('one auxiliary for two verbs', () => {
   it('shares "will" and "would" with a bare verb joined by "and" (13525474)', () => {
     // Tatoeba 13525474: "Vy budete idti domu i ostati domu" - both infinitives.

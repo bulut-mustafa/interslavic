@@ -66,7 +66,7 @@
       ],
       "isv": "tȯj",
       "why": "the plain demonstrative. `tamtȯj` ('that over there', type 3) won on the exact gloss 'тот', where tȯj is glossed 'этот, тот'",
-      "evidence": "steenbergen-pronouns: 'The primary demonstrative pronoun is toj \u201cthis, that\u201d, and it should be used whenever there is no need to distinguish explicitly between this one over here and that one over there.' The English 'that' is curated the same way",
+      "evidence": "steenbergen-pronouns: 'The primary demonstrative pronoun is toj “this, that”, and it should be used whenever there is no need to distinguish explicitly between this one over here and that one over there.' The English 'that' is curated the same way",
       "source": "steenbergen-pronouns"
     },
     {
@@ -80,7 +80,7 @@
       },
       "isv": "jedin",
       "why": "the first half of the reciprocal 'друг друга/другу/...' (PronType=Rcp): the formula is 'jedin drugogo', with drugy in the case the second half carries. The dictionary glosses only the genitive 'друг друга', so 'друг другу' became 'prijatelj prijatelju'",
-      "evidence": "steenbergen-pronouns: 'you can add the formula jedin drugogo: \u201eOni bijut se jedin drugogo\u201d'; his Tower of Babel: 'I oni govorili jedin k drugomu', 'da by oni ne razuměli se jedin drugogo'",
+      "evidence": "steenbergen-pronouns: 'you can add the formula jedin drugogo: „Oni bijut se jedin drugogo”'; his Tower of Babel: 'I oni govorili jedin k drugomu', 'da by oni ne razuměli se jedin drugogo'",
       "source": "steenbergen-pronouns"
     },
     {
@@ -103,7 +103,7 @@
       ],
       "isv": "tȯj",
       "why": "the neuter of 'тот', which the parser lemmatises separately ('от того, что задумали' -> lemma 'то'); the same plain demonstrative",
-      "evidence": "steenbergen-pronouns: 'The primary demonstrative pronoun is toj \u201cthis, that\u201d'",
+      "evidence": "steenbergen-pronouns: 'The primary demonstrative pronoun is toj “this, that”'",
       "source": "steenbergen-pronouns"
     },
     {
@@ -239,6 +239,27 @@
       },
       "isv": "råbota",
       "why": "work one goes to, is at or comes from is the job, `råbota` ('job, work, employment'). `dělo` is glossed bare 'work' and so outranks it on gloss position, but its sense is the work produced - its other rows are 'act, deed' and 'affair'",
+      "evidence": "steenbergen-verbs: 'Iduči do raboty, ona vsegda dymi cigaretoju „While going to her work, she always smokes a cigarette”'; the dictionary's own usage example for råbota: 'Iz pričiny intensivnosti raboty'",
+      "source": "steenbergen-verbs"
+    },
+    {
+      "lang": "ru",
+      "en": "работа",
+      "upos": [
+        "NOUN"
+      ],
+      "whenDependent": {
+        "deprel": "case",
+        "lemmas": [
+          "на",
+          "в",
+          "с",
+          "из",
+          "до"
+        ]
+      },
+      "isv": "råbota",
+      "why": "as for English \"work\": the work one goes to, is at or comes from (на/в/с/из/до работе/работу/работы) is the job, `råbota`. The dictionary lists `dělo` first for \"работа\", but its sense is the work produced",
       "evidence": "steenbergen-verbs: 'Iduči do raboty, ona vsegda dymi cigaretoju „While going to her work, she always smokes a cigarette”'; the dictionary's own usage example for råbota: 'Iz pričiny intensivnosti raboty'",
       "source": "steenbergen-verbs"
     },
