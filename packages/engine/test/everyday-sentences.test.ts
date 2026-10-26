@@ -353,6 +353,23 @@ describe('a phrase the dictionary lists whole is translated whole', () => {
   });
 });
 
+describe('a whole sentence that is a set formula', () => {
+  it('takes the dictionary\'s own formula, kept with its "!"', () => {
+    expect(out('en/thank-you.conllu')).toBe('Hvala!');
+    expect(out('en/happy-birthday.conllu')).toBe('Ščestnogo dnja rodženja!');
+    expect(out('en/good-morning.conllu')).toBe('Dobro utro!');
+  });
+
+  it('or a sourced one the dictionary lacks (rules/data/formulas.json)', () => {
+    expect(out('en/how-are-you.conllu')).toBe('Kako se imate?'); // Tatoeba 14052288
+    expect(out('en/thank-you-very-much.conllu')).toBe('Velika hvala.'); // Wp/isv, Krčma
+  });
+
+  it('but only as the whole sentence: "thank you for..." is still a verb', () => {
+    expect(out('en/thank-you-for-your-help.conllu')).toBe('Blagodarju vas za vašu pomoč.');
+  });
+});
+
 describe('one auxiliary for two verbs', () => {
   it('shares "will" and "would" with a bare verb joined by "and" (13525474)', () => {
     // Tatoeba 13525474: "Vy budete idti domu i ostati domu" - both infinitives.

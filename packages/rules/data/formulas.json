@@ -1,0 +1,15 @@
+{
+  "_comment": "Whole-sentence formulas the dictionary does not list, each with where Interslavic speakers write it. The dictionary's own formulas (its 87 glosses ending in ! or ?, e.g. 'Thank you!' -> Hvala!) are used first; this file only fills gaps, and only with a cited source.",
+  "formulas": {
+    "how are you": {
+      "isv": "Kako se imate",
+      "source": "https://tatoeba.org/en/sentences/show/14052288",
+      "quote": "Zdravite, kako se imate?"
+    },
+    "thank you very much": {
+      "isv": "Velika hvala",
+      "source": "https://incubator.wikimedia.org/wiki/Wp/isv/Krčma",
+      "quote": "Velika hvala za odgovor!"
+    }
+  }
+}

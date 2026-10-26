@@ -635,6 +635,9 @@ mutate "base forms match any formula"         phrasalst "s/            ? lex.loo
 mutate "inflecting phrase on any word"        phrasalst "s/          !\['VERB', 'NOUN', 'ADJ'\].includes(e.pos.upos) || e.pos.upos === head.upos,/          true,/"
 mutate "phrase verb stems not borrowed"       realst "s/    const principalParts = derivedLemma ? undefined : (phraseVerbParts ?? ownParts);/    const principalParts = derivedLemma ? undefined : ownParts;/"
 mutate "comma lost with absorbed word"        realst "s/ \&\& p.upos !== 'PUNCT' \&\& written.has(p.id)).at(-1);/ \&\& p.upos !== 'PUNCT').at(-1);/"
+mutate "formulas not matched"                 phrasalst "s/        if (candidates.length === 0 \&\& wholeSentence) {/        if (false) {/"
+mutate "formula inside a longer sentence"     phrasalst "s/        const wholeSentence = words.filter((t) => t.upos !== 'PUNCT').length === len;/        const wholeSentence = true;/"
+mutate "sourced formulas ignored"             phrasalst "s/          if (candidates.length === 0 \&\& extra) {/          if (false) {/"
 
 echo
 echo "==================================================="

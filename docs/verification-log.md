@@ -2260,3 +2260,16 @@ improvements. "Excuse me" gives `pomiluj`: the dictionary glosses it and
 `izvini/izvinite` identically and ranks by intelligibility (pomiluj marked not
 understood in 1 language, izvini in 4); Tatoeba has izvin- twice, pomiluj never -
 too little to override the dictionary.
+
+### 2. Whole-sentence formulas
+
+The dictionary keeps 87 formulas with their mark ("Thank you!" -> `Hvala!`, "Happy
+Birthday!" -> `Ščęstnogo dnja rođeńja!`), so they never matched as words. When a run
+is the WHOLE sentence it is now also looked up with "!" / "?". Two the dictionary
+lacks are in `rules/data/formulas.json`, each with a source: "How are you?" ->
+"Kako se imate?" (Tatoeba 14052288), "Thank you very much" -> "Velika hvala"
+(Wp/isv, Krčma). "Thank you for your help" is untouched (not the whole sentence).
+
+Left without a source, so not added: "Nice to meet you", "See you tomorrow",
+"Never mind" (no Tatoeba or Wp/isv hit). "Thanks for the gift" gives the stiff
+"Blagodarjenje za dar" where Wp/isv writes "hvala za".
