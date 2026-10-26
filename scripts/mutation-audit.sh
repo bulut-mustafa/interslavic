@@ -639,6 +639,7 @@ mutate "formulas not matched"                 phrasalst "s/        if (candidate
 mutate "formula inside a longer sentence"     phrasalst "s/        const wholeSentence = words.filter((t) => t.upos !== 'PUNCT').length === len;/        const wholeSentence = true;/"
 mutate "sourced formulas ignored"             phrasalst "s/          if (candidates.length === 0 \&\& extra) {/          if (false) {/"
 mutate "only the first light-verb rule"       light "s/    const rule = LIGHT_VERBS.find((r) => r.verb === verb.lemma.toLowerCase() \&\& objectOf(r));/    const rule = LIGHT_VERBS.find((r) => r.verb === verb.lemma.toLowerCase());/"
+mutate "idioms never flagged"                 rendst "s/    warnings: idiomWarnings(sentence),/    warnings: [],/"
 
 echo
 echo "==================================================="

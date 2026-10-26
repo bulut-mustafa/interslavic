@@ -18,6 +18,12 @@ import { translate } from '../src/pipeline.ts';
 
 const ROOT = path.resolve(import.meta.dirname, '../../..');
 const lex = Lexicon.fromTsv(path.join(ROOT, 'packages/lexicon/data/raw/words.tsv'));
+const full = (name: string) =>
+  translate(
+    parseConllu(fs.readFileSync(path.join(import.meta.dirname, 'fixtures/parse', name), 'utf8')),
+    lex,
+    { orthography: 'standard' },
+  );
 const out = (name: string) =>
   translate(
     parseConllu(fs.readFileSync(path.join(import.meta.dirname, 'fixtures/parse', name), 'utf8')),
@@ -384,6 +390,22 @@ describe('an English light verb + noun that Interslavic says with one verb', () 
 
   it('but not when the noun carries more, which the one verb would lose', () => {
     expect(out('en/he-made-an-important-decision.conllu')).toMatch(/ važno rěšenje\.$/);
+  });
+});
+
+describe('an English idiom with no sourced equivalent is flagged, not passed off', () => {
+  it('warns on idioms and unsourced set phrases, quoting them as written', () => {
+    expect(full('en/its-raining-cats-and-dogs.conllu').warnings).toEqual([
+      '"raining cats and dogs" is an English idiom. Translated word by word, it will not mean the same in Interslavic.',
+    ]);
+    expect(full('en/that-test-was-a-piece-of-cake.conllu').warnings?.[0]).toMatch(/^"piece of cake" is an English idiom/);
+    expect(full('en/i-will-see-you-later.conllu').warnings?.[0]).toMatch(/^"see you later" is a set phrase/);
+  });
+
+  it('and says nothing about ordinary sentences or sourced formulas', () => {
+    expect(full('en/thank-you.conllu').warnings).toEqual([]);
+    expect(full('en/she-had-lunch-at-home.conllu').warnings).toEqual([]);
+    expect(full('en/i-want-to-buy-a-car.conllu').warnings).toEqual([]);
   });
 });
 

@@ -507,6 +507,18 @@ describe('the site around the translator', () => {
     expect(screen.getByLabelText('Text to translate')).toBeTruthy();
   });
 
+  it('shows when an expression could only be translated word by word', async () => {
+    const warning = '"piece of cake" is an English idiom. Translated word by word, it will not mean the same in Interslavic.';
+    vi.stubGlobal('fetch', vi.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => ({ sentences: [sentence({ warnings: [warning] })] }),
+    })));
+    render(<App />);
+    expect(await screen.findByText(warning)).toBeTruthy();
+    expect(screen.getByRole('note', { name: 'Expressions translated word by word' })).toBeTruthy();
+  });
+
   it('starts empty on a plain visit, and translates nothing until asked', async () => {
     window.history.replaceState({}, '', '/');
     render(<App />);

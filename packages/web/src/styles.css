@@ -1452,3 +1452,16 @@ textarea::placeholder {
     scroll-behavior: smooth;
   }
 }
+
+/* An idiom or set phrase the translator could only take word by word. */
+.output-warnings {
+  margin: var(--space-2) 0 0;
+  padding: var(--space-2) var(--space-3);
+  list-style: none;
+  font-size: var(--text-sm);
+  border-left: 3px solid var(--amber, #b7791f);
+  background: color-mix(in srgb, var(--amber, #b7791f) 8%, transparent);
+}
+.output-warnings li + li {
+  margin-top: var(--space-1);
+}

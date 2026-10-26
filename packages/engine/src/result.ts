@@ -59,6 +59,11 @@ export interface Translation {
    * the evidence for THIS sentence, not the whole registry.
    */
   citations: Record<string, RuleCitation>;
+  /**
+   * Expressions in the source that the translator could only render word by
+   * word - English idioms and unsourced set phrases (rules/src/idioms.ts).
+   */
+  warnings?: string[];
 }
 
 /** A token after lexeme choice and feature resolution, before realisation. */

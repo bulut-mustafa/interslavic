@@ -2287,3 +2287,15 @@ verb may now lead several rules. Phrases the dictionary lists with the article -
 
 No source found, so not added (warned about instead, step 4): "pay attention",
 "take a shower". Noticed: "at eight" gives "na osmi" - clock times are not handled.
+
+### 4. Idioms with no sourced equivalent: flagged
+
+"piece of cake" -> "děl torta", "raining cats and dogs" -> "Doždi kotov i psov":
+no source gives an Interslavic equivalent, so none is invented. `rules/src/idioms.ts`
+lists common English idioms and the set phrases left unsourced in steps 2-3 (nice
+to meet you, see you later/tomorrow/soon, never mind, pay attention, take a shower)
+- English-side facts, like the time units. A translation containing one carries a
+`warnings` entry, shown under the result ("... is an English idiom. Translated word
+by word, it will not mean the same in Interslavic."). Matched on base forms or as
+written ("later" has the base form "late"). 12 of 271 English fixtures warn - the
+intended ones; none of the rest.

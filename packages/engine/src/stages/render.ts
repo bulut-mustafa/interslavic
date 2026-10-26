@@ -1,3 +1,4 @@
+import { idiomWarnings } from '../../../rules/src/idioms.ts';
 import { render, type Orthography } from '../../../morph/src/orthography.ts';
 import type { ParsedSentence } from '../../../types/index.ts';
 import type { GlossedWord, Translation } from '../result.ts';
@@ -62,5 +63,6 @@ export function renderStage(input: RenderInput): Translation {
         ? 1
         : words.filter((w) => w.validation === 'validated').length / words.length
       : null,
+    warnings: idiomWarnings(sentence),
   };
 }

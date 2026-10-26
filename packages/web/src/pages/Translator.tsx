@@ -235,6 +235,14 @@ export default function Translator() {
                   ))}
                 </div>
 
+                {primary.some((s) => s.warnings?.length) && (
+                  <ul className="output-warnings" role="note" aria-label="Expressions translated word by word">
+                    {primary.flatMap((s) => s.warnings ?? []).map((w) => (
+                      <li key={w}>{w}</li>
+                    ))}
+                  </ul>
+                )}
+
                 {alternate.length > 0 && (
                   <p className="alt-script" aria-label="The same text in the other script">
                     {alternate.map((s) => s.text).join(' ')}
