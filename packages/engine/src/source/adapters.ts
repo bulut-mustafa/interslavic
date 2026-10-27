@@ -94,6 +94,23 @@ export interface SourceAdapter {
    * null where it cannot. `null` for a source written in Latin.
    */
   nameToLatin: ((word: string) => string | null) | null;
+  /**
+   * The prefix of a one-word superlative - Ukrainian "найцінніший", Polish
+   * "najlepszy" - and the comparative endings it is built on, each with the
+   * positive ending the dictionary lists: "цінніший" -> "цінний". The parser
+   * marks Degree=Sup, from which Interslavic builds `naj-`; only the lookup
+   * needs the plain adjective. `null` where the superlative is two words.
+   */
+  superlativePrefix: string | null;
+  comparativeToPositive: readonly [string, string][];
+  /**
+   * The feminine and masculine adjective endings of a language name used as a
+   * noun. Ukrainian says "вивчаю іспанську [мову]" with the feminine "мова",
+   * and the parser makes the adjective a feminine NOUN the dictionary does not
+   * list; Interslavic names a language with the masculine adjective, as in
+   * "Medžuslovjansky" (the understood noun is `jezyk`).
+   */
+  languageNameEndings: readonly [string, string] | null;
 }
 
 export const EN: SourceAdapter = {
@@ -112,6 +129,9 @@ export const EN: SourceAdapter = {
   andWords: ['and'],
   shortAdjectiveEndings: [],
   nameToLatin: null,
+  superlativePrefix: null,
+  comparativeToPositive: [],
+  languageNameEndings: null,
 };
 
 export const RU: SourceAdapter = {
@@ -131,6 +151,9 @@ export const RU: SourceAdapter = {
   andWords: ['и'],
   shortAdjectiveEndings: ['ый', 'ий', 'ой'],
   nameToLatin: russianNameToLatin,
+  superlativePrefix: null,
+  comparativeToPositive: [],
+  languageNameEndings: null,
 };
 
 /**
@@ -156,6 +179,10 @@ export const UK: SourceAdapter = {
   // Ukrainian short forms ("повен", "зелен") are poetic; the long one ends -ий.
   shortAdjectiveEndings: ['ий'],
   nameToLatin: ukrainianNameToLatin,
+  superlativePrefix: 'най',
+  // цінн-іший -> цінн-ий, дорож-чий -> дорог-ий is irregular and not covered.
+  comparativeToPositive: [['іший', 'ий'], ['ший', 'кий']],
+  languageNameEndings: ['ська', 'ський'],
 };
 
 const BY_LANG: Record<string, SourceAdapter> = { en: EN, ru: RU, uk: UK };

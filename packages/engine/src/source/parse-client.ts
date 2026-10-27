@@ -1,4 +1,5 @@
 import type { ParsedSentence, SourceLang, UdToken } from '../../../types/index.ts';
+import { fixMixedScript } from '../../../rules/src/mixed-script.ts';
 
 /**
  * Client for the Python parsing service.
@@ -55,7 +56,8 @@ export async function parseText(
     res = await fetch(`${url}/parse`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ text, lang }),
+      // Look-alike Latin letters inside Cyrillic words would mislead the parser.
+      body: JSON.stringify({ text: fixMixedScript(text, lang), lang }),
       signal: AbortSignal.timeout(timeoutMs),
     });
   } catch (cause) {
