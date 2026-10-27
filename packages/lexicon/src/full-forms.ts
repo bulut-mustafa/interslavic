@@ -6,9 +6,9 @@ import type { Entry, Lexicon } from './reader.ts';
 /**
  * The full-form lexicon: every inflected form of every dictionary entry.
  *
- * This is the project's keystone artifact. Output cannot be reviewed by a fluent speaker, so
- * it cannot be judged by eye whether output is
- * correct. Correctness therefore cannot rest on a human eye:
+ * This is the project's keystone artifact. Output cannot be reviewed by a
+ * fluent speaker sentence by sentence, so correctness cannot rest on a human
+ * eye:
  *
  *   1. VALIDATION   - every generated word must resolve to a known form, so
  *                     the engine catches its own invented non-words.

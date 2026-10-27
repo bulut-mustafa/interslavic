@@ -39,7 +39,7 @@ export function Lesson({ slug }: { slug: string }) {
         <h1>{lesson.title}</h1>
         <p className="lesson-summary">{lesson.summary}</p>
         <p className="lesson-draft">
-          New page - if you spot a mistake, use &ldquo;Report a problem&rdquo; at the bottom.
+          Spotted a mistake? Use &ldquo;Report a problem&rdquo; at the bottom of the page.
         </p>
 
         {lesson.blocks.map((b, i) => (

@@ -22,3 +22,6 @@ services/parser/.venv/
 # Generated from the dictionary at build time (npm run lexicon:fetch), like the
 # dictionary itself - not redistributed. See docs/dictionary-provenance.md.
 packages/rules/data/preposition-government.json
+
+# macOS
+.DS_Store

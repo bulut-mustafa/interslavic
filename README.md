@@ -3,9 +3,30 @@
 A rule-based, deterministic translator into **Interslavic** (Medžuslovjansky) that shows
 its reasoning for every word.
 
-Nobody has shipped a translator *into* Interslavic: the official dictionary is word-lookup
-only, and the one neural demo is paused. The missing work is all on the source-analysis and
-transfer side, which is what this project builds.
+Dictionaries look Interslavic words up one at a time; this project translates whole
+sentences and explains every word it chose, so a learner can follow - and check - the
+grammar.
+
+**Try it online: https://interslavic.web.app** - free, no sign-up.
+
+## What it does
+
+- Translates **English and Russian into Interslavic**, written in Latin, Cyrillic, or the
+  etymological and simplified alphabets.
+- Shows **why each word has its form**: tap a word to see its case, aspect, gender and
+  number, the rule that decided it, and the source of that rule - Jan van Steenbergen's
+  grammar pages, the Interslavic dictionary, or attested usage (Tatoeba, the Interslavic
+  Wikipedia).
+- Says **how sure** it is. Where English gives no information (aspect, say) the choice is
+  marked as a guess; English idioms with no sourced equivalent are flagged instead of
+  translated as if they made sense.
+- Checks **every output word** against a full-form lexicon of 743,803 forms generated from
+  the dictionary, so invented non-words are caught.
+- Includes **16 short lessons** and a **phrasebook** with flashcards, in Latin and Cyrillic.
+
+It is rule-based and deterministic, not a neural or LLM translator: a parser analyses the
+source sentence, and documented rules plus the dictionary build the Interslavic. How each
+rule was checked is recorded in [docs/verification-log.md](docs/verification-log.md).
 
 ## Try it
 
@@ -26,15 +47,15 @@ npm run web                 # interface    (127.0.0.1:5174)
 Then open <http://127.0.0.1:5174>. The server builds the lexicon and the 743k-form
 index once at boot, so translations are fast after that.
 
-**Learn** - beside the translator, the site has 17 lessons (alphabet to word formation)
+**Learn** - beside the translator, the site has 16 lessons (alphabet to word formation)
 and a phrasebook with flashcards, in `packages/web/src/learn/`. Lessons are data, and
 `packages/web/test/lessons.test.ts` checks every Interslavic word on them against the
 lexicon, every table cell against the engine, and every "Try it" example against the
 translator's own output.
 
-**Online, for testers** — one container serves the page, the engine and the parser
-on one address, with a *Report a problem* button whose reports the server keeps.
-See [DEPLOY.md](DEPLOY.md): it runs on Google Cloud Run.
+**Online** — the pages are served from Firebase Hosting and the translator runs on Google
+Cloud Run; every page has a *Report a problem* button whose reports the server keeps.
+See [DEPLOY.md](DEPLOY.md).
 
 **Command line** — needs only the parser:
 
@@ -54,7 +75,7 @@ npm run isv -- "She did not know the answer." --brief
   checked  100% of words found in the full-form lexicon
 ```
 
-Every emitted word is checked against a generated full-form lexicon (286,457 forms), so the
+Every emitted word is checked against a generated full-form lexicon (743,803 forms), so the
 engine catches its own invented non-words. `--no-validate` skips the check.
 
 **Read this if you are learning from the output.** That check proves the *words* are real

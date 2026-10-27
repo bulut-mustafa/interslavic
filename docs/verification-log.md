@@ -1,8 +1,8 @@
 # Verification log
 
-Every load-bearing claim in the plan, with how it was checked. Written because a
-vacuous test assertion was found in the suite, which made "the tests pass" an
-inadequate answer to "is this correct?".
+Every load-bearing claim in the project's design, with how it was checked. Started
+because a vacuous test assertion was found in the suite, which made "the tests pass" an
+inadequate answer to "is this correct?". Newer entries are at the end.
 
 **Three categories, kept strictly separate:**
 `VERIFIED` = checked empirically in this repo · `CORRECTED` = was wrong, now fixed ·
@@ -672,16 +672,16 @@ Run it yourself: `bash scripts/mutation-audit.sh`
 
 ---
 
-## Pre-M4 recheck (2026-10-17)
+## Recheck before the web UI (2026-10-17)
 
-A full re-audit before starting the web UI. It found one **missing approved
+A full re-audit before starting the web UI. It found one **missing design
 requirement** and three further defects.
 
 ### The missing requirement: self-validation was never built
 
-The approved plan made the full-form lexicon the **keystone artifact** and scheduled it as
-early, because the output cannot be reviewed sentence by sentence by a fluent speaker, so it chose
-"validate and flag". It was never built; milestones were renumbered around it.
+The design made the full-form lexicon the **keystone artifact**, scheduled early,
+because the output cannot be reviewed sentence by sentence by a fluent speaker, so the
+approach is "validate and flag". It had not been built.
 
 Worse, the `validation` field reported `validated` whenever the morphology library returned
 *any* form — which is **not** the claim it appears to make. Earlier reports of "validated"
@@ -829,9 +829,9 @@ is traceable rather than surprising.
 
 ---
 
-## CORRECTED — claims in the plan that were wrong
+## CORRECTED — claims in the original design that were wrong
 
-| Plan said | Actually | Why it was wrong |
+| The design said | Actually | Why it was wrong |
 |---|---|---|
 | Full-form lexicon ≈ **600k** forms | **352,182** | An estimate (19k × ~30); the real average is ~18 forms/entry. Nearly 2× overstated. |
 | 124 `prep.` entries | **136** entries, 133 with codes | Research counted raw rows; we count entries after lemma-splitting |
@@ -846,8 +846,8 @@ is traceable rather than surprising.
 
 ## UNVERIFIED — research-sourced, NOT independently confirmed
 
-These are in the plan and may be wrong. **None of them is implemented yet**, so nothing in
-the working code depends on them. They must be confirmed before the milestone that uses them.
+These were in the original design and may be wrong. **None of them is implemented yet**, so
+nothing in the working code depends on them. They must be confirmed before they are used.
 
 - **Verb agreement after 5+** (research claimed 3rd-person singular neuter). The grammar
   page does not state it, so it is **not implemented**.
@@ -1961,8 +1961,8 @@ Left open, with the reason:
 
 ## VERIFIED: asking someone's name (2026-10-25)
 
-"What is your name" was compared with another tool's "Kak se ty
-zoveš?". Ours was "Čto jest vaše ime".
+"What is your name" was compared with another tool's "Kak se ty zoveš?". Ours was
+"Čto jest vaše ime".
 
 - **"vaše" (polite you) is right** for a stranger: "vy is a universal second person
   pronoun for both numbers, whereas the second person singular ty is used only for

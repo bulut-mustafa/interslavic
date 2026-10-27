@@ -12,8 +12,9 @@ const validator = buildFullFormIndex(lex);
 const FIXTURES = path.join(import.meta.dirname, 'fixtures/parse');
 
 /**
- * The full-form lexicon exists because output cannot be checked by a fluent speaker
- * by eye, so the engine has to catch its own invented non-words. These tests
+ * The full-form lexicon exists because output cannot be checked by a fluent
+ * speaker sentence by sentence, so the engine has to catch its own invented
+ * non-words. These tests
  * are the project's primary objective quality signal.
  */
 

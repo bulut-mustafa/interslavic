@@ -1,4 +1,4 @@
-# Putting the translator online for testers
+# Deployment
 
 The whole app runs in one container: the Stanza parser, the engine, and the web
 page, all on one address. It is hosted on **Google Cloud Run**, which builds the
@@ -16,7 +16,7 @@ servers were out of capacity in the account's home region.
 |---|---|
 | Project | `interslavic-translator-08rmc` |
 | Service | `interslavic`, region `europe-west1` |
-| Link for testers | **https://interslavic.web.app** |
+| Public address | **https://interslavic.web.app** |
 | Direct Cloud Run address | https://interslavic-8578650623.europe-west1.run.app |
 | Size | 1 CPU, 2 GiB, at most **one** copy running (caps the cost) |
 | Tester reports | bucket `interslavic-translator-08rmc-reports`, mounted at `/data` |
@@ -59,7 +59,7 @@ The build takes about 10–15 minutes and keeps every setting above.
   `gcloud meta list-files-for-upload`.
 - The dictionary is never uploaded: the build fetches it from its public source.
 
-## Reading the testers' reports
+## Reading the reports
 
 Each report from the page's **Report a problem** button is one line in a file
 that survives restarts. Open:
