@@ -123,6 +123,11 @@ export function planPhrasalVerbs(sentence: ParsedSentence, lex: Lexicon): Phrasa
    * The same gate as above: only an EXACT gloss of the whole surface phrase
    * counts, so nothing is assembled that the dictionary does not list. Forms,
    * not lemmas: both halves of "друг друга" have the lemma "друг".
+   *
+   * The parser's `ExtPos` is the part of speech of the whole expression - UD:
+   * it "indicates the part of speech that the expression would get". Without
+   * it "out of" tied the preposition `iz` (+2) with the prefix `iz-`, both
+   * glossed "out of", and the prefix won: "Ona gleděla iz- okno".
    */
   for (const head of sentence.tokens) {
     if (phrasalVerbs.has(head.id)) continue;
@@ -133,7 +138,13 @@ export function planPhrasalVerbs(sentence: ParsedSentence, lex: Lexicon): Phrasa
       .map((t) => t.form)
       .join(' ')
       .toLowerCase();
-    const best = rank(lex.lookup(phrase, sentence.lang), { gloss: phrase, lang: sentence.lang, contextWords })[0];
+    const extPos = head.feats.ExtPos;
+    const best = rank(lex.lookup(phrase, sentence.lang), {
+      gloss: phrase,
+      lang: sentence.lang,
+      contextWords,
+      ...(extPos ? { upos: extPos } : {}),
+    })[0];
     if (!best) continue;
     phrasalVerbs.set(head.id, best);
     for (const p of parts) phrasalParticles.add(p.id);

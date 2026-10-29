@@ -107,3 +107,14 @@ describe('"city"', () => {
     expect(out('en/live-in-a-big-city.conllu')).toBe('My živemo v velikom gradu.');
   });
 });
+
+describe('prepositions of more than one word', () => {
+  it('take the dictionary\'s preposition and its case', () => {
+    // Dictionary: iz (+2) "from, out of"; poręd (+2) "beside, next to"; po (+3)
+    // "according to". The parser marks "out of" and "according to" with
+    // ExtPos=ADP, UD's "part of speech that the expression would get".
+    expect(out('en/looked-out-of-the-window.conllu')).toBe('Ona gleděla iz okna.');
+    expect(out('en/lives-next-to-the-school.conllu')).toBe('Ona žive pored školy.');
+    expect(out('en/according-to-the-law.conllu')).toMatch(/^Po pravu, /);
+  });
+});

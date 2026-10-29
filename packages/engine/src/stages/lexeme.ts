@@ -205,7 +205,12 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
       const p = prepPlans.get(token.id);
       dropped.push({
         form: token.form,
-        why: p?.kind === 'caseMarker' ? p.case.because : 'expressed by case alone',
+        why:
+          p?.kind === 'caseMarker'
+            ? p.case.because
+            : p?.kind === 'absorbed'
+              ? `part of the preposition "${p.into}"`
+              : 'expressed by case alone',
       });
       continue;
     }

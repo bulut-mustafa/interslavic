@@ -34,7 +34,11 @@ export function planPrepositions(
   for (const token of sentence.tokens) {
     // The possessive clitic is tagged PART, not ADP, but it is a `case` marker
     // in exactly the same way - see CASE_MARKER_PREPOSITIONS.
-    const isCaseMarker = token.deprel === 'case' && (token.upos === 'ADP' || token.upos === 'PART');
+    // "According" (+ fixed "to") is tagged VERB but carries `ExtPos=ADP`, the
+    // part of speech of the whole expression.
+    const isCaseMarker =
+      token.deprel === 'case' &&
+      (token.upos === 'ADP' || token.upos === 'PART' || token.feats.ExtPos === 'ADP');
     if (!isCaseMarker) continue;
     // Consumed by a phrasal verb: the meaning is in the verb's own lemma.
     if (phrasalParticles.has(token.id)) continue;
@@ -45,6 +49,10 @@ export function planPrepositions(
       governedCase.set(token.head, p.case as Decision<string>);
     } else if (p.kind === 'preposition') {
       governedCase.set(token.head, p.case as Decision<string>);
+      if (p.absorbs !== undefined) {
+        prepPlans.set(p.absorbs, { kind: 'absorbed', into: p.prep });
+        deletedPreps.add(p.absorbs);
+      }
     }
     // The government reaches every conjunct, but the preposition itself is
     // emitted once, so only the CASE below is propagated.

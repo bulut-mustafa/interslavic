@@ -10,7 +10,15 @@ import { isTimeUnit, verbGovernedPhrase } from '../../../rules/src/verb-preposit
  * is a bare case marker that must be deleted (English "of"/recipient "to").
  */
 export type PrepPlan =
-  | { kind: 'preposition'; prep: string; case: Decision<Case>; alternatives: string[] }
+  | {
+      kind: 'preposition';
+      prep: string;
+      case: Decision<Case>;
+      alternatives: string[];
+      /** The word before it that is part of the same preposition ("NEXT to"). */
+      absorbs?: number;
+    }
+  | { kind: 'absorbed'; into: string }
   | { kind: 'caseMarker'; case: Decision<Case> }
   | { kind: 'unknown' };
 
@@ -74,7 +82,39 @@ const MARKER_REASON: Record<string, string> = {
 const TIMES_OF_DAY = new Set(['noon', 'midday', 'midnight']);
 
 export function planPreposition(adp: UdToken, sentence: ParsedSentence): PrepPlan {
-  const lemma = adp.lemma.toLowerCase();
+  /**
+   * A preposition written as a fixed expression is ONE preposition: "out" +
+   * fixed "of" is "out of", which the dictionary gives as `iz` (+2). Planned
+   * from "out" alone it found no government, and the noun kept the
+   * nominative: "iz okno".
+   */
+  const fixed = sentence.tokens.filter((t) => t.head === adp.id && t.deprel === 'fixed');
+  // Forms, not lemmas: "according to" has the lemma "accord".
+  const phrase = [adp, ...fixed].sort((a, b) => a.id - b.id).map((t) => t.form.toLowerCase()).join(' ');
+  /**
+   * The same preposition where the parser splits it: "next to" is an adverb
+   * "next" plus a case marker "to", but the dictionary lists the whole as one
+   * preposition, `sųsědno do` (+2) "next to". Word by word it became "slědno
+   * do školy", "following to the school". Only an adverb directly before the
+   * case marker, with nothing of its own, and only where the dictionary has
+   * the whole phrase.
+   */
+  const prev = sentence.tokens.find((t) => t.id === adp.id - 1);
+  const prevPhrase = prev && `${prev.form} ${adp.form}`.toLowerCase();
+  const absorbs =
+    fixed.length === 0 &&
+    prev?.upos === 'ADV' &&
+    prev.deprel === 'advmod' &&
+    !sentence.tokens.some((t) => t.head === prev.id) &&
+    candidatesForEnglish(prevPhrase!).length > 0
+      ? prev.id
+      : undefined;
+  const lemma =
+    absorbs !== undefined
+      ? prevPhrase!
+      : fixed.length > 0 && candidatesForEnglish(phrase).length > 0
+        ? phrase
+        : adp.lemma.toLowerCase();
 
   /**
    * A PARTITIVE "of" - a part out of a whole - is `iz` with the genitive, not
@@ -293,5 +333,6 @@ export function planPreposition(adp: UdToken, sentence: ParsedSentence): PrepPla
     case: decide<Case>(best.case, 'case.prep.governed', confidence, because,
       cands.slice(1, 4).map((c) => ({ value: c.case, because: `"${c.prep}" + ${c.case.toLowerCase()}` }))),
     alternatives: cands.slice(1, 4).map((c) => `${c.prep} (+${c.case.toLowerCase()})`),
+    ...(absorbs !== undefined ? { absorbs } : {}),
   };
 }
