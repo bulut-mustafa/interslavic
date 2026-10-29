@@ -12,7 +12,15 @@ if [ -z "$FEEDBACK_FILE" ]; then
 fi
 export FEEDBACK_FILE
 
-PYTHONPATH=/app/services/parser/src /opt/venv/bin/uvicorn parser_service.app:app --host 127.0.0.1 --port 8765 &
+# The engine is the container's main process, so the host never notices if
+# the parser dies; restart it here instead of leaving every request a 503.
+(
+  while true; do
+    PYTHONPATH=/app/services/parser/src /opt/venv/bin/uvicorn parser_service.app:app --host 127.0.0.1 --port 8765 \
+      || echo "parser exited with status $?, restarting" >&2
+    sleep 2
+  done
+) &
 
 # Load both language models while the engine builds its dictionary index
 # (about 22s and 33s on Cloud Run), so they overlap instead of adding up. The
