@@ -159,20 +159,15 @@ describe('auxiliary feature transfer actually changes the output', () => {
 });
 
 describe('multiword phrase inflection, end to end', () => {
-  // The dictionary glosses "city" only as the phrase "veliky gråd".
-  it('inflects the phrase\'s noun head and keeps its modifier', () => {
-    const r = out('i-work-in-big-city.conllu');
-    // The noun head must be locative after "v"...
-    expect(r.text).toContain('gradu');
-    // ...and the phrase's own modifier must still be present.
-    expect(r.text).toContain('veliky');
-  });
-
-  it('is a known limitation: the phrase modifier does not agree', () => {
-    // Documented rather than hidden: "veliky" should be "velikom" here, and
-    // it also duplicates the source's own "big". Both stem from the dictionary
-    // glossing "city" as a two-word phrase.
-    expect(out('i-work-in-big-city.conllu').text).toBe('Ja rabotaju v velikom veliky gradu.');
+  /**
+   * The dictionary glosses "city" only as the phrase "veliky gråd", whose
+   * modifier doubled the source's own "big": "v velikom veliky gradu". The
+   * head noun alone is what van Steenbergen writes for "city" - Genesis 11:4
+   * "let us build us a city and a tower" is "budujmo gråd i věžų"
+   * (http://steen.free.fr/interslavic/babel_text.html).
+   */
+  it('drops the phrase\'s built-in adjective when the noun has its own', () => {
+    expect(out('i-work-in-big-city.conllu').text).toBe('Ja rabotaju v velikom gradu.');
   });
 });
 

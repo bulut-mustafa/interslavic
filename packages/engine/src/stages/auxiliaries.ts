@@ -15,6 +15,7 @@ interface FormPersonNumber {
   form: string;
   person: string;
   number: string;
+  conditional?: boolean;
 }
 
 interface PersonNumber {
@@ -86,7 +87,7 @@ export function planAuxiliaries(
   // than VERB, but it must survive and be conjugated like any verb. Without
   // this it received no verb features at all and tie-breaking picked an
   // imperfect form (běše) instead of jest.
-  const futureForms = new Map<number, { form: string; person: string; number: string }>();
+  const futureForms = new Map<number, FormPersonNumber>();
   /** byti forms that precede an l-participle in the 1st and 2nd person. */
   const pastAuxiliaries = new Map<number, { form: string; person: string; number: string }>();
   /**
@@ -190,8 +191,38 @@ export function planAuxiliaries(
         continue;
       }
 
-      const role = auxiliaryRole(token.lemma);
+      let role = auxiliaryRole(token.lemma);
       if (!role) continue; // an unhandled modal falls through to plain lookup
+
+      /**
+       * Reported "would" is a future seen from the past, not a conditional:
+       * "She said she WOULD come back". The Interslavic Wikipedia keeps the
+       * future - "grupa rěšila, že ... versija bude služebno nazyvati se",
+       * "avtori ... myslili, že 'najlěpši' jezyk bude ulěpšiti i mysljeńje" -
+       * and has no reported clause with `by` for it. A clause that has an
+       * "if" of its own is a real conditional and stays one.
+       */
+      const clause = sentence.tokens.find((t) => t.id === token.head);
+      const reporter = clause?.deprel === 'ccomp' ? sentence.tokens.find((t) => t.id === clause.head) : undefined;
+      if (
+        role === 'conditional' &&
+        token.lemma.toLowerCase() === 'would' &&
+        reporter?.feats['Tense'] === 'Past' &&
+        !sentence.tokens.some((t) => t.head === clause!.id && t.deprel === 'advcl' &&
+          sentence.tokens.some((m) => m.head === t.id && m.deprel === 'mark' && m.lemma.toLowerCase() === 'if'))
+      ) {
+        role = 'future';
+      }
+
+      /**
+       * "would HAVE prepared": the perfect "have" is only English's way of
+       * putting the conditional in the past, and it overwrote it - "ja budu
+       * jesm prigotovil". The conditional stays and "have" is dropped.
+       */
+      if (role === 'perfect' && auxRoleForHead.get(token.head) === 'conditional') {
+        droppedAux.add(token.id);
+        continue;
+      }
 
       auxRoleForHead.set(token.head, role);
       auxFeatsForHead.set(token.head, token.feats);
@@ -202,6 +233,38 @@ export function planAuxiliaries(
       } else {
         droppedAux.add(token.id);
       }
+    }
+  }
+
+  /**
+   * The unreal "if" clause. English puts it in the past ("If I HAD money",
+   * "If I HAD known"); Interslavic puts it in the conditional, introduced by
+   * `ako`: "Ako li lovci by tancevali kogdakoli, vse dni byli by jednakove"
+   * (Maly princ, for "if the hunters danced at just any time"), "ne bylo by
+   * ni psov ... ako by člověk ne priložil" (Piron). Only when the clause it
+   * conditions is itself conditional, which is what makes the past unreal
+   * rather than a plain past.
+   *
+   * The "if" itself carries the particle, giving the texts' order "ako bys
+   * prihodil", "ako by člověk ...".
+   */
+  if (sentence.lang === 'en') {
+    for (const token of sentence.tokens) {
+      if (token.deprel !== 'advcl' || auxRoleForHead.get(token.head) !== 'conditional') continue;
+      const ifMark = sentence.tokens.find(
+        (t) => t.head === token.id && t.deprel === 'mark' && t.lemma.toLowerCase() === 'if',
+      );
+      if (!ifMark) continue;
+      const had = sentence.tokens.find(
+        (t) => t.head === token.id && t.deprel === 'aux' && t.lemma === 'have' && t.feats['Tense'] === 'Past',
+      );
+      const copula = sentence.tokens.find(
+        (t) => t.head === token.id && t.deprel === 'cop' && t.feats['Tense'] === 'Past',
+      );
+      if (!had && !copula && token.feats['Tense'] !== 'Past') continue;
+      const carrier = copula ?? token;
+      auxRoleForHead.set(carrier.id, 'conditional');
+      futureAuxToken.set(carrier.id, ifMark.id);
     }
   }
 
@@ -355,6 +418,18 @@ export function planAuxiliaries(
         (t) => t.head === token.id && t.deprel.startsWith('nsubj'),
       );
       if (!mark || !subject) continue;
+      /**
+       * "so bad THAT we stayed" is a result, not a purpose: the "so" (or
+       * "such") belongs to the word being graded, and "that" marks the clause
+       * alone. It states what happened, so it keeps its indicative - "tak
+       * zlo, že my ostali doma", where the purpose reading gave "da byhmo my
+       * ostali".
+       */
+      const governor = sentence.tokens.find((t) => t.id === token.head);
+      const graded = (t: UdToken) =>
+        /^(so|such)$/i.test(t.lemma) &&
+        (t.head === governor?.id || sentence.tokens.some((g) => g.id === t.head && g.head === governor?.id));
+      if (mark.lemma === 'that' && sentence.tokens.some(graded)) continue;
 
       const pronoun = pronounLemmaFor(subject.feats, sentence);
       const agreement = {
@@ -369,8 +444,11 @@ export function planAuxiliaries(
 
       // The conditional lands on the copula when there is one, else on the
       // clause's own predicate.
+      // A modal takes it ahead of both: "so that her children CAN study" is
+      // "da by děti mogli učiti se", the verb staying an infinitive.
       const copula = sentence.tokens.find((t) => t.head === token.id && t.deprel === 'cop');
-      finitePurposeCarriers.add(copula?.id ?? token.id);
+      const modal = sentence.tokens.find((t) => t.head === token.id && t.deprel === 'aux' && modalPlans.has(t.id));
+      finitePurposeCarriers.add(modal?.id ?? copula?.id ?? token.id);
 
       /**
        * "will" is replaced by the conditional, and a fixed "that" rides along

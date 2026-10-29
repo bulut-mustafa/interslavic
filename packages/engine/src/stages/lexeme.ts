@@ -228,12 +228,35 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
           ? 'Plur'
           : 'Sing';
       const conditional = futureHead !== undefined && auxRoleForHead.get(futureHead[0]) === 'conditional';
+      /**
+       * "would HAVE done": "A past conditional can be formed by inserting the
+       * past tense of the verb 'to be' into the normal conditional form: ja
+       * byl byh dělal 'I would have done' (m.), ja byla byh dělala (f.)"
+       * (http://steen.free.fr/interslavic/verbs.html; the same on
+       * interslavic.fun/learn/grammar/verbs). `byl` agrees like the
+       * l-participle it stands beside.
+       */
+      const pastConditional =
+        conditional &&
+        sentence.lang === 'en' &&
+        sentence.tokens.some(
+          (t) => t.head === futureHead[0] && t.id !== token.id && t.deprel === 'aux' && t.lemma === 'have',
+        );
+      const byl =
+        number === 'Plur'
+          ? 'byli'
+          : subject?.feats['Gender'] === 'Fem'
+            ? 'byla'
+            : subject?.feats['Gender'] === 'Neut'
+              ? 'bylo'
+              : 'byl';
       futureForms.set(token.id, {
         form: conditional
-          ? conditionalAuxiliary(person, number)
+          ? (token.deprel === 'mark' ? 'ako ' : pastConditional ? `${byl} ` : '') + conditionalAuxiliary(person, number)
           : futureAuxiliary(person, number),
         person,
         number,
+        conditional,
       });
       plan.push({
         token,
@@ -464,6 +487,32 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
       ingVerb && ingNoun && verbalNounPos
         ? { ...ingVerb, id: `${ingVerb.id}:vn`, lemma: ingNoun, pos: verbalNounPos, addition: parseAddition('') }
         : undefined;
+    /**
+     * The dictionary glosses "city" only with the phrase `veliky gråd` ("big
+     * town"). When the source noun brings its own adjective, the phrase's
+     * built-in one doubles it: "a big city" came out "velikom veliky gradu".
+     * The phrase's head noun carries the meaning, so it stands alone.
+     */
+    /**
+     * An unreal "if" is `ako`. The conjunctions page lists both "ako (li)" and
+     * "jestli" for "if", but in van Steenbergen's own texts every condition
+     * put in the conditional takes `ako`: "Lěpje by bylo, ako bys prihodil v
+     * to samo vrěme" (Maly princ), "Ne bylo by ni psov, ni roz, ni hlěba, ako
+     * by člověk ne priložil umysľno svoje talenty" (Piron). The Interslavic
+     * Wikipedia agrees ("ako by onogda avstro-vugorska vlada odzvala se");
+     * neither has `jestli` with the conditional.
+     */
+    const unrealIf =
+      token.deprel === 'mark' && auxRoleForHead.get(token.head) === 'conditional'
+        ? ranked.find((e) => e.lemma === 'ako')
+        : undefined;
+    const phraseWords = ranked[0]?.pos.upos === 'NOUN' ? ranked[0].lemma.split(' ') : [];
+    const phraseHeadEntry =
+      phraseWords.length === 2 &&
+      sentence.tokens.some((t) => t.head === token.id && t.deprel === 'amod') &&
+      lex.lookupLemma(phraseWords[0]!, 'ADJ').length > 0
+        ? lex.lookupLemma(phraseWords[1]!, 'NOUN')[0]
+        : undefined;
     const entry =
       phrasalVerbs.get(token.id) ??
       complementizerEntry ??
@@ -486,6 +535,8 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
        * right and the preposition still wrong, "čekajemo dlja pojezd".
        */
       (plannedPrep ? lex.lookupLemma(plannedPrep, 'ADP')[0] : undefined) ??
+      phraseHeadEntry ??
+      unrealIf ??
       ranked[0] ??
       verbalNounEntry ??
       properNounEntry ??

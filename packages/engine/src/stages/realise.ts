@@ -117,6 +117,36 @@ export function realiseStage(input: RealiseInput): RealiseOutput {
     if (plan_ && spec) insertedPrepositions.set(plan_.token.id, spec);
   }
 
+  /**
+   * A reported clause always opens with `že`, which English may leave out
+   * ("She said she would come"). Interslavic has no such omission: every
+   * reported clause in van Steenbergen's texts and the Interslavic Wikipedia
+   * has it - "Jan Hus skazal, že Rimskokatolična Crkva stala prězměrno
+   * močnoju", "ne myslim, že ona mene vidi". A clause opened by a question
+   * word ("I know where he lives") has its own opener and is left alone.
+   */
+  const reportedOpeners = new Set<number>();
+  if (sentence.lang === 'en') {
+    for (const clause of sentence.tokens) {
+      if (clause.deprel !== 'ccomp') continue;
+      const head = sentence.tokens.find((t) => t.id === clause.head);
+      if (head?.upos !== 'VERB') continue;
+      const children = sentence.tokens.filter((t) => t.head === clause.id);
+      if (children.some((t) => t.deprel === 'mark' || t.upos === 'PUNCT' && /["“«]/.test(t.form))) continue;
+      if (!children.some((t) => t.deprel.startsWith('nsubj'))) continue;
+      const subtree = new Set([clause.id]);
+      for (let grew = true; grew; ) {
+        grew = false;
+        for (const t of sentence.tokens) {
+          if (!subtree.has(t.id) && subtree.has(t.head)) { subtree.add(t.id); grew = true; }
+        }
+      }
+      if (sentence.tokens.some((t) => subtree.has(t.id) && /^(Int|Rel)$/.test(t.feats['PronType'] ?? ''))) continue;
+      const first = plan.find((n) => subtree.has(n.token.id));
+      if (first) reportedOpeners.add(first.token.id);
+    }
+  }
+
   const words: GlossedWord[] = [];
   const surfaces: string[] = [];
 
@@ -182,6 +212,31 @@ export function realiseStage(input: RealiseInput): RealiseOutput {
      * second `od` in "starějši od mene na dva roky" disappeared, which in turn
      * masked a mutation and made its guard look inert.
      */
+    /**
+     * A comma before the subordinating `že`: the texts write it 324 times to
+     * 69 without (van Steenbergen's texts and the Interslavic Wikipedia),
+     * "jesm taky glådny, že ne mogų spati" (Vȯlk i pės).
+     */
+    if (token.deprel === 'mark' && entry?.lemma === 'že') appendComma();
+    if (reportedOpeners.has(token.id)) {
+      appendComma();
+      surfaces.push('že');
+      words.push({
+        surface: 'že',
+        lemma: 'že',
+        sourceForm: '(that)',
+        pos: 'conj.',
+        features: [],
+        lexicalChoice: {
+          chosen: 'že',
+          because: 'a reported clause is introduced by "že", which English may leave out',
+          rejected: [],
+        },
+        notes: [],
+        validation: 'validated',
+      });
+    }
+
     const preposition = insertedPrepositions.get(token.id);
     if (preposition) {
       surfaces.push(preposition.form);
@@ -359,10 +414,17 @@ export function realiseStage(input: RealiseInput): RealiseOutput {
         sourceForm: token.form,
         pos: 'v.intr. ipf.',
         features: [
-          glossFeature(
-            'Tense',
-            decide('Fut', 'future.periphrastic', 'certain', 'the future is byti + infinitive'),
-          ),
+          future.conditional
+            ? glossFeature(
+                'Mood',
+                decide('Cnd', 'mood.conditional', 'certain',
+                  'the conditional is the l-participle with the conditional of byti: ' +
+                    '"ja byh dělal" (I would do), "ja byl byh dělal" (I would have done)'),
+              )
+            : glossFeature(
+                'Tense',
+                decide('Fut', 'future.periphrastic', 'certain', 'the future is byti + infinitive'),
+              ),
           glossFeature(
             'Person',
             decide(future.person, 'future.agreement', 'certain', 'agrees with the subject'),
@@ -374,9 +436,12 @@ export function realiseStage(input: RealiseInput): RealiseOutput {
         ],
         lexicalChoice: {
           chosen: future.form,
-          because:
-            'future of byti, stem bud- (the morphology library generates no future, so this ' +
-            'one closed auxiliary paradigm is supplied from the grammar)',
+          because: future.conditional
+            ? (token.deprel === 'mark'
+                ? 'an unreal "if" is "ako" with the conditional: "ako bys prihodil" (Maly princ); '
+                : '') + 'conditional of byti: byh, bys, by, byhmo, byste, by (verbs page)'
+            : 'future of byti, stem bud- (the morphology library generates no future, so this ' +
+              'one closed auxiliary paradigm is supplied from the grammar)',
           rejected: [],
         },
         notes,

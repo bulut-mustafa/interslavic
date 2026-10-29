@@ -98,6 +98,19 @@ const ownRussianAgreement = (verb: UdToken, sentence: ParsedSentence, feature: '
     ? verb.feats[feature]
     : undefined;
 
+/**
+ * A Slavic past in the neuter singular whose clause has no subject is
+ * impersonal: "Хотя было уже поздно, мы решили" is "bylo pozdno", and walking
+ * up to the main clause's "мы" made it "jesm byl". A copula's clause is its
+ * predicate, so that is where the subject would hang.
+ */
+export function isImpersonalSlavicPast(verb: UdToken, sentence: ParsedSentence): boolean {
+  if (sentence.lang === 'en') return false;
+  if (verb.feats['Tense'] !== 'Past' || verb.feats['Gender'] !== 'Neut' || verb.feats['Number'] !== 'Sing') return false;
+  const clause = verb.deprel === 'cop' || verb.deprel.startsWith('aux') ? verb.head : verb.id;
+  return !sentence.tokens.some((t) => (t.head === clause || t.head === verb.id) && t.deprel.startsWith('nsubj'));
+}
+
 export function subjectNumber(verb: UdToken, sentence: ParsedSentence, fallback?: string): string {
   const own = ownRussianAgreement(verb, sentence, 'Number');
   if (own) return own;
@@ -118,6 +131,7 @@ export function subjectNumber(verb: UdToken, sentence: ParsedSentence, fallback?
 export function subjectPerson(verb: UdToken, sentence: ParsedSentence): string {
   const own = ownRussianAgreement(verb, sentence, 'Person');
   if (own) return own;
+  if (isImpersonalSlavicPast(verb, sentence)) return '3';
   const subject =
     sentence.tokens.find((t) => t.head === verb.id && t.deprel.startsWith('nsubj')) ??
     subjectOfClause(verb, sentence);

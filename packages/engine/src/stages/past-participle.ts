@@ -1,6 +1,6 @@
 import { decide } from '../../../types/index.ts';
 import { realize } from '../../../morph/src/realize.ts';
-import { subjectOfClause, subjectPerson } from '../tree.ts';
+import { isImpersonalSlavicPast, subjectOfClause, subjectPerson } from '../tree.ts';
 import type { StageContext } from './context.ts';
 
 /**
@@ -29,7 +29,7 @@ export function pastParticipleStage(ctx: StageContext): void {
     const ownSubject = plan.find(
       (n) => n.token.head === node.token.id && n.token.deprel.startsWith('nsubj'),
     );
-    const walkedUp = subjectOfClause(node.token, sentence);
+    const walkedUp = isImpersonalSlavicPast(node.token, sentence) ? undefined : subjectOfClause(node.token, sentence);
     const subject =
       ownSubject ?? (walkedUp ? plan.find((n) => n.token.id === walkedUp.id) : undefined);
     // Gender is lexical for a noun subject and morphological for a pronoun.
@@ -40,6 +40,14 @@ export function pastParticipleStage(ctx: StageContext): void {
       subject?.feats.get('Gender')?.value ??
       subject?.token.feats['Gender'] ??
       (!subject && sentence.lang !== 'en' ? node.token.feats['Gender'] : undefined) ??
+      // English "it" with nothing resolved for it is the weather or the
+      // placeholder subject, and an impersonal past is neuter: "doždilo",
+      // "bylo važno" - the masculine default gave "Hot doždil".
+      (sentence.tokens.find(
+        (t) => t.head === (node.token.deprel === 'cop' ? node.token.head : node.token.id) && (t.deprel.startsWith('nsubj') || t.deprel === 'expl'),
+      )?.lemma.toLowerCase() === 'it'
+        ? 'Neut'
+        : undefined) ??
       'Masc';
     const number = node.feats.get('Number')?.value ?? subject?.token.feats['Number'] ?? 'Sing';
 

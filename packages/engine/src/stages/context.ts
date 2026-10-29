@@ -38,4 +38,6 @@ export interface InsertedForm {
   form: string;
   person: string;
   number: string;
+  /** The rewritten auxiliary is the conditional `byh`, not the future `budu`. */
+  conditional?: boolean;
 }

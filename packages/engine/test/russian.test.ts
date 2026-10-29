@@ -319,7 +319,8 @@ describe('comparison from Russian', () => {
  */
 describe('the Russian conditional', () => {
   it('becomes byh/bys/by and suppresses the compound past', () => {
-    expect(out('esli-by-ja-znal.conllu')).toBe('Jestli byh ja znal, ja byh prišel.');
+    // An unreal "if" is `ako`: "Lěpje by bylo, ako bys prihodil" (Maly princ).
+    expect(out('esli-by-ja-znal.conllu')).toBe('Ako byh ja znal, ja byh prišel.');
     expect(out('hotel-by-chitat.conllu')).toBe('Ja hotěl byh čitati.');
   });
 

@@ -44,7 +44,7 @@ export interface LexemeInput {
   droppedAux: Set<number>;
   auxFeatsForHead: Map<number, Record<string, string>>;
   auxRoleForHead: Map<number, AuxiliaryRole>;
-  futureForms: Map<number, { form: string; person: string; number: string }>;
+  futureForms: Map<number, { form: string; person: string; number: string; conditional?: boolean }>;
   futureAuxToken: Map<number, number>;
   conditionalVerbs: Set<number>;
   purposeClauses: Map<number, PersonNumber>;

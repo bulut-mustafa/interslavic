@@ -202,13 +202,13 @@ describe('a verb that names a result is perfective in a single past event', () =
     expect(out('en/he-stayed-in-the-house.conllu')).toBe('On ostal v domu.');
     expect(out('en/he-died-last-year.conllu')).toMatch(/^On umrl /);
     expect(out('en/she-succeeded.conllu')).toBe('Ona uspěla.');
-    expect(out('en/they-agreed-that-he-was-right.conllu')).toMatch(/^Oni soglasili se /);
+    expect(out('en/they-agreed-that-he-was-right.conllu')).toMatch(/^Oni soglasili se, že /);
     expect(out('en/we-arrived-yesterday.conllu')).toBe('My jesmo došli včera.');
   });
 
   it('but an activity or a state stays imperfective', () => {
-    expect(out('en/i-thought-that-he-was-right.conllu')).toMatch(/^Ja jesm myslil /);
-    expect(out('en/she-knew-that-he-was-right.conllu')).toMatch(/^Ona znala /);
+    expect(out('en/i-thought-that-he-was-right.conllu')).toMatch(/^Ja jesm myslil, že /);
+    expect(out('en/she-knew-that-he-was-right.conllu')).toMatch(/^Ona znala, že /);
     expect(out('en/she-lived-in-prague.conllu')).toBe('Ona žila v Pragě.');
     expect(out('en/ran-for-an-hour.conllu')).toBe('Ja jesm běgl časinu.');
     expect(out('en/waited-for-an-hour.conllu')).toBe('Ja jesm čekal časinu.');
@@ -355,7 +355,7 @@ describe('a phrase the dictionary lists whole is translated whole', () => {
 
   it('but not across "to", tenses, or onto a word of another kind', () => {
     expect(out('en/going-to-london.conllu')).toBe('Ja idu do Londona.');
-    expect(out('en/i-thought-that-he-was-right.conllu')).toMatch(/^Ja jesm myslil /);
+    expect(out('en/i-thought-that-he-was-right.conllu')).toMatch(/^Ja jesm myslil, že /);
     expect(out('en/she-can-be-happy.conllu')).toBe('Ona može byti ščestliva.');
   });
 });

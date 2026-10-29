@@ -56,8 +56,10 @@ describe('the imperative', () => {
  */
 describe('subordinate clauses', () => {
   it('uses "že" for a complementizer, not a demonstrative', () => {
-    // Was "kazala mně tamtogo ona byla...".
-    expect(out('told-me-that.conllu')).toBe('Ona kazala mně že ona byla utomljena.');
+    // Was "kazala mně tamtogo ona byla...". The comma before `že` is what the
+    // texts write, 324 times to 69 (van Steenbergen's texts and the
+    // Interslavic Wikipedia): "jesm taky glådny, že ne mogų spati".
+    expect(out('told-me-that.conllu')).toBe('Ona kazala mně, že ona byla utomljena.');
   });
 
   it('uses "ktory" for a relative pronoun, not the interrogative "kto"', () => {
