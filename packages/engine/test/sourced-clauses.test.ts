@@ -164,3 +164,47 @@ describe('a purpose infinitive', () => {
     expect(out('en/nice-to-meet-you.conllu')).not.toContain('že by');
   });
 });
+
+describe('tenses', () => {
+  it('a future progressive or perfect is budu + infinitive, aspect saying the rest', () => {
+    // Verbs page: "The future tense is formed by combining the future tense of
+    // the verb byti with the infinitive"; perfective: "will be completed at
+    // some point". Was "Ja budu čitaju knigu" / "Ja budu jesm pročital knigu".
+    expect(out('en/will-be-reading.conllu')).toBe('Ja budu čitati knigu.');
+    expect(out('en/will-have-read.conllu')).toBe('Ja budu pročitati knigu.');
+  });
+
+  it('"used to" is the imperfective past', () => {
+    // Verbs page: the imperfective expresses "a habit or a repeated action".
+    expect(out('en/used-to-read-books.conllu')).toBe('Ja jesm čital knigy.');
+  });
+
+  it('a Slavic perfective future becomes budu + infinitive', () => {
+    // Verbs page: "Using the present tense of a perfective verb for the future
+    // ... is rather to be avoided"; Maly princ: "budu odkryti cěnu ščestja".
+    expect(out('ru/ja-prochitaju-knigu.conllu')).toBe('Ja budu pročitati knigu.');
+  });
+});
+
+describe('verbs of motion', () => {
+  it('a habit takes the non-directional verb', () => {
+    // Verbs page: "When a non-directional verb of motion has a direction
+    // anyway, this expresses a habit: Igor jezdil do Moskvy".
+    expect(out('en/used-to-go-to-the-sea.conllu')).toMatch(/ hodili do morja /);
+  });
+
+  it('going by transport is jehati / jezditi / pojehati, with the instrumental', () => {
+    // Verbs page table: "to go (by transport) jezditi jehati pojehati";
+    // dictionary: "jehati želěznicejų „travel by train”".
+    expect(out('en/go-to-school-by-bus.conllu')).toBe('Ja vsegda ježdžu do školy avtobusom.');
+    expect(out('en/went-to-prague-by-train.conllu')).toMatch(/pojehali do Pragy pojezdom\.$/);
+  });
+});
+
+describe('"by"', () => {
+  it('in a passive is od + genitive; elsewhere the place sense pri', () => {
+    // Syntax page: "pica sdělana od studentov"; dictionary: pri (+6) "by, near".
+    expect(out('en/book-was-read-by-him.conllu')).toBe('Kniga byla pročitana od njego.');
+    expect(out('en/stood-by-the-window.conllu')).toBe('Ona stojala pri oknu.');
+  });
+});

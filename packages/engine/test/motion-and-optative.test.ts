@@ -104,8 +104,10 @@ describe('the aspect of a past movement', () => {
   });
 
   it('stays imperfective when the movement was a habit', () => {
-    // "every" belongs to "morning", one level below the verb.
-    expect(out('ran-every-morning.conllu')).toBe('Ona běgla vsako utro.');
+    // "every" belongs to "morning", one level below the verb. A habitual run
+    // with no direction is the non-directional běgati: "The first of these
+    // expresses movement without any particular direction" (verbs page).
+    expect(out('ran-every-morning.conllu')).toBe('Ona běgala vsako utro.');
     // And it outranks the direct object, which alone would make it perfective.
     expect(out('read-a-book-every-night.conllu')).toContain('jesm čital knigu');
   });

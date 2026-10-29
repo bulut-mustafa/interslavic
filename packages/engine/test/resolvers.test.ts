@@ -92,7 +92,7 @@ describe('aspect chain', () => {
     expect(out.decision.ruleId).toBe('aspect.adverbial.imp');
     expect(out.decision.confidence).toBe('high');
     // aspect.perfect also declines here: there is no perfect auxiliary.
-    expect(out.declined).toEqual(['aspect.copy', 'aspect.perfect']);
+    expect(out.declined).toEqual(['aspect.copy', 'aspect.habitual', 'aspect.perfect']);
   });
 
   it('reads a completive adverb as perfective', () => {

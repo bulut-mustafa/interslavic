@@ -9,7 +9,7 @@ import { auxiliaryRole, conditionalAuxiliary, futureAuxiliary } from '../../../r
 import { functionWordFor } from '../../../rules/src/function-words.ts';
 import { properNounXpos } from '../../../rules/src/proper-nouns.ts';
 import { isPastTransgressive, isPastTransgressiveAux, isTransgressive, isTransgressiveMark } from '../../../rules/src/transgressive.ts';
-import { isAroundAPlace } from '../../../rules/src/motion.ts';
+import { NON_DIRECTIONAL, isAroundAPlace, isHabitual } from '../../../rules/src/motion.ts';
 import { parseXpos } from '../../../lexicon/src/steen/parse-xpos.ts';
 import { parseAddition } from '../../../lexicon/src/steen/parse-addition.ts';
 import { modalFor } from '../../../rules/src/modals.ts';
@@ -525,6 +525,42 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
       lex.lookupLemma(phraseWords[0]!, 'ADJ').length > 0
         ? lex.lookupLemma(phraseWords[1]!, 'NOUN')[0]
         : undefined;
+    /**
+     * A habitual motion takes the non-directional verb: "Igor jezdil do Moskvy
+     * „Igor [always|often] went to Moskow”" (verbs page). "We used to go to the
+     * sea every summer" was "šli", the one-off trip. The sense that shares a
+     * gloss with the directional verb, so `nositi` "carry" and not "wear".
+     */
+    /**
+     * The same table splits "go" by how: "to go (by foot) hoditi idti pojdti",
+     * "to go (by transport) jezditi jehati pojehati". With a means of travel
+     * ("by bus", planned as a bare instrumental) "go" is `jehati`.
+     */
+    const byTransport =
+      token.lemma.toLowerCase() === 'go' &&
+      sentence.tokens.some(
+        (n) => n.head === token.id &&
+          sentence.tokens.some((c) => c.head === n.id && c.deprel === 'case' &&
+            (() => { const p = prepPlans.get(c.id); return p?.kind === 'caseMarker' && p.case.ruleId === 'case.means.instrumental'; })()),
+      );
+    // The table's three columns: jezditi (habit, below), jehati, and the
+    // perfective pojehati - "Igor pojehal do Moskvy „Igor has gone to Moscow”".
+    const directional = byTransport
+      ? lex.lookupLemma(aspect?.decision.value === 'Perf' ? 'pojehati' : 'jehati', 'VERB')[0] ??
+        lex.lookupLemma('jehati', 'VERB')[0]
+      : ranked[0];
+    const nonDirectionalLemma =
+      directional?.pos.upos === 'VERB' ? NON_DIRECTIONAL[directional.lemma] : undefined;
+    const habitualMotionEntry =
+      nonDirectionalLemma && token.upos === 'VERB' && isHabitual(token, sentence)
+        ? (() => {
+            const pairs = lex.lookupLemma(nonDirectionalLemma, 'VERB');
+            const shared = new Set(directional!.glosses.map((g) => g.text));
+            return pairs.find((e) => e.glosses.some((g) => shared.has(g.text))) ?? pairs[0];
+          })()
+        : byTransport
+          ? directional
+          : undefined;
     const entry =
       phrasalVerbs.get(token.id) ??
       complementizerEntry ??
@@ -549,6 +585,7 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
       (plannedPrep ? lex.lookupLemma(plannedPrep, 'ADP')[0] : undefined) ??
       phraseHeadEntry ??
       unrealIf ??
+      habitualMotionEntry ??
       ranked[0] ??
       verbalNounEntry ??
       properNounEntry ??

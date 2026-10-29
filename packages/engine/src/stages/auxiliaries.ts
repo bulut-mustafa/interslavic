@@ -223,6 +223,17 @@ export function planAuxiliaries(
         droppedAux.add(token.id);
         continue;
       }
+      /**
+       * The same for "will": the verbs page has one future, "budu dělati", and
+       * aspect says the rest - "will be reading" is ongoing (imperfective),
+       * "will have read" is done by then (perfective: "will be completed at
+       * some point"). The second auxiliary overwrote the future: "Ja budu
+       * čitaju knigu", "Ja budu jesm pročital knigu".
+       */
+      if ((role === 'perfect' || role === 'progressive') && auxRoleForHead.get(token.head) === 'future') {
+        droppedAux.add(token.id);
+        continue;
+      }
 
       auxRoleForHead.set(token.head, role);
       auxFeatsForHead.set(token.head, token.feats);

@@ -75,6 +75,12 @@
       "quote": "Imperfective aspect, on the other hand, focuses on action itself; it indicates that on the point of reference the action is or was going on. It can also express a an ongoing process, a habit or a repeated action",
       "why": "a habitual or iterative adverbial forces the imperfective"
     },
+    "aspect.habitual": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/verbs.html",
+      "quote": "It can also express a an ongoing process, a habit or a repeated action",
+      "why": "a past habit (\"used to\") is the imperfective past"
+    },
     "aspect.adverbial.perf": {
       "tier": "normative",
       "source": "http://steen.free.fr/interslavic/verbs.html",
@@ -200,6 +206,12 @@
       "source": "http://steen.free.fr/interslavic/numerals.html",
       "quote": "The subject always remains in the genitive plural.",
       "why": "and it persists in oblique positions"
+    },
+    "case.means.instrumental": {
+      "tier": "dictionary",
+      "source": "packages/lexicon/data/raw/words.tsv",
+      "quote": "jehati želěznicejų - travel by train, go by train",
+      "why": "a means of travel (\"by bus\") is the bare instrumental"
     },
     "case.predicate": {
       "tier": "normative",

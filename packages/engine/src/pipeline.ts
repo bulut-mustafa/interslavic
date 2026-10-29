@@ -166,7 +166,14 @@ export function translate(
 ): Translation {
   // "take photos" -> "photograph", "nobody but myself" -> "only myself":
   // rewritten before anything reads the tree (rules/src/source-rewrites.ts).
-  const { sentence, absorbed } = rewriteSource(parsed);
+  // A Slavic verb counts as perfective only if the dictionary agrees: some
+  // entry glossed by this lemma is perfective (or biaspectual), and none of
+  // its entries contradicts it by being imperfective only.
+  const isPerfective = (lemma: string): boolean => {
+    const verbs = lex.lookup(lemma, parsed.lang).filter((e) => e.pos.upos === 'VERB');
+    return verbs.length > 0 && verbs.some((e) => e.pos.aspect !== 'Imp');
+  };
+  const { sentence, absorbed } = rewriteSource(parsed, isPerfective);
   const orth: Orthography = opts.orthography ?? 'standard';
   const adapter = adapterFor(sentence);
   const dropped: Translation['dropped'] = [...absorbed];

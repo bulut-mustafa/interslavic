@@ -71,3 +71,31 @@ export function isAroundAPlace(adverb: UdToken, sentence: ParsedSentence): boole
       sentence.tokens.some((c) => c.head === obl.id && c.deprel === 'case' && c.lemma.toLowerCase() === 'in'),
   );
 }
+
+/**
+ * Verbs of motion come in a directional and a non-directional imperfective,
+ * and "When a non-directional verb of motion has a direction anyway, this
+ * expresses a habit: Igor jezdil do Moskvy „Igor [always|often] went to
+ * Moskow”." The pairs are the page's own table.
+ * http://steen.free.fr/interslavic/verbs.html
+ */
+export const NON_DIRECTIONAL: Record<string, string> = {
+  idti: 'hoditi', jehati: 'jezditi', letiti: 'lětati', běgti: 'běgati',
+  lězti: 'laziti', polzti: 'polzati', plyvti: 'plavati', pluti: 'plavati',
+  nesti: 'nositi', vezti: 'voziti', vesti: 'voditi',
+};
+
+/** Cues that make a clause a habit - the "[always|often]" of the page's gloss. */
+const HABIT_CUES = new Set(['always', 'usually', 'often', 'every', 'sometimes', 'daily', 'never']);
+
+/**
+ * Whether this verb states a habit: a past habit the source rewrite marked
+ * (`Aspect=Hab`, from "used to"), or a habit adverb on it - also one level
+ * down, as the determiner of "every summer".
+ */
+export function isHabitual(verb: UdToken, sentence: ParsedSentence): boolean {
+  if (verb.feats['Aspect'] === 'Hab') return true;
+  const children = sentence.tokens.filter((t) => t.head === verb.id);
+  const deps = [...children, ...sentence.tokens.filter((t) => children.some((c) => c.id === t.head) && t.deprel === 'det')];
+  return deps.some((d) => HABIT_CUES.has(d.lemma.toLowerCase()));
+}

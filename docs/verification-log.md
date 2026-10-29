@@ -2384,3 +2384,20 @@ Every rule added this session was re-checked against its source.
 - **"письмо".** *piśmo* is his word for a letter (Piron: "piśmo od čitatelja"), but the dictionary scores *piśmo* and *pisańje* equally, and no general rule separates the senses of Russian "письмо". Two candidate rules were measured and rejected: they flipped 31 and 280 other keys.
 - **"called" (phone), "get to", "next door", "in front of"**: no dictionary basis.
 - **"to rest"**: Stanza parses "rest" as a noun. The purpose rule works when the parse is right ("On šel domov, že by spal").
+
+## Tenses (2026-10-29)
+
+I ran every English tense and the Russian aspect pairs through the translator, then fixed each broken one from a source:
+
+- **"will be reading" / "will have read".** Was "budu čitaju" / "budu jesm pročital"; now "budu čitati" / "budu pročitati". The verbs page has one future, *budu* + infinitive, and aspect carries the rest.
+- **"used to" + verb.** Was "upotrěbil čitati"; now the imperfective past, "čital". Verbs page: the imperfective expresses "a habit or a repeated action".
+- **A habitual motion takes the non-directional verb.** "We used to go to the sea every summer" → "hodili". The verbs page's own table and "Igor jezdil do Moskvy".
+- **"go" by transport.** It is *jehati / jezditi / pojehati* (the same table), with the means in the bare instrumental: "ježdžu … avtobusom", "pojehali … pojezdom". The dictionary has "jehati želěznicejų „travel by train”".
+- **The passive agent "by".** Was "od strany njego"; now "od njego". Syntax page: "od with the genitive" ("pica sdělana od studentov"). The parser had labelled it a plain `obl`.
+- **"by" outside a passive.** It drops the agent senses: "pri oknu" (dictionary *pri* (+6) "by, near"), not "od strany okna".
+- **A Russian perfective future.** "Я прочитаю книгу" → "Ja budu pročitati knigu". Verbs page: the perfective present as a future "is rather to be avoided"; van Steenbergen writes "budu odkryti". Two guards apply:
+  - It is skipped for the subjectless first-person plural "let us" form: his Babel gives "Построим" / "Сойдём" as "budujmo" / "Sojdimo".
+  - It is skipped where the dictionary has no perfective verb for the lemma: the parser tags "мучится" as perfective.
+- **The pluperfect "had read"** stays as the compound past. The verbs page calls the pluperfect optional: "Distinguishing between various past tenses is not necessary".
+
+Open: "by" + a deadline ("by Friday" → "pri petku") has no source for its preposition.

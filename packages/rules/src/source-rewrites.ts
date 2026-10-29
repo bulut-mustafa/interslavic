@@ -254,12 +254,120 @@ export function rewriteOClock(sentence: ParsedSentence): SourceRewrite {
   };
 }
 
-export function rewriteSource(sentence: ParsedSentence): SourceRewrite {
-  const light = rewriteLightVerbs(rewriteReciprocalPreposition(correctRussianFuture(sentence)));
+/**
+ * "used to" + infinitive is a past habit, which Slavic says with the
+ * imperfective past alone: the verbs page gives the imperfective for "a habit
+ * or a repeated action" - "Igor jezdil do Moskvy „Igor [always|often] went to
+ * Moskow”". Word by word "I used to read books" was "Ja jesm upotrěbil čitati
+ * knigy", "I made use of reading". The infinitive takes the place of "used",
+ * in the past, marked habitual with UD's own `Aspect=Hab` (the aspect
+ * resolver reads it as imperfective); "used" and "to" are absorbed.
+ */
+export function rewriteUsedTo(sentence: ParsedSentence): SourceRewrite {
+  if (sentence.lang !== 'en') return { sentence, absorbed: [] };
+  const used = sentence.tokens.find(
+    (t) => t.lemma.toLowerCase() === 'use' && t.feats['Tense'] === 'Past' && t.feats['VerbForm'] === 'Fin',
+  );
+  const verb = used && sentence.tokens.find(
+    (t) => t.head === used.id && t.deprel === 'xcomp' && t.feats['VerbForm'] === 'Inf',
+  );
+  const to = verb && sentence.tokens.find(
+    (t) => t.head === verb.id && t.deprel === 'mark' && t.lemma.toLowerCase() === 'to',
+  );
+  if (!used || !verb || !to) return { sentence, absorbed: [] };
+  if (sentence.tokens.some((t) => t.head === used.id && t.deprel === 'obj')) return { sentence, absorbed: [] };
+  const tokens = sentence.tokens
+    .filter((t) => t.id !== used.id && t.id !== to.id)
+    .map((t) => {
+      if (t.id === verb.id) {
+        return {
+          ...t,
+          head: used.head,
+          deprel: used.deprel,
+          xpos: 'VBD',
+          feats: { ...used.feats, Aspect: 'Hab' },
+        };
+      }
+      return t.head === used.id ? { ...t, head: verb.id } : t;
+    });
+  return {
+    sentence: { ...sentence, tokens },
+    absorbed: [used, to].map((t) => ({ form: t.form, why: 'a past habit is the imperfective past alone' })),
+  };
+}
+
+/**
+ * A Slavic perfective future is a perfective PRESENT form ("прочитаю"), which
+ * Interslavic does not use for the future: "Using the present tense of a
+ * perfective verb for the future (as is done in West and East Slavic) is
+ * rather to be avoided, as it can easily be misunderstood by South Slavs."
+ * The future is "budu" + infinitive, and van Steenbergen writes it with a
+ * perfective too: "I tako budu odkryti cěnu ščestja!" (Maly princ). So the
+ * parse is given the shape the source's own "буду читать" has - a future
+ * auxiliary and an infinitive - and the existing future path builds it.
+ * "Я прочитаю книгу" was "Ja pročitaju knigu".
+ */
+export function rewritePerfectiveFuture(
+  sentence: ParsedSentence,
+  isPerfective: (lemma: string) => boolean = () => true,
+): ParsedSentence {
+  const copula = FUTURE_COPULA[sentence.lang];
+  if (!copula) return sentence;
+  const verbs = sentence.tokens.filter(
+    (t) => t.upos === 'VERB' && t.feats['Aspect'] === 'Perf' && t.feats['Tense'] === 'Fut' &&
+      t.feats['VerbForm'] === 'Fin' &&
+      /**
+       * The first person plural with no subject is the "let us" form, not a
+       * future: van Steenbergen gives "Построим себе город" (Babel) as the
+       * imperative "budujmo gråd i věžų".
+       */
+      // The ending decides when the tag is wrong: "сойдем" (Babel, "Sojdimo")
+      // comes tagged second person; -ем/-ём/-им (Ukrainian -емо/-імо) is the first.
+      !((t.feats['Person'] === '1' && t.feats['Number'] === 'Plur' || /(ем|ём|им|емо|імо)$/i.test(t.form)) &&
+        !sentence.tokens.some((c) => c.head === t.id && c.deprel.startsWith('nsubj'))) &&
+      // The parser's tag checked against the dictionary: it marks the
+      // imperfective "мучится" perfective future.
+      isPerfective(t.lemma),
+  );
+  if (verbs.length === 0) return sentence;
+  // Each auxiliary goes directly before its verb, so every id from there on
+  // moves up by the number of auxiliaries inserted before it.
+  const shift = (id: number) => (id === 0 ? 0 : id + verbs.filter((v) => v.id <= id).length);
+  const tokens: UdToken[] = [];
+  for (const t of sentence.tokens) {
+    const verb = verbs.find((v) => v.id === t.id);
+    if (verb) {
+      const { Person, Number: num } = verb.feats;
+      tokens.push({
+        ...verb,
+        id: shift(verb.id) - 1,
+        form: 'буду',
+        lemma: copula.lemma,
+        upos: 'AUX',
+        xpos: 'AUX',
+        head: shift(verb.id),
+        deprel: 'aux',
+        feats: { Mood: 'Ind', Tense: 'Fut', VerbForm: 'Fin', ...(Person ? { Person } : {}), ...(num ? { Number: num } : {}) },
+      });
+      const { Person: _p, Number: _n, Tense: _t, Mood: _m, ...rest } = verb.feats;
+      tokens.push({ ...verb, id: shift(verb.id), head: shift(verb.head), feats: { ...rest, VerbForm: 'Inf' } });
+      continue;
+    }
+    tokens.push({ ...t, id: shift(t.id), head: shift(t.head) });
+  }
+  return { ...sentence, tokens };
+}
+
+export function rewriteSource(
+  sentence: ParsedSentence,
+  isPerfective?: (lemma: string) => boolean,
+): SourceRewrite {
+  const light = rewriteLightVerbs(rewriteReciprocalPreposition(rewritePerfectiveFuture(correctRussianFuture(sentence), isPerfective)));
   const exceptive = rewriteExceptives(light.sentence);
   const clock = rewriteOClock(exceptive.sentence);
+  const habit = rewriteUsedTo(clock.sentence);
   return {
-    sentence: clock.sentence,
-    absorbed: [...light.absorbed, ...exceptive.absorbed, ...clock.absorbed],
+    sentence: habit.sentence,
+    absorbed: [...light.absorbed, ...exceptive.absorbed, ...clock.absorbed, ...habit.absorbed],
   };
 }

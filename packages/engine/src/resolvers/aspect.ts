@@ -54,6 +54,18 @@ const copyFromSource: AspectStrategy = {
   },
 };
 
+/**
+ * A past habit the source rewrite marked with UD's `Aspect=Hab` ("used to"):
+ * the verbs page gives the imperfective for "a habit or a repeated action".
+ */
+const habitual: AspectStrategy = {
+  id: 'aspect.habitual',
+  decide({ token }) {
+    if (token.feats['Aspect'] !== 'Hab') return null;
+    return decide<Aspect>('Imp', 'aspect.habitual', 'high', 'a past habit ("used to"): imperfective');
+  },
+};
+
 const IMPERFECTIVE_CUES = ['always', 'usually', 'often', 'every', 'never', 'sometimes', 'daily', 'while'];
 const PERFECTIVE_CUES = ['suddenly', 'already', 'finally', 'once', 'completely'];
 
@@ -436,6 +448,7 @@ const defaultImperfective: AspectStrategy = {
 
 export const ASPECT_CHAIN: AspectStrategy[] = [
   copyFromSource,
+  habitual,
   perfectAuxiliary,
   adverbialCue,
   tenseCue,

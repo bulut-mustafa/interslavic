@@ -272,7 +272,36 @@ export function planPreposition(adp: UdToken, sentence: ParsedSentence): PrepPla
     };
   }
 
-  const cands = candidatesForEnglish(lemma);
+  /**
+   * "by" outside a passive is not the agent. Its agent senses - `od stråny`
+   * ("со стороны", "on the part of") and `od` - led on frequency, so "She
+   * stood by the window" was "od strany okna". The dictionary's place sense is
+   * `pri` (+6) "by, near" ("при, рядом с"); the agent of a passive is handled
+   * below.
+   */
+  /**
+   * "by bus", "by train" on a verb of motion - "by" + a bare noun - is the
+   * means, which takes the instrumental with no preposition: the dictionary's
+   * own "jehati želěznicejų „travel by train, go by train”". With an article
+   * ("by the window") it is a place, and keeps `pri` below.
+   */
+  if (
+    lemma === 'by' && complement?.upos === 'NOUN' && governor?.upos === 'VERB' &&
+    isMotionVerb(governor.lemma) &&
+    !sentence.tokens.some((t) => t.head === complement.id && ['det', 'nmod:poss', 'amod', 'nummod'].includes(t.deprel)) &&
+    !sentence.tokens.some((t) => t.head === governor.id && t.deprel === 'aux:pass')
+  ) {
+    return {
+      kind: 'caseMarker',
+      case: decide<Case>('Ins', 'case.means.instrumental', 'high',
+        'a means of travel is the bare instrumental, as in "jehati želěznicejų" (dictionary: "travel by train")'),
+    };
+  }
+  const passiveGovernor =
+    governor !== undefined && sentence.tokens.some((t) => t.head === governor.id && t.deprel === 'aux:pass');
+  const cands = candidatesForEnglish(lemma).filter(
+    (c) => !(lemma === 'by' && !passiveGovernor && complement?.deprel !== 'obl:agent' && (c.prep === 'od stråny' || c.prep === 'od')),
+  );
   if (cands.length === 0) return { kind: 'unknown' };
 
   /**
@@ -291,7 +320,10 @@ export function planPreposition(adp: UdToken, sentence: ParsedSentence): PrepPla
    * `od` (7699), giving "od strany togo muža" where the page writes
    * "od togo muža".
    */
-  if (noun?.deprel === 'obl:agent') {
+  // The parser does not always label the agent: "The book was read by him"
+  // came as a plain `obl`. "by" on a verb with a passive auxiliary is the agent.
+  const passiveBy = lemma === 'by' && passiveGovernor;
+  if (noun?.deprel === 'obl:agent' || passiveBy) {
     const agent = cands.find((c) => c.prep === 'od' && c.case === 'Gen');
     if (agent) {
       return {
