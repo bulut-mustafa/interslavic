@@ -7,7 +7,8 @@
     "steenbergen-numerals": "http://steen.free.fr/interslavic/numerals.html",
     "steenbergen-verbs": "http://steen.free.fr/interslavic/verbs.html",
     "steenbergen-conjunctions": "http://steen.free.fr/interslavic/conjunctions.html",
-    "dictionary": "packages/lexicon/data/raw/words.tsv"
+    "dictionary": "packages/lexicon/data/raw/words.tsv",
+    "wiktionary-uk": "https://en.wiktionary.org (Ukrainian entries)"
   },
   "_scope": "Closed classes, plus open-class words only for a sense the parse itself shows (whenDependent, unlessHeadIs). The other senses of such a word stay with dictionary ranking - curating open-class words wholesale would never end.",
   "words": [
@@ -340,6 +341,103 @@
       "why": "the dictionary glosses `izvini, izvinite` and `pomiluj` identically (\"sorry, excuse me\") and states no preference; ranking by intelligibility marks chose `pomiluj`. Where the dictionary is neutral, usage decides, and usage has izvini/izvinite 6 times and pomiluj never. The vy form, as the translator addresses the reader",
       "evidence": "Wp/isv phrase table \"Извините! - Izvinite!\" and \"Nu izvini\" (talk page); Tatoeba (isv) \"Govori \\\"izvini\\\"!\", \"Govorite \\\"izvinite\\\"!\"; pomiluj: 0 in both",
       "source": "corpus"
+    },
+    {
+      "en": "один",
+      "lang": "uk",
+      "upos": [
+        "DET",
+        "NUM",
+        "PRON"
+      ],
+      "whenDependent": {
+        "deprel": "flat:abs"
+      },
+      "isv": "jedin",
+      "why": "the first half of the Ukrainian reciprocal 'один одного/одному' (the parser attaches the second half as flat:abs): the formula is 'jedin drugogo', as Russian 'друг друга'",
+      "evidence": "steenbergen-pronouns: 'you can add the formula jedin drugogo: „Oni bijut se jedin drugogo”'; his Tower of Babel: 'I oni govorili jedin k drugomu', 'da by oni ne razuměli se jedin drugogo'. wiktionary-uk: 'оди́н о́дного ... one another, each other'",
+      "source": "steenbergen-pronouns"
+    },
+    {
+      "en": "один",
+      "lang": "uk",
+      "upos": [
+        "DET",
+        "NUM",
+        "PRON"
+      ],
+      "whenRelation": "flat:abs",
+      "isv": "drugy",
+      "why": "the second half of the reciprocal, in its own case: 'один одному' -> 'jedin drugomu'. Without it both halves were `jedin`: 'jedin jednomu'",
+      "evidence": "steenbergen-pronouns: 'you can add the formula jedin drugogo: „Oni bijut se jedin drugogo”'; his Tower of Babel: 'I oni govorili jedin k drugomu', 'da by oni ne razuměli se jedin drugogo'. wiktionary-uk: 'оди́н о́дного ... one another, each other'",
+      "source": "steenbergen-pronouns"
+    },
+    {
+      "en": "його",
+      "lang": "uk",
+      "upos": [
+        "DET"
+      ],
+      "isv": "jegov",
+      "why": "the possessive 'his/its' (the genitive of він used as a possessive, which the parser tags DET Poss=Yes); the declinable form, so it agrees with its noun, as for Russian 'его'",
+      "evidence": "steenbergen-pronouns: 'Pjotr dal Ivanu jegovu knigu' = 'Pjotr gave Ivan his [= Ivan's] book'. wiktionary-uk: 'його ... genitive of він: of him'",
+      "source": "steenbergen-pronouns"
+    },
+    {
+      "en": "її",
+      "lang": "uk",
+      "upos": [
+        "DET"
+      ],
+      "isv": "jejin",
+      "why": "the possessive 'her/hers'; the declinable form, as for Russian 'её'",
+      "evidence": "steenbergen-pronouns: the possessives are listed as jegov / jejin / jihny beside the indeclinable jego / jej / jih",
+      "source": "steenbergen-pronouns"
+    },
+    {
+      "en": "їх",
+      "lang": "uk",
+      "upos": [
+        "DET"
+      ],
+      "isv": "jihny",
+      "why": "the possessive 'their'; the declinable form, as for Russian 'их' and as Ukrainian 'їхній' already reaches",
+      "evidence": "steenbergen-pronouns: the possessives are listed as jegov / jejin / jihny beside the indeclinable jego / jej / jih",
+      "source": "steenbergen-pronouns"
+    },
+    {
+      "en": "немати",
+      "lang": "uk",
+      "upos": [
+        "VERB"
+      ],
+      "isv": "nema",
+      "why": "the negative existential 'немає'/'нема', which the parser lemmatises 'немати'. The dictionary glosses 'немає' as `nema`, but the lemma matched nothing and the word stayed in Cyrillic: 'U mene немає brata'",
+      "evidence": "the dictionary glosses `nema` and `nemaje` 'there is/are no' (uk 'немає'); wiktionary-uk: 'немає ... there is no, there are no (+ genitive)'",
+      "source": "dictionary"
+    },
+    {
+      "en": "робота",
+      "lang": "uk",
+      "upos": [
+        "NOUN"
+      ],
+      "whenDependent": {
+        "deprel": "case",
+        "lemmas": [
+          "на",
+          "в",
+          "у",
+          "з",
+          "із",
+          "зі",
+          "до"
+        ]
+      },
+      "isv": "råbota",
+      "why": "as for Russian 'работа': the work one goes to, is at or comes from (на роботі, на роботу, з роботи, до роботи) is the job, `råbota`. The dictionary lists `dělo` first for 'робота', but its sense is the work produced",
+      "evidence": "steenbergen-verbs: 'Iduči do raboty, ona vsegda dymi cigaretoju „While going to her work, she always smokes a cigarette”'; the dictionary's own usage example for råbota: 'Iz pričiny intensivnosti raboty'",
+      "source": "steenbergen-verbs"
     }
   ]
 }

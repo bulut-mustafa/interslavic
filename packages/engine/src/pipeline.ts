@@ -172,9 +172,11 @@ function languageNamesAsAdjectives(sentence: ParsedSentence, lex: Lexicon): Pars
   const [fem, masc] = endings;
   const changed = sentence.tokens.map((t) => {
     const lemma = t.lemma.toLowerCase();
-    if (t.upos !== 'NOUN' || t.feats['Animacy'] !== 'Inan' || !lemma.endsWith(fem)) return t;
+    // The parser service's lemma check may already have given it the
+    // masculine adjective as lemma ("французькою" -> "французький").
+    if (t.upos !== 'NOUN' || t.feats['Animacy'] !== 'Inan' || !(lemma.endsWith(fem) || lemma.endsWith(masc))) return t;
     if (lex.lookup(lemma, sentence.lang).some((e) => e.pos.upos === 'NOUN')) return t;
-    const adjective = lemma.slice(0, -fem.length) + masc;
+    const adjective = lemma.endsWith(masc) ? lemma : lemma.slice(0, -fem.length) + masc;
     if (!lex.lookup(adjective, sentence.lang).some((e) => e.pos.upos === 'ADJ')) return t;
     // "розмовляю японською" speaks it in the instrumental; Interslavic makes the
     // language the object: "Ja ne govorim japonsky" (Tatoeba).
@@ -407,14 +409,30 @@ export function translate(
      * builds `naj-` ("Najcěnnějša věč", Tatoeba). Only on a miss, and only to
      * an adjective that exists.
      */
-    const sup = adapter.superlativePrefix;
-    if (sup && token.upos === 'ADJ' && token.feats['Degree'] === 'Sup' && token.lemma.toLowerCase().startsWith(sup) &&
-        lex.lookup(token.lemma, sentence.lang).length === 0) {
-      const comparative = token.lemma.toLowerCase().slice(sup.length);
-      for (const candidate of [comparative, ...adapter.comparativeToPositive
+    /**
+     * A one-word comparative is looked up as its POSITIVE, wherever the
+     * dictionary lists one: Interslavic builds its own comparative from the
+     * positive ("The basic comparative ending for adjectives -ějši", adjectives
+     * page), and the parser's Degree feature asks for it. Ukrainian lemmatises
+     * the comparative as itself, and the dictionary lists only some of those -
+     * and sometimes in another sense: "швидше" only as `raděje` "rather",
+     * which made "читає швидше" "reads rather"; from "швидко" it is
+     * `bystrěje`. A superlative drops its prefix first.
+     */
+    const degree = token.feats['Degree'];
+    if (adapter.comparativeToPositive.length > 0 && (token.upos === 'ADJ' || token.upos === 'ADV') &&
+        (degree === 'Cmp' || degree === 'Sup')) {
+      const sup = adapter.superlativePrefix;
+      const word = token.lemma.toLowerCase();
+      const comparative = degree === 'Sup' && sup && word.startsWith(sup) ? word.slice(sup.length) : word;
+      for (const candidate of adapter.comparativeToPositive
         .filter(([cmp]) => comparative.endsWith(cmp))
-        .map(([cmp, pos]) => comparative.slice(0, -cmp.length) + pos)]) {
-        if (lex.lookup(candidate, sentence.lang).some((e) => e.pos.upos === 'ADJ')) return candidate;
+        .map(([cmp, pos]) => comparative.slice(0, -cmp.length) + pos)) {
+        if (lex.lookup(candidate, sentence.lang).some((e) => e.pos.upos === token.upos)) return candidate;
+      }
+      if (comparative !== word && lex.lookup(word, sentence.lang).length === 0 &&
+          lex.lookup(comparative, sentence.lang).some((e) => e.pos.upos === token.upos)) {
+        return comparative;
       }
     }
     if (adapter.shortAdjectiveEndings.length > 0 && token.upos === 'ADJ' && token.feats['Variant'] === 'Short' &&
@@ -563,10 +581,18 @@ export function translate(
        * grandmother" penalised every `v.tr.` candidate and handed the sentence
        * to the reflexive `sbirati sę`: "Jeda byla sbirati se od mojej baby".
        */
+      /**
+       * A DIRECT object: the dictionary's `v.intr.` means "takes no accusative
+       * object" (see compareEntries). The Ukrainian parser labels a dative
+       * experiencer `obj` - "Мені подобається ця книга" - which made
+       * "подобатися" look transitive and handed it to `prijati` over
+       * `podobati sę`. A source that marks case says which it is.
+       */
       ...(token.upos === 'VERB' && !isPassiveClause(token, sentence)
         ? {
             hasDirectObject: sentence.tokens.some(
-              (t) => t.head === token.id && (t.deprel === 'obj' || t.deprel === 'ccomp'),
+              (t) => t.head === token.id && (t.deprel === 'ccomp' ||
+                (t.deprel === 'obj' && !['Dat', 'Ins'].includes(t.feats['Case'] ?? ''))),
             ),
           }
         : {}),

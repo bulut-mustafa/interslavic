@@ -426,6 +426,47 @@ export function planAuxiliaries(
     }
   }
 
+  /**
+   * A Slavic final clause, "чтобы"/"щоб": with an infinitive it is the purpose
+   * clause above ("Я прийшов, щоб убити його" - "že by ubil jego"), with a
+   * finite verb the finite one below, the verb in the conditional and no
+   * "jesm": "Ja byh hotěl, že by on je pisal čestěje" (Tatoeba #13357375),
+   * "On umrl, že by my mogli žiti" (#13910036), and van Steenbergen's Babel,
+   * "da by oni ne razuměli se jedin drugogo". "Я хочу, щоб ти заспівав" had
+   * kept the compound past: "aby ty jesi spěval".
+   */
+  if (adapter.purposeConjunctions.length > 0) {
+    for (const token of sentence.tokens) {
+      if (token.upos !== 'VERB' && token.upos !== 'AUX') continue;
+      // Also as the fixed half of a two-word mark: Russian "так чтобы".
+      const isPurpose = (t: UdToken) => adapter.purposeConjunctions.includes(t.lemma.toLowerCase());
+      const mark = sentence.tokens.find(
+        (t) => t.head === token.id && t.deprel === 'mark' &&
+          (isPurpose(t) || sentence.tokens.some((f) => f.head === t.id && f.deprel === 'fixed' && isPurpose(f))),
+      );
+      if (!mark) continue;
+      for (const f of sentence.tokens) if (f.head === mark.id && f.deprel === 'fixed') droppedAux.add(f.id);
+      const subject = token.feats['VerbForm'] === 'Inf'
+        ? subjectOfClause(token, sentence)
+        : sentence.tokens.find((t) => t.head === token.id && t.deprel.startsWith('nsubj'));
+      const pronoun = subject ? pronounLemmaFor(subject.feats, sentence) : null;
+      const agreement = {
+        person: subject ? personOf(subject) : (token.feats['Person'] ?? '3'),
+        number: pronoun
+          ? personalPronounNumber(pronoun)
+          : (subject?.feats['Number'] ?? token.feats['Number']) === 'Plur' ? 'Plur' : 'Sing',
+      };
+      if (token.feats['VerbForm'] === 'Inf') {
+        purposeClauses.set(token.id, agreement);
+        droppedAux.add(mark.id);
+        continue;
+      }
+      finitePurposeMarks.set(mark.id, agreement);
+      const copula = sentence.tokens.find((t) => t.head === token.id && t.deprel === 'cop');
+      finitePurposeCarriers.add(copula?.id ?? token.id);
+    }
+  }
+
   if (sentence.lang === 'en') {
     for (const token of sentence.tokens) {
       if (token.deprel !== 'advcl') continue;
@@ -510,10 +551,37 @@ export function planAuxiliaries(
   for (const token of sentence.tokens) {
     if (token.feats['Mood'] !== 'Imp' || token.upos !== 'VERB') continue;
     if (sentence.lang === 'en' && token.lemma === 'let') continue;
+    /**
+     * The first person plural is an imperative too - "dělajmo „let's do!”"
+     * (verbs page) - and Ukrainian has a form for it ("наробімо", "збудуймо",
+     * Gen 11:3-4), which the source tags Person=1.
+     */
+    if (adapter.marksSecondPersonNumber && token.feats['Person'] === '1') {
+      imperatives.set(token.id, { person: '1', number: 'Plur' });
+      continue;
+    }
     const number = adapter.marksSecondPersonNumber
       ? (token.feats['Number'] ?? 'Sing')
       : 'Plur';
     imperatives.set(token.id, { person: '2', number });
+  }
+
+  /**
+   * Russian says "let us" with the perfective first person plural and no
+   * subject: "Построим себе город" (Gen 11:4), which van Steenbergen renders
+   * with the imperative, "budujmo gråd i věžu". The perfective-future rewrite
+   * already leaves exactly these alone (source-rewrites.ts), and they came out
+   * as an indicative, "sbudujemo". The ending decides when the person tag is
+   * wrong, as it does there: "сойдем" comes tagged second person.
+   */
+  if (sentence.lang === 'ru') {
+    for (const token of sentence.tokens) {
+      if (token.upos !== 'VERB' || token.feats['Aspect'] !== 'Perf' || token.feats['Tense'] !== 'Fut') continue;
+      if (token.feats['VerbForm'] !== 'Fin' || imperatives.has(token.id)) continue;
+      const firstPlural = (token.feats['Person'] === '1' && token.feats['Number'] === 'Plur') || /(ем|ём|им)$/i.test(token.form);
+      if (!firstPlural || sentence.tokens.some((c) => c.head === token.id && c.deprel.startsWith('nsubj'))) continue;
+      imperatives.set(token.id, { person: '1', number: 'Plur' });
+    }
   }
 
   /**

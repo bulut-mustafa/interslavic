@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import path from 'node:path';
 import type { Aspect } from '../../types/index.ts';
 import { stripMetachars } from './steen/metacharacters.ts';
 import { splitMultiword } from './steen/split-lemmas.ts';
@@ -64,6 +65,46 @@ export const SLAVIC_SOURCES = ['ru', 'uk', 'pl', 'sh'] as const;
 export type SlavicSource = (typeof SLAVIC_SOURCES)[number];
 const SOURCE_COLUMNS: Record<SlavicSource, string[]> = { ru: ['ru'], uk: ['uk'], pl: ['pl'], sh: ['hr', 'sr'] };
 
+/**
+ * Source words a dictionary column lacks, each attached to an EXISTING
+ * Interslavic entry - one named by its lemma, part of speech and an English
+ * gloss, so the row is unambiguous. The Ukrainian column is missing common
+ * words its Russian neighbour has ("вокзал", "книжка", "кузен"): 4.6% of the
+ * word tokens of Tatoeba's Ukrainian, measured over its 5,000 most frequent
+ * lemmas. Each entry gives the source word's meaning from a dictionary of
+ * that language; no Interslavic word is added. A supplement row that matches
+ * no entry is an error, so a changed dictionary cannot silently drop one.
+ */
+interface SupplementWord {
+  lang: SlavicSource;
+  word: string;
+  isv: string;
+  upos: string;
+  en: string;
+  why: string;
+  evidence: string;
+}
+
+const SUPPLEMENT = path.resolve(import.meta.dirname, '../data/source-supplement.json');
+
+function applySupplement(entries: Entry[]): void {
+  if (!fs.existsSync(SUPPLEMENT)) return;
+  const { words } = JSON.parse(fs.readFileSync(SUPPLEMENT, 'utf8')) as { words: SupplementWord[] };
+  for (const w of words) {
+    const targets = entries.filter(
+      (e) => e.lemma === w.isv && e.pos.upos === w.upos && e.glosses.some((g) => normalizeGloss(g.text) === normalizeGloss(w.en)),
+    );
+    if (targets.length === 0) {
+      throw new Error(`source-supplement.json: no ${w.upos} "${w.isv}" glossed "${w.en}" for ${w.lang} "${w.word}"`);
+    }
+    for (const e of targets) {
+      // Appended in place: `ruGlosses` is the same array as `sourceGlosses.ru`.
+      const own = (e.sourceGlosses[w.lang] ??= []);
+      own.push({ text: w.word, index: own.length, supplemented: true });
+    }
+  }
+}
+
 export function isSlavicSource(lang: string | undefined): lang is SlavicSource {
   return (SLAVIC_SOURCES as readonly string[]).includes(lang ?? '');
 }
@@ -109,6 +150,8 @@ export function normalizeSource(g: string, lang: SlavicSource): string {
 export interface Gloss {
   /** Gloss with any trailing "(sense)" removed. */
   text: string;
+  /** Not in the dictionary's own column: added from data/source-supplement.json. */
+  supplemented?: boolean;
   /** The parenthesised sense label, when present (837 entries have one). */
   sense?: string;
   index: number;
@@ -299,6 +342,8 @@ export class Lexicon {
         });
       }
     }
+
+    applySupplement(lx.entries);
 
     for (const e of lx.entries) {
       for (const g of e.glosses) {

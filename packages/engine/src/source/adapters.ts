@@ -85,6 +85,14 @@ export interface SourceAdapter {
   /** The source's "and", which makes coordinated subjects plural together. */
   andWords: readonly string[];
   /**
+   * The conjunctions of a final clause, "so that, in order to" - Russian
+   * "чтобы", Ukrainian "щоб" ("щоб: so that, in order that; in order to",
+   * Wiktionary after Bilodid's СУМ). Interslavic gives such a clause "že" or
+   * "da" with the conditional (syntax page). English marks its own with "to"
+   * and "so that", read separately.
+   */
+  purposeConjunctions: readonly string[];
+  /**
    * Endings that turn a SHORT adjective lemma into the long form the
    * dictionary lists: Russian "прав" -> "правый". Empty where there is none.
    */
@@ -127,6 +135,7 @@ export const EN: SourceAdapter = {
   copulaLemma: null,
   presentationalPronoun: null,
   andWords: ['and'],
+  purposeConjunctions: [],
   shortAdjectiveEndings: [],
   nameToLatin: null,
   superlativePrefix: null,
@@ -149,6 +158,7 @@ export const RU: SourceAdapter = {
   copulaLemma: 'быть',
   presentationalPronoun: 'это',
   andWords: ['и'],
+  purposeConjunctions: ['чтобы', 'чтоб'],
   shortAdjectiveEndings: ['ый', 'ий', 'ой'],
   nameToLatin: russianNameToLatin,
   superlativePrefix: null,
@@ -176,13 +186,28 @@ export const UK: SourceAdapter = {
   copulaLemma: 'бути',
   presentationalPronoun: 'це',
   andWords: ['і', 'й', 'та'],
+  // щоби is the full form of щоб, аби its synonym (Wiktionary).
+  purposeConjunctions: ['щоб', 'щоби', 'аби'],
   // Ukrainian short forms ("повен", "зелен") are poetic; the long one ends -ий.
   shortAdjectiveEndings: ['ий'],
   nameToLatin: ukrainianNameToLatin,
   superlativePrefix: 'най',
-  // цінн-іший -> цінн-ий, дорож-чий -> дорог-ий is irregular and not covered.
-  comparativeToPositive: [['іший', 'ий'], ['ший', 'кий']],
-  languageNameEndings: ['ська', 'ський'],
+  /**
+   * The comparative adds -ш-/-іш- to the stem, and -к-, -ок-, -ек- drop:
+   * швидкий > швидший, глибокий > глибший, далекий > дальший, розумний >
+   * розумніший (urok.osvita.ua, naurok.com.ua, "Ступені порівняння
+   * прикметників"); an adverb adds -ше/-іше: швидко > швидше, тепло > тепліше
+   * ("Ступені порівняння прислівників"). Undone here, most specific first;
+   * a candidate counts only if the dictionary lists it. Stem alternations
+   * (дорогий > дорожчий, високий > вищий) are not undone.
+   */
+  comparativeToPositive: [
+    ['іший', 'ий'], ['ший', 'окий'], ['ший', 'екий'], ['ший', 'кий'], ['ший', 'ий'],
+    ['іше', 'о'], ['ше', 'око'], ['ше', 'еко'], ['ше', 'ко'], ['ше', 'о'],
+  ],
+  // The suffix is "-ський (feminine -ська, alternative -цький, variant
+  // -зький)" (Wiktionary): українська, німецька, французька all end -ька.
+  languageNameEndings: ['ька', 'ький'],
 };
 
 const BY_LANG: Record<string, SourceAdapter> = { en: EN, ru: RU, uk: UK };

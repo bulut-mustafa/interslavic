@@ -139,9 +139,16 @@ describe('The North Wind and the Sun, from English', () => {
  */
 describe('the Tower of Babel, from Russian', () => {
   it('keeps the person a subjectless Russian verb states', () => {
-    // "И сказали они: построим ... и сделаем" - first person, not "sbudujut"
-    expect(out('ru/babel-4.conllu')).toContain('sbudujemo sobě grad');
-    expect(out('ru/babel-4.conllu')).toContain('sdělajemo sobě ime');
+    // "И сказали они: построим ... и сделаем" - first person, not "sbudujut",
+    // and the imperative "let us": he writes "budujmo gråd i věžu", and the
+    // verbs page gives "dělajmo „let's do!”". Was the indicative "sbudujemo".
+    expect(out('ru/babel-4.conllu')).toContain('sbudujmo sobě grad');
+    expect(out('ru/babel-4.conllu')).toContain('sdělajmo sobě ime');
+  });
+
+  it('reads "сойдем" as "let us go down", whatever person it is tagged', () => {
+    // Tagged second person by the parser; the -ем ending is the first.
+    expect(out('ru/babel-7.conllu')).toMatch(/^Sojdimo že/);
   });
 
   it('builds the reciprocal in any case, masculine like the formula', () => {
@@ -151,7 +158,7 @@ describe('the Tower of Babel, from Russian', () => {
 
   it('gives a standalone "один" the gender the source marks', () => {
     // "так чтобы один не понимал" - was "jedna"
-    expect(out('ru/babel-7.conllu')).toContain('aby jedin ne razuměl');
+    expect(out('ru/babel-7.conllu')).toContain('da by jedin ne razuměl');
   });
 
   it('takes the plain demonstrative for "того"', () => {

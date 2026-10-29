@@ -3,5 +3,5 @@
 # lang = uk
 1	Будинок	будинок	NOUN	Ncmsnn	Animacy=Inan|Case=Nom|Gender=Masc|Number=Sing	3	nsubj	_	_
 2	був	бути	AUX	Vapis-sm	Aspect=Imp|Gender=Masc|Mood=Ind|Number=Sing|Tense=Past|VerbForm=Fin	3	cop	_	_
-3	побудований	побудований	ADJ	Ap-msnf-ep	Aspect=Perf|Case=Nom|Gender=Masc|Number=Sing|VerbForm=Part|Voice=Pass	0	root	_	_
+3	побудований	побудувати	ADJ	Ap-msnf-ep	Aspect=Perf|Case=Nom|Gender=Masc|Number=Sing|VerbForm=Part|Voice=Pass	0	root	_	_
 4	.	.	PUNCT	U	_	3	punct	_	_

@@ -192,10 +192,167 @@ export function rewriteClockTime(sentence: ParsedSentence): SourceRewrite {
   };
 }
 
+/**
+ * "повинен" with an infinitive is the modal "must": "пови́нен (feminine
+ * пови́нна, neuter пови́нне, plural пови́нні) must (+ infinitive), should,
+ * ought to" (Wiktionary). The parser lemmatises "повинні" as the adjective
+ * "повинний", which the dictionary has only as "guilty" (`vinnik`), so "Ми
+ * повинні піти" became "My jesmo vinniki ujdti". The dictionary glosses
+ * "повинен" as `dȯlžėn`, which is what Russian "должны" reaches.
+ */
+export function correctModalPovynen(sentence: ParsedSentence): ParsedSentence {
+  return {
+    ...sentence,
+    tokens: sentence.tokens.map((t) =>
+      t.lemma.toLowerCase() === 'повинний' &&
+      sentence.tokens.some((c) => c.head === t.id && c.deprel === 'xcomp' && c.feats['VerbForm'] === 'Inf')
+        ? { ...t, lemma: 'повинен' }
+        : t,
+    ),
+  };
+}
+
+/**
+ * "їм" is two words: the first person of "їсти" ("я їм", Wiktionary's
+ * conjugation table) and the dative of "вони" ("to them"). The parser takes
+ * the pronoun, so "Я їм яблуко" had no verb ("Ja jim jabloko") where Tatoeba
+ * has "Ja jem jabloko" (#1084429 / #13408259). In a sentence with no verb at
+ * all whose subject is "я", the dative pronoun cannot be what is missing, so
+ * there "їм" is the verb: it becomes the root, "я" its subject, and a noun
+ * left over its accusative object.
+ */
+export function rewriteJimAsVerb(sentence: ParsedSentence): ParsedSentence {
+  if (sentence.tokens.some(isVerbal)) return sentence;
+  const jim = sentence.tokens.find((t) => t.form.toLowerCase() === 'їм' && t.upos === 'PRON');
+  const ja = sentence.tokens.find((t) => t.lemma.toLowerCase() === 'я' && t.feats['Case'] === 'Nom');
+  if (!jim || !ja) return sentence;
+  const root = sentence.tokens.find((t) => t.head === 0);
+  return {
+    ...sentence,
+    tokens: sentence.tokens.map((t) => {
+      if (t.id === jim.id) {
+        return {
+          ...t, upos: 'VERB', lemma: 'їсти', xpos: 'VERB', head: 0, deprel: 'root',
+          feats: { Aspect: 'Imp', Mood: 'Ind', Number: 'Sing', Person: '1', Tense: 'Pres', VerbForm: 'Fin' },
+        };
+      }
+      if (t.id === ja.id) return { ...t, head: jim.id, deprel: 'nsubj' };
+      if (t.upos === 'NOUN' && (t.id === root?.id || t.head === root?.id)) {
+        return { ...t, head: jim.id, deprel: 'obj', feats: { ...t.feats, Case: 'Acc' } };
+      }
+      return t.head === root?.id || t.id === root?.id ? { ...t, head: jim.id, deprel: t.deprel === 'orphan' ? 'dep' : t.deprel } : t;
+    }),
+  };
+}
+
+/**
+ * "Ukrainian uses the `xcomp:pred` relation to distinguish the cases where
+ * `xcomp` is used for secondary predication" (universaldependencies.org/uk/
+ * dep/xcomp-pred.html). It IS an `xcomp`, and the engine reads `xcomp`: the
+ * predicate adjective of "Всі люди народжуються вільними і рівними" stayed
+ * instrumental ("svobodnymi i ravnymi"), where the Russian parse, labelled
+ * plain `xcomp`, reaches van Steenbergen's "rodęt sę svobodni i råvni".
+ */
+export function plainXcomp(sentence: ParsedSentence): ParsedSentence {
+  return {
+    ...sentence,
+    tokens: sentence.tokens.map((t) => (t.deprel === 'xcomp:pred' ? { ...t, deprel: 'xcomp' } : t)),
+  };
+}
+
+/**
+ * The passive participle as the Russian parser gives it: a VERB with
+ * VerbForm=Part, from which the Interslavic past passive participle is built
+ * ("The passive voice is created by combining a form of the verb byti „to be”
+ * with a passive participle", verbs page). The Ukrainian parser makes it an
+ * adjective; the parser service has already given it its verb as lemma
+ * ("наділені" -> "наділити"), and here it becomes the verb form:
+ * "Вони наділені розумом" -> "Oni sut obdarjeni razumom".
+ *
+ * The impersonal "-но/-то" form - "Будинок збудовано", "Міст було збудовано
+ * римлянами" - is the same passive with the noun as its object; the parser
+ * marks it Person=0. Interslavic has the personal passive only, so the noun
+ * becomes the subject and the participle agrees with it: "Dom jest
+ * sbudovany", "Most byl sbudovany".
+ */
+export function passiveParticiples(sentence: ParsedSentence): ParsedSentence {
+  const objectOf = new Map<number, UdToken>();
+  for (const t of sentence.tokens) {
+    if (t.upos === 'VERB' && t.feats['Person'] === '0' && /(но|то)$/.test(t.form.toLowerCase())) {
+      const obj = children(sentence, t).find((c) => c.deprel === 'obj');
+      if (obj) objectOf.set(t.id, obj);
+    }
+  }
+  const objects = new Set([...objectOf.values()].map((o) => o.id));
+  return {
+    ...sentence,
+    tokens: sentence.tokens.map((t) => {
+      if (t.upos === 'ADJ' && t.feats['VerbForm'] === 'Part' && t.feats['Voice'] === 'Pass' && /ти(ся)?$/.test(t.lemma)) {
+        return { ...t, upos: 'VERB', feats: { ...t.feats, Tense: 'Past', Variant: 'Short' } };
+      }
+      const obj = objectOf.get(t.id);
+      if (obj) {
+        const { Person: _p, Mood: _m, ...feats } = t.feats;
+        return {
+          ...t,
+          feats: {
+            ...feats, VerbForm: 'Part', Voice: 'Pass', Tense: 'Past', Variant: 'Short',
+            Number: obj.feats['Number'] ?? 'Sing', ...(obj.feats['Gender'] ? { Gender: obj.feats['Gender'] } : {}),
+          },
+        };
+      }
+      if (objects.has(t.id)) return { ...t, deprel: 'nsubj:pass', feats: { ...t.feats, Case: 'Nom' } };
+      // "було" with an impersonal passive is now a passive auxiliary (UD's
+      // `aux:pass`, as the Russian parser labels "была приготовлена"), and
+      // agrees with the new subject.
+      const subject = t.deprel === 'aux' ? objectOf.get(t.head) : undefined;
+      if (subject && t.lemma.toLowerCase() === 'бути') {
+        return {
+          ...t,
+          deprel: 'aux:pass',
+          feats: { ...t.feats, Number: subject.feats['Number'] ?? 'Sing', ...(subject.feats['Gender'] ? { Gender: subject.feats['Gender'] } : {}) },
+        };
+      }
+      return t;
+    }),
+  };
+}
+
+/** `token` inserted right after the token `afterId`, every later id moved up by one. */
+function insertAfter(sentence: ParsedSentence, afterId: number, token: Omit<UdToken, 'id'>): ParsedSentence {
+  const shift = (id: number) => (id > afterId ? id + 1 : id);
+  const tokens: UdToken[] = [];
+  for (const t of sentence.tokens) {
+    tokens.push({ ...t, id: shift(t.id), head: shift(t.head) });
+    if (t.id === afterId) tokens.push({ ...token, id: afterId + 1, head: shift(token.head) });
+  }
+  return { ...sentence, tokens };
+}
+
+/**
+ * "якби" is one word for "if" + the conditional: "Univerbation of як (jak,
+ * “if”) + би (by, subjunctive particle)" (Wiktionary). Russian writes the two
+ * apart, "Если бы я знал", which the conditional rule reads as "ako" + "byh";
+ * fused, the clause lost its conditional - "Ako by ja jesm znal" for "Якби я
+ * знав". So it is given back the shape the Russian parse has: "якщо" ("if")
+ * as the mark and "би" as a conditional auxiliary of the same verb.
+ */
+export function splitJakby(sentence: ParsedSentence): ParsedSentence {
+  const jakby = sentence.tokens.find((t) => t.lemma.toLowerCase() === 'якби' && t.deprel === 'mark');
+  if (!jakby) return sentence;
+  const marked = {
+    ...sentence,
+    tokens: sentence.tokens.map((t) => (t.id === jakby.id ? { ...t, lemma: 'якщо' } : t)),
+  };
+  return splitJakby(insertAfter(marked, jakby.id, {
+    form: 'би', lemma: 'би', upos: 'AUX', xpos: 'AUX', feats: { Mood: 'Cnd' }, head: jakby.head, deprel: 'aux',
+  }));
+}
+
 export function rewriteUkrainian(sentence: ParsedSentence): SourceRewrite {
   if (sentence.lang !== 'uk') return { sentence, absorbed: [] };
   const comparison = rewriteComparisonStandard(
-    rewriteSyntheticFuture(correctImperatives(rewriteVerblessOrphan(sentence))),
+    rewriteSyntheticFuture(correctImperatives(correctModalPovynen(rewriteVerblessOrphan(rewriteJimAsVerb(passiveParticiples(plainXcomp(splitJakby(sentence)))))))),
   );
   const clock = rewriteClockTime(comparison.sentence);
   return { sentence: clock.sentence, absorbed: [...comparison.absorbed, ...clock.absorbed] };

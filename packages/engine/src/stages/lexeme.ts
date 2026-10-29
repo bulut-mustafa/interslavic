@@ -315,6 +315,7 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
       inNegatedClause(token),
       sentence.tokens.filter((t) => t.head === token.id),
       sentence.tokens.find((t) => t.id === token.head)?.upos,
+      token.deprel,
     );
     /**
      * A curated lemma need not be a candidate for the source word, for the
@@ -823,14 +824,23 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
        * tie-break returned the n- form everywhere, so "I see him" came out as
        * "njego" instead of "jego".
        */
+      /**
+       * A Slavic preposition is never planned, so `governed` is unset there;
+       * its own `case` dependent is what says it is there ("з ним" -> "s
+       * njim", Russian "с ним" likewise).
+       */
+      const afterPreposition = governed !== undefined ||
+        (sentence.lang !== 'en' && sentence.tokens.some(
+          (t) => t.head === token.id && t.deprel === 'case' && t.upos === 'ADP' && !deletedPreps.has(t.id),
+        ));
       if (pronounEntry) {
         feats.set(
           'PrepCase',
           decide(
-            prepCaseFor(governed !== undefined),
+            prepCaseFor(afterPreposition),
             'pronoun.prepCase',
             'certain',
-            governed !== undefined
+            afterPreposition
               ? 'third-person pronouns take the n- form after a preposition'
               : 'no preposition, so the plain form rather than the n- form',
           ),

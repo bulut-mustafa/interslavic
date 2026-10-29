@@ -52,6 +52,13 @@ export interface FunctionWord {
    * big", `zamnogo`); modifying anything else it means "also" (`takože`).
    */
   unlessHeadIs?: string[];
+  /**
+   * When set, this entry applies only to a word in this relation to its head.
+   * The Ukrainian reciprocal "один одного" repeats one lemma, and the parser
+   * attaches the second "один" to the first as `flat:abs`; only that second one
+   * is `drugy`, while every other "один" stays the numeral.
+   */
+  whenRelation?: string;
   isv: string;
   why: string;
   evidence: string;
@@ -84,11 +91,13 @@ export function functionWordFor(
   negated = false,
   dependents: { deprel: string; lemma: string }[] = [],
   headUpos?: string,
+  deprel?: string,
 ): FunctionWord | null {
   const candidates = index()
     .get(`${lang}|${lemma.trim().toLowerCase()}`)
     ?.filter((w) => w.upos.includes(upos))
-    .filter((w) => !(w.unlessHeadIs && headUpos && w.unlessHeadIs.includes(headUpos))) ?? [];
+    .filter((w) => !(w.unlessHeadIs && headUpos && w.unlessHeadIs.includes(headUpos)))
+    .filter((w) => w.whenRelation === undefined || w.whenRelation === deprel) ?? [];
   const hasDependent = ({ whenDependent: want }: FunctionWord) =>
     want !== undefined &&
     dependents.some(
@@ -97,6 +106,7 @@ export function functionWordFor(
   // A conditional reading is the more specific entry, so it is tried first.
   return (
     (negated ? candidates.find((w) => w.whenNegated) : undefined) ??
+    candidates.find((w) => w.whenRelation !== undefined) ??
     candidates.find(hasDependent) ??
     candidates.find((w) => !w.whenNegated && !w.whenDependent) ??
     null
