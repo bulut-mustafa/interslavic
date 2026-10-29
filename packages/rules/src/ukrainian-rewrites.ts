@@ -1,6 +1,7 @@
 import type { ParsedSentence, UdToken } from '../../types/index.ts';
 import type { SourceRewrite } from './source-rewrites.ts';
 import { insertFutureAuxiliary } from './source-rewrites.ts';
+import { numeralValue } from './numerals.ts';
 
 /**
  * Rewrites of a Ukrainian parse into the shape the Interslavic rules already
@@ -349,10 +350,90 @@ export function splitJakby(sentence: ParsedSentence): ParsedSentence {
   }));
 }
 
+/**
+ * A cardinal the parser tags as a verb. "У мене п'ять братів" came out with
+ * "п'ять" a VERB and "братів" its object, so nothing counted the brothers and
+ * the clause lost its copula ("U mene pet bratov"). A word in the Ukrainian
+ * numeral table (numerals.ts) is a numeral: it counts its "object", and with
+ * "у мене" the clause takes the shape the Russian parse gives "У меня пять
+ * братьев" - "у меня" the predicate, the counted noun its subject - for the
+ * copula rule: "U mene sut pet bratov".
+ */
+export function numeralsTaggedAsVerbs(sentence: ParsedSentence): ParsedSentence {
+  const num = sentence.tokens.find(
+    (t) => t.upos === 'VERB' && numeralValue(t.lemma, t.form, 'uk') !== null,
+  );
+  if (!num) return sentence;
+  const counted = children(sentence, num).find((c) => c.deprel === 'obj' && c.upos === 'NOUN');
+  if (!counted) return sentence;
+  const place = children(sentence, num).find(
+    (c) => c.deprel.startsWith('obl') && children(sentence, c).some((g) => g.deprel === 'case'),
+  );
+  const head = place ?? counted;
+  return {
+    ...sentence,
+    tokens: sentence.tokens.map((t) => {
+      if (t.id === num.id) {
+        return { ...t, upos: 'NUM', xpos: 'NUM', head: counted.id, deprel: 'nummod', feats: { Case: counted.feats['Case'] ?? 'Nom', NumType: 'Card' } };
+      }
+      if (t.id === head.id) return { ...t, head: num.head, deprel: num.deprel };
+      if (place && t.id === counted.id) return { ...t, head: place.id, deprel: 'nsubj' };
+      return t.head === num.id ? { ...t, head: head.id } : t;
+    }),
+  };
+}
+
+/**
+ * A Cyrillic word the parser calls foreign. It tags "ґей" (Tatoeba "Ти ґей",
+ * "Я ґей") `X` with Foreign=Yes - the letter ґ is rare in its training text -
+ * and an `X` gets no case at all, so the form was picked blind: "Ty jesi
+ * gejem" for Tatoeba's "Ty jesi gej" (#5144734 / #12985202). Written in the
+ * Ukrainian alphabet it is not foreign; as the subject or the predicate of a
+ * verbless clause it is a nominative noun.
+ */
+export function cyrillicIsNotForeign(sentence: ParsedSentence): ParsedSentence {
+  return {
+    ...sentence,
+    tokens: sentence.tokens.map((t) =>
+      t.upos === 'X' && t.feats['Foreign'] === 'Yes' && /^[\u0400-\u04FF'’ʼ-]+$/.test(t.form) &&
+      (t.deprel === 'root' || t.deprel.startsWith('nsubj'))
+        ? { ...t, upos: 'NOUN', xpos: 'NOUN', feats: { Case: 'Nom', Number: 'Sing' } }
+        : t,
+    ),
+  };
+}
+
+/**
+ * "У мене багато книжок": the parser makes the quantifier "багато" the root,
+ * with the counted noun its subject and "у мене" hanging off it, so the copula
+ * went inside the quantity - "U mene mnogo sut knig". The clause has the
+ * shape of "У мене п'ять братів" (above): "у мене" is the predicate and the
+ * quantity of books its subject - "U mene sut mnogo knig".
+ */
+export function quantifierAsRoot(sentence: ParsedSentence): ParsedSentence {
+  if (sentence.tokens.some(isVerbal)) return sentence;
+  const root = sentence.tokens.find((t) => t.head === 0);
+  if (!root || !['DET', 'NUM'].includes(root.upos) || root.feats['NumType'] !== 'Card') return sentence;
+  const counted = children(sentence, root).find((c) => c.deprel.startsWith('nsubj') && c.upos === 'NOUN');
+  const place = children(sentence, root).find(
+    (c) => c.deprel.startsWith('obl') && children(sentence, c).some((g) => g.deprel === 'case'),
+  );
+  if (!counted || !place) return sentence;
+  return {
+    ...sentence,
+    tokens: sentence.tokens.map((t) => {
+      if (t.id === place.id) return { ...t, head: 0, deprel: 'root' };
+      if (t.id === counted.id) return { ...t, head: place.id, deprel: 'nsubj' };
+      if (t.id === root.id) return { ...t, head: counted.id, deprel: 'det' };
+      return t.head === root.id ? { ...t, head: place.id } : t;
+    }),
+  };
+}
+
 export function rewriteUkrainian(sentence: ParsedSentence): SourceRewrite {
   if (sentence.lang !== 'uk') return { sentence, absorbed: [] };
   const comparison = rewriteComparisonStandard(
-    rewriteSyntheticFuture(correctImperatives(correctModalPovynen(rewriteVerblessOrphan(rewriteJimAsVerb(passiveParticiples(plainXcomp(splitJakby(sentence)))))))),
+    rewriteSyntheticFuture(correctImperatives(correctModalPovynen(rewriteVerblessOrphan(rewriteJimAsVerb(passiveParticiples(plainXcomp(splitJakby(quantifierAsRoot(numeralsTaggedAsVerbs(cyrillicIsNotForeign(sentence))))))))))),
   );
   const clock = rewriteClockTime(comparison.sentence);
   return { sentence: clock.sentence, absorbed: [...comparison.absorbed, ...clock.absorbed] };

@@ -1392,7 +1392,20 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
         ),
       );
       const number = subjectNumber(token, sentence, src['Number']);
-      if (number === 'Plur') {
+      /**
+       * A plurale tantum subject (UD `Number=Ptan`: Ukrainian "збори") is
+       * plural only in the source; its Interslavic noun has its own number,
+       * decided above - `sȯbrańje` is singular - and the verb agrees with
+       * that: "Збори відбулися" had a plural verb beside a singular noun.
+       */
+      const subject = sentence.tokens.find((t) => t.head === token.id && t.deprel.startsWith('nsubj'));
+      const subjectsOwn = subject?.feats['Number'] === 'Ptan'
+        ? plan.find((n) => n.token.id === subject.id && n.entry)?.feats.get('Number')?.value
+        : undefined;
+      if (subjectsOwn) {
+        feats.set('Number', decide(subjectsOwn, 'number.fromSubject', 'certain',
+          `agrees with "${plan.find((n) => n.token.id === subject!.id)?.entry?.lemma}", plural-only in the source alone`));
+      } else if (number === 'Plur') {
         feats.set(
           'Number',
           decide('Plur', 'number.fromSubject', 'certain', `plural subject${via}`),

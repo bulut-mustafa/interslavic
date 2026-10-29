@@ -1,0 +1,203 @@
+{
+  "_comment": "Source words a dictionary column lacks, each attached to an existing Interslavic entry (named by lemma, part of speech and English gloss). No Interslavic word is added. Read by packages/lexicon/src/reader.ts (applySupplement); a row matching no entry is an error.",
+  "words": [
+    {
+      "lang": "uk",
+      "word": "вокзал",
+      "isv": "stancija",
+      "upos": "NOUN",
+      "en": "station",
+      "why": "the railway station; the same entry's Russian column lists 'вокзал'",
+      "evidence": "Wiktionary: 'вокза́л ... train station, railroad station, railway station'; dictionary: stancija, ru 'станция, вокзал'"
+    },
+    {
+      "lang": "uk",
+      "word": "книжка",
+      "isv": "kniga",
+      "upos": "NOUN",
+      "en": "book",
+      "why": "the everyday word for 'book', of which 'книга' (the entry's Ukrainian gloss) is the elevated synonym",
+      "evidence": "Wiktionary: 'кни́жка ... book. Synonym: (elevated) кни́га'; dictionary: kniga, uk 'книга'"
+    },
+    {
+      "lang": "uk",
+      "word": "кузен",
+      "isv": "kuzen",
+      "upos": "NOUN",
+      "en": "cousin",
+      "why": "a male cousin; the entry's Russian column lists 'кузен', its Ukrainian only 'двоюрідний брат'",
+      "evidence": "Wiktionary: 'кузе́н ... (dated) male cousin. Synonym: двою́рідний брат'; dictionary: kuzen, ru 'двоюродный брат, кузен'"
+    },
+    {
+      "lang": "uk",
+      "word": "набагато",
+      "isv": "duže",
+      "upos": "ADV",
+      "en": "a lot",
+      "why": "'much, far' with a comparative, the Ukrainian of Russian 'гораздо', which this entry glosses",
+      "evidence": "Wiktionary: 'набага́то ... much, far (+ comparative adjective or adverb)'; dictionary: duže, ru 'много, гораздо'"
+    },
+    {
+      "lang": "uk",
+      "word": "збудувати",
+      "isv": "sbudovati",
+      "upos": "VERB",
+      "en": "build",
+      "why": "the perfective 'to build', a synonym of 'побудувати', which this perfective entry glosses",
+      "evidence": "Wiktionary: 'збудува́ти ... pf (imperfective будува́ти) to build, to construct'; dictionary: sbudovati v.tr. pf., uk 'побудувати', ru 'построить'"
+    },
+    {
+      "lang": "uk",
+      "word": "погуляти",
+      "isv": "prohoditi sę",
+      "upos": "VERB",
+      "en": "stroll",
+      "why": "'to go for a walk'. The dictionary has only the imperfective 'гуляти' = prohoditi sę, so the perfective takes it",
+      "evidence": "Wiktionary: 'погуля́ти ... pf (imperfective гуля́ти) to go for a walk, to take a walk, to stroll for a while'; dictionary: prohoditi sę, uk 'гуляти, проходжуватися, прогулюватися'"
+    },
+    {
+      "lang": "uk",
+      "word": "залишитися",
+      "isv": "ostati",
+      "upos": "VERB",
+      "en": "stay",
+      "why": "'to stay, to remain'. The entry's own Ukrainian cell reads 'залишитися. зостатися' - a period where its separator should be - so the gloss never matched, and the verb fell back to `ostaviti` 'leave' plus a clitic: 'On ostavil se doma'",
+      "evidence": "Wiktionary: 'залиши́тися ... pf (imperfective залиша́тися) to remain, to stay'; dictionary: ostati v.intr. pf., ru 'остаться', uk 'залишитися. зостатися'"
+    },
+    {
+      "lang": "uk",
+      "word": "лишитися",
+      "isv": "ostati",
+      "upos": "VERB",
+      "en": "stay",
+      "why": "'to stay, to remain', the shorter synonym of 'залишитися'",
+      "evidence": "Wiktionary: 'лиши́тися ... pf (imperfective лиша́тися or залиша́тися) to stay, to remain'; dictionary: ostati v.intr. pf., ru 'остаться'"
+    },
+    {
+      "lang": "uk",
+      "word": "лишити",
+      "isv": "ostaviti",
+      "upos": "VERB",
+      "en": "leave",
+      "why": "'to leave', a synonym of 'залишити', which this entry glosses",
+      "evidence": "Wiktionary: 'лиши́ти ... pf to leave ... Synonyms: поки́нути, залиши́ти'; dictionary: ostaviti v.tr. pf., uk 'залишити, кинути, покинути'"
+    },
+    {
+      "lang": "uk",
+      "word": "побачитися",
+      "isv": "strěsti sę",
+      "upos": "VERB",
+      "en": "meet",
+      "why": "'to see each other, to meet' - the perfective reciprocal 'зустрітися', which this entry glosses",
+      "evidence": "Wiktionary: 'поба́читися ... pf to see each other, to meet'; dictionary: strěsti sę v.refl. pf., uk 'зустрітися', ru 'встретиться'"
+    },
+    {
+      "lang": "uk",
+      "word": "розказати",
+      "isv": "råzkazati",
+      "upos": "VERB",
+      "en": "tell",
+      "why": "'to tell, to narrate', the Ukrainian of Russian 'рассказать', which this entry glosses",
+      "evidence": "Wiktionary: 'розказа́ти ... pf to tell, to narrate, to recount ... Synonyms: розповісти́'; dictionary: råzkazati v.tr. pf., ru 'рассказать', uk 'розповісти'"
+    },
+    {
+      "lang": "uk",
+      "word": "спізнитися",
+      "isv": "opozdniti sę",
+      "upos": "VERB",
+      "en": "be late",
+      "why": "'to be late', a synonym of 'запізнитися', which this entry glosses",
+      "evidence": "Wiktionary: 'спізни́тися ... pf to be late. Synonym: запізни́тися'; dictionary: opozdniti sę v.refl. pf., uk 'запізнитися'"
+    },
+    {
+      "lang": "uk",
+      "word": "засмучений",
+      "isv": "smųtny",
+      "upos": "ADJ",
+      "en": "sad",
+      "why": "'sad, saddened'",
+      "evidence": "Wiktionary: 'засму́чений ... sad, saddened, sorry, grieved'; dictionary: smųtny adj., uk 'сумний', ru 'печальный, грустный'"
+    },
+    {
+      "lang": "uk",
+      "word": "навчатися",
+      "isv": "učiti sę",
+      "upos": "VERB",
+      "en": "study",
+      "why": "'to study; to learn', the imperfective 'учитися', which this entry glosses",
+      "evidence": "Wiktionary: 'навча́тися ... impf to study ... to learn'; dictionary: učiti sę v.refl. ipf., uk 'учитися, вчитися', ru 'учиться'"
+    },
+    {
+      "lang": "uk",
+      "word": "зачекати",
+      "isv": "čekati",
+      "upos": "VERB",
+      "en": "wait",
+      "why": "'to wait'. The dictionary has only the imperfective, which glosses 'чекати', so the perfective takes it",
+      "evidence": "Wiktionary: 'зачека́ти ... pf (imperfective чека́ти) to wait'; dictionary: čekati v.intr. ipf., uk 'чекати, ждати'"
+    },
+    {
+      "lang": "uk",
+      "word": "нечасто",
+      "isv": "rědko",
+      "upos": "ADV",
+      "en": "rarely",
+      "why": "'infrequently, rarely', a synonym of 'рідко', which this entry glosses",
+      "evidence": "Wiktionary: 'неча́сто ... infrequently, not often, rarely. Synonym: рі́дко'; dictionary: rědko adv., uk 'рідко'"
+    },
+    {
+      "lang": "uk",
+      "word": "жодний",
+      "isv": "nijedin",
+      "upos": "PRON",
+      "en": "none",
+      "why": "'not one, not any' - the full form of 'жоден', which this entry glosses",
+      "evidence": "Wiktionary: 'жо́дний ... not one, not any. Synonym: нія́кий'; dictionary: nijedin pron.indef., uk 'жоден', ru 'ни один, никакой'"
+    },
+    {
+      "lang": "uk",
+      "word": "тож",
+      "isv": "tomu",
+      "upos": "ADV",
+      "en": "therefore",
+      "why": "'so, hence', a synonym of 'отже', which this entry glosses",
+      "evidence": "Wiktionary: 'тож ... so, hence (consequently). Synonym: о́тже'; dictionary: tomu adv., uk 'тому, отже', ru 'поэтому'"
+    },
+    {
+      "lang": "uk",
+      "word": "аж",
+      "isv": "až",
+      "upos": "ADV",
+      "en": "even",
+      "why": "'even; as much as', the Ukrainian of Russian 'аж', which this entry glosses",
+      "evidence": "Wiktionary: 'аж ... even, as much as; till, until'; dictionary: až adv., ru 'даже, аж'"
+    },
+    {
+      "lang": "uk",
+      "word": "піаніно",
+      "isv": "fortepiano",
+      "upos": "NOUN",
+      "en": "piano",
+      "why": "'upright piano', a kind of 'фортепіано', which this entry glosses",
+      "evidence": "Wiktionary: 'піані́но ... upright piano. Hypernym: фортепіа́но'; dictionary: fortepiano n., uk 'фортепіано'"
+    },
+    {
+      "lang": "uk",
+      "word": "змушений",
+      "isv": "prinuđeny",
+      "upos": "ADJ",
+      "en": "forced",
+      "why": "'forced, compelled', a synonym of 'вимушений', which this entry glosses",
+      "evidence": "Wiktionary: 'зму́шений ... forced, compelled, constrained'; dictionary: prinuđeny adj., uk 'вимушений', ru 'вынужденный'"
+    },
+    {
+      "lang": "uk",
+      "word": "хороший",
+      "isv": "dobry",
+      "upos": "ADJ",
+      "en": "good",
+      "why": "'good', a synonym of 'добрий', which this entry glosses (its Russian column has 'хороший')",
+      "evidence": "Wiktionary: 'хоро́ший ... good. Synonyms: до́брий, га́рний'; dictionary: dobry adj., uk 'добрий', ru 'хороший, добрый'"
+    }
+  ]
+}
