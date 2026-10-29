@@ -8,7 +8,7 @@ import { verbalNoun } from '../../../morph/src/participles.ts';
 import { auxiliaryRole, conditionalAuxiliary, futureAuxiliary } from '../../../rules/src/auxiliaries.ts';
 import { functionWordFor } from '../../../rules/src/function-words.ts';
 import { properNounXpos } from '../../../rules/src/proper-nouns.ts';
-import { isTransgressive, isTransgressiveMark } from '../../../rules/src/transgressive.ts';
+import { isPastTransgressive, isPastTransgressiveAux, isTransgressive, isTransgressiveMark } from '../../../rules/src/transgressive.ts';
 import { isAroundAPlace } from '../../../rules/src/motion.ts';
 import { parseXpos } from '../../../lexicon/src/steen/parse-xpos.ts';
 import { parseAddition } from '../../../lexicon/src/steen/parse-addition.ts';
@@ -134,6 +134,13 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
       dropped.push({
         form: token.form,
         why: 'the infinitive ending carries this, so no separate word is needed',
+      });
+      continue;
+    }
+    if (isPastTransgressiveAux(token, sentence)) {
+      dropped.push({
+        form: token.form,
+        why: 'the participle "-vši/-ši" itself means "having done", so no separate word is needed',
       });
       continue;
     }
@@ -910,7 +917,9 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
           `"${entry.lemma}" is plural-only in the dictionary, so it has no singular to copy`,
         ),
       );
-    } else {
+    } else if (feats.get('Number')?.ruleId !== 'agreement.relative') {
+      // A relative pronoun already has its antecedent's number: English "who"
+      // marks none, and copying it made "studenti ktory" for "ljudi, ktori".
       const num = token.feats['Number'] === 'Plur' ? 'Plur' : 'Sing';
       feats.set('Number', decide(num, 'number.copy', 'certain', 'copied from the source'));
     }
@@ -1221,7 +1230,26 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
         continue;
       }
 
-      if (isTransgressive(token, sentence)) {
+      /**
+       * A Slavic source marks the adverbial participle itself (`VerbForm=Conv`):
+       * Russian "Читая" is "čitajuči", like "Iduči do raboty" (verbs page),
+       * and "Прочитав" is "pročitavši". Without this they were conjugated -
+       * "Čitaje knigu, ona usměhala se", "Pročitala pismo, ona ...".
+       */
+      const slavicConverb = sentence.lang !== 'en' && src['VerbForm'] === 'Conv';
+      if (isPastTransgressive(token, sentence) || (slavicConverb && src['Tense'] === 'Past')) {
+        feats.set(
+          'VerbForm',
+          decide('Conv', 'verbform.transgressive', 'high',
+            '"having done": the adverbial past active participle, built on the perfective (sdělavši)'),
+        );
+        feats.set('Tense', decide('Past', 'verbform.transgressive', 'certain',
+          'the past active participle is based on the infinitive stem of a perfective verb'));
+        if (effectiveAspect) feats.set('Aspect', effectiveAspect);
+        plan.push({ token, entry, ranked, aspect, feats, notes });
+        continue;
+      }
+      if (isTransgressive(token, sentence) || slavicConverb) {
         feats.set(
           'VerbForm',
           decide('Conv', 'verbform.transgressive', 'high',

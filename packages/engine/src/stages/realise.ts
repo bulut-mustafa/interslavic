@@ -2,7 +2,7 @@ import { adapterFor } from '../source/adapters.ts';
 import { decide, type Decision } from '../../../types/index.ts';
 import { realize } from '../../../morph/src/realize.ts';
 import { compared, type Degree } from '../../../morph/src/comparison.ts';
-import { pastPassiveParticiple, presentActiveParticiple } from '../../../morph/src/participles.ts';
+import { pastPassiveParticiple, pastActiveParticiple, presentActiveParticiple } from '../../../morph/src/participles.ts';
 import { conditionalAuxiliary, futureAuxiliary } from '../../../rules/src/auxiliaries.ts';
 import { isOneAnaphor, antecedentOf } from '../../../rules/src/anaphora.ts';
 import { isExpletiveSubject } from '../../../rules/src/expletives.ts';
@@ -147,6 +147,35 @@ export function realiseStage(input: RealiseInput): RealiseOutput {
     }
   }
 
+  /**
+   * A relative clause is set off by commas, which English often leaves out:
+   * van Steenbergen writes one before the relative pronoun 143 times to 38
+   * (most of those after "i", "ili" or "ale"), and closes the clause with
+   * another when the sentence goes on - "Zaradi vrěmena, ktoro požrtvoval
+   * jesi svojej rozě, ona jest ti tako važna" (Maly princ).
+   */
+  const relativeOpeners = new Set<number>();
+  const relativeClosers = new Set<number>();
+  if (sentence.lang === 'en') {
+    for (const clause of sentence.tokens) {
+      if (clause.deprel !== 'acl:relcl') continue;
+      const subtree = new Set([clause.id]);
+      for (let grew = true; grew; ) {
+        grew = false;
+        for (const t of sentence.tokens) {
+          if (!subtree.has(t.id) && subtree.has(t.head)) { subtree.add(t.id); grew = true; }
+        }
+      }
+      const inPlan = plan.filter((n) => subtree.has(n.token.id));
+      const first = inPlan[0];
+      if (!first || first.token.feats['PronType'] !== 'Rel') continue;
+      relativeOpeners.add(first.token.id);
+      const last = inPlan.at(-1)!;
+      const lastAt = plan.indexOf(last);
+      if (lastAt < plan.length - 1) relativeClosers.add(last.token.id);
+    }
+  }
+
   const words: GlossedWord[] = [];
   const surfaces: string[] = [];
 
@@ -200,7 +229,7 @@ export function realiseStage(input: RealiseInput): RealiseOutput {
   for (const node of plan) {
     const { token, entry, feats, notes } = node;
     if (owed) appendPunctuation(owed);
-    owed = punctuationAfter.get(token.id);
+    owed = punctuationAfter.get(token.id) ?? (relativeClosers.has(token.id) ? ',' : undefined);
     // "čim močněje on dul, tym bolje ..." - the second half is set off.
     if (feats.get('Case')?.ruleId === 'comparison.correlative' && entry?.lemma === 'tȯj') appendComma();
 
@@ -218,6 +247,7 @@ export function realiseStage(input: RealiseInput): RealiseOutput {
      * "jesm taky glådny, že ne mogų spati" (Vȯlk i pės).
      */
     if (token.deprel === 'mark' && entry?.lemma === 'že') appendComma();
+    if (relativeOpeners.has(token.id)) appendComma();
     if (reportedOpeners.has(token.id)) {
       appendComma();
       surfaces.push('že');
@@ -542,7 +572,9 @@ export function realiseStage(input: RealiseInput): RealiseOutput {
     // derived form itself rather than a paradigm cell.
     const transgressive =
       feats.get('VerbForm')?.value === 'Conv'
-        ? presentActiveParticiple(entry.lemma, entry.pos.xpos)
+        ? feats.get('Tense')?.value === 'Past'
+          ? pastActiveParticiple(entry.lemma, entry.pos.xpos)
+          : presentActiveParticiple(entry.lemma, entry.pos.xpos)
         : null;
     if (transgressive) {
       const known = opts.validator ? unknownWords(transgressive, opts.validator).length === 0 : true;

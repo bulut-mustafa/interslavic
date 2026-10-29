@@ -60,6 +60,24 @@ export function presentActiveParticiple(lemma: string, xpos: string): string | n
 }
 
 /**
+ * The past active participle, adverbial as well: "based on the infinitive stem
+ * of a perfective verb, followed by -vši if it ends in a vowel or -ši if it
+ * ends in a consonant. For example: sdělati > sdělavši 'having done'" (verbs
+ * page). The library derives it; its tag is `v.pfap.`.
+ */
+export function pastActiveParticiple(lemma: string, xpos: string): string | null {
+  let tokens;
+  try {
+    tokens = derive({ form: lemma, xpos } as never) as { form: string; xpos?: string }[];
+  } catch {
+    return null;
+  }
+  if (!Array.isArray(tokens)) return null;
+
+  return tokens.find((t) => t.xpos?.includes('pfap'))?.form ?? null;
+}
+
+/**
  * The verbal noun: "A verb can very simply be converted into a noun (gerund,
  * verbal noun) by substituting the ending -ny of the perfect past participle by
  * -nje (or -ty by tje). Examples: dělanje „(the act of) doing", pitje

@@ -177,7 +177,7 @@ describe('constructions from his texts', () => {
 
   it('makes "the one who" the demonstrative and kto', () => {
     // North Wind "togo, kto prvy uspěje"; Wikipedia "toj, kto", "tyh, kto"
-    expect(out('gold/g53.conllu')).toContain('že toj kto ');
+    expect(out('gold/g53.conllu')).toContain('že toj, kto ');
   });
 
   it('makes a partitive "of" iz with the genitive', () => {

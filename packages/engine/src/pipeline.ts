@@ -216,9 +216,21 @@ export function translate(
       const here: UdToken = up;
       up = sentence.tokens.find((t) => t.id === here.head);
     }
+    /**
+     * A relative pronoun subject ("who") marks no number of its own; it has
+     * that of the noun it stands for. "the students who had finished their
+     * exams" is "studenti, ktori zakončili svoje izpyty", as in van
+     * Steenbergen's "ljudi, ktori sovsěm ne razumějųt svoje języky" (Piron).
+     */
+    const relativeClause =
+      subject.feats['PronType'] === 'Rel'
+        ? sentence.tokens.find((t) => t.id === subject.head && t.deprel === 'acl:relcl')
+        : undefined;
+    const standsFor = relativeClause ? sentence.tokens.find((t) => t.id === relativeClause.head) : undefined;
+    const subjectNumber = (standsFor ?? subject).feats['Number'] ?? 'Sing';
     return (
-      personOf(token) === personOf(subject) &&
-      (token.feats['Number'] ?? 'Sing') === (subject.feats['Number'] ?? 'Sing')
+      personOf(token) === personOf(standsFor ?? subject) &&
+      (token.feats['Number'] ?? 'Sing') === subjectNumber
     );
   };
 

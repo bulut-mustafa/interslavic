@@ -64,7 +64,7 @@ describe('subordinate clauses', () => {
 
   it('uses "ktory" for a relative pronoun, not the interrogative "kto"', () => {
     // Was "Muž kto žive tam".
-    expect(out('man-who-lives.conllu')).toBe('Muž ktory žive tam jest moj stryjec.');
+    expect(out('man-who-lives.conllu')).toBe('Muž, ktory žive tam, jest moj stryjec.');
   });
 
   it('agrees the relative pronoun with its antecedent', () => {
@@ -75,17 +75,17 @@ describe('subordinate clauses', () => {
   it('takes animacy from the antecedent', () => {
     // "dom" is masculine INANIMATE, so the accusative equals the nominative.
     // Without animacy the adjective paradigm gave the animate "ktorogo".
-    expect(out('house-that-i-built.conllu')).toContain('dom ktory');
+    expect(out('house-that-i-built.conllu')).toContain('dom, ktory');
   });
 
   it('takes the ANIMATE accusative when the antecedent is animate', () => {
-    expect(out('man-that-i-saw.conllu')).toContain('Muž ktorogo');
+    expect(out('man-that-i-saw.conllu')).toContain('Muž, ktorogo');
   });
 
   it('defaults to inanimate when the antecedent is not in the dictionary', () => {
     // An untranslated antecedent has no gender either, so this cannot be
     // conditioned on gender - doing so left the animate "ktorogo".
-    expect(out('unknown-antecedent.conllu')).toContain('Blargistan ktory');
+    expect(out('unknown-antecedent.conllu')).toContain('Blargistan, ktory');
   });
 
   it('agrees a copula with a subject that hangs off the predicate', () => {
