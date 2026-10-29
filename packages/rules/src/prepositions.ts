@@ -112,9 +112,18 @@ function index(): Map<string, PrepCandidate[]> {
   return m;
 }
 
+/**
+ * English spellings of one preposition that the dictionary glosses only one
+ * way. "till" is defined as "until" (Wiktionary, preposition sense 1: "Until;
+ * to, up to"), and the dictionary glosses `do` (+2) "to, till" but never
+ * "until", so "until Friday" fell to the adverb `dopŕva` ("only, just now").
+ */
+const SAME_PREPOSITION: Record<string, string> = { until: 'till' };
+
 /** Candidates for an English preposition, best first. */
 export function candidatesForEnglish(lemma: string): PrepCandidate[] {
-  return index().get(normalize(lemma)) ?? [];
+  const key = normalize(lemma);
+  return index().get(key) ?? index().get(SAME_PREPOSITION[key] ?? '') ?? [];
 }
 
 /**

@@ -1222,7 +1222,11 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
           (token.deprel === 'xcomp' ||
             token.deprel === 'ccomp' ||
             token.deprel === 'acl' ||
-            token.deprel === 'csubj') &&
+            token.deprel === 'csubj' ||
+            // "Nice to meet you": the complement of an adjective, as in "ne
+            // bylo legko napisati" (Interslavic Wikipedia).
+            (token.deprel === 'advcl' &&
+              sentence.tokens.find((t) => t.id === token.head)?.upos === 'ADJ')) &&
           (!infinitiveNeedsMarker ||
             sentence.tokens.some((t) => t.head === token.id && t.deprel === 'mark')));
       if (isInfinitiveComplement) {

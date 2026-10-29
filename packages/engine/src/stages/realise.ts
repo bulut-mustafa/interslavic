@@ -176,6 +176,59 @@ export function realiseStage(input: RealiseInput): RealiseOutput {
     }
   }
 
+  /**
+   * An adverbial clause is set off from its main clause the same way, on
+   * whichever side it stands: "Boli mně srdce, kogda vidžu" (Schleicher), "ja
+   * ju slušal jesm, kogda ona žalila se", "Lěpje by bylo, ako bys prihodil",
+   * "Ale kogda jest denj, ja nošu verigu" (Maly princ, Vȯlk i pės), "byl by
+   * mnogo dramatičnějši, ako ne bylo by" (Piron). His texts leave the opening
+   * comma out only after a connective - "Ale kogda", "daže ako", "osoblivo
+   * kogda" - so it is added only where the conjunction opens the clause and
+   * the word before it is not one. English only: a Slavic source writes these
+   * commas itself, and they are carried over. Only a real clause (a verb or a
+   * copula) opened by a conjunction or by "when"/"where", which UD tags
+   * `advmod`; a purpose infinitive has its own comma (commaBeforeFinalClause).
+   */
+  const adverbialOpeners = new Set<number>();
+  const adverbialClosers = new Set<number>();
+  if (sentence.lang === 'en') {
+    for (const clause of sentence.tokens) {
+      if (clause.deprel !== 'advcl') continue;
+      const isClause = clause.upos === 'VERB' || clause.upos === 'AUX' ||
+        sentence.tokens.some((t) => t.head === clause.id && t.deprel === 'cop');
+      if (!isClause) continue;
+      const subtree = new Set([clause.id]);
+      for (let grew = true; grew; ) {
+        grew = false;
+        for (const t of sentence.tokens) {
+          if (!subtree.has(t.id) && subtree.has(t.head)) { subtree.add(t.id); grew = true; }
+        }
+      }
+      const inPlan = plan.filter((n) => subtree.has(n.token.id));
+      const first = inPlan[0];
+      if (!first) continue;
+      const opener = first.token;
+      const opens =
+        (opener.deprel === 'mark' && opener.upos === 'SCONJ') ||
+        (opener.deprel === 'advmod' && /^(Int|Rel)$/.test(opener.feats['PronType'] ?? ''));
+      if (!opens) continue;
+      // "after"/"before" + clause has no settled Interslavic form, and the one
+      // attested shape puts no comma before it: "našel medvěda poslě togo,
+      // kogda ..." (Interslavic Wikipedia).
+      if (['after', 'before'].includes(opener.lemma.toLowerCase())) continue;
+      const firstAt = plan.indexOf(first);
+      const lastAt = plan.indexOf(inPlan.at(-1)!);
+      if (clause.head < opener.id) {
+        const before = firstAt > 0 ? plan[firstAt - 1]!.token : undefined;
+        if (before && !['cc', 'mark'].includes(before.deprel) && before.upos !== 'SCONJ') {
+          adverbialOpeners.add(opener.id);
+        }
+      } else if (lastAt < plan.length - 1 && clause.head > inPlan.at(-1)!.token.id) {
+        adverbialClosers.add(inPlan.at(-1)!.token.id);
+      }
+    }
+  }
+
   const words: GlossedWord[] = [];
   const surfaces: string[] = [];
 
@@ -229,7 +282,9 @@ export function realiseStage(input: RealiseInput): RealiseOutput {
   for (const node of plan) {
     const { token, entry, feats, notes } = node;
     if (owed) appendPunctuation(owed);
-    owed = punctuationAfter.get(token.id) ?? (relativeClosers.has(token.id) ? ',' : undefined);
+    owed =
+      punctuationAfter.get(token.id) ??
+      (relativeClosers.has(token.id) || adverbialClosers.has(token.id) ? ',' : undefined);
     // "čim močněje on dul, tym bolje ..." - the second half is set off.
     if (feats.get('Case')?.ruleId === 'comparison.correlative' && entry?.lemma === 'tȯj') appendComma();
 
@@ -247,7 +302,7 @@ export function realiseStage(input: RealiseInput): RealiseOutput {
      * "jesm taky glådny, že ne mogų spati" (Vȯlk i pės).
      */
     if (token.deprel === 'mark' && entry?.lemma === 'že') appendComma();
-    if (relativeOpeners.has(token.id)) appendComma();
+    if (relativeOpeners.has(token.id) || adverbialOpeners.has(token.id)) appendComma();
     if (reportedOpeners.has(token.id)) {
       appendComma();
       surfaces.push('že');

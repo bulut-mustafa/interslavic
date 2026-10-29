@@ -6,6 +6,7 @@
     "steenbergen-nouns": "http://steen.free.fr/interslavic/nouns.html",
     "steenbergen-numerals": "http://steen.free.fr/interslavic/numerals.html",
     "steenbergen-verbs": "http://steen.free.fr/interslavic/verbs.html",
+    "steenbergen-conjunctions": "http://steen.free.fr/interslavic/conjunctions.html",
     "dictionary": "packages/lexicon/data/raw/words.tsv"
   },
   "_scope": "Closed classes, plus open-class words only for a sense the parse itself shows (whenDependent, unlessHeadIs). The other senses of such a word stay with dictionary ranking - curating open-class words wholesale would never end.",
@@ -42,6 +43,16 @@
       "why": "used in the grammar's own interrogative examples; 'ktory' is also correct and is ranked type 1, so this is a preference rather than a correction",
       "evidence": "steenbergen-syntax: 'Koju knigu kupil otec?'; 'Koja žena ljubi togo muža?'",
       "source": "steenbergen-syntax"
+    },
+    {
+      "en": "until",
+      "upos": [
+        "SCONJ"
+      ],
+      "isv": "dopoka",
+      "why": "'until' opening a clause is 'dopoka ne', with `ne` before the clause's verb (negation stage). Ranking took the adverb `dopŕva` ('only, just now'), and the multiword `dopoka ne` would put `ne` right after the conjunction instead of before the verb",
+      "evidence": "steenbergen-conjunctions: 'dopoka ne „till, until”'; Interslavic Wikipedia: 'dopoka raziskyvanje 2014 roka ne našlo jego', 'dopoka ne byl zaměnjeny drugoju zeleninoju'",
+      "source": "steenbergen-conjunctions"
     },
     {
       "en": "too",

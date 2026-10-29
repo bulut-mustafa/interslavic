@@ -25,13 +25,15 @@ const outGold = (name: string) => translate(gold(name), lex, { orthography: 'sta
  */
 describe('the conditional', () => {
   it('agrees the particle with the subject', () => {
-    expect(out('i-would-read.conllu')).toBe('Ja byh čital knigu.');
+    // "the book" bounds the act, so the perfective (aspect.singleAct): his
+    // conditionals with an object are perfective, "da by uviděl grad i věžu".
+    expect(out('i-would-read.conllu')).toBe('Ja byh pročital knigu.');
     expect(out('we-would-read.conllu')).toBe('My byhmo čitali.');
     expect(out('you-would-know.conllu')).toBe('Vy byste znali.');
   });
 
   it('uses the l-participle, which agrees in gender', () => {
-    expect(out('she-would-read.conllu')).toBe('Ona by čitala knigu.');
+    expect(out('she-would-read.conllu')).toBe('Ona by pročitala knigu.');
   });
 
   it('does not add the compound past auxiliary on top of it', () => {

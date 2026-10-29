@@ -2351,3 +2351,36 @@ more evidence gathered, usage is one-sided: Wp/isv 4 (a phrase table "Izvinite!"
 corpus decides, so a curated entry (function-words.json, cited) now picks
 `izvinite` - the vy form the translator uses throughout - and the phrase lookup
 consults curated entries like the single-word lookup does.
+
+## Audit of the clause rules, and what it added (2026-10-29)
+
+Every rule added this session was re-checked against its source.
+
+**Confirmed:**
+- *byl byh dělal* (verbs page).
+- Purpose clauses with *da/že by* + conditional: syntax page, "Final clauses are translated by means of že or da followed by the conditional". The 2017 conjunctions page lists only *aby* / *že by*, but the syntax page and his usage (48 *da by(hmo)*, 0 *aby*) settle it.
+- *hot*: the first variant of the dictionary's "hoť, hoti".
+- *ja jesm* + L-participle in the first person, where only 3rd-person *je/jest/sut* is "usually omitted".
+- *se* after the verb ("Ja myju se").
+- *prijdti*, *zato že*.
+- *dopoka* = "as long as" and *tutoj* for "this" (syntax page: "Tutoj hlěb jest nedragy").
+
+**Fixed or added:**
+- **Conditional aspect.** "would" + a bounded object is perfective: *kupil byh*, *pročital byh*. Evidence: his conditionals "da by uviděl grad i věžu", "by pomyslil", "by odkryl", and the verbs page, where the perfective "focuses on the result". "will" stays as it was: his futures go both ways ("budu odkryti cěnu ščestja" beside "budu poznavati zvuk kroka").
+- **Purpose aspect.** A purpose infinitive under a single past event follows the same test: "že byhmo kupili hlěb". The old exclusion cited "že by fotografovali tulipany", whose bare-plural object is unbounded anyway.
+- **Infinitive under an adjective.** It is a complement, not a purpose clause ("ne bylo legko napisati", Wikipedia). "Nice to meet you" was "Prijemno, že by strěčal vas".
+- **Commas around adverbial clauses**, on either side of the main clause:
+  - Examples: "ja ju slušal jesm, kogda ona žalila se" and "Ale kogda jest denj, ja nošu verigu".
+  - No comma after a connective (*ale*, *i*).
+  - Not applied to "after/before", whose one attested form has none ("poslě togo, kogda").
+- **"until" + clause → *dopoka ne***, with *ne* before the verb.
+  - Conjunctions page: "dopoka ne „till, until”".
+  - His English–Interslavic dictionary: "until … (conj) dopoka ne".
+  - Wikipedia: "dopoka raziskyvanje … ne našlo jego".
+- **"until" + noun → *do* + genitive.** His dictionary: "till … (prep) do (kogo/čego)"; Wiktionary defines the preposition "till" as "until".
+
+**Left unchanged, with the research done:**
+- **"after/before" + clause.** No grammar page or dictionary entry gives a conjunction. The wiki has one "poslě togo, kogda" and one "poslě togo, ako"; "before" has none.
+- **"письмо".** *piśmo* is his word for a letter (Piron: "piśmo od čitatelja"), but the dictionary scores *piśmo* and *pisańje* equally, and no general rule separates the senses of Russian "письмо". Two candidate rules were measured and rejected: they flipped 31 and 280 other keys.
+- **"called" (phone), "get to", "next door", "in front of"**: no dictionary basis.
+- **"to rest"**: Stanza parses "rest" as a noun. The purpose rule works when the parse is right ("On šel domov, že by spal").

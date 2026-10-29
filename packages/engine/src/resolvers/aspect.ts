@@ -340,12 +340,30 @@ const pastResult: AspectStrategy = {
  * names a result: that test was measured on single past events, and on "should
  * act towards one another", a general norm, it gave "postupiti" where his UDHR
  * has "imajut postupati". Only an infinitive governed by a verb or a modal,
- * and a positive command; left out on purpose:
- * - "will"/"would": the verbs page shows the future only as "budu dělati",
+ * and a positive command.
+ *
+ * The conditional "would" counts too: van Steenbergen's conditionals with an
+ * object are perfective - "da by uviděl grad i věžu" (Babel), "obyčny
+ * prohodnik by pomyslil" (Maly princ), "da by dostal kontrolnu reakciju",
+ * "by odkryl" (Piron) - matching the verbs page: perfective "focuses on the
+ * result of an action". So "I would buy a car" is `kupil byh`, not
+ * `kupoval byh` ("I would be buying"). Left out on purpose:
+ * - "will": his futures with an object go both ways - "budu odkryti cěnu
+ *   ščestja" beside "budu poznavati zvuk kroka", "budu strěgti jihne domy" -
  *   and Tatoeba has "on bude pomagati";
+ * - a reported "would" (`ccomp`), which is the future of reported speech;
+ *
+ * A purpose infinitive counts as well. It was left out on his "že by
+ * fotografovali tulipany" (syntax page), but that object is a bare plural,
+ * which this test leaves imperfective anyway; with a bounded object his
+ * purpose clauses are perfective - "da by uviděl grad i věžu" (Babel), "da by
+ * dostal kontrolnu reakciju", "da byhmo izběgli konfrontaciju" (Piron). Only
+ * under a single past event, as in "Bog sšel v dol, da by uviděl": under a
+ * present habit the purpose repeats too - "She works to help her family" is
+ * `že by pomagala` (verbs page: imperfective for "a habit or a repeated
+ * action"). Still left out:
  * - after a phase or liking verb, which takes the imperfective: his Babel has
  *   "prěstali budovati", Tatoeba "Ljubju ničego ne dělati";
- * - a purpose clause, an `advcl`: his "že by fotografovali tulipany";
  * - "going to", a future;
  * - a negative command, tagged on "do", not on the verb - and the Slavic
  *   negative command is imperfective ("Ne otvarjajte okno").
@@ -360,7 +378,7 @@ function isBarePlural(noun: UdToken, sentence: ParsedSentence): boolean {
     !sentence.tokens.some((t) => t.head === noun.id && ['det', 'nmod:poss', 'nummod'].includes(t.deprel));
 }
 
-const MODALS = ['can', 'could', 'must', 'may', 'might', 'should'];
+const MODALS = ['can', 'could', 'must', 'may', 'might', 'should', 'would'];
 const TAKES_IMPERFECTIVE = ['begin', 'start', 'stop', 'finish', 'continue', 'keep', 'like', 'love', 'enjoy', 'hate', 'prefer', 'learn'];
 
 const singleAct: AspectStrategy = {
@@ -376,9 +394,16 @@ const singleAct: AspectStrategy = {
         head.lemma.toLowerCase() !== 'go' &&
         !TAKES_IMPERFECTIVE.includes(head.lemma.toLowerCase());
       const modal = sentence.tokens.some(
-        (t) => t.head === token.id && t.deprel === 'aux' && MODALS.includes(t.lemma.toLowerCase()),
+        (t) =>
+          t.head === token.id && t.deprel === 'aux' && MODALS.includes(t.lemma.toLowerCase()) &&
+          !(t.lemma.toLowerCase() === 'would' && token.deprel === 'ccomp'),
       );
-      if (!governed && !modal) return null;
+      const purpose =
+        token.deprel === 'advcl' && head?.upos === 'VERB' && head.feats['Tense'] === 'Past' &&
+        sentence.tokens.some((t) => t.head === token.id && t.deprel === 'mark' && t.lemma.toLowerCase() === 'to');
+      // The complement of an adjective: "ne bylo legko napisati" (Wikipedia).
+      const adjectiveComplement = token.deprel === 'advcl' && head?.upos === 'ADJ';
+      if (!governed && !modal && !purpose && !adjectiveComplement) return null;
     }
     const bounded = sentence.tokens.some(
       (t) => t.head === token.id && ((t.deprel === 'obj' && !isBarePlural(t, sentence) && !isTimeUnit(t.lemma)) ||

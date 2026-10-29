@@ -32,9 +32,17 @@ describe('conditionals', () => {
     expect(out('en/if-i-had-known-would-have.conllu')).toBe(
       'Ako byh ja znal, že vy jeste prihodili, ja byl byh prigotovil večerju.',
     );
+    // The conjunctions page lists both ako (li) and jestli as "if"; the split
+    // between unreal and real "if" follows his usage:
     // "Ako li lovci by tancevali kogdakoli, vse dni byli by jednakove" (Maly
     // princ, for "if the hunters danced at just any time").
     expect(out('en/if-i-had-money.conllu')).toMatch(/^Ako byh ja iměl /);
+  });
+
+  it('a conditional with an object is perfective', () => {
+    // "da by uviděl grad i věžu" (Babel), "by odkryl" (Piron); verbs page:
+    // perfective "focuses on the result of an action".
+    expect(out('en/if-i-had-money.conllu')).toMatch(/, ja byh kupil avto\.$/);
   });
 
   it('a real "if" keeps jestli', () => {
@@ -62,6 +70,8 @@ describe('result and purpose clauses', () => {
   });
 
   it('a modal in a purpose clause takes the conditional, the verb an infinitive', () => {
+    // Syntax page: "Final clauses are translated by means of že or da followed
+    // by the conditional: … Ona prinosi jabloka, da by děti byli zdrave."
     // "da by pěšehodi mogli hoditi na most" (Wikipedia), "da by mogl uzrěti" (Piron).
     expect(out('en/so-that-we-could-catch.conllu')).toContain('da byhmo my mogli zastati');
   });
@@ -116,5 +126,41 @@ describe('prepositions of more than one word', () => {
     expect(out('en/looked-out-of-the-window.conllu')).toBe('Ona gleděla iz okna.');
     expect(out('en/lives-next-to-the-school.conllu')).toBe('Ona žive pored školy.');
     expect(out('en/according-to-the-law.conllu')).toMatch(/^Po pravu, /);
+  });
+});
+
+describe('"until"', () => {
+  it('opening a clause is dopoka ne, with ne before the verb', () => {
+    // Conjunctions page: "dopoka ne „till, until”"; his English-Interslavic
+    // dictionary: "until ... (conj) dopoka ne". Wikipedia: "dopoka
+    // raziskyvanje 2014 roka ne našlo jego".
+    expect(out('en/waited-until-he-arrived.conllu')).toBe('My jesmo čekali, dopoka on ne došel.');
+  });
+
+  it('before a noun is do with the genitive', () => {
+    // His English-Interslavic dictionary: "till ... (prep) do (kogo/čego)".
+    expect(out('en/wait-until-friday.conllu')).toBe('Ja budu čekati do petka.');
+  });
+});
+
+describe('adverbial clauses are set off by commas', () => {
+  it('after the main clause, and before it', () => {
+    // "ja ju slušal jesm, kogda ona žalila se" (Maly princ); "Ale kogda jest
+    // denj, ja nošu verigu" (Vȯlk i pės).
+    expect(out('en/reading-when-you-called.conllu')).toContain('čital, kogda ');
+    expect(out('en/when-he-came-i-stopped.conllu')).toContain(' i kogda on prišel, ja ');
+  });
+});
+
+describe('a purpose infinitive', () => {
+  it('is že by + conditional, perfective for one bounded act in the past', () => {
+    // Syntax page: "Turisti posětili Niderlandiju, že by fotografovali
+    // tulipany"; with a bounded object, "da by uviděl grad i věžu" (Babel).
+    expect(out('en/went-to-buy-bread.conllu')).toMatch(/, že byhmo kupili hlěb\.$/);
+  });
+
+  it('is not used for the complement of an adjective', () => {
+    // "jegove slova ne bylo legko napisati" (Wikipedia).
+    expect(out('en/nice-to-meet-you.conllu')).not.toContain('že by');
   });
 });

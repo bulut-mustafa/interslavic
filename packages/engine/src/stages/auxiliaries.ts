@@ -389,6 +389,13 @@ export function planAuxiliaries(
   if (sentence.lang === 'en') {
     for (const token of sentence.tokens) {
       if (token.deprel !== 'advcl' || token.feats['VerbForm'] !== 'Inf') continue;
+      /**
+       * Under an adjective the infinitive is its complement, not a purpose:
+       * "jegove slova ne bylo legko napisati" (Interslavic Wikipedia). Read as
+       * a purpose, "Nice to meet you" became "Prijemno, že by strěčal vas".
+       */
+      const governor = sentence.tokens.find((t) => t.id === token.head);
+      if (governor?.upos === 'ADJ') continue;
       const to = sentence.tokens.find(
         (t) => t.head === token.id && t.deprel === 'mark' && t.lemma === 'to',
       );

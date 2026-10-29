@@ -74,5 +74,24 @@ export function planNegation(
     }
   }
 
+  /**
+   * "until" is `dopoka ne`, and the `ne` stands before the clause's verb, not
+   * after the conjunction: "dopoka raziskyvanje 2014 roka ne našlo jego",
+   * "dopoka ne byl zaměnjeny" (Interslavic Wikipedia); conjunctions page:
+   * "dopoka ne „till, until”". This `ne` belongs to the conjunction, not to a
+   * negated clause, so negative concord (`negatedClauses`) does not apply.
+   */
+  if (sentence.lang === 'en') {
+    for (const mark of sentence.tokens) {
+      if (mark.deprel !== 'mark' || !['until', 'till'].includes(mark.lemma.toLowerCase())) continue;
+      const clause = sentence.tokens.find((t) => t.id === mark.head);
+      if (!clause || !(clause.upos === 'VERB' || clause.upos === 'AUX' || copulaOf(clause.id))) continue;
+      if (negatedVerbs.has(clause.id) || negatedClauses.has(clause.id)) continue;
+      const modalId = modalOfHead.get(clause.id);
+      const modal = modalId === undefined ? undefined : sentence.tokens.find((t) => t.id === modalId);
+      negatedVerbs.add((modal ?? copulaOf(clause.id) ?? clause).id);
+    }
+  }
+
   return { negationParticles, negatedVerbs, negatedClauses };
 }
