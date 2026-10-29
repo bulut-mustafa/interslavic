@@ -1,4 +1,5 @@
 import { decide, type Case, type Decision, type ParsedSentence, type UdToken } from '../../../types/index.ts';
+import { casesGovernedBy } from '../../../rules/src/prepositions.ts';
 import { normalizeGloss, rank, type Entry } from '../../../lexicon/src/reader.ts';
 import { resolveAspect, type AspectOutcome } from '../resolvers/aspect.ts';
 import { resolveCase } from '../resolvers/case.ts';
@@ -75,7 +76,7 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
     imperatives, optativeVerbs, modalPlans, modalOfHead, analyticSuperlatives,
     negationParticles, verbGovernedCase,
     contextWords,
-    personOf, possessorIsSubject, inNegatedClause, needsVerbFeatures, rankedFor,
+    personOf, possessorIsSubject, inNegatedClause, needsVerbFeatures, rankedFor, lookupLemmaOf,
   } = input;
 
   const plan: PlanNode[] = [];
@@ -657,13 +658,26 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
      *
      * The same test holds for English: "bigger" has the lemma "big", while
      * "more" is its own lemma and is handled analytically.
+     *
+     * The word compared is the one LOOKED UP, which is not always the parser's
+     * lemma: Ukrainian "краще" is looked up by its own form (see
+     * lookupLemmaOf), and its entry `lěpje` "better" is already the
+     * comparative. And an entry the dictionary itself marks `adj.comp.` -
+     * `lěpši`, `krasnějši` - is never made comparative again, nor one marked
+     * `adj.sup.` (`najlěpši`) anything; the Ukrainian parser gives "старший",
+     * "кращий" their own comparative as lemma, which matches exactly those
+     * entries. A superlative IS built on a comparative entry: "The superlative
+     * is formed by adding the prefix naj- to the comparative" (adjectives
+     * page), so Russian "самый лучший" stays `najlěpši`.
      */
     const degreeIsOnAnotherStem =
       analyticSuperlatives.has(token.id) ||
-      token.form.trim().toLowerCase() !== token.lemma.trim().toLowerCase();
+      token.form.trim().toLowerCase() !== lookupLemmaOf(token).trim().toLowerCase();
+    const alreadyGraded = /^adj\.sup\./.test(entry.pos.raw) ||
+      (sourceDegree === 'Cmp' && /^adj\.comp\./.test(entry.pos.raw));
     if (
       (sourceDegree === 'Cmp' || sourceDegree === 'Sup') &&
-      degreeIsOnAnotherStem &&
+      degreeIsOnAnotherStem && !alreadyGraded &&
       (entry.pos.upos === 'ADJ' || entry.pos.upos === 'ADV')
     ) {
       feats.set(
@@ -752,6 +766,26 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
       });
       const numeralCase =
         adapter.copyCase && countingNumeral ? countingNumeral.feats['Case'] : undefined;
+      /**
+       * A source preposition can govern another case than the Interslavic one
+       * it becomes: Ukrainian "про" takes the accusative ("про Європейський
+       * союз") where `o` governs only the locative ("o, ob - about;
+       * concerning", prepositions page, With the locative). The copied case
+       * then belongs to the source's preposition, not to Interslavic, so a
+       * preposition the dictionary's `(+N)` codes give ONE case imposes it.
+       */
+      const prepNode = adapter.copyCase && !countingNumeral
+        ? plan.find((n) => n.token.head === token.id && n.token.deprel === 'case' && n.entry?.pos.upos === 'ADP')
+        : undefined;
+      const prepCases = prepNode?.entry ? [...casesGovernedBy(prepNode.entry.lemma)] : [];
+      const prepOnly = prepCases.length === 1 && prepCases[0] !== token.feats['Case']
+        ? decide<string>(
+            prepCases[0]!,
+            'case.prep.only',
+            'certain',
+            `"${prepNode!.entry!.lemma}" governs only this case, whatever the source's preposition took`,
+          )
+        : undefined;
       const c = resolveCase({
         token,
         sentence,
@@ -765,6 +799,7 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
       feats.set(
         'Case',
         governed ??
+          prepOnly ??
           (numeralCase
             ? decide<string>(
                 numeralCase,

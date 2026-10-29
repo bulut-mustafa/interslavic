@@ -78,7 +78,7 @@ import {
   RELATIVE_PRONOUN,
 } from '../../rules/src/pronouns.ts';
 import { functionWordFor } from '../../rules/src/function-words.ts';
-import { codeBelongsToPreposition } from '../../rules/src/prepositions.ts';
+import { casesGovernedBy, codeBelongsToPreposition } from '../../rules/src/prepositions.ts';
 import { negativeCounterparts } from '../../rules/src/negation.ts';
 import { rewriteSource } from '../../rules/src/source-rewrites.ts';
 
@@ -383,6 +383,19 @@ export function translate(
     const base = adverbBase(token);
     if (base) return base;
     /**
+     * A comparative adverb the parser lemmatises as its ADJECTIVE: Ukrainian
+     * "краще" gets the lemma "кращий", whose entries are adjectives
+     * (`krasnějši`, `lěpši`), while the dictionary glosses the adverb itself -
+     * "ліпше, краще" is `lěpje` "better". Looked up by its own form, only when
+     * the lemma has no adverb and the form has one.
+     */
+    if (sentence.lang !== 'en' && token.upos === 'ADV' && token.feats['Degree'] &&
+        token.form.toLowerCase() !== token.lemma.toLowerCase() &&
+        !lex.lookup(token.lemma, sentence.lang).some((e) => e.pos.upos === 'ADV') &&
+        lex.lookup(token.form, sentence.lang).some((e) => e.pos.upos === 'ADV')) {
+      return token.form.toLowerCase();
+    }
+    /**
      * A Russian short adjective the parser lemmatises as itself - "прав",
      * "готов" - while the dictionary lists the long form: "Том был во всём
      * прав" left "прав" untranslated. Tried as the long form only on a miss,
@@ -510,8 +523,31 @@ export function translate(
   const rankAs = (token: UdToken, candidates: Entry[]): string =>
     isNounModifier(token) && candidates.some((e) => e.pos.upos === 'ADJ') ? 'ADJ' : token.upos;
 
+  /**
+   * A Slavic source preposition is one word for what Interslavic splits by the
+   * case it governs, and the source states that case on its noun. Ukrainian
+   * "у"/"в" and Russian "в" gloss both `u` and `v`, but `u` governs only the
+   * genitive ("u - at, at the place of", prepositions page) and `v` the
+   * accusative and locative; Ukrainian "з" glosses `iz` (+gen, "from, out of")
+   * and `s` (+ins, "with"). The dictionary's own `(+N)` codes say which case
+   * each one governs, so a candidate that governs the noun's case comes first:
+   * "у школі" is `v školě`, "у мене" stays `u mene`, "з тобою" is `s toboju`.
+   *
+   * A counted noun's case is its numeral's doing ("в девять часов": genitive
+   * plural after "девять"); the preposition governs the numeral, so its case
+   * is the one read.
+   */
+  const byGovernedCase = (token: UdToken, ranked: Entry[]): Entry[] => {
+    if (sentence.lang === 'en' || token.upos !== 'ADP' || token.deprel !== 'case') return ranked;
+    const numeral = sentence.tokens.find((t) => t.head === token.head && baseDeprel(t.deprel) === 'nummod');
+    const c = (numeral ?? sentence.tokens.find((t) => t.id === token.head))?.feats['Case'];
+    if (!c) return ranked;
+    const governs = (e: Entry) => casesGovernedBy(e.lemma).has(c as Case);
+    return [...ranked.filter(governs), ...ranked.filter((e) => !governs(e))];
+  };
+
   const rankedFor = (token: UdToken, aspect: AspectOutcome | null): Entry[] =>
-    rank(candidatesFor(token), {
+    byGovernedCase(token, rank(candidatesFor(token), {
       upos: rankAs(token, candidatesFor(token)),
       gloss: lookupLemmaOf(token),
       lang: sentence.lang,
@@ -535,7 +571,7 @@ export function translate(
           }
         : {}),
       ...(aspect ? { aspect: aspect.decision.value } : {}),
-    });
+    }));
 
   // ---- Phase 0d: verb government ----------------------------------------
   const verbGovernedCase = planVerbGovernment(sentence, rankedFor, needsVerbFeatures, lex);
@@ -551,7 +587,7 @@ export function translate(
     imperatives, optativeVerbs, modalPlans, modalOfHead, analyticSuperlatives,
     negationParticles, verbGovernedCase,
     contextWords,
-    personOf, possessorIsSubject, inNegatedClause, needsVerbFeatures, rankedFor,
+    personOf, possessorIsSubject, inNegatedClause, needsVerbFeatures, rankedFor, lookupLemmaOf,
   });
 
   const byTokenId = new Map(plan.map((n) => [n.token.id, n]));

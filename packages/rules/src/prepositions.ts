@@ -60,6 +60,26 @@ export function prepositionLemmas(): Set<string> {
   return lemmaCache;
 }
 
+let governsCache: Map<string, Set<Case>> | null = null;
+
+/**
+ * Every case the dictionary's `(+N)` codes give this Interslavic preposition:
+ * `u` only the genitive, `s` the genitive and instrumental, `o` the locative,
+ * `v` the accusative and locative. Empty for a lemma the table does not list.
+ */
+export function casesGovernedBy(prep: string): Set<Case> {
+  if (!governsCache) {
+    const raw = JSON.parse(fs.readFileSync(DATA, 'utf8')) as { prepositions: PrepEntry[] };
+    governsCache = new Map();
+    for (const row of raw.prepositions) {
+      let cases = governsCache.get(row.prep);
+      if (!cases) governsCache.set(row.prep, (cases = new Set()));
+      cases.add(row.case);
+    }
+  }
+  return governsCache.get(prep) ?? new Set();
+}
+
 /**
  * True when a `(+N)` code on this lemma states what a PREPOSITION governs
  * rather than what the verb governs - i.e. the lemma ends in a preposition.

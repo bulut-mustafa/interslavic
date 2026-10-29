@@ -540,9 +540,17 @@ export function realiseStage(input: RealiseInput): RealiseOutput {
        * A Russian name the dictionary does not have is written in Latin by
        * the pages' own letter tables (russianNameToLatin) - "Зульфия" ->
        * "Zuljfija" - and kept as it was where they do not cover a letter.
+       *
+       * The Ukrainian parser tags a name it does not know as a common noun
+       * ("Зульфія спала"), so a capitalised noun the dictionary does not have
+       * counts as one too - except as a sentence's first word, where the
+       * capital says nothing.
        */
       const toLatin = adapterFor(sentence).nameToLatin;
-      const latinName = toLatin && token.upos === 'PROPN' ? toLatin(token.form) : null;
+      const firstWord = sentence.tokens.find((t) => t.upos !== 'PUNCT')?.id === token.id;
+      const looksLikeName = token.upos === 'PROPN' ||
+        (token.upos === 'NOUN' && !firstWord && /^\p{Lu}\p{Ll}/u.test(token.form));
+      const latinName = toLatin && looksLikeName ? toLatin(token.form) : null;
       if (latinName) notes.push(`a name, written in Latin by the Interslavic letter tables (${token.form})`);
       const surface = latinName ?? token.form;
       surfaces.push(surface);

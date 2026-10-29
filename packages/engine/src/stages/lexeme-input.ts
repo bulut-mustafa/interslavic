@@ -75,4 +75,6 @@ export interface LexemeInput {
   needsVerbFeatures: (t: UdToken) => boolean;
   /** This token's ranked dictionary candidates. */
   rankedFor: (t: UdToken, aspect: AspectOutcome | null) => Entry[];
+  /** The source word this token is looked up by in the dictionary. */
+  lookupLemmaOf: (t: UdToken) => string;
 }

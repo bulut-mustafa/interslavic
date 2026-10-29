@@ -91,7 +91,7 @@
       "tier": "transfer",
       "source": "packages/engine/src/source/adapters.ts",
       "quote": null,
-      "why": "Russian marks aspect explicitly"
+      "why": "Russian and Ukrainian mark aspect explicitly"
     },
     "aspect.default.imp": {
       "tier": "normative",
@@ -169,7 +169,7 @@
       "tier": "transfer",
       "source": "packages/engine/src/source/adapters.ts",
       "quote": null,
-      "why": "Russian marks case explicitly, so it is copied rather than inferred"
+      "why": "Russian and Ukrainian mark case explicitly, so it is copied rather than inferred"
     },
     "case.deprel.iobj": {
       "tier": "normative",
@@ -265,7 +265,7 @@
       "tier": "normative",
       "source": "http://steen.free.fr/interslavic/syntax.html",
       "quote": "Although a sentence like: „Pica jest dělana” or „Pica jest dělajema” „Pizza is being made” is grammatically completely correct",
-      "why": "Interslavic writes the present copula where Russian omits it"
+      "why": "Interslavic writes the present copula where Russian and Ukrainian omit it"
     },
     "degree.comparative": {
       "tier": "normative",
@@ -560,6 +560,12 @@
       "source": "corpus: https://isv.miraheze.org/wiki/Medžuslovjansky_jezyk ; https://isv.miraheze.org/wiki/Pravda",
       "quote": "Tuta kniga jest lěpša než/neželi tamta kniga.",
       "why": "the noun after než/neželi takes the case of the noun it is compared with"
+    },
+    "case.prep.only": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/prepositions.html",
+      "quote": "o, ob – about; concerning, regarding",
+      "why": "a preposition with one case imposes it on its noun, whatever case the source's preposition took (Ukrainian про + accusative becomes o + locative); which prepositions have one case comes from the dictionary's (+N) codes"
     }
   }
 }

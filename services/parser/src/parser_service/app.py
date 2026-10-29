@@ -18,6 +18,8 @@ import stanza
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
+from .lemmas import check_words
+
 logging.getLogger("stanza").setLevel(logging.WARNING)
 
 Lang = Literal["en", "ru", "uk", "pl", "sh"]
@@ -128,6 +130,7 @@ def parse(req: ParseRequest) -> ParseResponse:
 
     sentences: list[Sentence] = []
     for sent in doc.sentences:
+        check_words(sent.words, req.lang)
         tokens: list[Token] = []
         for word in sent.words:
             tokens.append(

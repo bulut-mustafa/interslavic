@@ -5,6 +5,7 @@ description = "Thin UD parsing service for the Interslavic translator. Parses on
 requires-python = ">=3.11"
 dependencies = [
     "stanza>=1.10",
+    "simplemma>=2.0",
     "fastapi>=0.115",
     "uvicorn[standard]>=0.34",
 ]

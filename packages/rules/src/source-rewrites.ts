@@ -1,5 +1,6 @@
 import type { ParsedSentence, UdToken } from '../../types/index.ts';
 import { fixMixedScript } from './mixed-script.ts';
+import { rewriteUkrainian } from './ukrainian-rewrites.ts';
 
 /**
  * Rewrites of the English parse into what it MEANS, applied once before any
@@ -185,10 +186,15 @@ export function rewriteExceptives(sentence: ParsedSentence): SourceRewrite {
  * out present: "Ja jesm s toboju" for "I will be with you". A fact of Russian
  * morphology, corrected before anything reads the tense.
  */
-const FUTURE_COPULA: Record<string, { lemma: string; forms: RegExp }> = {
-  ru: { lemma: 'быть', forms: /^буд/i },
-  // Ukrainian conjugates the same stem: буду, будеш, буде, будемо, будете, будуть.
-  uk: { lemma: 'бути', forms: /^буд/i },
+const FUTURE_COPULA: Record<string, { lemma: string; forms: RegExp; aspectTagged: boolean }> = {
+  ru: { lemma: 'быть', forms: /^буд/i, aspectTagged: true },
+  /**
+   * Ukrainian conjugates the same stem: буду, будеш, буде, будемо, будете,
+   * будуть. Its parser (UD Ukrainian-IU) does not tag aspect reliably: it marks
+   * "прочитаю" Aspect=Imp and the plain present "прокидаюся" Tense=Fut, so a
+   * perfective future is recognised by the dictionary's aspect alone.
+   */
+  uk: { lemma: 'бути', forms: /^буд/i, aspectTagged: false },
 };
 
 export function correctRussianFuture(sentence: ParsedSentence): ParsedSentence {
@@ -322,7 +328,7 @@ export function rewritePerfectiveFuture(
   const copula = FUTURE_COPULA[sentence.lang];
   if (!copula) return sentence;
   const verbs = sentence.tokens.filter(
-    (t) => t.upos === 'VERB' && t.feats['Aspect'] === 'Perf' && t.feats['Tense'] === 'Fut' &&
+    (t) => t.upos === 'VERB' && (t.feats['Aspect'] === 'Perf' || !copula.aspectTagged) && t.feats['Tense'] === 'Fut' &&
       t.feats['VerbForm'] === 'Fin' &&
       /**
        * The first person plural with no subject is the "let us" form, not a
@@ -337,6 +343,14 @@ export function rewritePerfectiveFuture(
       // imperfective "мучится" perfective future.
       isPerfective(t.lemma),
   );
+  return insertFutureAuxiliary(sentence, verbs, copula.lemma);
+}
+
+/**
+ * Gives each of `verbs` the shape "буду" + infinitive: a future auxiliary of
+ * `lemma` in the verb's person and number, and the verb itself an infinitive.
+ */
+export function insertFutureAuxiliary(sentence: ParsedSentence, verbs: UdToken[], lemma: string): ParsedSentence {
   if (verbs.length === 0) return sentence;
   // Each auxiliary goes directly before its verb, so every id from there on
   // moves up by the number of auxiliaries inserted before it.
@@ -350,7 +364,7 @@ export function rewritePerfectiveFuture(
         ...verb,
         id: shift(verb.id) - 1,
         form: 'буду',
-        lemma: copula.lemma,
+        lemma,
         upos: 'AUX',
         xpos: 'AUX',
         head: shift(verb.id),
@@ -416,12 +430,13 @@ export function rewriteSource(
   sentence: ParsedSentence,
   isPerfective?: (lemma: string) => boolean,
 ): SourceRewrite {
-  const light = rewriteLightVerbs(rewriteReciprocalPreposition(rewritePerfectiveFuture(correctRussianFuture(rewriteAdverbialComparative(rewriteAdverbialDifferent(fixMixedScriptTokens(sentence)))), isPerfective)));
+  const ukrainian = rewriteUkrainian(fixMixedScriptTokens(sentence));
+  const light = rewriteLightVerbs(rewriteReciprocalPreposition(rewritePerfectiveFuture(correctRussianFuture(rewriteAdverbialComparative(rewriteAdverbialDifferent(ukrainian.sentence))), isPerfective)));
   const exceptive = rewriteExceptives(light.sentence);
   const clock = rewriteOClock(exceptive.sentence);
   const habit = rewriteUsedTo(clock.sentence);
   return {
     sentence: habit.sentence,
-    absorbed: [...light.absorbed, ...exceptive.absorbed, ...clock.absorbed, ...habit.absorbed],
+    absorbed: [...ukrainian.absorbed, ...light.absorbed, ...exceptive.absorbed, ...clock.absorbed, ...habit.absorbed],
   };
 }

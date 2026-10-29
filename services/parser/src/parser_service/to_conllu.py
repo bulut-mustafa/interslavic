@@ -27,6 +27,7 @@ def to_conllu(text: str, lang: str) -> str:
     import stanza
 
     from .app import with_terminator
+    from .lemmas import check_words
 
     nlp = stanza.Pipeline(lang=lang, processors=PROCESSORS, download_method=None, verbose=False)
     # Same terminator fix the service applies - see `with_terminator`. Without
@@ -38,6 +39,7 @@ def to_conllu(text: str, lang: str) -> str:
     out: list[str] = []
     for sent in doc.sentences:
         words = list(sent.words)
+        check_words(words, lang)
         if added_terminator and words and (words[-1].upos or "") == "PUNCT":
             words.pop()
         out.append(f"# text = {sent.text[:-1] if added_terminator else sent.text}")

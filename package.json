@@ -12,7 +12,7 @@
     "lexicon:fetch": "node --experimental-strip-types packages/lexicon/scripts/fetch.ts && node --experimental-strip-types packages/rules/scripts/gen-prepositions.ts",
     "typecheck": "tsc --noEmit",
     "parser": "cd services/parser && PYTHONPATH=src .venv/bin/uvicorn parser_service.app:app --host 127.0.0.1 --port 8765",
-    "parser:setup": "cd services/parser && uv venv && uv pip install -q stanza fastapi \"uvicorn[standard]\" && PYTHONPATH=src .venv/bin/python -c \"import stanza; [stanza.download(l, processors=\"tokenize,pos,lemma,depparse\", verbose=False) for l in (\"en\",\"ru\")]\"",
+    "parser:setup": "cd services/parser && uv venv && uv pip install -q stanza simplemma fastapi \"uvicorn[standard]\" && PYTHONPATH=src .venv/bin/python -c \"import stanza; [stanza.download(l, processors=\"tokenize,pos,lemma,depparse\", verbose=False) for l in (\"en\",\"ru\")]\"",
     "fixtures:check": "cd services/parser && PYTHONPATH=src .venv/bin/python -m parser_service.fixtures",
     "fixtures:write": "cd services/parser && PYTHONPATH=src .venv/bin/python -m parser_service.fixtures --write",
     "server": "node --experimental-strip-types packages/server/src/main.ts",
