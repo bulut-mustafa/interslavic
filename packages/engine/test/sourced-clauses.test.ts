@@ -208,3 +208,13 @@ describe('"by"', () => {
     expect(out('en/stood-by-the-window.conllu')).toBe('Ona stojala pri oknu.');
   });
 });
+
+describe('"differently"', () => {
+  it('is inako, also when English says "different"', () => {
+    // Dictionary: inako "otherwise, in another way"; Wikipedia: "vsaky avtor
+    // piše inače", "za Ukrajincev i Hrvatov inako"; Wiktionary lists the
+    // English adverb "different": "Differently." Was "sdělal razny".
+    expect(out('en/would-have-done-different.conllu')).toBe('Ja byl byh sdělal inako.');
+    expect(out('en/thinks-differently.conllu')).toBe('Ona mysli inako.');
+  });
+});

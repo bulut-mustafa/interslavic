@@ -45,6 +45,16 @@
       "source": "steenbergen-syntax"
     },
     {
+      "en": "differently",
+      "upos": [
+        "ADV"
+      ],
+      "isv": "inako",
+      "why": "'differently' is 'in another way', the dictionary's gloss of `inako`. With no gloss 'differently' the adverb was derived from `råzny` 'different, various' - 'razno', 'variously' - which the corpus never writes",
+      "evidence": "dictionary: inako adv. 'otherwise, in another way' (ru 'иначе, по-другому'); steenbergen en-ms: 'otherwise: inako, inače'; Interslavic Wikipedia: 'za Ukrajincev i Hrvatov inako', 'vsaky avtor piše inače', 'něktore inače dumajut'; 'razno' 0 times",
+      "source": "dictionary"
+    },
+    {
       "en": "until",
       "upos": [
         "SCONJ"

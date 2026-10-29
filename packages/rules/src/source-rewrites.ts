@@ -358,11 +358,35 @@ export function rewritePerfectiveFuture(
   return { ...sentence, tokens };
 }
 
+/**
+ * "do it different" uses "different" as an ADVERB - Wiktionary's English
+ * entry lists the adverb "different": "Differently." The parser tags it an
+ * adjective complement of the verb, and it came out as the adjective: "Ja byl
+ * byh sdělal razny". An adjective complement is a real adjective only after a
+ * verb that links it to the subject ("It seems different", "She looks
+ * different"), so only those keep it; on any other verb it is the adverb.
+ */
+const LINKING_VERBS = new Set(['be', 'become', 'seem', 'look', 'appear', 'sound', 'feel', 'smell', 'taste', 'get', 'grow', 'turn', 'remain', 'stay', 'keep', 'prove']);
+
+export function rewriteAdverbialDifferent(sentence: ParsedSentence): ParsedSentence {
+  if (sentence.lang !== 'en') return sentence;
+  return {
+    ...sentence,
+    tokens: sentence.tokens.map((t) => {
+      if (t.lemma.toLowerCase() !== 'different' || t.upos !== 'ADJ' || t.deprel !== 'xcomp') return t;
+      const verb = sentence.tokens.find((h) => h.id === t.head);
+      if (verb?.upos !== 'VERB' || LINKING_VERBS.has(verb.lemma.toLowerCase())) return t;
+      if (sentence.tokens.some((c) => c.head === t.id)) return t;
+      return { ...t, lemma: 'differently', upos: 'ADV', xpos: 'RB', deprel: 'advmod', feats: {} };
+    }),
+  };
+}
+
 export function rewriteSource(
   sentence: ParsedSentence,
   isPerfective?: (lemma: string) => boolean,
 ): SourceRewrite {
-  const light = rewriteLightVerbs(rewriteReciprocalPreposition(rewritePerfectiveFuture(correctRussianFuture(sentence), isPerfective)));
+  const light = rewriteLightVerbs(rewriteReciprocalPreposition(rewritePerfectiveFuture(correctRussianFuture(rewriteAdverbialDifferent(sentence)), isPerfective)));
   const exceptive = rewriteExceptives(light.sentence);
   const clock = rewriteOClock(exceptive.sentence);
   const habit = rewriteUsedTo(clock.sentence);
