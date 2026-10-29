@@ -37,7 +37,7 @@ for _ in range(180):
         time.sleep(1)
 else:
     raise SystemExit('parser did not start')
-for lang, text in (('en', 'Hello.'), ('ru', 'Привет.')):
+for lang, text in (('en', 'Hello.'), ('ru', 'Привет.'), ('uk', 'Привіт.')):
     request = urllib.request.Request('http://127.0.0.1:8765/parse',
         data=json.dumps({'text': text, 'lang': lang}).encode(),
         headers={'content-type': 'application/json'})

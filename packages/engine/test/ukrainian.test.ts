@@ -151,6 +151,8 @@ describe('the future', () => {
     expect(out('budu-chytaty')).toBe('Ja budu čitati knigu.');
     expect(out('chytatymu')).toBe('Ja budu čitati knigu.');
     expect(out('ne-robytymu')).toBe('Ja ne budu dělati tutogo s toboju.');
+    // Reflexive too: "запізнюватимусь" is запізнюватися + -му + -сь.
+    expect(out('zapiznjuvatymus')).toBe('Jestli ja budu opozdnjati se, ne čekaj na mene.');
     expect(out('prochytaju-knyhu')).toBe('Ja budu pročitati knigu.');
   });
 
@@ -183,6 +185,15 @@ describe('comparison', () => {
     expect(out('chytaje-shvydshe')).toContain('bystrěje');
     // "краще" matched `krasnějši` and was compared again: "krasnějšeje".
     expect(out('krashche-nizh-ja')).toContain('lěpje');
+  });
+
+  it('takes a suppletive comparative through its positive', () => {
+    // "кращий" is the comparative of "добрий" (Wiktionary); the dictionary
+    // lists it first under `krasnějši` "more beautiful". Tatoeba #6859050.
+    expect(out('maju-krashchu-ideju')).toBe('Ja imaju lěpšu ideju.');
+    // "вищий" is високий's (Wiktionary); adjectives page: "vysoky > vysši".
+    // Was "vyšnějši", from `vyšny` "upper". Tatoeba #1598660.
+    expect(out('vy-vyshchi-za-mene')).toBe('Vy jeste vysši od mene.');
   });
 
   it('builds the superlative with naj-', () => {
@@ -333,6 +344,11 @@ describe('prepositions', () => {
 });
 
 describe('repairs of the Ukrainian parse', () => {
+  it('gives the past the gender the verb states, where "ти" has none', () => {
+    // verbs page: "jesm byl(a)". Was "Koliko piva ty jesi kupil?".
+    expect(out('skilky-pyva-kupyla')).toBe('Koliko piva ty jesi kupila?');
+  });
+
   it('reads a gendered verb as past', () => {
     // Tagged Gender=Masc and Tense=Pres at once: was "Ty umoriš se?".
     expect(out('ty-vtomyvsja')).toBe('Ty jesi umoril se?');

@@ -38,9 +38,9 @@ export function pageMeta(path: string): PageMeta {
   if (clean === '/') {
     return {
       path: '/',
-      title: 'Interslavic translator - English and Russian to Medžuslovjansky',
+      title: 'Interslavic translator - English, Russian and Ukrainian to Medžuslovjansky',
       description:
-        'Translate English or Russian into Interslavic, with the case, aspect and form of every word explained - and lessons on the grammar.',
+        'Translate English, Russian or Ukrainian into Interslavic, with the case, aspect and form of every word explained - and lessons on the grammar.',
       index: true,
       jsonLd: { '@context': 'https://schema.org', '@type': 'WebSite', name: SITE_NAME, url: `${SITE}/` },
     };

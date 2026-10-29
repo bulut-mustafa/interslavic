@@ -16,6 +16,8 @@ in the parse - part of speech, features, tree - is touched.
 
 from __future__ import annotations
 
+import re
+
 import simplemma
 
 # A Ukrainian infinitive ends in -ти or (archaic, still listed) -чи; a reflexive
@@ -25,13 +27,23 @@ _REFLEXIVE = ("ся", "сь")
 # The past tense is the l-participle: -в (masculine), -ла, -ло, -ли.
 _PAST = ("ла", "ло", "ли", "в")
 _CHECKED = {"NOUN", "VERB", "AUX", "ADJ", "ADV", "PROPN"}
+# The synthetic future is the infinitive plus -му, -меш, -ме, -мемо, -мете,
+# -муть, a reflexive adding -ся/-сь (-ться after -ме): "запізнюватимусь",
+# "запізнюватиметься" (Wiktionary's conjugation of запізнюватися).
+_SYNTHETIC_FUTURE = re.compile(r"^(.*ти)(му|меш|ме|мемо|мете|муть)(ся|сь|ться)?$")
+# The forms of the demonstrative "той" (Wiktionary's declension table), which
+# the parser lemmatises as themselves - "та" then matched the conjunction "та"
+# ("and"): "Моя іспанська вже не та" came out "... ne jest a".
+_TOJ = {"той", "те", "теє", "та", "тая", "ті", "тії", "того", "тієї", "тої", "теї",
+        "тих", "тому", "тій", "тим", "ту", "тую", "тім"}
 
 
 def _is_lemma(word: str) -> bool:
     """A word simplemma knows and that is its own lemma ("римлян" is a form)."""
-    if word.endswith("ся"):
-        return _is_lemma(word[:-2])
-    return simplemma.is_known(word, lang="uk") and simplemma.lemmatize(word, lang="uk").lower() == word.lower()
+    if simplemma.is_known(word, lang="uk") and simplemma.lemmatize(word, lang="uk").lower() == word.lower():
+        return True
+    # A reflexive verb is often listed by its stem ("митися" under "мити").
+    return word.endswith("ся") and _is_lemma(word[:-2])
 
 
 def _fits(upos: str, lemma: str) -> bool:
@@ -47,6 +59,9 @@ def _candidates(form: str, upos: str, feats: str) -> list[str]:
     stem = word[:-2] if reflexive else word
     suffix = "ся" if reflexive else ""
     found = [simplemma.lemmatize(stem, lang="uk") + suffix]
+    future = _SYNTHETIC_FUTURE.match(word) if upos in ("VERB", "AUX") else None
+    if future:
+        found.append(future.group(1) + ("ся" if future.group(3) else ""))
     if upos in ("VERB", "AUX") and "Tense=Past" in feats:
         for ending in _PAST:
             if stem.endswith(ending):
@@ -93,6 +108,8 @@ def participle_verb(lemma: str) -> str | None:
 
 def check_lemma(form: str, lemma: str, upos: str, feats: str, lang: str) -> str:
     """The lemma to use: Stanza's, unless it is not a real lemma of its kind."""
+    if lang == "uk" and upos in ("DET", "PRON") and form.lower() in _TOJ and "PronType=Dem" in (feats or ""):
+        return "той"
     if lang != "uk" or upos not in _CHECKED or not lemma:
         return lemma
     # The Ukrainian parser gives a passive participle an adjective lemma

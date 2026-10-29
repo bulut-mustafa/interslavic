@@ -425,6 +425,8 @@ export function translate(
       const sup = adapter.superlativePrefix;
       const word = token.lemma.toLowerCase();
       const comparative = degree === 'Sup' && sup && word.startsWith(sup) ? word.slice(sup.length) : word;
+      const suppletive = adapter.suppletiveComparatives.find(([cmp]) => cmp === comparative)?.[1];
+      if (suppletive && lex.lookup(suppletive, sentence.lang).some((e) => e.pos.upos === token.upos)) return suppletive;
       for (const candidate of adapter.comparativeToPositive
         .filter(([cmp]) => comparative.endsWith(cmp))
         .map(([cmp, pos]) => comparative.slice(0, -cmp.length) + pos)) {

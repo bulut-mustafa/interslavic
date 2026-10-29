@@ -198,6 +198,15 @@
       "en": "good",
       "why": "'good', a synonym of 'добрий', which this entry glosses (its Russian column has 'хороший')",
       "evidence": "Wiktionary: 'хоро́ший ... good. Synonyms: до́брий, га́рний'; dictionary: dobry adj., uk 'добрий', ru 'хороший, добрый'"
+    },
+    {
+      "lang": "uk",
+      "word": "запізнюватися",
+      "isv": "opozdnjati sę",
+      "upos": "VERB",
+      "en": "be late",
+      "why": "the imperfective 'to be late', a synonym of 'спізнюватися', which this entry glosses",
+      "evidence": "Wiktionary: 'запі́знюватися ... impf (perfective запізни́тися) to be late. Synonyms: спі́знюватися'; dictionary: opozdnjati sę v.refl. ipf., uk 'спізнюватися, затримуватися'"
     }
   ]
 }

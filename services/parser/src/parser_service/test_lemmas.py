@@ -23,6 +23,12 @@ CASES = [
     # A passive participle gets its verb.
     ("наділені", "наділений", "ADJ", "VerbForm=Part|Voice=Pass", "наділити"),
     ("зроблений", "зроблений", "ADJ", "VerbForm=Part|Voice=Pass", "зробити"),
+    # The synthetic future, reflexive too, is its infinitive.
+    ("запізнюватимусь", "запізнюватимусь", "VERB", "Tense=Fut", "запізнюватися"),
+    ("читатиму", "читатиму", "VERB", "Tense=Fut", "читати"),
+    # A form of the demonstrative "той".
+    ("та", "та", "DET", "PronType=Dem", "той"),
+    ("тим", "тим", "PRON", "PronType=Dem", "той"),
     # A real lemma is kept.
     ("книгу", "книга", "NOUN", "", "книга"),
     ("брати", "брат", "NOUN", "", "брат"),

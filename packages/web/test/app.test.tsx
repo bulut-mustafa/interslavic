@@ -533,4 +533,11 @@ describe('the site around the translator', () => {
     expect((screen.getByLabelText('Text to translate') as HTMLTextAreaElement).value).toBe('Я буду');
     expect(screen.getByRole('button', { name: 'Russian' }).getAttribute('aria-pressed')).toBe('true');
   });
+
+  it('opens on Ukrainian from a link, with a Ukrainian prompt', () => {
+    window.history.replaceState({}, '', '/?lang=uk');
+    render(<App />);
+    expect(screen.getByRole('button', { name: 'Ukrainian' }).getAttribute('aria-pressed')).toBe('true');
+    expect((screen.getByLabelText('Text to translate') as HTMLTextAreaElement).placeholder).toBe('Введіть речення…');
+  });
 });

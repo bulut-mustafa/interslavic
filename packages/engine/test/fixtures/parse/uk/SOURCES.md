@@ -215,3 +215,7 @@ repaired text the parser receives (see `rules/src/mixed-script.ts`).
 | `uk/ty-starshyj-za-mene` | Ти старший за мене. | Tatoeba #5862299 |
 | `uk/snidaju-o-somij` | Я снідаю о сьомій. | Tatoeba #922102 |
 | `uk/vyvchaju-anhlijsku` | Я вивчаю англійську. | Tatoeba #4918241 |
+| `uk/maju-krashchu-ideju` | Я маю кращу ідею. | Tatoeba #6859050 |
+| `uk/zapiznjuvatymus` | Якщо я запізнюватимусь, не чекай на мене. | Tatoeba #10124149 |
+| `uk/skilky-pyva-kupyla` | Скільки пива ти купила? | Tatoeba #7147463 |
+| `uk/vy-vyshchi-za-mene` | Ви вищі за мене. | Tatoeba #1598660 |

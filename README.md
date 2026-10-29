@@ -11,7 +11,7 @@ grammar.
 
 ## What it does
 
-- Translates **English and Russian into Interslavic**, written in Latin, Cyrillic, or the
+- Translates **English, Russian and Ukrainian into Interslavic**, written in Latin, Cyrillic, or the
   etymological and simplified alphabets.
 - Shows **why each word has its form**: tap a word to see its case, aspect, gender and
   number, the rule that decided it, and the source of that rule - Jan van Steenbergen's
@@ -33,7 +33,7 @@ rule was checked is recorded in [docs/verification-log.md](docs/verification-log
 ```bash
 npm install
 npm run lexicon:fetch       # dictionary snapshot (not committed)
-npm run parser:setup        # one-off: Python venv + Stanza models (~1.3 GB)
+npm run parser:setup        # one-off: Python venv + Stanza models for en, ru, uk (~1.6 GB)
 ```
 
 **Web UI** — three processes, one per terminal:
@@ -62,10 +62,11 @@ See [DEPLOY.md](DEPLOY.md).
 ```bash
 npm run isv -- "The woman read a book."
 npm run isv -- "Мальчик даёт девочке книгу." --lang ru
+npm run isv -- "Хлопчик дає дівчинці нову книгу." --lang uk
 npm test
 ```
 
-Type any English or Russian sentence. The first request loads a language model and
+Type any English, Russian or Ukrainian sentence. The first request loads a language model and
 takes a few seconds; after that it is fast.
 
 ```

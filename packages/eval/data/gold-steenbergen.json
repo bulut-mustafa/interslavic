@@ -634,6 +634,212 @@
       "tests": [
         "free translation of a running text"
       ]
+    },
+    {
+      "id": "g01-uk",
+      "lang": "uk",
+      "uk": "Батько купив книгу?",
+      "isv": "Otec kupil knigu?",
+      "page": "syntax",
+      "tests": [
+        "past l-participle",
+        "yes/no question"
+      ],
+      "of": "g01",
+      "en_of_target": "Has father bought a book?"
+    },
+    {
+      "id": "g02-uk",
+      "lang": "uk",
+      "uk": "Яку книгу купив батько?",
+      "isv": "Koju knigu kupil otec?",
+      "page": "syntax",
+      "tests": [
+        "wh-question",
+        "accusative"
+      ],
+      "of": "g02",
+      "en_of_target": "Which book has father bought?"
+    },
+    {
+      "id": "g03-uk",
+      "lang": "uk",
+      "uk": "Де батько купив ту книгу?",
+      "isv": "Kde otec kupil tu knigu?",
+      "page": "syntax",
+      "tests": [
+        "wh-question",
+        "demonstrative"
+      ],
+      "of": "g03",
+      "en_of_target": "Where did father buy that book?"
+    },
+    {
+      "id": "g04-uk",
+      "lang": "uk",
+      "uk": "Яка жінка любить того чоловіка?",
+      "isv": "Koja žena ljubi togo muža?",
+      "page": "syntax",
+      "tests": [
+        "masc animate accusative"
+      ],
+      "of": "g04",
+      "en_of_target": "Which woman loves that man?"
+    },
+    {
+      "id": "g05-uk",
+      "lang": "uk",
+      "uk": "Я не хочу йти в кіно.",
+      "isv": "Ja ne hoču idti v kino.",
+      "page": "syntax",
+      "tests": [
+        "modal + infinitive",
+        "negation"
+      ],
+      "of": "g05",
+      "en_of_target": "I don't want to go to the cinema."
+    },
+    {
+      "id": "g07-uk",
+      "lang": "uk",
+      "uk": "Я ніколи не їм шоколад.",
+      "isv": "Ja nikogda ne jem čokoladu.",
+      "page": "syntax",
+      "tests": [
+        "negative concord",
+        "accusative"
+      ],
+      "of": "g07",
+      "en_of_target": "I never eat chocolate."
+    },
+    {
+      "id": "g08-uk",
+      "lang": "uk",
+      "uk": "Ніхто не прийшов на вечірку.",
+      "isv": "Nikto ne prijehal na zabavu.",
+      "page": "syntax",
+      "tests": [
+        "negative concord",
+        "preposition na",
+        "word sense"
+      ],
+      "of": "g08",
+      "en_of_target": "Nobody came to the party."
+    },
+    {
+      "id": "g17-uk",
+      "lang": "uk",
+      "uk": "Мій брат не їсть хліб.",
+      "isv": "Moj brat ne je hlěb.",
+      "page": "syntax",
+      "tests": [
+        "negation",
+        "accusative under negation"
+      ],
+      "of": "g17",
+      "en_of_target": "My brother doesn't eat bread."
+    },
+    {
+      "id": "g18-uk",
+      "lang": "uk",
+      "uk": "Кіт спить під столом.",
+      "isv": "Kot spi pod stolom",
+      "page": "prepositions",
+      "tests": [
+        "pod + instrumental",
+        "static location"
+      ],
+      "of": "g18",
+      "en_of_target": "The cat is sleeping under the table"
+    },
+    {
+      "id": "g19-uk",
+      "lang": "uk",
+      "uk": "Кіт побіг під стіл.",
+      "isv": "Kot poběgl pod stol",
+      "page": "prepositions",
+      "tests": [
+        "pod + accusative",
+        "motion"
+      ],
+      "of": "g19",
+      "en_of_target": "The cat fled under the table"
+    },
+    {
+      "id": "g22-uk",
+      "lang": "uk",
+      "uk": "Я мию свою машину.",
+      "isv": "Ja myju svoje avto",
+      "page": "pronouns",
+      "tests": [
+        "svoj",
+        "accusative neuter"
+      ],
+      "of": "g22",
+      "en_of_target": "I am washing my car"
+    },
+    {
+      "id": "g23-uk",
+      "lang": "uk",
+      "uk": "Я мию себе.",
+      "isv": "Ja myju se",
+      "page": "pronouns",
+      "tests": [
+        "reflexive se"
+      ],
+      "of": "g23",
+      "en_of_target": "I'm washing myself"
+    },
+    {
+      "id": "g27-uk",
+      "lang": "uk",
+      "uk": "п'ять будинків",
+      "isv": "pet domov",
+      "page": "numerals",
+      "tests": [
+        "numeral government",
+        "genitive plural after 5"
+      ],
+      "of": "g27",
+      "en_of_target": "five houses"
+    },
+    {
+      "id": "g28-uk",
+      "lang": "uk",
+      "uk": "два студенти",
+      "isv": "dva studenti",
+      "page": "numerals",
+      "tests": [
+        "numeral government",
+        "nominative plural after 2-4"
+      ],
+      "of": "g28",
+      "en_of_target": "two students"
+    },
+    {
+      "id": "g50-uk",
+      "lang": "uk",
+      "uk": "Всі люди народжуються вільними і рівними у своїй гідності та правах.",
+      "isv": "Vsi ljudi rodet se svobodni i ravni v dostojnosti i pravah.",
+      "page": "udhr",
+      "tests": [
+        "universal quantifier",
+        "predicate instrumental"
+      ],
+      "of": "g50"
+    },
+    {
+      "id": "g51-uk",
+      "lang": "uk",
+      "uk": "Вони наділені розумом і совістю і повинні діяти у відношенні один до одного в дусі братерства.",
+      "isv": "Oni sut obdarjeni razumom i svěstju i imajut postupati jedin k drugomu v duhu bratstva.",
+      "page": "udhr",
+      "tests": [
+        "zero copula before a passive participle",
+        "reciprocal",
+        "oni is masculine animate"
+      ],
+      "of": "g51"
     }
   ]
 }

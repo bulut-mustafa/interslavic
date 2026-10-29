@@ -6,18 +6,18 @@ import { parseConllu } from '../../engine/src/conllu.ts';
 import { translate, type Translation } from '../../engine/src/pipeline.ts';
 import { DEFAULT_PARSER_URL, parseText, parserHealthy } from '../../engine/src/source/parse-client.ts';
 import type { Orthography } from '../../morph/src/orthography.ts';
-import type { SourceLang } from '../../types/index.ts';
+import { ENABLED_LANGS, type SourceLang } from '../../types/index.ts';
 
 const ROOT = path.resolve(import.meta.dirname, '../../..');
 const TSV = path.join(ROOT, 'packages/lexicon/data/raw/words.tsv');
 
 const USAGE = `
 usage:
-  npm run isv -- "<text>" [--lang en|ru] [--orth <orthography>]
+  npm run isv -- "<text>" [--lang en|ru|uk] [--orth <orthography>]
   npm run isv -- <fixture.conllu> [--orth <orthography>]
 
 options:
-  --lang en|ru     source language for free text (default: en)
+  --lang en|ru|uk  source language for free text (default: en)
   --orth           standard | etymological | simplified | cyrillic (default: standard)
   --brief          just the translation, no per-word analysis
   --no-validate    skip the full-form lexicon check (saves a few seconds)
@@ -121,8 +121,8 @@ async function main(): Promise<void> {
   }
 
   const lang = (flag(args, 'lang') ?? 'en') as SourceLang;
-  if (lang !== 'en' && lang !== 'ru') {
-    console.error(`unsupported --lang "${lang}" (expected en or ru)`);
+  if (!(ENABLED_LANGS as readonly string[]).includes(lang)) {
+    console.error(`unsupported --lang "${lang}" (expected ${ENABLED_LANGS.join(', ')})`);
     process.exit(2);
   }
   const url = flag(args, 'parser') ?? DEFAULT_PARSER_URL;

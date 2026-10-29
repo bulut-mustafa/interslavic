@@ -112,6 +112,15 @@ export interface SourceAdapter {
   superlativePrefix: string | null;
   comparativeToPositive: readonly [string, string][];
   /**
+   * Comparatives on another root or another stem, each with its positive: Ukrainian
+   * "кращий" is the comparative of "добрий". Looked up by the positive, so
+   * Interslavic builds its own irregular comparative from it ("dobry > lěpši",
+   * adjectives page) rather than taking whatever entry glosses the
+   * comparative - the dictionary lists "кращий" first under `krasnějši`,
+   * "more beautiful".
+   */
+  suppletiveComparatives: readonly [string, string][];
+  /**
    * The feminine and masculine adjective endings of a language name used as a
    * noun. Ukrainian says "вивчаю іспанську [мову]" with the feminine "мова",
    * and the parser makes the adjective a feminine NOUN the dictionary does not
@@ -140,6 +149,7 @@ export const EN: SourceAdapter = {
   nameToLatin: null,
   superlativePrefix: null,
   comparativeToPositive: [],
+  suppletiveComparatives: [],
   languageNameEndings: null,
 };
 
@@ -163,6 +173,7 @@ export const RU: SourceAdapter = {
   nameToLatin: russianNameToLatin,
   superlativePrefix: null,
   comparativeToPositive: [],
+  suppletiveComparatives: [],
   languageNameEndings: null,
 };
 
@@ -205,7 +216,16 @@ export const UK: SourceAdapter = {
     ['іший', 'ий'], ['ший', 'окий'], ['ший', 'екий'], ['ший', 'кий'], ['ший', 'ий'],
     ['іше', 'о'], ['ше', 'око'], ['ше', 'еко'], ['ше', 'ко'], ['ше', 'о'],
   ],
-  // The suffix is "-ський (feminine -ська, alternative -цький, variant
+  // Wiktionary: добрий "comparative кращий or ліпший", поганий "гірший",
+  // великий "більший", малий "менший"; and those whose stem alternates, which
+  // the suffix rule above does not undo: високий "вищий", дорогий "дорожчий",
+  // близький "ближчий", низький "нижчий", вузький "вужчий", далекий "дальший".
+  suppletiveComparatives: [
+    ['кращий', 'добрий'], ['ліпший', 'добрий'], ['гірший', 'поганий'], ['більший', 'великий'], ['менший', 'малий'],
+    ['вищий', 'високий'], ['дорожчий', 'дорогий'], ['ближчий', 'близький'], ['нижчий', 'низький'],
+    ['вужчий', 'вузький'], ['дальший', 'далекий'],
+  ],
+  // The suffix is "-ський" (feminine -ська, alternative -цький, variant
   // -зький)" (Wiktionary): українська, німецька, французька all end -ька.
   languageNameEndings: ['ька', 'ький'],
 };

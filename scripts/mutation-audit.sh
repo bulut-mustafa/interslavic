@@ -88,6 +88,8 @@ RENDST=packages/engine/src/stages/render.ts
 TREEST=packages/engine/src/tree.ts
 GLOSSST=packages/engine/src/gloss.ts
 FWJSON=packages/rules/data/function-words.json
+UKRW=packages/rules/src/ukrainian-rewrites.ts
+SUPPL=packages/lexicon/data/source-supplement.json
 
 save "$CASE" case; save "$ASPECT" aspect; save "$READER" reader
 save "$REALIZE" realize; save "$ORTH" orth; save "$PIPE" pipe
@@ -98,6 +100,7 @@ save "$PHRASALST" phrasalst; save "$NEGST" negst; save "$GOVST" govst
 save "$REALST" realst; save "$AGRST" agrst; save "$PREDST" predst
 save "$COPST" copst; save "$PARTST" partst; save "$NUMST" numst
 save "$RENDST" rendst; save "$TREEST" treest; save "$GLOSSST" glossst
+save "$UKRW" ukrw; save "$SUPPL" suppl
 
 # The suite is run ~110 times, so a machine under memory pressure needs a
 # smaller worker pool. Override, do not weaken: the same tests must run.
@@ -196,7 +199,7 @@ mutate "leading ne treated as the head"    split  "s/  if (words.length > 1 \&\&
 mutate "library error marker accepted"     realize "s/  if (\/ERROR\/.test(form)) {/  if (false) {/"
 mutate "error forms indexed as valid"      fullform "s/    if (k.includes(.error.)) return;//"
 mutate "transitivity not ranked on"        reader "s/    if (ctx.hasDirectObject === true \&\& e.pos.intransitive \&\& !governsACase) s += 200;//"
-mutate "object-less verb may be transitive" reader "s/    if (ctx.hasDirectObject === false \&\& e.pos.transitive \&\& ctx.lang !== 'ru') s += 200;//"
+mutate "object-less verb may be transitive" reader "s/    if (ctx.hasDirectObject === false \&\& e.pos.transitive \&\& !isSlavicSource(ctx.lang)) s += 200;//"
 mutate "government code does not exempt"   reader "s/    const governsACase = e.addition.governs !== undefined;/    const governsACase = false;/"
 mutate "intr marker conflated with unmarked" xpos "s/      intransitive: has(.intr..),/      intransitive: false,/"
 mutate "phrasal verbs not recognised"      phrasalst   "s/        if (child.deprel === .compound:prt.) candidates.push({ particle: child });//"
@@ -205,7 +208,7 @@ mutate "phrasal entry not preferred"       lexeme      "s/      phrasalVerbs.get
 mutate "split reports a false clitic"      split  "s/^      reflexive,\$/      reflexive: true,/"
 
 echo "=== Russian source side ==="
-mutate "russian glosses split on commas"   reader "s/          ruGlosses: parseGlosses(f\[cRu!\] ?? ..),/          ruGlosses: (f[cRu!] ?? '').split(',').map((x) => ({ text: x.trim(), index: 0 })).filter((g) => g.text),/"
+mutate "russian glosses split on commas"   reader "s/        const all = cols.filter((c) => c >= 0).flatMap((c) => parseGlosses(f\[c\] ?? ''));/        const all = cols.filter((c) => c >= 0).flatMap((c) => (f[c] ?? '').split(',').map((x) => ({ text: x.trim() })).filter((g) => g.text));/"
 mutate "T-V distinction ignored"           pron   "s/      return marksSecondPersonNumber \&\& !plural ? .ty. : .vy.;/      return 'vy';/"
 mutate "adapter says russian is like english" adapt "s/  marksSecondPersonNumber: true,/  marksSecondPersonNumber: false,/"
 mutate "deprel subtype not matched"        numst       "s/    if (baseDeprel(node.token.deprel) !== .nummod.) continue;/    if (node.token.deprel !== 'nummod') continue;/"
@@ -246,7 +249,7 @@ mutate "UD expl label ignored"             expl   "s/  if (token.deprel === .exp
 mutate "weather verbs emptied"             expl   "s/  .rain., .snow., .hail., .sleet., .drizzle., .thunder., .pour.,//"
 mutate "any nsubj it treated as dummy"     expl   "s/  return verb?.upos === .VERB. \&\& WEATHER_VERBS.has(verb.lemma.toLowerCase());/  return true;/"
 mutate "impersonal predicate not neuter"   predst      "s/      node.feats.set(.Gender., decide(.Neut., .agreement.impersonal./      node.feats.set('Gender', decide('Fem', 'agreement.impersonal'/"
-mutate "clausal subject gets conjugated"   lexeme      "s/          token.deprel === .csubj.) \&\&/          false) \&\&/"
+mutate "clausal subject gets conjugated"   lexeme      "s/            token.deprel === 'csubj' ||/            false ||/"
 mutate "question inversion kept"           realst      "s/  if (punctuation.includes(.?.) \&\& !sentence.tokens.some((t) => t.feats\[.PronType.\] === .Int.)) {/  if (false) {/"
 mutate "wh-questions also reordered"       realst      "s/ \&\& !sentence.tokens.some((t) => t.feats\[.PronType.\] === .Int.)//"
 mutate "verb-first question not reordered" realst      "s/    if (verbIndex >= 0) {/    if (verbIndex > 0) {/"
@@ -286,7 +289,7 @@ mutate "optative not third person"         lexeme      "s/        feats.set('Per
 
 echo "=== mood: conditional and final clauses ==="
 mutate "would not treated as conditional"  auxrules "s/  would: 'conditional',//"
-mutate "conditional particle ignores person" lexeme     "s/          ? conditionalAuxiliary(person, number)/          ? conditionalAuxiliary('3', 'Sing')/"
+mutate "conditional particle ignores person" lexeme     "s/ + conditionalAuxiliary(person, number)/ + conditionalAuxiliary('3', 'Sing')/"
 mutate "conditional adds the jesm auxiliary" partst     "s/    if (!conditionalVerbs.has(node.token.id) \&\& (personForAux === '1' || personForAux === '2')) {/    if (personForAux === '1' || personForAux === '2') {/"
 mutate "purpose clause not detected"       auxst       "s/      if (!to) continue;/      continue;/"
 mutate "final clause conjunction dropped"  realst      "s/        \['da', 'da', /        ['', 'da', /"
@@ -312,8 +315,8 @@ mutate "etymological suffixes dropped"     neg    "s/^const INDEFINITE_SUFFIXES 
 
 echo "=== personal pronouns ==="
 mutate "pronoun lemma normalisation off"   lexeme      "s/    const pronounLemma = isReflexive || presentationalEntry ? null : pronounLemmaFor(token.feats, sentence);/    const pronounLemma = null;/"
-mutate "n- form used everywhere"           lexeme      "s/            prepCaseFor(governed !== undefined),/            prepCaseFor(true),/"
-mutate "n- form never used"                lexeme      "s/            prepCaseFor(governed !== undefined),/            prepCaseFor(false),/"
+mutate "n- form used everywhere"           lexeme      "s/            prepCaseFor(afterPreposition),/            prepCaseFor(true),/"
+mutate "n- form never used"                lexeme      "s/            prepCaseFor(afterPreposition),/            prepCaseFor(false),/"
 mutate "you translated as ty"              pron   "s/      return marksSecondPersonNumber \&\& !plural ? .ty. : .vy.;/      return 'ty';/"
 mutate "feminine pronoun read as masculine" pron  "s/      if (feats\['Gender'\] === 'Fem') return 'ona';//"
 mutate "vy treated as singular"            pron   "s/ || lemma === 'vy'//"
@@ -357,7 +360,7 @@ mutate "government loses its citation"      case   "s/verbGovernedBy$/verbGovern
 
 echo "=== aspect chain ==="
 mutate "present tense -> Perf"              aspect "s/^        'Imp',\$/        'Perf',/"
-mutate "aspect copy from source disabled"   aspect "s/if (sentence.lang !== 'ru') return null;/if (true) return null;/"
+mutate "aspect copy from source disabled"   aspect "s/    if (!adapterFor(sentence).copyAspect) return null;/    if (true) return null;/"
 mutate "default aspect -> Perf"             aspect "s/      'Imp',\$/      'Perf',/"
 mutate "imperfective cue list emptied"      aspect "s/^const IMPERFECTIVE_CUES = .*$/const IMPERFECTIVE_CUES: string[] = [];/"
 mutate "perfective cue list emptied"        aspect "s/^const PERFECTIVE_CUES = .*$/const PERFECTIVE_CUES: string[] = [];/"
@@ -420,13 +423,13 @@ mutate "indeclinable fast-path removed"     realst "s/if (entry.pos.indeclinable
 mutate "planned preposition ignored"        lexeme      "s/      (plannedPrep ? lex.lookupLemma(plannedPrep, .ADP.)\[0\] : undefined) ??/      undefined ??/"
 
 echo "=== auxiliaries and predicates (M3) ==="
-mutate "auxiliaries never classified"       auxst       "s/const role = auxiliaryRole(token.lemma);/const role = null;/"
+mutate "auxiliaries never classified"       auxst       "s/      let role = auxiliaryRole(token.lemma);/      let role = null;/"
 mutate "aux tense not transferred to verb"  lexeme      "s/const src = { ...token.feats, ...(fromAux ?? {}) };/const src = { ...token.feats };/"
 mutate "copula gets no verb features"       pipe   "s/const isCopula = (t: UdToken): boolean => t.deprel === 'cop' || t.deprel === 'aux:pass';/const isCopula = (_t: UdToken): boolean => false;/"
 mutate "predicate agreement disabled"       predst      "s/    if (!isRoot \&\& !subject) continue;/    continue;/"
 mutate "predicate case not nominative"      predst "s/decide('Nom', 'case.predicate'/decide('Acc', 'case.predicate'/"
 mutate "possessive deprel removed"          case   "s/  'nmod:poss',//"
-mutate "aux plural number not transferred"  lexeme      "s/      if (number === 'Plur') {/      if (false) {/"
+mutate "aux plural number not transferred"  lexeme      "s/      } else if (number === 'Plur') {/      } else if (false) {/"
 
 echo "=== multiword head (M3) ==="
 mutate "multiword head back to first word"  split  "s/^    head: last,\$/    head: words[0] ?? '',/"
@@ -447,7 +450,7 @@ mutate "validator always says yes"          fullform "s/has: (form) => index.has
 mutate "folded spellings not indexed"       fullform "s/if (folded !== t.form) add(folded, reading);//"
 mutate "citation forms not indexed"         fullform "s/^    addEntryCitation(entry, add);\$/    void 0;/"
 mutate "analyze returns nothing"            fullform "s/analyze: (form) => index.get(key(form)) ?? \[\],/analyze: () => [],/"
-mutate "validation check skipped"           realst      "s/if (opts.validator) {\n      const missing/X/; s/const missing = unknownWords(surface, opts.validator);/const missing: string[] = [];/"
+mutate "validation check skipped"           realst      "s/      const missing = unknownWords(surface, opts.validator).filter((w) => !ownWords.has(w.toLowerCase()));/      const missing: string[] = [];/"
 mutate "multiword validated as one string"  glossst "s|split(/[\\]s+/)|split(\"@@\")|"
 mutate "validation rate always 1"           rendst      "s/: words.filter((w) => w.validation === 'validated').length \/ words.length/: 1/"
 
@@ -503,9 +506,9 @@ mutate "name ending: consonant not masc"    proper "/CONSONANT.test(name)/d"
 mutate "name ending: -a not feminine"       proper "/return .f.sg./d"
 mutate "unknown name gender called lexical" lexeme "s/entry === properNounEntry \&\& entry.pos.gender/false/"
 mutate "unknown name claimed validated"   realst "s/    if (entry.unlisted) {/    if (false) {/"
-mutate "transgressive not built"           lexeme "s/^      if (isTransgressive(token, sentence)) {$/      if (false) {/"
+mutate "transgressive not built"           lexeme "s/^      if (isTransgressive(token, sentence) || slavicConverb) {$/      if (false) {/"
 mutate "transgressive mark kept"           lexeme "s/^    if (isTransgressiveMark(token, sentence)) {$/    if (false) {/"
-mutate "transgressive inflected"           realst "s/        ? presentActiveParticiple(entry.lemma, entry.pos.xpos)/        ? null/"
+mutate "transgressive inflected"           realst "s/          : presentActiveParticiple(entry.lemma, entry.pos.xpos)/          : null/"
 mutate "transgressive marks ignored"       transg "s/.every((m) => SIMULTANEOUS_MARKS.has(m.lemma.toLowerCase()));/.every(() => true);/"
 mutate "transgressive despite own subject" transg "/c.deprel.startsWith(.nsubj.)/d"
 mutate "collective alternative never named"  numst "s/if (collective \&\& takesCollective(/if (false \&\& takesCollective(/"
@@ -515,7 +518,7 @@ mutate "perfect progressive made perfective" aspect "s/    if (token.xpos === .V
 mutate "anaphor decision hidden from modifier" agrst "s/      if (hv.ruleId === .anaphora.one.) {/      if (false) {/"
 mutate "agreement launders confidence"     agrst "s/^          hv.confidence,$/          'certain',/"
 mutate "source comma dropped"              realst "s/^    if (owed) appendPunctuation(owed);\$//"
-mutate "source comma owed by no word"      realst "s/^    owed = punctuationAfter.get(token.id);\$/    owed = undefined;/"
+mutate "source comma owed by no word"      realst "s/^      punctuationAfter.get(token.id) ??\$/      undefined ??/"
 mutate "work to the job sense removed"     fwjson "s/\"isv\": \"råbota\"/\"isv\": \"dělo\"/"
 mutate "light verb not rewritten"          light "s/^  if (removed.size === 0) return { sentence, absorbed };\$/  return { sentence, absorbed };/"
 mutate "light verb absorbs a modifier"     light "s/    if (rest.length > 0 || ofPhrases.length > 1) continue;/    if (ofPhrases.length > 1) continue;/"
@@ -550,14 +553,14 @@ mutate "be+participle phrase ignored"        phrasalst "s/^      if (!aux) conti
 mutate "absorbed passive still a participle" lexeme  "s/ \&\& !absorbedPassive) {/) {/"
 mutate "absorbed aux gives no tense"         lexeme  "s/      const fromAux = auxFeatsForHead.get(token.id) ?? absorbedPassive?.feats;/      const fromAux = auxFeatsForHead.get(token.id);/"
 mutate "unmarked slot still blocks a form"   realize "s/    hits = most > 0 ? lenient.filter((t) => stated(t) === most) : \[\];/    hits = [];/"
-mutate "capital ignored for Russian"         reader  "s/        if (idx >= 0 \&\& capitalised(e.ruGlosses\[idx\]!.text) !== capitalised(ctx.gloss)) s += CASE_CONTRADICTED;//"
+mutate "capital ignored for Russian"         reader  "s/        if (idx >= 0 \&\& capitalised(own\[idx\]!.text) !== capitalised(ctx.gloss)) s += CASE_CONTRADICTED;//"
 mutate "domain label not penalised"          reader  "s/        if (exact \&\& isDomainLabel(exact.sense) \&\& !senseSupported(exact.sense, ctx)) s += DOMAIN_LABEL_UNSUPPORTED;//"
-mutate "objectless penalty also for Russian" reader  "s/ \&\& e.pos.transitive \&\& ctx.lang !== 'ru') s += 200;/ \&\& e.pos.transitive) s += 200;/"
+mutate "objectless penalty also for Russian" reader  "s/ \&\& e.pos.transitive \&\& !isSlavicSource(ctx.lang)) s += 200;/ \&\& e.pos.transitive) s += 200;/"
 mutate "semicolon not carried"               realst  "s/  const INTERIOR_MARKS = new Set(\[',', ';', ':', '!', '?'\]);/  const INTERIOR_MARKS = new Set([',']);/"
 mutate "final mark carried as interior"      realst  "s/^    if (!sentence.tokens.some((p) => p.id > t.id \&\& p.upos !== 'PUNCT')) continue;\$//"
 mutate "should left unhandled"               modals  "s/^  should: {\$/  should_unhandled: {/"
 mutate "and-subjects stay singular"          treest  "s/^    if (isCoordinatedByAnd(subject, sentence)) return 'Plur';\$//"
-mutate "Russian verb borrows outer subject"  treest  "s/^  sentence.lang === 'ru' \&\&\$/  false \&\&/"
+mutate "Russian verb borrows outer subject"  treest  "s/^  sentence.lang !== 'en' \&\&\$/  false \&\&/"
 mutate "spelling variants not tried"         reader  "s/    for (const variant of spellingVariants(key)) {/    for (const variant of [] as string[]) {/"
 mutate "bare modal left unplanned"           auxst   "s/^          modalPlans.set(token.id, bare);\$//"
 mutate "-ly adverb not derived"              pipe    "s/^    if (base) return base;\$//"
@@ -581,24 +584,24 @@ mutate "adjective entry keeps no gender"    agrst  "s/ || node.entry?.pos.upos =
 mutate "and-verb not sharing will"          auxst  "s/      if (role === 'future' || role === 'conditional') auxRoleForHead.set(verb.id, role);//"
 mutate "gerund complement conjugated"        lexeme  "s/^        gerundComplement ||\$//"
 mutate "let me read as let us"               auxst   "s/ \&\& object.feats\['Number'\] === 'Plur') {/) {/"
-mutate "Russian name takes a common noun"    pipe    "s/    return sentence.lang === 'ru' \&\& token.upos === 'PROPN' \&\& capitalised(word)/    return false \&\& capitalised(word)/"
+mutate "Russian name takes a common noun"    pipe    "s/    return sentence.lang !== 'en' \&\& token.upos === 'PROPN' \&\& capitalised(word)/    return false \&\& capitalised(word)/"
 mutate "possessive matched as personal"      pipe    "s/    if (token.feats\['Poss'\] === 'Yes') return 'poss';//"
 mutate "svoj inside its own subject"         pipe    "s/      if (up.id === subject.id) return false;//"
 mutate "copula before ne"                    copst   "s/      if (negation \&\& plan.indexOf(negation) >= plan.indexOf(after)) {/      if (false) {/"
 mutate "copula after fronted phrase first"   copst   "s/      let after = plan.find((n, i) => i > openingEnd \&\& !opening.has(n.token.id)) ?? node;/      let after = plan.find((n) => !opening.has(n.token.id)) ?? node;/"
 mutate "will be keeps the copula"            auxst   "s/    if (copula \&\& !finitePurposeCarriers.has(copula.id)) droppedAux.add(copula.id);//"
-mutate "Russian буду left present"           light   "s/      t.lemma.toLowerCase() === 'быть' \&\& \/^буд\/i.test(t.form) \&\& t.feats\['Tense'\] !== 'Fut'/      false/"
+mutate "Russian буду left present"           light   "s/      t.lemma.toLowerCase() === copula.lemma \&\& copula.forms.test(t.form) \&\& t.feats\['Tense'\] !== 'Fut'/      false/"
 mutate "Russian future copula conjugated"    lexeme  "s/    if (futureHead || russianFutureCopula) {/    if (futureHead) {/"
-mutate "impersonal past ignores own gender"  partst  "s/      (!subject \&\& sentence.lang === 'ru' ? node.token.feats\['Gender'\] : undefined) ??//"
+mutate "impersonal past ignores own gender"  partst  "s/      (!subject \&\& sentence.lang !== 'en' ? node.token.feats\['Gender'\] : undefined) ??//"
 mutate "imperative do ignored"               auxst   "s/        imperatives.set(verb.id, { person: '2', number: 'Plur' });\$//"
 mutate "determiner+pronoun phrase ignored"   phrasalst "s/      if (children.length !== 1 || det?.deprel !== 'det' || det.id !== word.id - 1) continue;/      continue;/"
-mutate "short adjective not lengthened"      pipe    "s/        if (lex.lookup(token.lemma + ending, 'ru').some((e) => e.pos.upos === 'ADJ')) return token.lemma + ending;//"
+mutate "short adjective not lengthened"      pipe    "s/        if (lex.lookup(token.lemma + ending, sentence.lang).some((e) => e.pos.upos === 'ADJ')) return token.lemma + ending;//"
 mutate "headword gender unused"              agrst   "s/    const own = node.entry ? headwordGender(node.entry) : undefined;/    const own = undefined as string | undefined;/"
 mutate "agreement overrides a preposition's case" agrst "s/      if (f === 'Case' \&\& ownPreposition) continue;//"
 mutate "infinitive copula conjugated"        lexeme  "s/^        copulaInfinitive ||\$//"
 mutate "too always zamnogo"                  fwjson  "s/      \"isv\": \"takože\",/      \"isv\": \"zamnogo\",/"
 mutate "punctuation blocks a phrase"         phrasalst "s/    const children = sentence.tokens.filter((t) => t.head === word.id \&\& t.upos !== 'PUNCT');/    const children = sentence.tokens.filter((t) => t.head === word.id);/"
-mutate "Russian name left in Cyrillic"       realst  "s/        sentence.lang === 'ru' \&\& token.upos === 'PROPN' ? russianNameToLatin(token.form) : null;/        null;/"
+mutate "Russian name left in Cyrillic"       realst  "s/      const latinName = toLatin \&\& looksLikeName ? toLatin(token.form) : null;/      const latinName = null;/"
 mutate "soft sign before a vowel doubled"    orth    "s/    if ((c === 'л' || c === 'н') \&\& next === 'ь' \&\& !(afterSoft \&\& RU_VOWELS.has(afterSoft))) {/    if ((c === 'л' || c === 'н') \&\& next === 'ь') {/"
 mutate "initial е read as e"                 orth    "s/    if (c === 'е') { out += i === 0 || RU_VOWELS.has(lower\[i - 1\]!) ? 'je' : 'e'; continue; }/    if (c === 'е') { out += 'e'; continue; }/"
 mutate "uncovered letter guessed"            orth    "s/    if (latin === undefined) return null;/    if (latin === undefined) { out += c; continue; }/"
@@ -608,7 +611,7 @@ mutate "one who keeps ktory"                 lexeme  "s/          antecedent \&\
 mutate "correlative the dropped"             lexeme  "s/  if (hits.length !== 2) return () => null;/  return () => null;/"
 mutate "correlative halves swapped"          lexeme  "s/      const lemma = correlative === 0 ? 'čto' : 'tȯj';/      const lemma = correlative === 0 ? 'tȯj' : 'čto';/"
 mutate "no comma before tym"                 realst  "s/    if (feats.get('Case')?.ruleId === 'comparison.correlative' \&\& entry?.lemma === 'tȯj') appendComma();//"
-mutate "reciprocal preposition left outside" light   "s/  const light = rewriteLightVerbs(rewriteReciprocalPreposition(correctRussianFuture(sentence)));/  const light = rewriteLightVerbs(correctRussianFuture(sentence));/"
+mutate "reciprocal preposition left outside" light   "s/^  const one = sentence.tokens.find(\$/  return sentence; const one = sentence.tokens.find(/"
 mutate "towards a reciprocal is do"          prep    "s/  if (lemma === 'towards' \&\& complement?.feats\['PronType'\] === 'Rcp') {/  if (false) {/"
 mutate "particle does not finish an event"    aspect "s/^  pastWithParticle,\$//"
 mutate "out finishes light and sound"         aspect "s/(t.lemma.toLowerCase() === 'out' \&\& isMotionVerb(token.lemma))/(t.lemma.toLowerCase() === 'out')/"
@@ -646,6 +649,27 @@ mutate "one-word formulas ignored"            phrasalst "s/        if (len === 1
 mutate "clock time takes na"                  prep "s/  if (lemma === 'at' \&\& complement \&\& (complement.upos === 'NUM' || TIMES_OF_DAY.has(complement.lemma.toLowerCase()))) {/  if (false) {/"
 mutate "o'clock left in"                      light "s/  const clock = rewriteOClock(exceptive.sentence);/  const clock = { sentence: exceptive.sentence, absorbed: [] };/"
 mutate "curated phrase choice ignored"        phrasalst "s/        const best = pool.find((e) => curated \&\& e.lemma === curated.isv) ?? rank(pool, {/        const best = rank(pool, {/"
+
+echo "=== Ukrainian and Slavic source rules ==="
+mutate "verbless clause keeps the orphan"    ukrw  "s/    (c) => (c.deprel === 'orphan' || (pronounSubject \&\& c.deprel === 'nmod')) \&\&/    (c) => false \&\&/"
+mutate "imperative number from the tag"      ukrw  "s/      if (t.feats\['Mood'\] !== 'Imp' \&\& !firstPlural) return t;/      return t;/"
+mutate "synthetic future left present"       ukrw  "s/  return insertFutureAuxiliary(sentence, verbs, 'бути');/  return sentence;/"
+mutate "comparison за kept as za"            ukrw  "s/const COMPARISON_PREPOSITIONS = new Set(\['за', 'від'\]);/const COMPARISON_PREPOSITIONS = new Set<string>();/"
+mutate "clock time о + ordinal kept"         ukrw  "s/    if (!cardinal || t.feats\['Case'\] !== 'Loc' || t.feats\['Gender'\] !== 'Fem') continue;/    continue;/"
+mutate "якби left fused"                     ukrw  "s/  if (!jakby) return sentence;/  return sentence;/"
+mutate "-но passive left impersonal"         ukrw  "s/      if (obj) objectOf.set(t.id, obj);//"
+mutate "gendered present stays present"      ukrw  "s/        ? { ...t, feats: { ...t.feats, Tense: 'Past' } }/        ? t/"
+mutate "їм always the pronoun"               ukrw  "s/  if (!jim || !ja) return sentence;/  return sentence;/"
+mutate "xcomp:pred left as it is"            ukrw  "s/(t.deprel === 'xcomp:pred' ? { ...t, deprel: 'xcomp' } : t)/(t)/"
+mutate "preposition ignores the noun's case" pipe  "s/    return \[...ranked.filter(governs), ...ranked.filter((e) => !governs(e))\];/    return ranked;/"
+mutate "one-case preposition does not impose" lexeme "s/      const prepOnly = prepCases.length === 1 \&\& prepCases\[0\] !== token.feats\['Case'\]/      const prepOnly = false/"
+mutate "Slavic purpose clause not read"      auxst "s/  if (adapter.purposeConjunctions.length > 0) {/  if (false) {/"
+mutate "comparative not from the positive"   pipe  "s/    if (adapter.comparativeToPositive.length > 0 \&\& (token.upos === 'ADJ' || token.upos === 'ADV') \&\&/    if (false \&\&/"
+mutate "plural-only subject keeps source number" lexeme "s/      const subjectsOwn = subject?.feats\['Number'\] === 'Ptan'/      const subjectsOwn = false/"
+mutate "dative object counts as direct"      pipe  "s/                (t.deprel === 'obj' \&\& !\['Dat', 'Ins'\].includes(t.feats\['Case'\] ?? ''))),/                t.deprel === 'obj'),/"
+mutate "supplement not read"                 suppl "s/\"word\": \"вокзал\"/\"word\": \"вокзалXX\"/"
+mutate "suppletive comparative not undone"  pipe  "s/      if (suppletive \&\& lex.lookup(suppletive, sentence.lang).some((e) => e.pos.upos === token.upos)) return suppletive;//"
+mutate "past ignores the verb's own gender"  partst "s/      (sentence.lang !== 'en' ? node.token.feats\['Gender'\] : undefined) ??//"
 
 echo
 echo "==================================================="

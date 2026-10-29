@@ -485,3 +485,14 @@ describe('a pronoun after a Russian preposition', () => {
     expect(out('tatoeba-ona-s-nim.conllu')).toBe('Ona jest s njim.');
   });
 });
+
+/**
+ * "ты" has no gender, but the Russian past states the speaker's: "Ты купила
+ * новую машину?" (Tatoeba #2799937) is feminine, as the verbs page writes
+ * "jesm byl(a)". The masculine default gave "Ty jesi kupil".
+ */
+describe('the gender of a past with a first- or second-person subject', () => {
+  it('is the one the verb states', () => {
+    expect(out('tatoeba-ty-kupila.conllu')).toBe('Ty jesi kupila novu mašinu?');
+  });
+});

@@ -663,22 +663,14 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
      * The word compared is the one LOOKED UP, which is not always the parser's
      * lemma: Ukrainian "краще" is looked up by its own form (see
      * lookupLemmaOf), and its entry `lěpje` "better" is already the
-     * comparative. And an entry the dictionary itself marks `adj.comp.` -
-     * `lěpši`, `krasnějši` - is never made comparative again, nor one marked
-     * `adj.sup.` (`najlěpši`) anything; the Ukrainian parser gives "старший",
-     * "кращий" their own comparative as lemma, which matches exactly those
-     * entries. A superlative IS built on a comparative entry: "The superlative
-     * is formed by adding the prefix naj- to the comparative" (adjectives
-     * page), so Russian "самый лучший" stays `najlěpši`.
+     * comparative.
      */
     const degreeIsOnAnotherStem =
       analyticSuperlatives.has(token.id) ||
       token.form.trim().toLowerCase() !== lookupLemmaOf(token).trim().toLowerCase();
-    const alreadyGraded = /^adj\.sup\./.test(entry.pos.raw) ||
-      (sourceDegree === 'Cmp' && /^adj\.comp\./.test(entry.pos.raw));
     if (
       (sourceDegree === 'Cmp' || sourceDegree === 'Sup') &&
-      degreeIsOnAnotherStem && !alreadyGraded &&
+      degreeIsOnAnotherStem &&
       (entry.pos.upos === 'ADJ' || entry.pos.upos === 'ADV')
     ) {
       feats.set(

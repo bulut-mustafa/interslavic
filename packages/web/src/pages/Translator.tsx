@@ -7,12 +7,19 @@ import { Tabs } from '../components/Tabs.tsx';
 // Same origin: the engine serves the page in production, Vite proxies in dev.
 const API = '';
 
-type Lang = 'en' | 'ru';
+type Lang = 'en' | 'ru' | 'uk';
 
 const LANGS: { value: Lang; label: string }[] = [
   { value: 'en', label: 'English' },
   { value: 'ru', label: 'Russian' },
+  { value: 'uk', label: 'Ukrainian' },
 ];
+
+const PLACEHOLDERS: Record<Lang, string> = {
+  en: 'Type a sentence…',
+  ru: 'Введите предложение…',
+  uk: 'Введіть речення…',
+};
 
 const ORTHS: { value: Orthography; label: string }[] = [
   { value: 'standard', label: 'Latin' },
@@ -60,7 +67,7 @@ function fromAddress(): { text: string; lang: Lang } {
   const q = new URLSearchParams(typeof window === 'undefined' ? '' : window.location.search);
   return {
     text: q.get('text') ?? '',
-    lang: q.get('lang') === 'ru' ? 'ru' : 'en',
+    lang: LANGS.find((l) => l.value === q.get('lang'))?.value ?? 'en',
   };
 }
 
@@ -183,7 +190,7 @@ export default function Translator() {
               value={text}
               onChange={(e) => setText(e.target.value)}
               spellCheck={false}
-              placeholder={lang === 'en' ? 'Type a sentence…' : 'Введите предложение…'}
+              placeholder={PLACEHOLDERS[lang]}
               aria-label="Text to translate"
             />
             {text && (

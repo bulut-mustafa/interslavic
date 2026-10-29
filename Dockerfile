@@ -20,7 +20,7 @@ RUN python3 -m venv /opt/venv \
  && /opt/venv/bin/pip install --no-cache-dir --upgrade pip \
  && /opt/venv/bin/pip install --no-cache-dir torch==2.14.1 --index-url https://download.pytorch.org/whl/cpu \
  && /opt/venv/bin/pip install --no-cache-dir stanza==1.15.0 simplemma==2.0.0 fastapi==0.143.3 "uvicorn[standard]==0.54.0" \
- && /opt/venv/bin/python -c "import stanza; [stanza.download(l, processors='tokenize,pos,lemma,depparse', verbose=False) for l in ('en','ru')]" \
+ && /opt/venv/bin/python -c "import stanza; [stanza.download(l, processors='tokenize,pos,lemma,depparse', verbose=False) for l in ('en','ru','uk')]" \
  && chmod -R a+rX /opt/stanza
 
 # ---- engine and web ----

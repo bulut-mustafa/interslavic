@@ -27,20 +27,21 @@ const GOLD = JSON.parse(
 ) as {
   pairs: {
     id: string;
-    /** Present for an English pair; a Russian pair carries `ru` instead. */
+    /** Present for an English pair; a Russian or Ukrainian pair carries `ru` or `uk` instead. */
     en?: string;
     ru?: string;
+    uk?: string;
     lang?: string;
     isv: string;
     page: string;
     tests: string[];
-    /** For a Russian pair, the English pair whose target it mirrors. */
+    /** For a Russian or Ukrainian pair, the English pair whose target it mirrors. */
     of?: string;
   }[];
 };
 
 /** The source sentence of a pair, whichever language it is in. */
-const source = (p: { en?: string; ru?: string }): string => p.en ?? p.ru ?? '';
+const source = (p: { en?: string; ru?: string; uk?: string }): string => p.en ?? p.ru ?? p.uk ?? '';
 
 const FIXTURES = path.join(ROOT, 'packages/engine/test/fixtures/parse/gold');
 
@@ -181,10 +182,29 @@ const DIFFERENCES: Record<string, { status: Status; why: string }> = {
   },
 };
 
+// The Ukrainian pairs mirror the Russian ones: his Interslavic is the target,
+// only the source changes (fixtures/parse/uk/SOURCES.md).
+DIFFERENCES['g08-uk'] = {
+  status: 'acceptable',
+  why: 'as g08-ru: Ukrainian "прийшов" is arrival on foot, so we pick `prijdti`; the page writes `prijehati` for the English "came to the party"',
+};
+DIFFERENCES['g22-uk'] = {
+  status: 'acceptable',
+  why: 'lexical choice: the dictionary glosses Ukrainian "машина" as `mašina` ("car, machine"), where the page writes `avto`; "svoju" then agrees with the feminine noun. Both are "car"',
+};
+DIFFERENCES['g50-uk'] = {
+  status: 'acceptable',
+  why: 'as g50-ru ("dostojenstvo" for his "dostojnost", "svojem" for the source\'s "своїй"), plus "a" for Ukrainian "та", which the conjunctions page glosses "a „and, but”" as it does "i „and”"',
+};
+DIFFERENCES['g51-uk'] = {
+  status: 'acceptable',
+  why: 'the constructions are his - the copula and passive participle, the reciprocal, the modal - in equally valid dictionary words: "nadani" (the dictionary\'s word for "наділити") for "obdarjeni", "umom" for "razumom", "svědomje" for "svěsť", "povinni dějati" for "imajut postupati"; and "jedin do drugogo" for the source\'s "один до одного", "do" being glossed "to, towards" on the prepositions page as "k" is',
+};
+
 describe("gold: van Steenbergen's own Interslavic", () => {
   it('has a fixture for every gold pair', () => {
     // A floor, not an equality: adding a pair must never fail the suite.
-    expect(GOLD.pairs.length).toBeGreaterThanOrEqual(58);
+    expect(GOLD.pairs.length).toBeGreaterThanOrEqual(74);
     for (const p of GOLD.pairs) {
       expect(fs.existsSync(path.join(FIXTURES, `${p.id}.conllu`)), p.id).toBe(true);
     }
@@ -229,8 +249,10 @@ describe("gold: van Steenbergen's own Interslavic", () => {
     // name the dictionary lacks was declined by its ending ("Ivanu"), 30/49
     // once driving around in a place became "jezdil po Moskvě", 31/49 once
     // "nobody but myself" became "jedino sebe".
+    // 16 Ukrainian pairs, mirroring the Russian ones, brought it to 74: 43/74
+    // (English 20/42, Russian 11/16, Ukrainian 12/16).
     // Raise this floor as it improves; never lower it.
-    expect(matched).toBeGreaterThanOrEqual(31);
+    expect(matched).toBeGreaterThanOrEqual(43);
   });
 
   it('counts how much of the gap is ours', () => {
@@ -238,7 +260,7 @@ describe("gold: van Steenbergen's own Interslavic", () => {
     // Not an assertion about quality - a tripwire, so that silently
     // reclassifying a defect as "acceptable" shows up as a failing test.
     expect({ acceptable: by('acceptable'), defect: by('defect'), unsupported: by('unsupported'), parser: by('parser') })
-      .toEqual({ acceptable: 15, defect: 7, unsupported: 1, parser: 4 });
+      .toEqual({ acceptable: 19, defect: 7, unsupported: 1, parser: 4 });
   });
 });
 

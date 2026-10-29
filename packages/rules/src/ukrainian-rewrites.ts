@@ -97,7 +97,8 @@ export function correctImperatives(sentence: ParsedSentence): ParsedSentence {
  * one, "budu" + infinitive, so the verb is given that shape. "Я читатиму
  * книгу" was the present "Ja čitaju knigu".
  */
-const SYNTHETIC_FUTURE = /(тиму|тимеш|тиме|тимемо|тимете|тимуть)(ся|сь)?$/;
+// A reflexive adds -ся/-сь, or -ться after -ме: "запізнюватиметься" (Wiktionary).
+const SYNTHETIC_FUTURE = /(тиму|тимеш|тиме|тимемо|тимете|тимуть)(ся|сь|ться)?$/;
 
 export function rewriteSyntheticFuture(sentence: ParsedSentence): ParsedSentence {
   const verbs = sentence.tokens.filter(
