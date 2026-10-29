@@ -382,11 +382,33 @@ export function rewriteAdverbialDifferent(sentence: ParsedSentence): ParsedSente
   };
 }
 
+/**
+ * The same for a comparative: in "runs faster", "works harder" the parser
+ * tags the adverb ("fast", "hard" are adverbs as well as adjectives in
+ * Wiktionary, comparative "faster", "harder") an adjective complement, which
+ * gave the adjective "On běži bystrějši" (sometimes it is tagged advmod
+ * and still ADJ). An adverb's comparative ends in
+ * -ěje (adjectives page: "prostěje 'simplier'"), so it must reach the
+ * engine as an adverb.
+ */
+export function rewriteAdverbialComparative(sentence: ParsedSentence): ParsedSentence {
+  if (sentence.lang !== 'en') return sentence;
+  return {
+    ...sentence,
+    tokens: sentence.tokens.map((t) => {
+      if (t.upos !== 'ADJ' || (t.deprel !== 'xcomp' && t.deprel !== 'advmod') || t.feats['Degree'] !== 'Cmp') return t;
+      const verb = sentence.tokens.find((h) => h.id === t.head);
+      if (verb?.upos !== 'VERB' || LINKING_VERBS.has(verb.lemma.toLowerCase())) return t;
+      return { ...t, upos: 'ADV', xpos: 'RBR', deprel: 'advmod' };
+    }),
+  };
+}
+
 export function rewriteSource(
   sentence: ParsedSentence,
   isPerfective?: (lemma: string) => boolean,
 ): SourceRewrite {
-  const light = rewriteLightVerbs(rewriteReciprocalPreposition(rewritePerfectiveFuture(correctRussianFuture(rewriteAdverbialDifferent(sentence)), isPerfective)));
+  const light = rewriteLightVerbs(rewriteReciprocalPreposition(rewritePerfectiveFuture(correctRussianFuture(rewriteAdverbialComparative(rewriteAdverbialDifferent(sentence))), isPerfective)));
   const exceptive = rewriteExceptives(light.sentence);
   const clock = rewriteOClock(exceptive.sentence);
   const habit = rewriteUsedTo(clock.sentence);

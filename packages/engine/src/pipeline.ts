@@ -224,6 +224,18 @@ export function translate(
       up = sentence.tokens.find((t) => t.id === here.head);
     }
     /**
+     * "faster than his brother": the noun after "than" compared with the
+     * subject is itself the subject of the shortened clause ("than his
+     * brother runs"), so it is "jego brat", not "svoj brat".
+     */
+    const possessed = sentence.tokens.find((t) => t.id === token.head);
+    if (possessed && sentence.tokens.some((t) => t.head === possessed.id && t.lemma.toLowerCase() === 'than')) {
+      const comparative = sentence.tokens.find((t) => t.id === possessed.head);
+      const clause =
+        comparative?.deprel === 'advmod' ? sentence.tokens.find((t) => t.id === comparative.head) : comparative;
+      if (!clause || !sentence.tokens.some((t) => t.head === clause.id && t.deprel === 'obj')) return false;
+    }
+    /**
      * A relative pronoun subject ("who") marks no number of its own; it has
      * that of the noun it stands for. "the students who had finished their
      * exams" is "studenti, ktori zakončili svoje izpyty", as in van

@@ -554,6 +554,12 @@
       "source": "https://incubator.wikimedia.org/wiki/Wp/isv",
       "quote": "On jest umrl 10 novembra 2017 goda v 9:15",
       "why": "\"at\" a clock time is \"v\" with the accusative (\"v 9:15\", \"v 20:00\", \"v poldenj\"), as in Russian, Czech, Croatian and Bulgarian; frequency gave the locative \"na\""
+    },
+    "case.comparison": {
+      "tier": "corpus",
+      "source": "corpus: https://isv.miraheze.org/wiki/Medžuslovjansky_jezyk ; https://isv.miraheze.org/wiki/Pravda",
+      "quote": "Tuta kniga jest lěpša než/neželi tamta kniga.",
+      "why": "the noun after než/neželi takes the case of the noun it is compared with"
     }
   }
 }

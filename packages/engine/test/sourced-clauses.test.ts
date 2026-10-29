@@ -218,3 +218,44 @@ describe('"differently"', () => {
     expect(out('en/thinks-differently.conllu')).toBe('Ona mysli inako.');
   });
 });
+
+describe('"than"', () => {
+  it('the compared noun takes the case of its counterpart', () => {
+    // isv.miraheze.org grammar: "Tuta kniga jest lěpša než/neželi tamta
+    // kniga"; Pravda: "ktore bolje razumějeme, čem samu koncepciju".
+    expect(out('en/likes-summer-more-than-winter.conllu')).toBe('Ja ljubju lěto vyše než zimu.');
+    expect(out('en/better-than-that-book.conllu')).toBe('Tuta kniga jest lěpša než ta kniga.');
+  });
+
+  it('an adverb compares with -ěje, and the compared noun keeps jego', () => {
+    // Adjectives page: "prostěje 'simplier'"; wiki grammar: "dobry > lěpši
+    // (prislovnik: lěpje ili lučše)". Pronouns page: svoj only "whenever the
+    // possessor is also the subject" - the brother is the subject of "than
+    // his brother (runs)". Dictionary: tęžko "hard (work)".
+    expect(out('en/runs-faster-than-his-brother.conllu')).toBe('On běži bystrěje než jego brat.');
+    expect(out('en/sings-better-than-me.conllu')).toBe('Ona pěvaje lěpje než ja.');
+    expect(out('en/works-harder-than-me.conllu')).toBe('On rabotaje težje než ja.');
+  });
+});
+
+describe('place names', () => {
+  it('current English names reach the dictionary\'s entry', () => {
+    // UN member-state list: "Türkiye"; dictionary: "Turcija - Turkey",
+    // "Kyjev - Kiev", "Brěg Slonovoj Kosti - Ivory Coast".
+    expect(out('en/lives-in-turkiye.conllu')).toBe('Ona žive v Turciji.');
+    expect(out('en/works-in-kyiv.conllu')).toBe('On rabotaje v Kyjevu.');
+    expect(out('en/born-in-cote-divoire.conllu')).toBe('Ona urodila se v Brěgu Slonovoj Kosti.');
+  });
+
+  it('a multiword name is one entry, and every word of it declines', () => {
+    // Wikipedia in Interslavic: "v Sěvernoj Makedoniji", "Objedinjenogo
+    // Kraljevstva", "Bosniji i Hercegovině", "iz Sjedinjenyh Štatov".
+    expect(out('en/live-in-north-macedonia.conllu')).toBe('Ja živu v Sěvernoj Makedoniji.');
+    expect(out('en/live-in-the-united-states.conllu')).toBe('Ja živu v Sjedinjenyh Štatah Ameriky.');
+    expect(out('en/lives-in-bosnia-and-herzegovina.conllu')).toBe('Ona žive v Bosniji i Hercegovině.');
+    expect(out('en/went-to-the-united-kingdom.conllu')).toBe('My jesmo pošli do Objedinjenogo Kraljevstva.');
+    expect(out('ru/zhivu-v-severnoj-makedonii.conllu')).toBe('Ja živu v Sěvernoj Makedoniji.');
+    expect(out('ru/zhivet-v-soedinennyh-shtatah.conllu')).toBe('Ona žive v Sjedinjenyh Štatah Ameriky.');
+    expect(out('ru/govoril-o-evropejskom-soyuze.conllu')).toBe('On rěkl o Evropejskoj Uniji.');
+  });
+});

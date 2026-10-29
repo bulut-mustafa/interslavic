@@ -189,6 +189,49 @@ const byCoordination: CaseRule = ({ token, sentence }) => {
   );
 };
 
+/**
+ * The noun after "than" (než/neželi) is in the same case as the noun it is
+ * compared with - než is a conjunction and governs nothing:
+ *
+ *   "Tuta kniga jest lěpša než/neželi tamta kniga"      (nominative, like the subject)
+ *   "ktore bolje razumějeme, čem samu koncepciju pravdy" (accusative, like the object)
+ *       isv.miraheze.org, Medžuslovjansky jezyk (grammar) and Pravda
+ *
+ * The counterpart is the object when the compared verb has one, otherwise the
+ * subject. "I like X more than Y" can also mean "...than Y does", so the
+ * subject reading is named as the alternative.
+ */
+const byComparison: CaseRule = ({ token, sentence }) => {
+  if (!['NOUN', 'PROPN', 'PRON'].includes(token.upos)) return null;
+  if (!sentence.tokens.some((t) => t.head === token.id && t.lemma.toLowerCase() === 'than')) return null;
+  const head = sentence.tokens.find((t) => t.id === token.head);
+  if (!head) return null;
+  // "likes tea MORE than": the comparative modifies the verb.
+  // "is BETTER than": the comparative is the predicate itself.
+  // "runs faster than his brother": "than" hangs off the verb itself.
+  const clause =
+    head.feats['Degree'] === 'Cmp'
+      ? head.deprel === 'advmod' ? sentence.tokens.find((t) => t.id === head.head) : head
+      : sentence.tokens.some((t) => t.head === head.id && t.feats['Degree'] === 'Cmp') ? head : undefined;
+  if (!clause) return null;
+  const counterpart =
+    sentence.tokens.find((t) => t.head === clause.id && t.deprel === 'obj') ??
+    sentence.tokens.find((t) => t.head === clause.id && t.deprel === 'nsubj');
+  if (!counterpart) return null;
+  const inherited = byDeprel({ token: counterpart, sentence });
+  if (!inherited) return null;
+  const isObject = counterpart.deprel === 'obj';
+  return decide<Case>(
+    inherited.value,
+    'case.comparison',
+    isObject ? 'high' : inherited.confidence,
+    `compared with "${counterpart.form}", so the same case: ${inherited.because}`,
+    isObject && inherited.value !== 'Nom'
+      ? [{ value: 'Nom', because: `if it means "than ${token.form} does", it is compared with the subject` }]
+      : inherited.alternatives,
+  );
+};
+
 /** amod/det/nummod copy their head's case; the chain is shown in the gloss. */
 export const AGREEING_DEPRELS = new Set([
   'amod',
@@ -206,6 +249,7 @@ const CASE_CASCADE: CaseRule[] = [
   byPreposition,
   byVerbGovernance,
   byCoordination,
+  byComparison,
   byTemporalAdverbial,
   byDeprel,
 ];

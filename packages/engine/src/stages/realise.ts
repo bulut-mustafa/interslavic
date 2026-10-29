@@ -661,6 +661,18 @@ export function realiseStage(input: RealiseInput): RealiseOutput {
      * tagged Degree=Pos, and asking them for Cmp would match nothing.
      */
     const degree = request['Degree'];
+    /**
+     * An adverb reached through its adjective ("sings better" -> `dobry`)
+     * compares as the ADVERB: "prostěje 'simplier'" beside the adjective
+     * "prostějši" (adjectives page). So the adverb (the neuter, "dobro") is
+     * compared, and the result is used as it is - it does not inflect.
+     */
+    const adverbOfAdjective =
+      token.upos === 'ADV' && entry.pos.upos === 'ADJ' && (degree === 'Cmp' || degree === 'Sup')
+        ? realize({ lemma: entry.lemma, xpos: entry.pos.xpos, feats: { Case: 'Nom', Gender: 'Neut', Number: 'Sing' } })
+        : null;
+    const comparedAdverb =
+      adverbOfAdjective?.ok ? compared(adverbOfAdjective.form, 'adv.', degree as Degree) : null;
     const comparedLemma =
       degree === 'Cmp' || degree === 'Sup'
         ? compared(entry.lemma, entry.pos.xpos, degree as Degree)
@@ -690,12 +702,15 @@ export function realiseStage(input: RealiseInput): RealiseOutput {
             ?.addition.principalParts
         : undefined;
     const principalParts = derivedLemma ? undefined : (phraseVerbParts ?? ownParts);
-    const result = realize({
-      lemma: derivedLemma ?? entry.lemma,
-      xpos: participleLemma ? 'adj.' : entry.pos.xpos,
-      feats: request,
-      principalParts,
-    });
+    const nameForm = comparedAdverb ?? (derivedLemma ? null : declineName(entry.lemma, entry.pos, request, lex));
+    const result = nameForm
+      ? { ok: true as const, form: nameForm, matched: request, ambiguous: [] as string[] }
+      : realize({
+          lemma: derivedLemma ?? entry.lemma,
+          xpos: participleLemma ? 'adj.' : entry.pos.xpos,
+          feats: request,
+          principalParts,
+        });
 
     let surface: string;
     let validation: GlossedWord['validation'] = 'unvalidated';
@@ -733,7 +748,10 @@ export function realiseStage(input: RealiseInput): RealiseOutput {
       // not a word the full-form lexicon could know.
       validation = 'untranslated';
     } else if (opts.validator) {
-      const missing = unknownWords(surface, opts.validator);
+      // A name's genitive tail is copied from the dictionary's own entry
+      // ("Brěg Slonovoj Kosti"), so it is attested even with no entry of its own.
+      const ownWords = new Set(nameForm ? entry.lemma.split(/\s+/).map((w) => w.toLowerCase()) : []);
+      const missing = unknownWords(surface, opts.validator).filter((w) => !ownWords.has(w.toLowerCase()));
       validation = missing.length === 0 ? 'validated' : 'unvalidated';
       if (missing.length > 0) {
         notes.push(
@@ -832,3 +850,70 @@ export function realiseStage(input: RealiseInput): RealiseOutput {
 
   return { words, surfaces };
 }
+
+/**
+ * A multiword name declines every word that agrees with its noun, not just
+ * the last word: "v Sěvernoj Makedoniji", "do Objedinjenogo Kraljevstva",
+ * "v Bosniji i Hercegovině". The adjectives before the noun agree with it;
+ * a genitive after it stays as it is ("Sjedinjenyh Štatah Ameriky", "Brěgu
+ * Slonovoj Kosti"); a second noun after "i" takes the same case. Returns
+ * null for anything else, which then inflects as before.
+ */
+function declineName(
+  lemma: string,
+  pos: { upos: string; xpos: string },
+  request: Record<string, string>,
+  lex: RealiseInput['lex'],
+): string | null {
+  const words = lemma.trim().split(/\s+/);
+  if (words.length < 2 || !/^\p{Lu}/u.test(lemma) || (pos.upos !== 'NOUN' && pos.upos !== 'PROPN')) return null;
+  // The dictionary cites adjectives in the masculine: -y, or -i after a soft stem.
+  const adjectiveOf = (word: string): string | null => {
+    const lower = word.toLowerCase();
+    const stem = lower.replace(/[yiaoe]$/, '');
+    const listed = [`${stem}y`, `${stem}i`].find((l) => lex.lookupLemma(l, 'ADJ').length > 0);
+    // -sky is the adjective suffix of names the dictionary does not list
+    // separately: "Saudovska Arabija", "Dominikańska Republika".
+    return listed ?? (/(sk|ck)[yaoe]$/.test(lower) ? `${stem}y` : null);
+  };
+  const head = words.findIndex((w) => w !== 'i' && !adjectiveOf(w));
+  if (head < 0) return null;
+  // Gender and number are the name's own, from the dictionary ("f.sg.",
+  // "m.pl."), not the English head's: "New Zealand" is headed by "New".
+  const gender = /^f/.test(pos.xpos) ? 'Fem' : /^n/.test(pos.xpos) ? 'Neut' : 'Masc';
+  const agreement: Record<string, string> = {
+    Case: request['Case'] ?? 'Nom',
+    Number: /pl/.test(pos.xpos) ? 'Plur' : 'Sing',
+    Gender: gender,
+    ...(gender === 'Masc' ? { Animacy: 'Inan' } : {}),
+  };
+  const keepCapital = (from: string, to: string) =>
+    /^\p{Lu}/u.test(from) ? to.charAt(0).toUpperCase() + to.slice(1) : to;
+  const nominative = { ...agreement, Case: 'Nom' };
+  const out: string[] = [];
+  for (const [i, word] of words.entries()) {
+    const adjective = adjectiveOf(word);
+    if (i < head) {
+      const form = realize({ lemma: adjective!, xpos: 'adj.', feats: agreement });
+      if (!form.ok) return null;
+      out.push(keepCapital(word, form.form));
+    } else if (i === head || (words[i - 1] === 'i' && !adjective)) {
+      // A plural-only noun ("Štaty", m.pl.) is tagged Number=Ptan, not Plur.
+      const feats: Record<string, string> = /pl/.test(pos.xpos)
+        ? { Case: agreement.Case! }
+        : { Case: agreement.Case!, Number: 'Sing' };
+      const form = realize({ lemma: word, xpos: pos.xpos, feats });
+      if (!form.ok) return null;
+      out.push(form.form);
+    } else {
+      // An adjective after the noun still in the nominative ("Papua Nova
+      // Gvineja") is a second name, not a genitive - not handled here.
+      if (adjective && word.toLowerCase() === (realize({ lemma: adjective, xpos: 'adj.', feats: nominative }) as { form?: string }).form) {
+        return null;
+      }
+      out.push(word);
+    }
+  }
+  return out.join(' ');
+}
+

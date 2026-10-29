@@ -144,6 +144,33 @@ export function spellingVariants(word: string): string[] {
 }
 
 /**
+ * Place names English writes in more than one way, mapped to the one the
+ * dictionary glosses. The dictionary has "Turcija - Turkey", "Svazilend -
+ * Swaziland", "Kyjev - Kiev"; the current official names are those of the UN
+ * member-state list (un.org/en/about-us/member-states: Türkiye, Eswatini,
+ * Côte D'Ivoire, Viet Nam, Republic of Moldova, Czechia, United States of
+ * America) and of the US Board on Geographic Names (Kyiv, 2019). Consulted
+ * only on a miss, like the spelling variants.
+ */
+const PLACE_NAME_VARIANTS: Record<string, string> = {
+  türkiye: 'turkey',
+  turkiye: 'turkey',
+  eswatini: 'swaziland',
+  "côte d'ivoire": 'ivory coast',
+  "cote d'ivoire": 'ivory coast',
+  'viet nam': 'vietnam',
+  'republic of moldova': 'moldova',
+  moldavia: 'moldova',
+  'czech republic': 'czechia',
+  'united states': 'united states of america',
+  kyiv: 'kiev',
+  byelorussia: 'belarus',
+  kirghizia: 'kyrgyzstan',
+  lvov: 'lviv',
+  kharkov: 'kharkiv',
+};
+
+/**
  * Normalise a Russian gloss. The `ru` column carries stress marks on some
  * entries (e.g. "пода́ть"), which no parser's lemma will contain, so combining
  * accents are stripped via NFD before comparison.
@@ -315,6 +342,8 @@ export class Lexicon {
       const hits = this.byGloss.get(variant);
       if (hits) return hits;
     }
+    const renamed = PLACE_NAME_VARIANTS[key];
+    if (renamed) return this.byGloss.get(renamed) ?? [];
     return [];
   }
 
@@ -556,7 +585,9 @@ export function compareEntries(a: Entry, b: Entry, ctx: RankContext = {}): numbe
         const key = normalizeGloss(ctx.gloss);
         const exact = e.glosses.find((g) => normalizeGloss(g.text) === key);
         if (!exact) s += 50;
-        else s += exact.index; // earlier sense wins
+        // Earlier sense wins - unless the sentence names a sense's label:
+        // "work harder" is tęžko "hard (work)", not tvŕdo "firmly, hard".
+        else s += exact.sense && !isDomainLabel(exact.sense) && senseSupported(exact.sense, ctx) ? 0 : exact.index;
         if (exact && isDomainLabel(exact.sense) && !senseSupported(exact.sense, ctx)) s += DOMAIN_LABEL_UNSUPPORTED;
         if (exact && capitalised(exact.text) !== capitalised(ctx.gloss)) s += CASE_CONTRADICTED;
       }

@@ -1,5 +1,5 @@
 import type { ParsedSentence, UdToken } from '../../../types/index.ts';
-import { normalizeGloss, rank, type Entry, type Lexicon } from '../../../lexicon/src/reader.ts';
+import { glossesIn, isSlavicSource, normalizeGloss, normalizeSource, rank, type Entry, type Lexicon } from '../../../lexicon/src/reader.ts';
 import { resolveAspect } from '../resolvers/aspect.ts';
 import { contextWordsOf } from '../gloss.ts';
 import { isTimeUnit } from '../../../rules/src/verb-prepositions.ts';
@@ -148,6 +148,58 @@ export function planPhrasalVerbs(sentence: ParsedSentence, lex: Lexicon): Phrasa
     if (!best) continue;
     phrasalVerbs.set(head.id, best);
     for (const p of parts) phrasalParticles.add(p.id);
+  }
+
+  /**
+   * ---- a multiword name ----------------------------------------------------
+   *
+   * The dictionary lists place names as one entry: "Sěverna Makedonija -
+   * North Macedonia", "Sjedinjene Štaty Ameriky - United States of America",
+   * "Bosnija i Hercegovina". The parser splits them into a head and its
+   * capitalised modifiers (compound, amod, flat), so word by word "the United
+   * States" became "jesmo sjedinili štatah". The whole name is looked up by
+   * the same exact-gloss gate, longest span first. A Slavic source declines
+   * the name ("в Северной Македонии"), so there it is matched word by word.
+   */
+  const NAME_PARTS = new Set(['compound', 'amod', 'flat', 'flat:name']);
+  const capitalised = (t: UdToken) => /^\p{Lu}/u.test(t.form);
+  for (const head of sentence.tokens) {
+    // Russian capitalises only a name's first word: "Европейский союз".
+    const slavic = isSlavicSource(sentence.lang);
+    if ((!slavic && !capitalised(head)) || phrasalVerbs.has(head.id) || phrasalParticles.has(head.id)) continue;
+    const span = [head];
+    for (let grew = true; grew; ) {
+      grew = false;
+      const lo = Math.min(...span.map((t) => t.id));
+      const hi = Math.max(...span.map((t) => t.id));
+      const next = sentence.tokens.find(
+        (t) =>
+          (t.id === lo - 1 || t.id === hi + 1) && t.head === head.id && NAME_PARTS.has(t.deprel) &&
+          // "Côte d'Ivoire": a flat part may start lower-case.
+          (capitalised(t) || t.deprel.startsWith('flat') || (slavic && t.id < head.id)),
+      );
+      if (next) {
+        span.push(next);
+        grew = true;
+      }
+    }
+    span.sort((a, b) => a.id - b.id);
+    // "Bosnia and Herzegovina": a capitalised conjunct right after "and".
+    const conj = sentence.tokens.find((t) => t.head === head.id && t.deprel === 'conj' && capitalised(t));
+    const cc = conj && sentence.tokens.find((t) => t.head === conj.id && t.deprel === 'cc' && t.id === conj.id - 1);
+    const spans =
+      conj && cc && cc.id === span[span.length - 1]!.id + 1 ? [[...span, cc, conj], span] : [span];
+    for (const parts of spans) {
+      if (parts.length < 2 || !(slavic ? capitalised(parts[0]!) : parts.some((t) => t.upos === 'PROPN'))) continue;
+      const phrase = parts.map((t) => t.form).join(' ').toLowerCase();
+      const hits = (isSlavicSource(sentence.lang) ? slavicNameMatches(parts, sentence.lang, lex) : lex.lookup(phrase, sentence.lang))
+        .filter((e) => (e.pos.upos === 'NOUN' || e.pos.upos === 'PROPN') && /^\p{Lu}/u.test(e.lemma));
+      const best = rank(hits, { gloss: phrase, lang: sentence.lang, contextWords })[0];
+      if (!best) continue;
+      phrasalVerbs.set(head.id, best);
+      for (const p of parts) if (p.id !== head.id) phrasalParticles.add(p.id);
+      break;
+    }
   }
 
   /**
@@ -426,3 +478,41 @@ export function planPhrasalVerbs(sentence: ParsedSentence, lex: Lexicon): Phrasa
 
   return { phrasalVerbs, phrasalParticles };
 }
+
+const multiwordNames = new WeakMap<Lexicon, Entry[]>();
+
+/**
+ * Multiword names in a declining source language: "в Северной Македонии" is
+ * the gloss "Северная Македония" in another case. Each word must share its
+ * stem with the gloss word in the same position - all of the word but its
+ * ending, at least three letters - so only the endings may differ.
+ */
+function slavicNameMatches(parts: UdToken[], lang: 'ru' | 'uk' | 'pl' | 'sh', lex: Lexicon): Entry[] {
+  let names = multiwordNames.get(lex);
+  if (!names) {
+    names = lex.entries.filter((e) => /^\p{Lu}\S*\s/u.test(e.lemma));
+    multiwordNames.set(lex, names);
+  }
+  const words = parts.map((t) => normalizeSource(t.form, lang));
+  const sameStem = (a: string, b: string) => {
+    if (a === b) return true;
+    let n = 0;
+    while (n < a.length && n < b.length && a[n] === b[n]) n++;
+    return n >= 3 && n >= Math.max(a.length, b.length) - 3;
+  };
+  const matching = (prefix: boolean) =>
+    names.filter((e) =>
+      glossesIn(e, lang).some((g) => {
+        const gloss = normalizeSource(g.text, lang).split(/\s+/);
+        if (prefix ? gloss.length <= words.length : gloss.length !== words.length) return false;
+        return words.every((w, i) => sameStem(gloss[i]!, w));
+      }),
+    );
+  /**
+   * The short form of a longer name: "в Соединённых Штатах" for the gloss
+   * "Соединённые Штаты Америки". Only when no gloss matches exactly.
+   */
+  const exact = matching(false);
+  return exact.length > 0 ? exact : matching(true);
+}
+
