@@ -1,4 +1,5 @@
 import type { ParsedSentence, UdToken } from '../../types/index.ts';
+import { fixMixedScript } from './mixed-script.ts';
 
 /**
  * Rewrites of the English parse into what it MEANS, applied once before any
@@ -254,6 +255,13 @@ export function rewriteOClock(sentence: ParsedSentence): SourceRewrite {
   };
 }
 
+/** The same repair on an already parsed sentence (frozen fixtures, other callers). */
+export function fixMixedScriptTokens(sentence: ParsedSentence): ParsedSentence {
+  const fix = (s: string) => fixMixedScript(s, sentence.lang);
+  if (sentence.tokens.every((t) => fix(t.form) === t.form && fix(t.lemma) === t.lemma)) return sentence;
+  return { ...sentence, tokens: sentence.tokens.map((t) => ({ ...t, form: fix(t.form), lemma: fix(t.lemma) })) };
+}
+
 /**
  * "used to" + infinitive is a past habit, which Slavic says with the
  * imperfective past alone: the verbs page gives the imperfective for "a habit
@@ -408,7 +416,7 @@ export function rewriteSource(
   sentence: ParsedSentence,
   isPerfective?: (lemma: string) => boolean,
 ): SourceRewrite {
-  const light = rewriteLightVerbs(rewriteReciprocalPreposition(rewritePerfectiveFuture(correctRussianFuture(rewriteAdverbialComparative(rewriteAdverbialDifferent(sentence))), isPerfective)));
+  const light = rewriteLightVerbs(rewriteReciprocalPreposition(rewritePerfectiveFuture(correctRussianFuture(rewriteAdverbialComparative(rewriteAdverbialDifferent(fixMixedScriptTokens(sentence)))), isPerfective)));
   const exceptive = rewriteExceptives(light.sentence);
   const clock = rewriteOClock(exceptive.sentence);
   const habit = rewriteUsedTo(clock.sentence);

@@ -159,6 +159,31 @@ export interface TranslateOptions {
   validator?: FullFormIndex;
 }
 
+/**
+ * A language name the parser made a feminine noun ("іспанську" for
+ * "іспанську мову") becomes the masculine adjective Interslavic names a
+ * language with: "Ja učim španski". Only an INANIMATE noun the dictionary does
+ * not list, and only where the masculine adjective exists - so a woman
+ * described by an adjective ("знайома") keeps her gender.
+ */
+function languageNamesAsAdjectives(sentence: ParsedSentence, lex: Lexicon): ParsedSentence {
+  const endings = adapterFor(sentence).languageNameEndings;
+  if (!endings) return sentence;
+  const [fem, masc] = endings;
+  const changed = sentence.tokens.map((t) => {
+    const lemma = t.lemma.toLowerCase();
+    if (t.upos !== 'NOUN' || t.feats['Animacy'] !== 'Inan' || !lemma.endsWith(fem)) return t;
+    if (lex.lookup(lemma, sentence.lang).some((e) => e.pos.upos === 'NOUN')) return t;
+    const adjective = lemma.slice(0, -fem.length) + masc;
+    if (!lex.lookup(adjective, sentence.lang).some((e) => e.pos.upos === 'ADJ')) return t;
+    // "розмовляю японською" speaks it in the instrumental; Interslavic makes the
+    // language the object: "Ja ne govorim japonsky" (Tatoeba).
+    const caseFix: Record<string, string> = t.feats['Case'] === 'Ins' ? { Case: 'Acc' } : {};
+    return { ...t, upos: 'ADJ', lemma: adjective, feats: { ...t.feats, Gender: 'Masc', ...caseFix } };
+  });
+  return changed.some((t, i) => t !== sentence.tokens[i]) ? { ...sentence, tokens: changed } : sentence;
+}
+
 export function translate(
   parsed: ParsedSentence,
   lex: Lexicon,
@@ -173,7 +198,9 @@ export function translate(
     const verbs = lex.lookup(lemma, parsed.lang).filter((e) => e.pos.upos === 'VERB');
     return verbs.length > 0 && verbs.some((e) => e.pos.aspect !== 'Imp');
   };
-  const { sentence, absorbed } = rewriteSource(parsed, isPerfective);
+  const rewritten = rewriteSource(parsed, isPerfective);
+  const absorbed = rewritten.absorbed;
+  const sentence = languageNamesAsAdjectives(rewritten.sentence, lex);
   const orth: Orthography = opts.orthography ?? 'standard';
   const adapter = adapterFor(sentence);
   const dropped: Translation['dropped'] = [...absorbed];
@@ -361,6 +388,22 @@ export function translate(
      * прав" left "прав" untranslated. Tried as the long form only on a miss,
      * and only where that form exists.
      */
+    /**
+     * A one-word superlative the dictionary does not list - "Найцінніша річ" -
+     * is looked up as its plain adjective; the parser's Degree=Sup still
+     * builds `naj-` ("Najcěnnějša věč", Tatoeba). Only on a miss, and only to
+     * an adjective that exists.
+     */
+    const sup = adapter.superlativePrefix;
+    if (sup && token.upos === 'ADJ' && token.feats['Degree'] === 'Sup' && token.lemma.toLowerCase().startsWith(sup) &&
+        lex.lookup(token.lemma, sentence.lang).length === 0) {
+      const comparative = token.lemma.toLowerCase().slice(sup.length);
+      for (const candidate of [comparative, ...adapter.comparativeToPositive
+        .filter(([cmp]) => comparative.endsWith(cmp))
+        .map(([cmp, pos]) => comparative.slice(0, -cmp.length) + pos)]) {
+        if (lex.lookup(candidate, sentence.lang).some((e) => e.pos.upos === 'ADJ')) return candidate;
+      }
+    }
     if (adapter.shortAdjectiveEndings.length > 0 && token.upos === 'ADJ' && token.feats['Variant'] === 'Short' &&
         lex.lookup(token.lemma, sentence.lang).length === 0) {
       for (const ending of adapter.shortAdjectiveEndings) {
