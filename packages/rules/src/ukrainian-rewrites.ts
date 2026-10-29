@@ -27,13 +27,22 @@ const isVerbal = (t: UdToken) => t.upos === 'VERB' || t.upos === 'AUX';
  *
  * Only a prepositional predicate ("для тебе", "з Томом", "у мене"), in a
  * sentence with no verb at all, whose root is nominal.
+ *
+ * The Russian parser does the same with a pronoun subject, attaching the
+ * predicate as `nmod`: "Она с ним" (Tatoeba #8796330), whose Ukrainian twin
+ * "Вона з ним" (#8796386) Tatoeba translates "Ona jest s njim" (#12981697).
+ * A nominative personal pronoun takes no prepositional modifier as a noun
+ * phrase, so there too the prepositional phrase is the predicate. Used for
+ * every Slavic source (source-rewrites.ts).
  */
 export function rewriteVerblessOrphan(sentence: ParsedSentence): ParsedSentence {
-  if (sentence.tokens.some(isVerbal)) return sentence;
+  if (sentence.lang === 'en' || sentence.tokens.some(isVerbal)) return sentence;
   const root = sentence.tokens.find((t) => t.head === 0);
   if (!root || !['NOUN', 'PRON', 'PROPN'].includes(root.upos)) return sentence;
+  const pronounSubject = root.upos === 'PRON' && root.feats['PronType'] === 'Prs' && root.feats['Case'] === 'Nom';
   const orphan = children(sentence, root).find(
-    (c) => c.deprel === 'orphan' && children(sentence, c).some((g) => g.deprel === 'case'),
+    (c) => (c.deprel === 'orphan' || (pronounSubject && c.deprel === 'nmod')) &&
+      children(sentence, c).some((g) => g.deprel === 'case'),
   );
   if (!orphan) return sentence;
   return {
@@ -430,10 +439,28 @@ export function quantifierAsRoot(sentence: ParsedSentence): ParsedSentence {
   };
 }
 
+/**
+ * Only the Ukrainian past marks gender: the present and future conjugate for
+ * person ("я читаю, ти читаєш"), the past for gender and number ("він читав,
+ * вона читала", Wiktionary's conjugation tables). The parser tagged "Ти
+ * втомився?" Gender=Masc and Tense=Pres together, and the present won: "Ty
+ * umoriš se?". A finite verb with a gender is past.
+ */
+export function genderMeansPast(sentence: ParsedSentence): ParsedSentence {
+  return {
+    ...sentence,
+    tokens: sentence.tokens.map((t) =>
+      isVerbal(t) && t.feats['VerbForm'] === 'Fin' && t.feats['Gender'] && t.feats['Tense'] && t.feats['Tense'] !== 'Past'
+        ? { ...t, feats: { ...t.feats, Tense: 'Past' } }
+        : t,
+    ),
+  };
+}
+
 export function rewriteUkrainian(sentence: ParsedSentence): SourceRewrite {
   if (sentence.lang !== 'uk') return { sentence, absorbed: [] };
   const comparison = rewriteComparisonStandard(
-    rewriteSyntheticFuture(correctImperatives(correctModalPovynen(rewriteVerblessOrphan(rewriteJimAsVerb(passiveParticiples(plainXcomp(splitJakby(quantifierAsRoot(numeralsTaggedAsVerbs(cyrillicIsNotForeign(sentence))))))))))),
+    rewriteSyntheticFuture(correctImperatives(correctModalPovynen(rewriteJimAsVerb(passiveParticiples(plainXcomp(splitJakby(quantifierAsRoot(numeralsTaggedAsVerbs(cyrillicIsNotForeign(genderMeansPast(sentence))))))))))),
   );
   const clock = rewriteClockTime(comparison.sentence);
   return { sentence: clock.sentence, absorbed: [...comparison.absorbed, ...clock.absorbed] };

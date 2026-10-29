@@ -34,7 +34,14 @@ export function predicateAgreementStage(ctx: StageContext): void {
     // once the dictionary has absorbed its "be" (phrasal-verbs.ts).
     const passiveParticiple =
       node.token.upos === 'VERB' && node.feats.get('Voice')?.value === 'Pass';
-    if (node.token.upos !== 'ADJ' && node.token.upos !== 'NOUN' && !passiveParticiple) continue;
+    /**
+     * An interrogative determiner can be the predicate too, and agrees like an
+     * adjective: "Яка в тебе адреса?" asks "which [is] your address", and the
+     * feminine of Ukrainian "адреса" gave "Koja ... adres" beside the
+     * masculine `adres`.
+     */
+    const interrogative = node.token.upos === 'DET' && (node.token.feats['PronType'] ?? '').split(',').includes('Int');
+    if (node.token.upos !== 'ADJ' && node.token.upos !== 'NOUN' && !passiveParticiple && !interrogative) continue;
     /**
      * A predicate is a nominal that HAS a subject - which is the real test,
      * and covers a subordinate clause as well as the sentence root. Requiring

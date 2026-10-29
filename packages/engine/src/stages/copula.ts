@@ -49,6 +49,14 @@ export function copulaStage(ctx: StageContext): void {
        */
       const predicative = node.token.upos === 'ADJ' || node.token.upos === 'ADV';
       if (!predicative && !subject) continue;
+      /**
+       * The same holds for a prepositional root with no subject: "До завтра!"
+       * ("See you tomorrow") is a phrase, not a clause - "Do jest zautra!".
+       * "Где станция?" and "Мне холодно" have their subject or experiencer;
+       * a bare "do + noun" has neither.
+       */
+      if (!subject && sentence.tokens.some((t) => t.head === node.token.id && t.deprel === 'case') &&
+          !sentence.tokens.some((t) => t.head === node.token.id && !['case', 'punct'].includes(t.deprel))) continue;
       const person = subject ? subjectPerson(node.token, sentence) : '3';
       const number = subject?.feats.get('Number')?.value ?? 'Sing';
       const cop = realize({

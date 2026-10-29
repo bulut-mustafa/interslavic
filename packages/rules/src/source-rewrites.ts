@@ -1,6 +1,6 @@
 import type { ParsedSentence, UdToken } from '../../types/index.ts';
 import { fixMixedScript } from './mixed-script.ts';
-import { rewriteUkrainian } from './ukrainian-rewrites.ts';
+import { rewriteUkrainian, rewriteVerblessOrphan } from './ukrainian-rewrites.ts';
 
 /**
  * Rewrites of the English parse into what it MEANS, applied once before any
@@ -431,7 +431,7 @@ export function rewriteSource(
   isPerfective?: (lemma: string) => boolean,
 ): SourceRewrite {
   const ukrainian = rewriteUkrainian(fixMixedScriptTokens(sentence));
-  const light = rewriteLightVerbs(rewriteReciprocalPreposition(rewritePerfectiveFuture(correctRussianFuture(rewriteAdverbialComparative(rewriteAdverbialDifferent(ukrainian.sentence))), isPerfective)));
+  const light = rewriteLightVerbs(rewriteReciprocalPreposition(rewritePerfectiveFuture(correctRussianFuture(rewriteAdverbialComparative(rewriteAdverbialDifferent(rewriteVerblessOrphan(ukrainian.sentence)))), isPerfective)));
   const exceptive = rewriteExceptives(light.sentence);
   const clock = rewriteOClock(exceptive.sentence);
   const habit = rewriteUsedTo(clock.sentence);

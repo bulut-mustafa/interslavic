@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { realize, selectForm } from '../src/realize.ts';
-import { russianNameToLatin } from '../src/orthography.ts';
+import { russianNameToLatin, ukrainianNameToLatin } from '../src/orthography.ts';
 
 /**
  * These tests exist because a mutation audit found that the variant-preference
@@ -176,5 +176,26 @@ describe('a Russian name in Latin letters', () => {
   it('declines a letter the tables do not cover', () => {
     expect(russianNameToLatin('Эдуард')).toBeNull();
     expect(russianNameToLatin('Господь')).toBeNull();
+  });
+});
+
+/**
+ * Ukrainian names, by Ukrainian letter values; the dictionary's own Ukrainian
+ * place names are written the same way (Харків Harkiv, Львів Ljviv, Україна
+ * Ukrajina).
+ */
+describe('a Ukrainian name in Latin letters', () => {
+  it('matches the dictionary\'s own Ukrainian place names', () => {
+    expect(ukrainianNameToLatin('Харків')).toBe('Harkiv');
+    expect(ukrainianNameToLatin('Львів')).toBe('Ljviv');
+    expect(ukrainianNameToLatin('Україна')).toBe('Ukrajina');
+  });
+
+  it('writes и y, є je, ґ g, and drops the separating apostrophe', () => {
+    expect(ukrainianNameToLatin('Зульфія')).toBe('Zuljfija');
+    expect(ukrainianNameToLatin('Євген')).toBe('Jevhen');
+    expect(ukrainianNameToLatin('Ґанна')).toBe('Ganna');
+    expect(ukrainianNameToLatin("Мар'яна")).toBe('Marjana');
+    expect(ukrainianNameToLatin('Миколаїв')).toBe('Mykolajiv');
   });
 });

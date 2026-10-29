@@ -55,6 +55,29 @@ describe('UDHR Article 1, from Russian', () => {
   });
 });
 
+/**
+ * Article 1 in Ukrainian, in the text of the Unicode UDHR project. It builds
+ * the same constructions as the Russian, by other routes: the parser marks
+ * the predicate adjectives `xcomp:pred`, makes "наділені" an adjective, and
+ * writes the reciprocal "один до одного".
+ */
+describe('UDHR Article 1, from Ukrainian', () => {
+  it('puts the predicate adjectives in the nominative, as he does', () => {
+    expect(out('gold/g50-uk.conllu')).toMatch(/^Vsi ljudi rodet se svobodni i ravni /);
+  });
+
+  it('builds the passive from the participle "наділені"', () => {
+    // The parser's adjective "наділений" was left in Cyrillic.
+    expect(out('gold/g51-uk.conllu')).toMatch(/^Oni sut nadani umom i svědomjem /);
+  });
+
+  it('reads "повинні" as the modal and "один до одного" as the reciprocal', () => {
+    // Were "vinniki" ("the guilty") and "jedin do jednogo".
+    expect(out('gold/g51-uk.conllu')).toContain('i povinni dějati');
+    expect(out('gold/g51-uk.conllu')).toContain('jedin do drugogo');
+  });
+});
+
 describe('UDHR Article 1, from English', () => {
   it('reads "human beings" as the one noun člověk, plural ljudi', () => {
     expect(out('gold/g50.conllu')).toMatch(/^Vsi ljudi /);
@@ -137,6 +160,33 @@ describe('The North Wind and the Sun, from English', () => {
  * defects. (The verbs Stanza mis-lemmatised - "смешаем" as "смесать",
  * "обожжем" as "обождать" - and "сойдем" tagged 2nd person are the parser's.)
  */
+/**
+ * Ohienko's Ukrainian Bible (Gen 11; Mt 6). The parser splits a verse at the
+ * colon before direct speech, so each part is its own fixture.
+ */
+describe('the Tower of Babel and the Lord\'s Prayer, from Ukrainian', () => {
+  it('builds the first person plural imperative', () => {
+    // "наробімо", "збудуймо", "зійдімо, і змішаймо" - "dělajmo „let's do!”".
+    expect(out('uk/babel-3.conllu')).toContain('nadělajmo cegly');
+    expect(out('uk/babel-4.conllu')).toContain('sbudujmo sobě');
+    expect(out('uk/babel-7.conllu')).toContain('sojdimo, i zaměšajmo');
+  });
+
+  it('builds the reciprocal and the final clause', () => {
+    expect(out('uk/babel-3-intro.conllu')).toBe('I skazali oni jedin drugomu');
+    expect(out('uk/babel-7.conllu')).toContain('da by ne razuměli oni jezyka jedin drugogo');
+  });
+
+  it('repairs the Latin "I" the published text opens Mt 6:13 with', () => {
+    expect(out('uk/ne-vvedy-nas.conllu')).toMatch(/^I ne vvedi nas v /);
+  });
+
+  it('keeps the third-person optative', () => {
+    // "нехай буде воля Твоя" - "the optative particle nehaj" (verbs page).
+    expect(out('uk/nehaj-bude-volja.conllu')).toBe('Nehaj bude volja tvoja, kak na nebu, tak i na zemji.');
+  });
+});
+
 describe('the Tower of Babel, from Russian', () => {
   it('keeps the person a subjectless Russian verb states', () => {
     // "И сказали они: построим ... и сделаем" - first person, not "sbudujut",

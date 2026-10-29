@@ -192,6 +192,11 @@ export function render(text: string, orth: Orthography): string {
  * is written є), and the apostrophe marks a j before я ю є ї ("Мар'яна" ->
  * Marjana). ль нь are lj nj; any other soft sign is dropped, as Interslavic
  * has no letter for it. Anything else unknown keeps the name as written.
+ *
+ * The dictionary writes Ukrainian place names this way itself: Харків
+ * `Harkiv`, Львів `Ljviv`, Україна `Ukrajina` (х h, і i, ль lj, ї ji); and
+ * "g is pronounced more like an aspirated h in Ukrainian"
+ * (http://steen.free.fr/interslavic/flavorizacija.html), so г is h.
  */
 const UK_LETTERS: Record<string, string> = Object.fromEntries([
   ...LAT_TO_CYR.filter(([lat]) => lat.length === 1 && !'jěyeghi'.includes(lat)).map(([lat, cyr]) => [cyr, lat]),

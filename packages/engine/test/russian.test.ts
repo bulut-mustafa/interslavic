@@ -472,3 +472,16 @@ describe('an untranslated subject keeps the gender the source marks', () => {
     expect(out('rustam-schastliv.conllu')).toBe('Rustam jest ščestlivy.');
   });
 });
+
+/**
+ * "After a preposition, all pronouns of the third person are preceded by n-:
+ * jego > do njego" (pronouns page). Only planned English prepositions were
+ * seen, so a Russian one never was; and the parser attaches the predicate of
+ * "Она с ним" to the pronoun (`nmod`), which left the clause without its
+ * copula. Tatoeba translates the Ukrainian twin "Ona jest s njim" (#12981697).
+ */
+describe('a pronoun after a Russian preposition', () => {
+  it('takes the n- form, and the clause its copula', () => {
+    expect(out('tatoeba-ona-s-nim.conllu')).toBe('Ona jest s njim.');
+  });
+});
