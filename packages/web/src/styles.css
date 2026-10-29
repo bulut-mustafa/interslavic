@@ -217,6 +217,11 @@ textarea {
   grid-template-columns: 1fr 1fr;
 }
 
+/* The phone layout's target bar; side by side, the top bar carries it. */
+.target-bar {
+  display: none;
+}
+
 .pane {
   position: relative;
   min-height: 14rem;
@@ -811,8 +816,38 @@ textarea::placeholder {
     display: none;
   }
 
+  /* Target language and script move down to sit above the translation. */
   .langbar-target {
+    display: none;
+  }
+
+  .target-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
     border-top: 1px solid var(--rule);
+    background: var(--paper);
+  }
+
+  .target-bar .target-lang {
+    padding: 0;
+  }
+
+  .script-select {
+    min-height: 2.75rem;
+    padding: 0 var(--space-3);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    background: var(--paper-raised);
+    font-size: var(--text-sm);
+    cursor: pointer;
+  }
+
+  /* The bar takes the divider the translation pane had. */
+  .target-bar + .pane-target {
+    border-top: 0;
   }
 }
 
@@ -820,14 +855,6 @@ textarea::placeholder {
   .shell {
     padding: var(--space-3) var(--space-3) var(--space-5);
     gap: var(--space-3);
-  }
-
-  /* Four scripts do not fit one row on a phone; they scroll rather than wrap,
-     so the bar keeps its height. */
-  .langbar-target .tabs {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    scrollbar-width: none;
   }
 
   .tab {

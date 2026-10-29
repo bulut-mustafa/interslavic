@@ -199,6 +199,26 @@ export default function Translator() {
             )}
           </section>
 
+          {/* On a phone the panes stack, so the target language and script move
+              here, directly above the translation they describe; the bar at the
+              top keeps only the source language. Four script tabs do not fit a
+              phone's width, so here they are a dropdown. */}
+          <div className="target-bar">
+            <span className="target-lang">Interslavic</span>
+            <select
+              className="script-select"
+              value={orth}
+              onChange={(e) => setOrth(e.target.value as Orthography)}
+              aria-label="Script"
+            >
+              {ORTHS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <section className={`pane pane-target${busy ? ' is-busy' : ''}`} aria-live="polite">
             {primary.length === 0 && !error ? (
               <p className="placeholder">{busy ? 'Translating…' : 'Translation'}</p>
