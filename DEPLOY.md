@@ -9,7 +9,8 @@ Why Cloud Run: the parser needs about 1.7 GB of memory at its peak (measured:
 parser 1.2 GB, engine 0.5 GB), which rules out free hosts with 512 MB or 1 GB.
 That was with the English and Russian models. Ukrainian adds a third (317 MB of
 model files; the image also installs simplemma for its lemma check), so measure
-the peak again in the container before relying on the 2 GiB size below.
+the peak again in the container; the service has 4 GiB (below), double the
+measured two-language peak.
 Hugging Face made Docker Spaces paid in July 2026, and Oracle's free Ampere
 servers were out of capacity in the account's home region.
 
@@ -21,7 +22,7 @@ servers were out of capacity in the account's home region.
 | Service | `interslavic`, region `europe-west1` |
 | Public address | **https://interslavic.web.app** |
 | Direct Cloud Run address | https://interslavic-8578650623.europe-west1.run.app |
-| Size | 1 CPU, 2 GiB, at most **one** copy running (caps the cost) |
+| Size | 1 CPU, 4 GiB, at most **one** copy running (caps the cost) |
 | Tester reports | bucket `interslavic-translator-08rmc-reports`, mounted at `/data` |
 | Budget alert | 150 TRY (about 3 USD) a month, emails at 25%, 50% and 100% |
 
