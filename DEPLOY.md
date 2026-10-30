@@ -8,9 +8,9 @@ while someone is using it.
 Why Cloud Run: the parser needs about 1.7 GB of memory at its peak (measured:
 parser 1.2 GB, engine 0.5 GB), which rules out free hosts with 512 MB or 1 GB.
 That was with the English and Russian models. Ukrainian adds a third (317 MB of
-model files; the image also installs simplemma for its lemma check), so measure
-the peak again in the container; the service has 4 GiB (below), double the
-measured two-language peak.
+model files; the image also installs simplemma for its lemma check). Measured on
+Cloud Run (2026-10-30): 45% of 4 GiB with English and Russian, 51% (about
+2.1 GB) with all three, so the 4 GiB below leaves about 2 GB spare.
 Hugging Face made Docker Spaces paid in July 2026, and Oracle's free Ampere
 servers were out of capacity in the account's home region.
 
