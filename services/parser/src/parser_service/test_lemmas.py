@@ -29,10 +29,14 @@ CASES = [
     # A form of the demonstrative "той".
     ("та", "та", "DET", "PronType=Dem", "той"),
     ("тим", "тим", "PRON", "PronType=Dem", "той"),
+    # A listed verb form takes its own infinitive over another real verb.
+    ("бреше", "брати", "VERB", "", "брехати"),
     # A real lemma is kept.
     ("книгу", "книга", "NOUN", "", "книга"),
     ("брати", "брат", "NOUN", "", "брат"),
     ("зустрілися", "зустрітися", "VERB", "Tense=Past", "зустрітися"),
+    ("живу", "жити", "VERB", "", "жити"),
+    ("може", "могти", "VERB", "", "могти"),
 ]
 
 

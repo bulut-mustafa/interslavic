@@ -207,6 +207,15 @@
       "en": "be late",
       "why": "the imperfective 'to be late', a synonym of 'спізнюватися', which this entry glosses",
       "evidence": "Wiktionary: 'запі́знюватися ... impf (perfective запізни́тися) to be late. Synonyms: спі́знюватися'; dictionary: opozdnjati sę v.refl. ipf., uk 'спізнюватися, затримуватися'"
+    },
+    {
+      "lang": "uk",
+      "word": "одне одного",
+      "isv": "jedin drugogo",
+      "upos": "PRON",
+      "en": "each other",
+      "why": "the reciprocal for a mixed pair; the entry lists the masculine 'один одного' only, so 'Вони люблять одне одного' was 'Oni ljubet jedin drugy'",
+      "evidence": "Wiktionary 'одне одного': 'each other, one another' (g=n; masculine один одного, feminine одна одну), usage notes at 'один одного': 'одне одного is for when one person is masculine gender and the other one is feminine'; dictionary: jedin drugogo, uk 'один одного, один другого'"
     }
   ]
 }

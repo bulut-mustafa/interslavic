@@ -203,7 +203,9 @@ export function correctRussianFuture(sentence: ParsedSentence): ParsedSentence {
   return {
     ...sentence,
     tokens: sentence.tokens.map((t) =>
-      t.lemma.toLowerCase() === copula.lemma && copula.forms.test(t.form) && t.feats['Tense'] !== 'Fut'
+      // Not the imperative "будь", "будьте" ("будь ласка" is "please").
+      t.lemma.toLowerCase() === copula.lemma && copula.forms.test(t.form) && t.feats['Tense'] !== 'Fut' &&
+        t.feats['Mood'] !== 'Imp'
         ? { ...t, feats: { ...t.feats, Tense: 'Fut' } }
         : t,
     ),

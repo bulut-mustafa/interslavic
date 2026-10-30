@@ -436,3 +436,63 @@ describe('Tatoeba\'s Ukrainian-Interslavic pairs', () => {
     expect(out('vijna-ce-myr')).toBe('Vojna jest mir.');
   });
 });
+
+/**
+ * Defects found by re-checking 60 unseen Tatoeba meanings translated from
+ * English, Russian and Ukrainian side by side (verification-log, 2026-10-30).
+ */
+describe('the held-out re-check', () => {
+  it('keeps the future of "бути" when it is the predicate itself', () => {
+    // #6909585 "Will you be there?": the copula path only knew `cop`.
+    expect(out('ty-tam-budesh')).toBe('Ty tam budeš?');
+  });
+
+  it('reads the adverb "чому" as "why", not the dative of "що"', () => {
+    // Wiktionary "чому": Adverb "why"; Pronoun "dative of що".
+    expect(out('chomu-dyvlyatsya')).toBe('Začto na mene vse gledajut?');
+    expect(out('tom-ne-rozumie-chomu')).toBe('Tom ne razuměje, začto my tuto jesmo sdělali.');
+  });
+
+  it('gives the conjunction "та" as "i"', () => {
+    // Wiktionary "та": "and" (syn. і, й) first; Steenbergen: i "and", a "and, but".
+    expect(out('tom-ta-meri')).toBe('Tom i Meri skončili.');
+  });
+
+  it('keeps an infinitive copula an infinitive', () => {
+    expect(out('mozhe-buty-rakom')).toBe('Jegova hvoroba može byti rakom.');
+  });
+
+  it('keeps the capital of a name read as a common word', () => {
+    // "Тому" parsed as the adverb "тому" (ago, therefore).
+    expect(out('ty-dopomih-tomu')).toBe('Ty jesi pomogl Tomu?');
+  });
+
+  it('reads "все ще" as "still" and keeps the quantity genitive', () => {
+    expect(out('vse-shche-chasu')).toBe('U nas jest ješče mnogo časa.');
+  });
+
+  it('gives the mixed-gender reciprocal "одне одного" the one formula', () => {
+    // Wiktionary "один одного", usage notes; Steenbergen: "jedin drugogo".
+    expect(out('odne-odnoho')).toBe('My jedin drugogo ne razumějemo.');
+  });
+
+  it('takes the verb the lemma tables list over another real verb', () => {
+    // #7743789: the parser lemmatised "бреше" (lies) as "брати" (takes).
+    expect(out('tom-breshe')).toBe('Ja jesm uvěrjeny, že Tom lže.');
+  });
+
+  it('keeps an infinitive after "як" an infinitive', () => {
+    // #4930523; "шнурки" is not in the dictionary's Ukrainian column.
+    expect(out('ne-znaje-jak-zavjazuvaty')).toBe('Tom ne znaje kak zavezyvati шнурки.');
+  });
+
+  it('uses the long reflexive after a preposition', () => {
+    // Steenbergen: "after a preposition, it is better to use the longer forms".
+    expect(out('vytrachaje-na-sebe')).toBe('Moja supruga trati na sebe prěmnogo pěnezov.');
+  });
+
+  it('builds the imperative of byti and agrees its predicate with the addressee', () => {
+    expect(out('bud-oberezhnyj')).toBe('Bud ostražny.');
+    expect(out('budte-uvazhni')).toBe('Budte ostražni.');
+  });
+});

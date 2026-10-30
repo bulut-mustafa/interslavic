@@ -547,9 +547,13 @@ export function planAuxiliaries(
    * on an imperative, so the page's form for "more persons, or one person
    * formal" is used. Russian distinguishes "Открой" (singular) from "Откройте"
    * (plural) outright, and overriding that would change the register.
+   *
+   * A copula is a verb here too: "Будь здоров", "Be careful" were the present
+   * "Jesi zdravo", "Jest ostražno". byti has the imperative "bųď, bųďte"
+   * (the morphology's own paradigm).
    */
   for (const token of sentence.tokens) {
-    if (token.feats['Mood'] !== 'Imp' || token.upos !== 'VERB') continue;
+    if (token.feats['Mood'] !== 'Imp' || !(token.upos === 'VERB' || token.deprel === 'cop')) continue;
     if (sentence.lang === 'en' && token.lemma === 'let') continue;
     /**
      * The first person plural is an imperative too - "dělajmo „let's do!”"

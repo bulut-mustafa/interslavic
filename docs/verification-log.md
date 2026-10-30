@@ -2505,3 +2505,59 @@ output, so it was removed. `CHECK=1` reports 0 stale of 449.
   *mnogo*).
 - Parser errors on attested sentences: "Томе" as a pronoun, "Том" as the noun
   "volume", "собаки" read as a plural.
+
+## Re-check: Ukrainian against Russian on the same meanings (2026-10-30)
+
+`VERIFIED`. The cross-check above compared Ukrainian with English. This one
+puts Ukrainian and Russian side by side: Tatoeba English sentences that have
+BOTH a Ukrainian and a Russian translation, none used before (no sentence ID
+in the corpus or any earlier sample), at most eight words, parsed live. Two
+independent samples of 60 were drawn with different seeds; the first was used
+to find defects, the second only after every fix, to measure.
+
+**Second sample, never tuned on:**
+
+```
+uk:  288 words   certain 86.0%  guess 0.0%  untranslated 17  unvalidated 0
+ru:  285 words   certain 85.2%  guess 0.1%  untranslated 33  unvalidated 0
+en:  300 words   certain 67.9%  guess 4.6%  untranslated 26  unvalidated 0
+```
+
+Read output by output, Ukrainian is as good as Russian or better on most of the
+60. Where Russian is worse it is mostly words its column lacks ("лжёт",
+"заглянул", "беспокою", "по-польски") and a past with the wrong gender ("Том
+что-нибудь сделал" → *sdělalo*). The defects both share are dictionary gaps
+and idioms ("что ты за человек").
+
+**Defects the first sample showed, each fixed and given an attested fixture:**
+
+| defect | fix and source |
+|---|---|
+| "Ти там будеш?" → *Ty tam jesi?* | the future copula path took only `cop`; "to be" as the predicate itself takes it too |
+| "Чому …?" → *Čego …?* | the adverb "чому" is "why", not the dative of "що" (Wiktionary "чому"); dictionary *začto*/*čemu* |
+| "Том та Мері" → *Tom a Meri* | "та" is first "and", syn. і/й (Wiktionary); *i* "and" vs *a* "and, but" (conjunctions page) |
+| "може бути раком" → *može jest* (Russian too) | a Slavic infinitive copula stays an infinitive (*može byti*) |
+| "Ти допоміг Тому?" → *tomu* | a mid-sentence capital marks a name; the output keeps it (Ukrainian school orthography) |
+| "У нас все ще багато часу" → *vse jest ješče mnogo čas* | "все ще" = "still", as the dictionary itself lists it; the quantifier's genitive kept |
+| "одне одного" → *jedno drugogo* | the neuter is the mixed-gender reciprocal (Wiktionary usage notes): *jedin drugogo*; supplement row |
+| "Будь здоров", "Be careful" → *Jesi zdravo*, *Jest ostražno* (all three languages) | the imperative of *byti* (*bųď, bųďte*), its predicate agreeing with the addressee |
+| "Том бреше" → *Tom bere* ("takes") | a verb form simplemma's tables list takes their infinitive (брехати); changes no other fixture |
+| "не знає як зав'язувати" → finite *zavezyvaje* | a Slavic infinitive in `advcl` stays an infinitive |
+| "на себе" → *na se* | the long reflexive after a preposition (pronouns page), for Slavic sources too |
+
+A first version of the future fix turned "будь ласка" into *bude*, because
+`correctRussianFuture` tagged the imperative "будь" future; the imperative is
+now excluded. It was caught by the before/after diff over all fixtures.
+
+**Outputs changed elsewhere:** none in English or Russian fixtures. Four
+Ukrainian fixtures improved: UDHR Art. 1 *i pravah* (his text has *i*), Babel
+4 *i věžu* (Ohienko "та башту"), *To bylo Tom?*, *v Boga*.
+
+**After:** 791 tests pass; all uk fixtures equal their live parse; gold uk
+12/16, ru 11/16; all uk fixtures certain 85.3%, guess 0.1% (all ru 82.5%,
+0.7%); en↔uk pairs certain 86.0%, 0 untranslated.
+
+**Left:** "тепло" as an adverb (the parser makes "рік" its subject and the
+dictionary has no adverb *teplo*); "зараз"/"тепер" take *momentalno*/*dnešnje*
+by the dictionary's own ranking (Czech "momentálně" is "currently"); the
+possessive "Томову"; words neither column has (впустив/впустил, шнурки).

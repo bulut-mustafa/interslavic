@@ -222,10 +222,14 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
      * A Slavic future COPULA - Russian "Я буду с тобой", Ukrainian "Я буду з
      * тобою" - is byti's future itself, `budu`, which the morphology cannot
      * build (it has no future of byti), so it takes the same path as the
-     * future auxiliary.
+     * future auxiliary. So does the verb "to be" itself, where the parser makes
+     * it the predicate rather than a copula: "Ти там будеш?" was the present
+     * "Ty tam jesi?" for "Will you be there?".
      */
     const russianFutureCopula =
-      adapter.copulaLemma !== null && token.deprel === 'cop' &&
+      adapter.copulaLemma !== null &&
+      (token.deprel === 'cop' ||
+        (token.deprel !== 'aux' && !sentence.tokens.some((c) => c.head === token.id && c.feats['VerbForm'] === 'Inf'))) &&
       token.lemma.toLowerCase() === adapter.copulaLemma && token.feats['Tense'] === 'Fut';
     if (futureHead || russianFutureCopula) {
       // Walk to the subject rather than looking only under the infinitive: with
@@ -868,6 +872,15 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
           );
         }
       }
+      // The same rule for a Slavic reflexive, which the source marks itself:
+      // "на себе" was the clitic "na se".
+      if (
+        !isReflexive && sentence.lang !== 'en' && afterPreposition && token.upos === 'PRON' &&
+        token.feats['Reflex'] === 'Yes' && hasCliticForm(feats.get('Case')?.value ?? '')
+      ) {
+        feats.set('Variant', decide('Long', 'reflexive.long', 'certain',
+          'after a preposition the longer reflexive form is used ("k mně, za tebe")'));
+      }
     }
 
     /**
@@ -1273,11 +1286,13 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
        * "be", so the complement test below never saw it: "Ja hoču jesm dobry
        * artist".
        */
+      // A Slavic infinitive is one by its own ending ("бути", "быть"): "Його
+      // хвороба може бути раком" was "može jest rakom".
       const copulaInfinitive =
-        sentence.lang === 'en' &&
         token.deprel === 'cop' &&
         token.feats['VerbForm'] === 'Inf' &&
-        (modalOfHead.has(token.head) ||
+        (sentence.lang !== 'en' ||
+          modalOfHead.has(token.head) ||
           sentence.tokens.some((t) => t.head === token.head && t.deprel === 'mark' && t.lemma.toLowerCase() === 'to'));
       /**
        * An English "-ing" complement of a verb - "I love DOING nothing",
@@ -1298,9 +1313,11 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
             token.deprel === 'acl' ||
             token.deprel === 'csubj' ||
             // "Nice to meet you": the complement of an adjective, as in "ne
-            // bylo legko napisati" (Interslavic Wikipedia).
+            // bylo legko napisati" (Interslavic Wikipedia). A Slavic infinitive
+            // is one by its ending wherever it hangs: "не знає як
+            // зав'язувати" was the finite "kak zavezyvaje".
             (token.deprel === 'advcl' &&
-              sentence.tokens.find((t) => t.id === token.head)?.upos === 'ADJ')) &&
+              (sentence.lang !== 'en' || sentence.tokens.find((t) => t.id === token.head)?.upos === 'ADJ'))) &&
           (!infinitiveNeedsMarker ||
             sentence.tokens.some((t) => t.head === token.id && t.deprel === 'mark')));
       if (isInfinitiveComplement) {

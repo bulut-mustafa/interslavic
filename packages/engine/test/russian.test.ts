@@ -496,3 +496,16 @@ describe('the gender of a past with a first- or second-person subject', () => {
     expect(out('tatoeba-ty-kupila.conllu')).toBe('Ty jesi kupila novu mašinu?');
   });
 });
+
+describe('byti that is not finite present', () => {
+  it('keeps an infinitive copula an infinitive', () => {
+    // Tatoeba #6002420; the Ukrainian twin is #5751256.
+    expect(out('tatoeba-mozhet-byt-rakom.conllu')).toBe('Jegova hvoroba može byti rakom.');
+  });
+
+  it('builds the imperative and agrees its predicate with the addressee', () => {
+    // Tatoeba #1017101 and #1850051: the present "Jesi zdravo" before.
+    expect(out('tatoeba-bud-zdorov.conllu')).toBe('Bud zdravy!');
+    expect(out('tatoeba-budte-ostorozhny.conllu')).toBe('Budte ostražni.');
+  });
+});

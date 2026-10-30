@@ -120,6 +120,16 @@ def check_lemma(form: str, lemma: str, upos: str, feats: str, lang: str) -> str:
         verb = participle_verb(lemma) or participle_verb(simplemma.lemmatize(form.lower(), lang="uk"))
         if verb:
             return verb
+    # A verb form the tables list belongs to the infinitive they give, even
+    # where the model's guess is another real verb: "бреше" -> "брати" (to
+    # take) for "брехати" (to lie), and "Том бреше" was "Tom bere". Only an
+    # infinitive counts, so a homograph the tables give to another word
+    # ("живу" -> "живий", "може") keeps the model's verb; on the fixtures this
+    # changes nothing else.
+    if upos in ("VERB", "AUX") and simplemma.is_known(form.lower(), lang="uk"):
+        listed = simplemma.lemmatize(form.lower(), lang="uk")
+        if listed != lemma.lower() and _is_lemma(listed) and _fits(upos, listed):
+            return listed
     if _is_lemma(lemma.lower()) and _fits(upos, lemma.lower()):
         return lemma
     for candidate in _candidates(form, upos, feats or ""):

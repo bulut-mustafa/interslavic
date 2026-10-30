@@ -219,3 +219,16 @@ repaired text the parser receives (see `rules/src/mixed-script.ts`).
 | `uk/zapiznjuvatymus` | Якщо я запізнюватимусь, не чекай на мене. | Tatoeba #10124149 |
 | `uk/skilky-pyva-kupyla` | Скільки пива ти купила? | Tatoeba #7147463 |
 | `uk/vy-vyshchi-za-mene` | Ви вищі за мене. | Tatoeba #1598660 |
+| `uk/ty-tam-budesh` | Ти там будеш? | Tatoeba #6909585 |
+| `uk/chomu-dyvlyatsya` | Чому на мене всі дивляться? | Tatoeba #8116285 |
+| `uk/tom-ne-rozumie-chomu` | Том не розуміє, чому ми це зробили. | Tatoeba #7215511 |
+| `uk/tom-ta-meri` | Том та Мері закінчили. | Tatoeba #5805165 |
+| `uk/mozhe-buty-rakom` | Його хвороба може бути раком. | Tatoeba #5751256 |
+| `uk/ty-dopomih-tomu` | Ти допоміг Тому? | Tatoeba #5903327 |
+| `uk/vse-shche-chasu` | У нас все ще багато часу. | Tatoeba #6933809 |
+| `uk/odne-odnoho` | Ми одне одного не розуміємо. | Tatoeba #6690486 |
+| `uk/bud-oberezhnyj` | Будь обережний. | Tatoeba #5943059 |
+| `uk/budte-uvazhni` | Будьте уважні. | Tatoeba #5943141 |
+| `uk/tom-breshe` | Я переконаний, що Том бреше. | Tatoeba #7743789 |
+| `uk/ne-znaje-jak-zavjazuvaty` | Том не знає як зав'язувати шнурки. | Tatoeba #4930523 |
+| `uk/vytrachaje-na-sebe` | Моя дружина витрачає на себе забагато грошей. | Tatoeba #8015367 |

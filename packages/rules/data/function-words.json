@@ -438,6 +438,17 @@
       "why": "as for Russian 'работа': the work one goes to, is at or comes from (на роботі, на роботу, з роботи, до роботи) is the job, `råbota`. The dictionary lists `dělo` first for 'робота', but its sense is the work produced",
       "evidence": "steenbergen-verbs: 'Iduči do raboty, ona vsegda dymi cigaretoju „While going to her work, she always smokes a cigarette”'; the dictionary's own usage example for råbota: 'Iz pričiny intensivnosti raboty'",
       "source": "steenbergen-verbs"
+    },
+    {
+      "en": "та",
+      "lang": "uk",
+      "upos": [
+        "CCONJ"
+      ],
+      "isv": "i",
+      "why": "the Ukrainian 'and' (sense 1, a synonym of і/й); the dictionary lists 'та' under i, a and ale alike and ranked `a` ('and, but') first, so 'Том та Мері' was 'Tom a Meri'",
+      "evidence": "wiktionary-uk: 'та ... Conjunction: and, also, even; synonyms: і, й' (sense 2 'but' is listed second). steenbergen-conjunctions: 'a „and, but” ... i „and”'",
+      "source": "steenbergen-conjunctions"
     }
   ]
 }

@@ -12,6 +12,7 @@ import { phraseOf, subjectOfClause } from '../tree.ts';
 import type { GlossedWord } from '../result.ts';
 import { glossFeature, matchedGloss, prepositionReason, unknownWords } from '../gloss.ts';
 import type { RealiseInput, RealiseOutput } from './realise-input.ts';
+import type { ParsedSentence, UdToken } from '../../../types/index.ts';
 
 /**
  * Ask the morphology for a form for every planned token, and emit the words
@@ -21,6 +22,22 @@ import type { RealiseInput, RealiseOutput } from './realise-input.ts';
  * The last stage before rendering, and the one that must run after every
  * feature-setting stage - it reads the features they wrote.
  */
+/**
+ * Inside a Russian or Ukrainian sentence a capital marks a proper name
+ * ("З великої букви пишуть ... імена", naurok.com.ua, "Вправляння в написанні
+ * великої букви у власних назвах"), and a name the parser read as the
+ * like-spelt common word keeps it: Tatoeba's "Том" is "том" (volume) or the
+ * adverb "тому" to the parser, and "Ти допоміг Тому?" was "Ty jesi pomogl
+ * tomu?". A polite capitalised "Ви" is a pronoun, not a name.
+ */
+function keepNameCapital(token: UdToken, sentence: ParsedSentence, surface: string): string {
+  const firstWord = sentence.tokens.find((t) => t.upos !== 'PUNCT')?.id === token.id;
+  return sentence.lang !== 'en' && !firstWord && /^\p{Lu}\p{Ll}/u.test(token.form) && /^\p{Ll}/u.test(surface) &&
+    token.feats['PronType'] !== 'Prs'
+    ? surface.charAt(0).toUpperCase() + surface.slice(1)
+    : surface;
+}
+
 export function realiseStage(input: RealiseInput): RealiseOutput {
   const {
     sentence, lex, opts, orth, plan, dropped, punctuation,
@@ -581,7 +598,7 @@ export function realiseStage(input: RealiseInput): RealiseOutput {
       if (!derived && (degree === 'Cmp' || degree === 'Sup')) {
         notes.push(`"${entry.lemma}" has no ${degree === 'Cmp' ? 'comparative' : 'superlative'} form`);
       }
-      const form = derived ?? entry.lemma;
+      const form = keepNameCapital(token, sentence, derived ?? entry.lemma);
       const known = opts.validator ? unknownWords(form, opts.validator).length === 0 : true;
       surfaces.push(form);
       words.push({
@@ -771,6 +788,8 @@ export function realiseStage(input: RealiseInput): RealiseOutput {
       validation = 'validated';
       notes.push('not checked against the full-form lexicon');
     }
+
+    surface = keepNameCapital(token, sentence, surface);
 
     surfaces.push(surface);
     words.push({

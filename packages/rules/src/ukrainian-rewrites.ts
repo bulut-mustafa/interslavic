@@ -458,11 +458,91 @@ export function genderMeansPast(sentence: ParsedSentence): ParsedSentence {
   };
 }
 
+/**
+ * "Чому" is both the adverb "why" and the dative of "що" (Wiktionary, "чому":
+ * Adverb "why", Pronoun "dative of що"). The parser gives the adverb the
+ * pronoun's lemma, so "Чому на мене всі дивляться?" was "Čego na mene ...".
+ * An adverb is the "why" word, which the dictionary glosses itself
+ * (čemu, začto: uk "чому").
+ */
+export function chomuIsWhy(sentence: ParsedSentence): ParsedSentence {
+  return {
+    ...sentence,
+    tokens: sentence.tokens.map((t) =>
+      t.upos === 'ADV' && t.form.toLowerCase() === 'чому' && t.lemma !== 'чому' ? { ...t, lemma: 'чому' } : t,
+    ),
+  };
+}
+
+/**
+ * "все ще" is "still": the dictionary lists it as one unit among its glosses
+ * for "still" (kako prěđe: uk "як раніше, як колись, все ще"), and "ще" alone
+ * is `ješče` "still, even, yet". The parser reads "все" as a pronoun
+ * argument - "Ти все ще чекаєш?" was "Ty vse ješče čekaješ?", "everything
+ * still" - so it is absorbed into the "ще" that carries the meaning.
+ *
+ * Its quantity: in "У нас все ще багато часу" the parser hung "багато" on
+ * the noun as `advmod`, where "У нас багато часу" has it as `det:numgov`, the
+ * quantifier governing the genitive; with `advmod` the noun lost its genitive
+ * ("mnogo čas"). A quantifier on a genitive noun is given the relation the
+ * parser itself uses. So is "у нас": with "все" gone it is the `orphan`
+ * predicate of a verbless clause, as the parser has it there, not `obl`.
+ */
+export function rewriteVseShche(sentence: ParsedSentence): SourceRewrite {
+  const vse = sentence.tokens.find(
+    (t) => ['все', 'усе'].includes(t.form.toLowerCase()) && t.upos === 'PRON' &&
+      sentence.tokens.some((n) => n.id === t.id + 1 && n.form.toLowerCase() === 'ще' && n.upos === 'ADV') &&
+      children(sentence, t).length === 0,
+  );
+  const tokens = sentence.tokens
+    .filter((t) => t !== vse)
+    .map((t) => {
+      const head = sentence.tokens.find((h) => h.id === t.head);
+      if (vse?.deprel.startsWith('nsubj') && head?.id === vse.head && head.head === 0 && t.deprel === 'obl' &&
+        !sentence.tokens.some(isVerbal) && children(sentence, t).some((c) => c.deprel === 'case')) {
+        return { ...t, deprel: 'orphan' };
+      }
+      return t.upos === 'DET' && t.feats['NumType'] === 'Card' && t.deprel === 'advmod' &&
+        head?.upos === 'NOUN' && head.feats['Case'] === 'Gen'
+        ? { ...t, deprel: 'det:numgov' }
+        : t;
+    });
+  return {
+    sentence: { ...sentence, tokens },
+    absorbed: vse ? [{ form: vse.form, why: '"все ще" is "still", which "ješče" already says' }] : [],
+  };
+}
+
+/**
+ * The neuter reciprocal "одне одного" is not about neuter things: it "is for
+ * when one person is masculine gender and the other one is feminine"
+ * (Wiktionary, "один одного", usage notes). Interslavic has the one formula
+ * "jedin drugogo" (pronouns page), which Russian "друг друга" already reaches;
+ * the neuter gave "My jedno drugogo ne razumějemo". (Where the dictionary has
+ * the phrase whole, "одне одного", the supplement attaches it to
+ * `jedin drugogo` itself.)
+ */
+export function mixedReciprocal(sentence: ParsedSentence): ParsedSentence {
+  const changed = new Map<number, Record<string, string>>();
+  for (const t of sentence.tokens) {
+    const second = sentence.tokens.find((c) => c.head === t.id && c.deprel === 'flat:abs' && c.lemma === 'один');
+    if (t.lemma !== 'один' || t.feats['Gender'] !== 'Neut' || !second) continue;
+    changed.set(t.id, { ...t.feats, Gender: 'Masc' });
+    changed.set(second.id, { ...second.feats, Gender: 'Masc' });
+  }
+  if (changed.size === 0) return sentence;
+  return {
+    ...sentence,
+    tokens: sentence.tokens.map((t) => (changed.has(t.id) ? { ...t, feats: changed.get(t.id)! } : t)),
+  };
+}
+
 export function rewriteUkrainian(sentence: ParsedSentence): SourceRewrite {
   if (sentence.lang !== 'uk') return { sentence, absorbed: [] };
+  const still = rewriteVseShche(sentence);
   const comparison = rewriteComparisonStandard(
-    rewriteSyntheticFuture(correctImperatives(correctModalPovynen(rewriteJimAsVerb(passiveParticiples(plainXcomp(splitJakby(quantifierAsRoot(numeralsTaggedAsVerbs(cyrillicIsNotForeign(genderMeansPast(sentence))))))))))),
+    rewriteSyntheticFuture(correctImperatives(correctModalPovynen(rewriteJimAsVerb(passiveParticiples(plainXcomp(splitJakby(quantifierAsRoot(numeralsTaggedAsVerbs(cyrillicIsNotForeign(genderMeansPast(chomuIsWhy(mixedReciprocal(still.sentence))))))))))))),
   );
   const clock = rewriteClockTime(comparison.sentence);
-  return { sentence: clock.sentence, absorbed: [...comparison.absorbed, ...clock.absorbed] };
+  return { sentence: clock.sentence, absorbed: [...still.absorbed, ...comparison.absorbed, ...clock.absorbed] };
 }

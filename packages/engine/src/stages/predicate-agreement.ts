@@ -63,6 +63,33 @@ export function predicateAgreementStage(ctx: StageContext): void {
      */
     const isRoot = node.token.deprel === 'root';
     const subject = subjectFor(node.token);
+    /**
+     * An imperative copula has a subject, unexpressed: the person spoken
+     * to. "Будь обережний", "Be careful" agree with the addressee, in the
+     * imperative's number - the impersonal neuter gave "Bųď ostražno". The
+     * gender is the source's where it marks one (Russian and Ukrainian
+     * do), else the unmarked masculine; a plural addressee is persons. The
+     * Ukrainian parser makes the verb the head instead, with the adjective as
+     * its complement: "Будьте [уважні]ccomp".
+     */
+    const imperative = plan.find(
+      (n) => n.feats.get('Mood')?.value === 'Imp' &&
+        ((n.token.head === node.token.id && n.token.deprel === 'cop') ||
+          (n.token.id === node.token.head && n.token.lemma.toLowerCase() === adapter.copulaLemma &&
+            ['ccomp', 'xcomp'].includes(node.token.deprel))),
+    );
+    if (imperative && !subject && node.token.upos === 'ADJ') {
+      const number = imperative.feats.get('Number')?.value ?? 'Sing';
+      const why = 'agrees with the person addressed by the imperative';
+      node.feats.set('Case', decide('Nom', 'case.predicate', 'high', 'predicate complement takes the nominative'));
+      node.feats.set('Number', decide(number, 'agreement.predicate', 'high', why));
+      node.feats.set('Gender', decide(
+        number === 'Sing' ? (node.token.feats['Gender'] ?? 'Masc') : 'Masc', 'agreement.predicate', 'high', why));
+      if (number === 'Plur' || (node.token.feats['Gender'] ?? 'Masc') === 'Masc') {
+        node.feats.set('Animacy', decide('Anim', 'agreement.predicate', 'high', why));
+      }
+      continue;
+    }
     if (!isRoot && !subject) continue;
 
     /**

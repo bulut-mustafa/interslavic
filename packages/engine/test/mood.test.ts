@@ -98,3 +98,10 @@ describe('the "going to" future', () => {
     expect(out('you-will-read.conllu')).toBe('Vy budete čitati.');
   });
 });
+
+describe('the imperative of "be"', () => {
+  it('is the imperative of byti, with the predicate agreeing with the addressee', () => {
+    // Tatoeba #1849392: the impersonal "Jest ostražno" before.
+    expect(out('be-careful.conllu')).toBe('Budte ostražni.');
+  });
+});
