@@ -82,8 +82,11 @@ Without the right token the address answers 404.
   idle minutes. The first request then starts it and loads the language models;
   the page says it may still be starting up.
 - **Cost.** Cloud Run's monthly free allowance covers testing use. The image
-  storage (several GB, with 0.5 GB free) costs a few cents a month. The budget
-  alert warns by email; it does not stop the service.
+  storage is the real cost: each deploy stores a new image of about 1.5 GB
+  (0.5 GB free), and 22 of them had grown to 34 GB. A cleanup policy on the
+  `cloud-run-source-deploy` repository now keeps the 3 newest images (the live
+  revision and two to roll back to) and deletes older ones, about once a day.
+  The budget alert warns by email; it does not stop the service.
 - **To stop all costs**, delete the project:
   `gcloud projects delete interslavic-translator-08rmc`.
 - **The dictionary is fetched at build time**, so it may include edits made after
