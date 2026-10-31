@@ -7,7 +7,7 @@
   "sha256": "2a8ae2a57f6666214852078d5ae21a82bdc491217e45a80ca3b36d85bebc6fc9",
   "bytes": 7924207,
   "rowCount": 19100,
-  "licenseNote": "Wordlist traces to Jan van Steenbergen (steen.free.fr), whose published material is CC BY-NC-ND 3.0. The dictionary app code is MIT. The wordlist itself carries no explicit license. Personal, non-commercial use with attribution only. The snapshot is NOT committed to this repo.",
+  "licenseNote": "Wordlist traces to Jan van Steenbergen (steen.free.fr), whose pages state no licence. The dictionary app code is MIT. The wordlist itself carries no explicit license. Personal, non-commercial use with attribution only. The snapshot is NOT committed to this repo.",
   "maintainers": [
     "Sergey Cherebedov (sonic16x)",
     "Jan van Steenbergen (lexicon)"

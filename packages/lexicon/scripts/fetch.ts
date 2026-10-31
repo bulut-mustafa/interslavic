@@ -54,8 +54,8 @@ async function main(): Promise<void> {
     bytes: Buffer.byteLength(text),
     rowCount,
     licenseNote:
-      'Wordlist traces to Jan van Steenbergen (steen.free.fr), whose published material is ' +
-      'CC BY-NC-ND 3.0. The dictionary app code is MIT. The wordlist itself carries no ' +
+      'Wordlist traces to Jan van Steenbergen (steen.free.fr), whose pages state no ' +
+      'licence. The dictionary app code is MIT. The wordlist itself carries no ' +
       'explicit license. Personal, non-commercial use with attribution only. ' +
       'The snapshot is NOT committed to this repo.',
     maintainers: ['Sergey Cherebedov (sonic16x)', 'Jan van Steenbergen (lexicon)'],

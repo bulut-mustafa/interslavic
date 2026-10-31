@@ -247,6 +247,11 @@ Interslavic vocabulary comes from the **Medžuslovjansky slovnik**
 Cherebedov and contributors, with the lexicon originating in
 [Jan van Steenbergen's](http://steen.free.fr/interslavic) work.
 
+Grammar rules are cited to Steenbergen's grammar pages, with some quotations from the same
+grammar on [interslavic.fun](https://interslavic.fun/learn/grammar/) and attested usage from
+the [Interslavic Wikipedia](https://isv.miraheze.org/) (CC BY-SA 4.0) and
+[Tatoeba](https://tatoeba.org). Terms for each are in [DATA-LICENSES.md](DATA-LICENSES.md).
+
 Inflection uses [`@interslavic/morphology`](https://www.npmjs.com/package/@interslavic/morphology) (MIT).
 Forms are cross-checked against [`@interslavic/utils`](https://www.npmjs.com/package/@interslavic/utils)
 (MIT), the older engine behind interslavic-dictionary.com, used as a verification oracle only.
@@ -254,7 +259,7 @@ Both come from the same authors, so they are independent *implementations* rathe
 independent sources — enough to catch a coding error, not a shared misreading of the grammar.
 
 **The dictionary snapshot is deliberately not committed to this repository.** Its wordlist
-traces to CC BY-NC-ND material and carries no explicit license of its own, so this project
+traces to Jan van Steenbergen's work and carries no explicit license of its own, so this project
 is for personal, non-commercial use with attribution. `packages/lexicon/data/provenance.json`
 records the exact source URL, checksum and row count instead. See
 [docs/dictionary-provenance.md](docs/dictionary-provenance.md).

@@ -141,7 +141,7 @@ describe('indeclinables', () => {
 });
 
 describe('numeral government', () => {
-  // Quoted from interslavic.fun/learn/grammar/numbers/: "nominative singular
+  // Quoted from interslavic.fun/learn/grammar/numerals/: "nominative singular
   // after 1, the nominative plural after 2-4 and the genitive plural after 5
   // and more: jedin dom, dva domy, četyri domy, pet domov."
   it('reads numeral values from words and digits', () => {

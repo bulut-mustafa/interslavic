@@ -17,8 +17,9 @@ It backs [interslavic-dictionary.com](https://interslavic-dictionary.com/), whos
 
 The app code is MIT, but **the wordlist is a different artifact from the code**:
 
-- it originates in Jan van Steenbergen's work at `steen.free.fr`, whose published material
-  is **CC BY-NC-ND 3.0**;
+- it originates in Jan van Steenbergen's work at `steen.free.fr`, whose pages state **no
+  licence** (checked 2026-10-31, live and in Internet Archive copies from 2020 and 2023), so
+  that material is treated as all rights reserved;
 - the repository states **no explicit license for the data itself**;
 - the maintainers describe the project only informally as "a non-profit open source
   project... we don't make money from it".

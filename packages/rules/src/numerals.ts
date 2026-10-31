@@ -1,7 +1,7 @@
 import type { Case, NumberFeat } from '../../types/index.ts';
 
 /**
- * Numeral government, quoted from interslavic.fun/learn/grammar/numbers/:
+ * Numeral government, quoted from interslavic.fun/learn/grammar/numerals/:
  *
  *   "it is recommended to use the nominative singular after 1, the nominative
  *    plural after 2-4 and the genitive plural after 5 and more:

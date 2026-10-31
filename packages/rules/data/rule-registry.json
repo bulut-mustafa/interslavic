@@ -317,7 +317,7 @@
     },
     "pronoun.presentational": {
       "tier": "corpus",
-      "source": "https://tatoeba.org/en/sentences/search?from=isv&query=%22To+jest%22",
+      "source": "https://tatoeba.org/en/sentences/show/13490195",
       "quote": "To jest nosorog.",
       "why": "a subject that only presents a noun ('It's a poem', 'Это животное') is the neuter demonstrative to: 39 'To jest' sentences in Tatoeba's Interslavic against 2 'Ono jest', both 'Kde ono jest?' about a specific thing; asking what it is presents it the same way, 'Čto jest to?' for 'What's that?' (12984803)"
     },
@@ -551,7 +551,7 @@
     },
     "case.prep.clockTime": {
       "tier": "corpus",
-      "source": "https://incubator.wikimedia.org/wiki/Wp/isv",
+      "source": "https://incubator.wikimedia.org/wiki/Wp/isv/Mihail_Nikolajevič_Zadornov",
       "quote": "On jest umrl 10 novembra 2017 goda v 9:15",
       "why": "\"at\" a clock time is \"v\" with the accusative (\"v 9:15\", \"v 20:00\", \"v poldenj\"), as in Russian, Czech, Croatian and Bulgarian; frequency gave the locative \"na\""
     },
