@@ -507,7 +507,7 @@ const FEMALE_EQUIVALENT = 0.5;
  * penalty in `score()`, because frequency is only consulted when scores tie -
  * so a single penalty point would override a 10,000-point frequency gap. A flat
  * penalty was measured and rejected for exactly that reason: it flipped 119
- * gloss keys, many of them wrongly. See docs/verification-log.md.
+ * gloss keys, many of them wrongly. See docs/verification/lexicon-and-word-sense.md.
  */
 function effectiveFrequency(e: Entry, ctx: RankContext): number {
   let f = e.frequency;

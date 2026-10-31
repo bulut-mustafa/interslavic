@@ -26,7 +26,7 @@ const feat = (name: string, sourceForm: string, featureName: string) =>
  *
  * Source: http://steen.free.fr/interslavic/numerals.html
  *
- * Fixing the noun (see the plurale tantum entry in docs/verification-log.md)
+ * Fixing the noun (see the plurale tantum entry in docs/verification/testing-and-oracles.md)
  * left the numeral behind: the noun inflected, the modifier still agreed with
  * the source's singular and gave "Jedna dveri".
  */

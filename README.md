@@ -20,20 +20,21 @@ grammar.
 - Says **how sure** it is. Where English gives no information (aspect, say) the choice is
   marked as a guess; English idioms with no sourced equivalent are flagged instead of
   translated as if they made sense.
-- Checks **every output word** against a full-form lexicon of 743,803 forms generated from
+- Checks **every output word** against a full-form lexicon generated from
   the dictionary, so invented non-words are caught.
 - Includes **16 short lessons** and a **phrasebook** with flashcards, in Latin and Cyrillic.
 
 It is rule-based and deterministic, not a neural or LLM translator: a parser analyses the
 source sentence, and documented rules plus the dictionary build the Interslavic. How each
-rule was checked is recorded in [docs/verification-log.md](docs/verification-log.md).
+rule was checked is recorded in [docs/verification-log.md](docs/verification-log.md). All the
+documentation is listed in [docs/README.md](docs/README.md).
 
 ## Try it
 
 ```bash
 npm install
 npm run lexicon:fetch       # dictionary snapshot (not committed)
-npm run parser:setup        # one-off: Python venv + Stanza models for en, ru, uk (~1.6 GB)
+npm run parser:setup        # one-off: Python venv + Stanza models for en, ru, uk (a large download)
 ```
 
 **Web UI** — three processes, one per terminal:
@@ -44,7 +45,7 @@ npm run server              # engine API   (127.0.0.1:8766)
 npm run web                 # interface    (127.0.0.1:5174)
 ```
 
-Then open <http://127.0.0.1:5174>. The server builds the lexicon and the 743k-form
+Then open <http://127.0.0.1:5174>. The server builds the lexicon and its full-form
 index once at boot, so translations are fast after that.
 
 **Learn** - beside the translator, the site has 16 lessons (alphabet to word formation)
@@ -76,18 +77,16 @@ npm run isv -- "She did not know the answer." --brief
   checked  100% of words found in the full-form lexicon
 ```
 
-Every emitted word is checked against a generated full-form lexicon (743,803 forms), so the
+Every emitted word is checked against a generated full-form lexicon, so the
 engine catches its own invented non-words. `--no-validate` skips the check.
 
 **Read this if you are learning from the output.** That check proves the *words* are real
 Interslavic forms. It does **not** prove the sentence means what you asked. The two are
-separate, and we learned it the hard way: "How are you doing?" once produced
-`Kak ty dělaješ?` — "how do you do it?" — at 100% validation.
+separate: a sentence made of real words can still mean something else.
 
 Meaning is measured separately, against Interslavic written by the language's co-author
 (`npm test` runs it): see **[docs/verification-log.md](docs/verification-log.md)** for the
-current score, the bugs that measurement caught, and the differences that remain. One is a
-known defect: "party" resolves to `partija`, the *political* sense.
+current score, the bugs that measurement caught, and the differences that remain.
 
 A pre-parsed fixture works too, and needs no running service:
 
@@ -95,60 +94,12 @@ A pre-parsed fixture works too, and needs no running service:
 npm run isv -- packages/engine/test/fixtures/parse/en/water-is-cold.conllu
 ```
 
-Correctness is audited three ways, not just by a green suite.
+Correctness is audited three ways, not just by a green suite: mutation testing, a second
+independent engine used as an oracle, and frozen parser fixtures. How to run each is in
+[docs/testing.md](docs/testing.md); what was found is in
+[docs/verification-log.md](docs/verification-log.md).
 
-**Mutation testing** — `bash scripts/mutation-audit.sh` injects a deliberate bug, one at a
-time, and checks the suite catches every one; a surviving mutation means fake coverage.
-**Do not edit the files it targets while it runs**: it snapshots each one and restores that
-snapshot after every mutation, so an edit made mid-run is silently reverted. If the run is
-killed outright (an out-of-memory watchdog sends SIGKILL, which no trap can catch), the
-backups stay in `.mutation-backup/` and **the next run restores them first** and says so. `FROM`/`TO` run a slice by index and `TEST_CMD` overrides the
-runner, so a machine short of memory can still complete it:
-`FROM=1 TO=45 TEST_CMD="npx vitest run --silent --pool=forks --poolOptions.forks.maxForks=1" bash scripts/mutation-audit.sh`
-
-The audit runs the suite 264 times, so the suite's own speed is the audit's
-cost. It is 25s, and `vitest.config.ts` explains the settings that got it there
-from 78s - the short version is that only 7s of a run is testing, and capping
-the worker count is what stops the out-of-memory watchdog killing the pool.
-Closing other applications matters more than it sounds: with swap near full the
-pool cannot run in parallel at all.
-
-**A second, independent engine** — `@interslavic/utils`, the inflection and transliteration
-engine behind interslavic-dictionary.com, is used as an oracle for every form we emit:
-
-```bash
-node --experimental-strip-types packages/eval/scripts/diff-orthography.ts   # all 4 scripts, every form
-node --experimental-strip-types packages/eval/scripts/diff-paradigms.ts     # case/number slots
-node --experimental-strip-types packages/eval/scripts/score-gold.ts         # meaning, per construction
-```
-
-It found two real defects the full-form validator could not: a Cyrillic rule that took a
-documented fallback we were not entitled to, and 155 plurale tantum nouns that never
-inflected at all. Where it disagrees with van Steenbergen's pages, the pages win — and on
-17 irregular nouns they do, because the reference ignores the dictionary's own principal
-parts.
-`npm run fixtures:check` re-parses every frozen fixture against live Stanza and diffs it.
-See [docs/verification-log.md](docs/verification-log.md) for what is verified, what was
-wrong, and what remains unverified.
-
-### Where the grammar pages are silent
-
-They have no page on case usage, so some questions cannot be answered from them at all.
-Those rules are settled instead from **attested usage** — van Steenbergen's own parallel
-texts (`maly_princ`, `babel_text`, `schleicher`, `northwind`, `selo`, `volk_i_pes` …) and
-the Interslavic Wikipedia at `incubator.wikimedia.org/wiki/Wp/isv`, searchable with
-`insource:/…/ prefix:Wp/isv`. That is a tier below the normative pages and above research:
-every such rule quotes its source in the code. Neither corpus is committed.
-
-### What is still wrong, and why
-
-Word **choice** is the weak layer, not grammar. `party` resolves to the political
-`partija` because all four dictionary senses carry the bare gloss "party"; `floor` and
-`coat` miss because the Interslavic word is glossed under a different English word (`etaž`
-"storey", `paljto` "overcoat"). The zonal WordNet was evaluated as the fix for this and
-**rejected on measurement** — it replicates the same gaps. See the log.
-
-Output:
+### Example output
 
 ```
   source   The boy gives the girl a book.
@@ -159,7 +110,7 @@ Output:
   davaje   <- gives   [davati, v.tr. ipf.]
       Aspect = Imp  (high)  <- present tense requires imperfective -
                                 a perfective present reads as a future in Interslavic
-      chose over: ... dati (v.tr. pf., freq 7606)
+      chose over: ... dati (v.tr. pf.)
   děvě   <- girl   [děva, f.]
       Case = Dat  (certain)  <- indirect object (iobj) of "gives"
   knigu   <- book   [kniga, f.]
@@ -175,70 +126,22 @@ simplified     Hlapec davaje deve knigu.
 cyrillic       Хлапец даваје дєвє книгу.
 ```
 
-## The interface
+### What is still wrong, and why
 
-Two panes, with the per-word analysis beneath them. The design has one job beyond
-translating: showing where the engine is guessing, because the reader cannot yet judge
-Interslavic unaided.
-
-- **A confidence rail** runs down the left of every analysis line. Teal is certain, amber is
-  a default with known exceptions, plum is a guess. You scan one column to find the doubt.
-- **Feature names are written out** — "nominative", not `Nom` — with the reason beside the
-  value ("subject (nsubj)").
-- **Alternatives are shown** wherever the engine had to choose.
-- **Unverified words are marked** in the output and listed, so an invented form cannot slip
-  past unnoticed.
-- **The other script sits under the translation.** Interslavic's Latin and Cyrillic map 1:1,
-  which is the defining fact about how it is written, so the alternate is always visible
-  rather than hidden behind the switcher.
-
-Typography is IBM Plex Serif and Sans, chosen for a real constraint rather than taste: the
-etymological alphabet needs `ě ų å ė ȯ ć đ ŕ ť ś ź` and the Cyrillic output needs Cyrillic,
-and most display faces drop those glyphs.
+Word **choice** is the weak layer, not grammar. When several dictionary senses carry the
+same English gloss, or a word is glossed under a different English word, the engine can pick
+the wrong one. The zonal WordNet was evaluated as the fix and **rejected on measurement** —
+it replicates the same gaps. See [docs/verification-log.md](docs/verification-log.md).
 
 ## How it works
 
-```
-text → parse (Python/Stanza, UD)
-     → plan prepositions → auxiliaries and modals → negation → verb government
-     → lexical transfer (aspect first, then the lexeme)
-     → numeral government → agreement → predicate agreement → past participle
-     → realise → linearise → orthography → gloss
-```
+A parser (Python, Stanza) analyses the source sentence; a TypeScript engine then runs a fixed
+series of stages - prepositions, auxiliaries, negation, verb government, lexical transfer,
+agreement, realisation, orthography - and every decision carries the rule that made it and
+where that rule comes from. The parser parses and nothing else.
 
-Each arrow is one file in `packages/engine/src/stages/`, and the order above is declared
-in `stages/index.ts` as what each stage reads and writes. A test fails if a stage reads
-something no earlier stage has written — the ordering contract used to live in comments,
-and a stage reading an empty map is invisible to the type checker and to every output test.
-
-The Python service parses and nothing else; every translation decision lives in the
-TypeScript engine, which keeps it swappable and the interesting logic in one place.
-Parser output is frozen as CoNLL-U fixtures, so the test suite needs no Python, no models
-and no network.
-
-Design rules worth knowing before changing anything:
-
-1. **Every feature assignment is a `Decision<T>`** carrying a rule id, a confidence, a
-   human-readable justification and the rejected alternatives. Resolvers may not write a
-   bare value. Glossing is structural, not retrofitted.
-   The rule id reaches the output, and `packages/rules/data/rule-registry.json` says where
-   each rule comes from - its tier, its source and, where the grammar states it in a
-   sentence, the verbatim quote. A test fails if the engine can emit a rule the registry
-   does not cite, so a rule cannot be added without saying what says so, and the UI shows
-   that citation beside the decision it justifies.
-2. **Aspect is resolved before the lexeme is finalised.** Aspect is a *filter* on
-   candidates: "give" ranks `dati` (perfective, freq 7606) above `davati` (imperfective,
-   freq 6395), and a perfective present reads as a *future* in Interslavic — the error the
-   standard explicitly warns against.
-3. **Confidence is honest.** `nsubj`→Nom is `certain`; `obj`→Acc is only `default`, because
-   many verbs govern genitive or instrumental and we have no frame for them yet. Visible
-   wrongness beats invisible wrongness.
-4. **Orthography is a pure post-processing function**, which is why four variants are cheap.
-5. **Parser output is frozen as CoNLL-U fixtures**, so the test suite needs no Python, no
-   models and no network, and a parser upgrade becomes a reviewable diff.
-6. **Some English words are deleted, not translated.** Articles, do-support, and the case
-   markers "of" and recipient "to" have no Interslavic equivalent; the gloss says why each
-   one went.
+The pipeline, the design rules, the interface and where the grammar pages are silent are in
+[docs/design.md](docs/design.md).
 
 ## Attribution
 

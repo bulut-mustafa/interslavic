@@ -26,7 +26,7 @@ export type SourceLang = (typeof SOURCE_LANGS)[number];
 
 /**
  * The source languages offered to users. A language is added here only once it
- * reaches Russian's measured quality (docs/verification-log.md); the server
+ * reaches Russian's measured quality (docs/verification/russian.md); the server
  * refuses the rest and the interface does not list them.
  */
 export const ENABLED_LANGS: readonly SourceLang[] = ['en', 'ru', 'uk'];

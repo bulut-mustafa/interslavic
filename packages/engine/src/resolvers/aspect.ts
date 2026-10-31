@@ -226,7 +226,7 @@ const pastWithObject: AspectStrategy = {
  * marks as directional ("under (direction)"). "Ran for an hour" and "ran
  * towards the house" have none, and a habitual "ran to school every morning"
  * is caught by the adverbial cue first - those are the readings that broke a
- * wider "every past motion verb" rule (docs/verification-log.md).
+ * wider "every past motion verb" rule (docs/verification/grammar.md).
  */
 const GOAL_PREPOSITIONS = ['to', 'into', 'onto'];
 

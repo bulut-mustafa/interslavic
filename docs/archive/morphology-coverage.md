@@ -1,5 +1,9 @@
 # M0 audit: `@interslavic/morphology` coverage
 
+> **Archived.** A one-time audit from before the engine was built; its verdict (use the library)
+> was acted on. Kept for the record, not maintained. Current checks are in
+> [../verification-log.md](../verification-log.md).
+
 **Date:** 2026-10-17 · **Version probed:** `@interslavic/morphology@0.1.2` (MIT, ESM-only, `node>=20`)
 
 ## Verdict: GATE PASSED. Use the library; author no paradigm tables.

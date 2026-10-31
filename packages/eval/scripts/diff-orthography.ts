@@ -3,7 +3,7 @@
  * transliterator shipped by the Interslavic org (`@interslavic/utils`, MIT),
  * which is what interslavic-dictionary.com renders with.
  *
- * Tier-3 oracle (see docs/verification-log.md): where it disagrees with the
+ * Tier-3 oracle (see docs/verification/testing-and-oracles.md): where it disagrees with the
  * normative alphabet pages, the pages win - but every disagreement must be
  * looked at, because a silent orthography bug changes every form it touches.
  *

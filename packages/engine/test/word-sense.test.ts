@@ -32,7 +32,7 @@ const gold = (id: string) =>
  * frequency is only consulted when scores tie, one penalty point overrode a
  * 10,000-point frequency gap and flipped 119 gloss keys, many wrongly. What
  * ships is a discount on frequency, and only when the source gives no support
- * for the label. See docs/verification-log.md.
+ * for the label. See docs/verification/lexicon-and-word-sense.md.
  */
 describe('sense labels', () => {
   it('prefers the unlabelled sense when nothing supports the label', () => {

@@ -1,7 +1,7 @@
 /**
  * Written as a visible escape, never as the literal character: a mutation
  * audit once found an invisible combining character sitting inside a regex
- * here, which worked only by accident (docs/verification-log.md).
+ * here, which worked only by accident (docs/verification/testing-and-oracles.md).
  */
 const SENTINEL = '\u0001';
 

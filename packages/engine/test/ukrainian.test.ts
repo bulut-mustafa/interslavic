@@ -439,7 +439,7 @@ describe('Tatoeba\'s Ukrainian-Interslavic pairs', () => {
 
 /**
  * Defects found by re-checking 60 unseen Tatoeba meanings translated from
- * English, Russian and Ukrainian side by side (verification-log, 2026-10-30).
+ * English, Russian and Ukrainian side by side (docs/verification/ukrainian.md, 2026-10-30).
  */
 describe('the held-out re-check', () => {
   it('keeps the future of "бути" when it is the predicate itself', () => {
