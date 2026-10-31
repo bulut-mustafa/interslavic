@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { track } from '../analytics.ts';
 import { toCyrillic } from '../../../morph/src/orthography.ts';
 import { Tabs } from '../components/Tabs.tsx';
 import { PHRASEBOOK, sourceUrl, type Phrase } from './phrasebook.ts';
@@ -22,7 +23,10 @@ export function Phrasebook() {
           { value: 'cards', label: 'Flashcards' },
         ]}
         value={mode}
-        onChange={setMode}
+        onChange={(m) => {
+          track('phrasebook-view', { mode: m });
+          setMode(m);
+        }}
       />
       {mode === 'list' ? <PhraseList /> : <Flashcards />}
     </main>

@@ -1,4 +1,5 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { track } from '../analytics.ts';
 import type { GlossedWord, RuleCitation, Translation } from '../../../engine/src/pipeline.ts';
 import type { Orthography } from '../../../morph/src/orthography.ts';
 import { ReportForm } from '../components/ReportForm.tsx';
@@ -101,6 +102,7 @@ export default function Translator() {
       setPrimary(main);
       setAlternate(alt);
       setError(null);
+      track('translate', { lang, script: orth });
     } catch (err) {
       if (id !== requestId.current) return;
       setError(err instanceof Error ? err.message : String(err));
@@ -292,7 +294,10 @@ export default function Translator() {
                     <button
                       type="button"
                       className="text-button"
-                      onClick={() => setReporting((r) => !r)}
+                      onClick={() => {
+                        if (!reporting) track('report-open', { where: 'translator' });
+                        setReporting((r) => !r);
+                      }}
                       aria-expanded={reporting}
                     >
                       Report a problem
@@ -417,6 +422,7 @@ function CopyButton({ text }: { text: string }) {
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(text);
+      track('copy-translation');
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch {

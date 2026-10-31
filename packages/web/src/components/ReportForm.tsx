@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { track } from '../analytics.ts';
 
 /**
  * What testers send back: what they were looking at, what we showed, and what
@@ -34,6 +35,7 @@ export function ReportForm({
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ source, output, lang, orthography, comment, suggestion }),
       });
+      if (res.ok) track('report-sent', { where: lang === 'lesson' ? 'lesson' : 'translator' });
       setState(res.ok ? 'sent' : 'failed');
     } catch {
       setState('failed');
