@@ -58,6 +58,24 @@ gcloud run deploy interslavic --source . --region europe-west1
 ```
 
 The build takes about 10–15 minutes and keeps every setting above.
+
+**Startup CPU boost** (not yet switched on): Google gives a starting container
+extra CPU until it is ready, and reports up to about 30% shorter starts for
+Node.js. It costs next to nothing and only touches cold starts. To try it, add
+`--cpu-boost` to the command above once, then compare the time of the first
+request after a quiet spell with the 40 seconds measured before. It stays on
+for later deploys. (Minimum instances would remove cold starts altogether but
+are billed all the time, so they are not used.)
+
+**The word index is saved at build time.** The image build runs
+`npm run lexicon:index`, which works out every form of every dictionary entry
+once and saves it (`packages/lexicon/data/built/fullforms.bin`, about 115 MB,
+inside the image and never served). At start the server loads that file in
+about 2 seconds instead of building the index in about 12 (about 33 on Cloud
+Run), and holds about 150 MB for it instead of about 350. The file carries a
+stamp of the dictionary and the inflection code; if it is missing or does not
+match, the server builds the index itself exactly as before, so a stale file can
+never be used. The start-up log says which: `loaded` or `built`.
 - What is uploaded is decided by `.gcloudignore`, which reads `.dockerignore`.
   It is the same set of files as `git ls-files`; check with
   `gcloud meta list-files-for-upload`.

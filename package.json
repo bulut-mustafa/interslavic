@@ -11,6 +11,7 @@
     "isv": "node --experimental-strip-types packages/cli/src/main.ts",
     "lexicon:fetch": "node --experimental-strip-types packages/lexicon/scripts/fetch.ts && node --experimental-strip-types packages/rules/scripts/gen-prepositions.ts",
     "typecheck": "tsc --noEmit",
+    "lexicon:index": "node --experimental-strip-types packages/lexicon/scripts/build-index.ts",
     "parser": "cd services/parser && PYTHONPATH=src .venv/bin/uvicorn parser_service.app:app --host 127.0.0.1 --port 8765",
     "parser:setup": "cd services/parser && uv venv && uv pip install -q stanza simplemma fastapi \"uvicorn[standard]\" && PYTHONPATH=src .venv/bin/python -c \"import stanza; [stanza.download(l, processors=\"tokenize,pos,lemma,depparse\", verbose=False) for l in (\"en\",\"ru\",\"uk\")]\"",
     "fixtures:check": "cd services/parser && PYTHONPATH=src .venv/bin/python -m parser_service.fixtures",
@@ -19,6 +20,8 @@
     "server": "node --experimental-strip-types packages/server/src/main.ts",
     "web": "vite packages/web",
     "web:build": "vite build packages/web && vite build packages/web --ssr src/entry-server.tsx --outDir dist-ssr && node --experimental-strip-types packages/web/scripts/prerender.ts",
+    "perf:boot": "node --experimental-strip-types --expose-gc scripts/perf/boot.ts",
+    "perf:api": "python3 scripts/perf/api.py",
     "dev": "npm run parser & npm run server & npm run web"
   },
   "devDependencies": {
@@ -36,7 +39,9 @@
     "vitest": "^3.2.4"
   },
   "dependencies": {
+    "@huggingface/transformers": "^4.3.2",
     "@interslavic/morphology": "0.1.2",
-    "@interslavic/utils": "^3.4.4"
+    "@interslavic/utils": "^3.4.4",
+    "tesseract.js": "^7.0.0"
   }
 }

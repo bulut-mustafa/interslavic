@@ -1,6 +1,6 @@
 import { paradigm, type MorphToken } from '../../morph/src/realize.ts';
 import { derive } from '@interslavic/morphology';
-import { toStandard } from '../../morph/src/orthography.ts';
+import { toSimplified, toStandard } from '../../morph/src/orthography.ts';
 import type { Entry, Lexicon } from './reader.ts';
 
 /**
@@ -26,6 +26,13 @@ export interface Reading {
   lemma: string;
   xpos: string;
   feats: Record<string, string>;
+  /**
+   * The other feature sets the SAME lemma and part of speech gives this form.
+   * A form is often several at once - "ženě" is dative and locative, "ženy"
+   * genitive singular, nominative plural and accusative plural - and the index
+   * keeps one reading per lemma, so without this the others were thrown away.
+   */
+  otherFeats?: Record<string, string>[];
 }
 
 export interface FullFormIndex {
@@ -40,16 +47,45 @@ export interface FullFormIndex {
   /** Every analysis of this form; empty when unknown. Syncretism is real, so
    *  a single form routinely has several readings. */
   analyze(form: string): Reading[];
+  /**
+   * Standard-alphabet forms written WITHOUT ě that stand for forms with it.
+   * The orthography page allows e for ě as a legitimate simplification
+   * (http://steen.free.fr/interslavic/orthography.html), so "zene" is read as
+   * "ženě". Empty when the form is not such a simplification.
+   */
+  lookupSimplified(form: string): string[];
+  /**
+   * Standard-alphabet forms within `maxDistance` edits (insert, delete,
+   * substitute, swap two neighbours) of `form`, nearest first, at most `limit`.
+   */
+  nearest(form: string, maxDistance: number, limit?: number): { form: string; distance: number }[];
 }
 
 const key = (form: string): string => form.trim().toLowerCase();
+
+const sameFeats = (a: Record<string, string>, b: Record<string, string>): boolean => {
+  const ka = Object.keys(a);
+  return ka.length === Object.keys(b).length && ka.every((k) => a[k] === b[k]);
+};
 
 export interface BuildOptions {
   /** Index only every nth entry. For fast tests, not for real use. */
   sample?: number;
 }
 
+/** What building the index produces, before it is wrapped in its lookups: this is what can be saved and loaded. */
+export interface FullFormData {
+  index: Map<string, Reading[]>;
+  generated: number;
+  skipped: number;
+}
+
 export function buildFullFormIndex(lex: Lexicon, opts: BuildOptions = {}): FullFormIndex {
+  return fullFormIndexFrom(computeFullFormData(lex, opts));
+}
+
+/** The slow part: every form of every entry, worked out from the dictionary. Seconds, and 350 MB, which is why it can be done ahead of time and saved. */
+export function computeFullFormData(lex: Lexicon, opts: BuildOptions = {}): FullFormData {
   const index = new Map<string, Reading[]>();
   let generated = 0;
   let skipped = 0;
@@ -67,9 +103,16 @@ export function buildFullFormIndex(lex: Lexicon, opts: BuildOptions = {}): FullF
     if (k.includes('error')) return;
     let bucket = index.get(k);
     if (!bucket) index.set(k, (bucket = []));
-    // Collapse duplicate readings, which syncretism produces in bulk.
-    if (!bucket.some((r) => r.lemma === reading.lemma && r.xpos === reading.xpos)) {
+    // One reading per lemma and part of speech; a different feature set of the
+    // same one is kept on it rather than dropped (syncretism produces them in bulk).
+    const same = bucket.find((r) => r.lemma === reading.lemma && r.xpos === reading.xpos);
+    if (!same) {
       bucket.push(reading);
+    } else if (same !== reading) {
+      const known = [same.feats, ...(same.otherFeats ?? [])];
+      if (!known.some((f) => sameFeats(f, reading.feats))) {
+        (same.otherFeats ??= []).push(reading.feats);
+      }
     }
   };
 
@@ -133,13 +176,133 @@ export function buildFullFormIndex(lex: Lexicon, opts: BuildOptions = {}): FullF
     addEntryCitation(entry, add);
   }
 
+  return { index, generated, skipped };
+}
+
+/**
+ * Makes the readings share what they repeat. The index holds 1.3 million
+ * readings but only about 46,000 distinct lemmas and parts of speech and 1,400
+ * distinct feature sets; loaded from a file, each is a separate copy, and
+ * sharing them takes the index from about 400 MB of heap to about 150 MB. The
+ * shared feature sets are frozen, so nothing can change one reading's features
+ * and change every other's by accident.
+ */
+export function internReadings(data: FullFormData): FullFormData {
+  const strings = new Map<string, string>();
+  const featSets = new Map<string, Record<string, string>>();
+  const text = (x: string): string => {
+    const known = strings.get(x);
+    if (known !== undefined) return known;
+    strings.set(x, x);
+    return x;
+  };
+  const feats = (f: Record<string, string>): Record<string, string> => {
+    const key = JSON.stringify(f);
+    const known = featSets.get(key);
+    if (known) return known;
+    featSets.set(key, Object.freeze(f));
+    return f;
+  };
+  const done = new Set<Reading>(); // a reading is shared between the etymological and the folded key: do it once
+  for (const bucket of data.index.values()) {
+    for (const r of bucket) {
+      if (done.has(r)) continue;
+      done.add(r);
+      r.lemma = text(r.lemma);
+      r.xpos = text(r.xpos);
+      r.feats = feats(r.feats);
+      if (r.otherFeats) r.otherFeats = r.otherFeats.map(feats);
+    }
+  }
+  return data;
+}
+
+/** The lookups over a built (or loaded) index. */
+export function fullFormIndexFrom(data: FullFormData): FullFormIndex {
+  const { index, generated, skipped } = data;
+
+  /** Built on first use: the translator never asks, and the maps are not small. */
+  let standardByLength: Map<number, string[]> | null = null;
+  const standardKeys = (): Map<number, string[]> => {
+    if (standardByLength) return standardByLength;
+    standardByLength = new Map();
+    for (const k of index.keys()) {
+      if (ETYMOLOGICAL_LETTER.test(k) || k.includes(' ')) continue;
+      let bucket = standardByLength.get(k.length);
+      if (!bucket) standardByLength.set(k.length, (bucket = []));
+      bucket.push(k);
+    }
+    return standardByLength;
+  };
+
+  let simplified: Map<string, string[]> | null = null;
+  const simplifiedKeys = (): Map<string, string[]> => {
+    if (simplified) return simplified;
+    simplified = new Map();
+    for (const bucket of standardKeys().values()) {
+      for (const k of bucket) {
+        if (!k.includes('ě')) continue;
+        const plain = toSimplified(k);
+        const list = simplified.get(plain);
+        if (list) list.push(k);
+        else simplified.set(plain, [k]);
+      }
+    }
+    return simplified;
+  };
+
   return {
     size: index.size,
     generated,
     skipped,
     has: (form) => index.has(key(form)),
     analyze: (form) => index.get(key(form)) ?? [],
+    lookupSimplified: (form) => simplifiedKeys().get(key(form)) ?? [],
+    nearest: (form, maxDistance, limit = 200) => {
+      const target = key(form);
+      const found: { form: string; distance: number }[] = [];
+      for (let len = target.length - maxDistance; len <= target.length + maxDistance; len++) {
+        for (const k of standardKeys().get(len) ?? []) {
+          const distance = editDistance(target, k, maxDistance);
+          if (distance <= maxDistance && k !== target) found.push({ form: k, distance });
+        }
+      }
+      found.sort((a, b) => a.distance - b.distance || a.form.localeCompare(b.form));
+      return found.slice(0, limit);
+    },
   };
+}
+
+/** The letters that exist only in the etymological alphabet (see orthography.ts). */
+const ETYMOLOGICAL_LETTER = /[ęųåėȯćđĺľńŕťďśź]/;
+
+/**
+ * Optimal-string-alignment distance: an insertion, deletion, substitution or
+ * swap of two neighbours each cost 1. Gives up and returns `limit + 1` as soon
+ * as no alignment can come in under `limit`, which is what keeps scanning the
+ * whole index cheap.
+ */
+export function editDistance(a: string, b: string, limit: number): number {
+  if (Math.abs(a.length - b.length) > limit) return limit + 1;
+  let prev2: number[] = [];
+  let prev = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= a.length; i++) {
+    const row = [i];
+    let rowMin = i;
+    for (let j = 1; j <= b.length; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      let d = Math.min(prev[j]! + 1, row[j - 1]! + 1, prev[j - 1]! + cost);
+      if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) {
+        d = Math.min(d, prev2[j - 2]! + 1);
+      }
+      row.push(d);
+      if (d < rowMin) rowMin = d;
+    }
+    if (rowMin > limit) return limit + 1;
+    prev2 = prev;
+    prev = row;
+  }
+  return prev[b.length]!;
 }
 
 /**

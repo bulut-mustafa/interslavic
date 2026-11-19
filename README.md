@@ -23,6 +23,13 @@ grammar.
 - Checks **every output word** against a full-form lexicon generated from
   the dictionary, so invented non-words are caught.
 - Includes **16 short lessons** and a **phrasebook** with flashcards, in Latin and Cyrillic.
+- **The Studio** (`/studio`): a workspace of tools beside the translator - a *Photo* editor (find the
+  text in a picture, change or translate it, move and restyle it, save it) and a *Video* editor (cut,
+  rearrange, add styled and translated text or subtitles, save it), a *Recording* page that turns speech into
+  subtitles in the browser, *Subtitles* (.srt) translation, *Watch* (a video with tap-a-word Interslavic
+  subtitles) and printable *Worksheets*. Words in the other Slavic languages come from the dictionary's own
+  columns. Also an Anki deck of the phrasebook, read-aloud buttons and shareable links. See
+  [docs/utilities.md](docs/utilities.md).
 
 It is rule-based and deterministic, not a neural or LLM translator: a parser analyses the
 source sentence, and documented rules plus the dictionary build the Interslavic. How each

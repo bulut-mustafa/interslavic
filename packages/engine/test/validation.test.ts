@@ -118,7 +118,7 @@ describe('validation rate over every fixture', () => {
   it('flags a word that is not in the lexicon', () => {
     // A stub validator that knows nothing: every word must be flagged, proving
     // the check is actually consulted rather than assumed true.
-    const nothing = { size: 0, generated: 0, skipped: 0, has: () => false, analyze: () => [] };
+    const nothing = { size: 0, generated: 0, skipped: 0, has: () => false, analyze: () => [], lookupSimplified: () => [], nearest: () => [] };
     const sentence = parseConllu(
       fs.readFileSync(path.join(FIXTURES, 'en/water-is-cold.conllu'), 'utf8'),
     );

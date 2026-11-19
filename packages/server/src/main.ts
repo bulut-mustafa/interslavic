@@ -2,7 +2,11 @@ import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
 import { Lexicon } from '../../lexicon/src/reader.ts';
-import { buildFullFormIndex, type FullFormIndex } from '../../lexicon/src/full-forms.ts';
+import { type FullFormIndex } from '../../lexicon/src/full-forms.ts';
+import { loadFullFormIndex } from '../../lexicon/src/full-forms-cache.ts';
+import { analyzeText } from '../../lexicon/src/analyze.ts';
+import { checkBatch, translateLines } from './batch.ts';
+import { buildCognateIndex, type CognateIndex } from '../../lexicon/src/cognates.ts';
 import { translate, type Translation } from '../../engine/src/pipeline.ts';
 import {
   DEFAULT_PARSER_URL,
@@ -24,10 +28,11 @@ const OFFERED: readonly SourceLang[] = [
 /**
  * HTTP front end for the engine.
  *
- * Exists mainly so the lexicon and the full-form index are built ONCE at boot
- * rather than per request: loading the dictionary takes ~140ms and indexing
- * 286k forms takes ~2.8s, which is fine at startup and unacceptable per
- * keystroke.
+ * Exists mainly so the lexicon and the full-form index are made ONCE at boot
+ * rather than per request: loading the dictionary takes ~0.4s, and the index
+ * (744k forms) takes ~12s to build on a laptop, or a few seconds to load when
+ * the container build has saved it (see lexicon/src/full-forms-cache.ts). That
+ * is fine at startup and unacceptable per keystroke.
  */
 
 const ROOT = path.resolve(import.meta.dirname, '../../..');
@@ -50,6 +55,8 @@ const FEEDBACK_TOKEN = process.env['FEEDBACK_TOKEN'];
  */
 const MAX_TEXT = 2000;
 const MAX_FIELD = 2000;
+/** Reading needs no parser, so it can take a page, not just a paragraph. */
+const MAX_ANALYZE_TEXT = 10_000;
 
 const ORTHOGRAPHIES = new Set<Orthography>(['standard', 'etymological', 'simplified', 'cyrillic']);
 
@@ -59,16 +66,21 @@ interface Ready {
 }
 
 let ready: Ready | null = null;
+/** True while a subtitle batch is being translated. */
+let batchBusy = false;
+let cognates: CognateIndex | null = null;
 
 function boot(): Ready {
   if (ready) return ready;
   const t0 = Date.now();
-  const lex = Lexicon.fromTsv(path.join(ROOT, 'packages/lexicon/data/raw/words.tsv'));
+  const wordsPath = path.join(ROOT, 'packages/lexicon/data/raw/words.tsv');
+  const lex = Lexicon.fromTsv(wordsPath);
   const loaded = Date.now();
-  const validator = buildFullFormIndex(lex);
+  // Saved by the container build when there is one (a few seconds), worked out here otherwise (12 s on a laptop).
+  const { index: validator, from } = loadFullFormIndex(lex, { root: ROOT, wordsPath, cacheFile: path.join(ROOT, 'packages/lexicon/data/built/fullforms.bin') });
   process.stdout.write(
     `lexicon: ${lex.entries.length} entries in ${loaded - t0}ms · ` +
-      `full-form index: ${validator.size} forms in ${Date.now() - loaded}ms\n`,
+      `full-form index: ${validator.size} forms ${from === 'saved' ? 'loaded' : 'built'} in ${Date.now() - loaded}ms\n`,
   );
   ready = { lex, validator };
   return ready;
@@ -172,6 +184,84 @@ const server = http.createServer((req, res) => {
         // rather than a generic 500.
         const isParser = message.includes('parser service');
         json(res, isParser ? 503 : 400, { error: message });
+      }
+    })();
+    return;
+  }
+
+  /**
+   * A word in the other Slavic languages, from the dictionary's own columns.
+   * For text in a language the translator cannot write: look a word up and use it.
+   */
+  if (req.method === 'GET' && url.pathname === '/api/lookup') {
+    const q = (url.searchParams.get('q') ?? '').slice(0, 60);
+    cognates ??= buildCognateIndex(path.join(ROOT, 'packages/lexicon/data/raw/words.tsv'));
+    json(res, 200, { entries: cognates.lookup(q, 8) });
+    return;
+  }
+
+  /**
+   * Subtitles: a list of short lines, each translated on its own. Capped per
+   * request, and only one batch runs at a time - the parser is a single process
+   * and a whole film would otherwise tie it up for everyone else.
+   */
+  if (req.method === 'POST' && url.pathname === '/api/translate-batch') {
+    void (async () => {
+      if (batchBusy) {
+        json(res, 429, { error: 'the translator is busy with another file; please retry in a moment' });
+        return;
+      }
+      batchBusy = true;
+      try {
+        const body = JSON.parse(await readBody(req)) as TranslateBody & { lines?: unknown };
+        const lang: SourceLang | null =
+          body.lang === undefined ? 'en' : isSourceLang(body.lang) && OFFERED.includes(body.lang) ? body.lang : null;
+        if (!lang) {
+          json(res, 400, { error: `translation from "${String(body.lang)}" is not available yet` });
+          return;
+        }
+        const problem = checkBatch(body.lines);
+        if (problem) {
+          json(res, 413, { error: problem });
+          return;
+        }
+        const orthography: Orthography = ORTHOGRAPHIES.has(body.orthography as Orthography)
+          ? (body.orthography as Orthography)
+          : 'standard';
+        const { lex, validator } = boot();
+        const results = await translateLines(body.lines as string[], {
+          parse: (text) => parseText(text, lang, { url: PARSER_URL }),
+          translate: (s) => translate(s, lex, { orthography, validator }),
+        });
+        json(res, 200, { results });
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        json(res, message.includes('parser service') ? 503 : 400, { error: message });
+      } finally {
+        batchBusy = false;
+      }
+    })();
+    return;
+  }
+
+  /**
+   * Interslavic in, analysis out: for each word, whether it is a form of a
+   * dictionary word and which. Pure lookup in the index built at boot - no
+   * parser, no state.
+   */
+  if (req.method === 'POST' && url.pathname === '/api/analyze') {
+    void (async () => {
+      try {
+        const body = JSON.parse(await readBody(req)) as { text?: unknown };
+        const text = typeof body.text === 'string' ? body.text : '';
+        if (text.length > MAX_ANALYZE_TEXT) {
+          json(res, 413, { error: `please keep it under ${MAX_ANALYZE_TEXT} characters` });
+          return;
+        }
+        const { lex, validator } = boot();
+        json(res, 200, analyzeText(text, lex, validator));
+      } catch (err) {
+        json(res, 400, { error: err instanceof Error ? err.message : String(err) });
       }
     })();
     return;

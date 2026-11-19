@@ -22,8 +22,10 @@ export FEEDBACK_FILE
   done
 ) &
 
-# Load both language models while the engine builds its dictionary index
-# (about 22s and 33s on Cloud Run), so they overlap instead of adding up. The
+# Load the language models while the engine gets its dictionary index (the
+# models took about 22s on Cloud Run; building the index took about 33s, but
+# the image build now saves it and the engine loads it in a couple of seconds),
+# so the two overlap instead of adding up. The
 # engine opens the public port only after its index is built, and a host such
 # as Cloud Run holds the first visitor's request until then, so a cold start
 # is a wait rather than a "translator is not answering" error.

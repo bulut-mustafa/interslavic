@@ -127,6 +127,32 @@ export function toCyrillic(text: string): string {
 }
 
 /**
+ * Standard Cyrillic back to standard Latin: the inverse of LAT_TO_CYR, read
+ * from the same table so the two directions cannot disagree (a test round-trips
+ * the whole index). The one two-letter entry, дж, needs no row of its own:
+ * д and ж give d and ž, which spell "dž" already.
+ *
+ * The result is the STANDARD alphabet only. Cyrillic cannot carry the
+ * etymological letters, and a letter the table does not know (я, ю, э ...)
+ * is left as written, so the caller can tell the text is not Interslavic.
+ */
+const CYR_TO_LAT: Map<string, string> = new Map(
+  LAT_TO_CYR.filter(([, cyr]) => cyr.length === 1).flatMap(([lat, cyr]) => [
+    [cyr, lat] as [string, string],
+    [
+      cyr.toUpperCase(),
+      lat.length > 1 ? lat.charAt(0).toUpperCase() + lat.slice(1) : lat.toUpperCase(),
+    ] as [string, string],
+  ]),
+);
+
+export function fromCyrillic(text: string): string {
+  let out = '';
+  for (const ch of text) out += CYR_TO_LAT.get(ch) ?? ch;
+  return out;
+}
+
+/**
  * A Russian name in Latin letters, by the pages' own tables, or null where
  * they do not cover a letter - such a name is left as it was rather than
  * guessed.
