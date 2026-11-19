@@ -918,9 +918,13 @@ const PagePane = forwardRef<
 
   // Tell the strip of pages how this page looks now, and what would bring it back, a moment after the last change.
   const read = reading === null && readError === null && readOk;
+  const pendingInfo = useRef<Parameters<typeof onInfo>[0] | null>(null);
   useEffect(() => {
     if (!pic) return;
+    // What the strip and the store are owed if this page goes away before the timer fires.
+    pendingInfo.current = { edited: docEdited(doc), size: pageSize(doc, { width: pic.w, height: pic.h }) ?? undefined, snapshot: { lang, script, hist, glyphs, read, layerFiles: [...objects.keys()] } };
     const t = setTimeout(() => {
+      pendingInfo.current = null;
       let thumb: string | undefined;
       const cache = createRenderCache();
       try {
@@ -941,6 +945,18 @@ const PagePane = forwardRef<
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pic, hist, glyphs, lang, script, read, picsVersion, bg]);
+
+  // Leaving the page (another page is shown, or the editor closes) within the 250 ms must not drop the last edit: save it now, without a new thumbnail.
+  const onInfoRef = useRef(onInfo);
+  onInfoRef.current = onInfo;
+  useEffect(
+    () => () => {
+      const owed = pendingInfo.current;
+      pendingInfo.current = null;
+      if (owed) onInfoRef.current(owed);
+    },
+    [pic],
+  );
 
   useEffect(() => {
     if (!layer) setTyping(false);
@@ -1652,6 +1668,7 @@ export default function PhotoEditor({ recognizer = tesseractRecognizer, store = 
       .catch(() => setKept('failed'));
   };
 
+  const restoreFailedRef = useRef(false);
   // Bring back what was open last time.
   useEffect(() => {
     if (!store) return;
@@ -1683,7 +1700,11 @@ export default function PhotoEditor({ recognizer = tesseractRecognizer, store = 
           });
         }
       })
-      .catch(() => live && setRestoreFailed(true))
+      .catch(() => {
+        if (!live) return;
+        restoreFailedRef.current = true;
+        setRestoreFailed(true);
+      })
       .finally(() => live && setRestoring(false));
     return () => {
       live = false;
@@ -1694,6 +1715,8 @@ export default function PhotoEditor({ recognizer = tesseractRecognizer, store = 
   // The order of the pages, and which is shown, are kept too.
   useEffect(() => {
     if (!store || restoring) return;
+    // A restore that failed leaves the page list empty although the saved pages are still there: never clear them for that.
+    if (restoreFailedRef.current && pages.length === 0) return;
     keep(async () => {
       if (pages.length === 0) await store.clear();
       else await store.saveMeta({ order: pages.map((p) => p.id), current });

@@ -1,10 +1,18 @@
-import type * as H from '../editor/history.ts';
-import type { TextLayer } from '../editor/layers.ts';
-import { getFile, hasIndexedDb, kvClear, kvDel, kvGet, kvPut, putFile } from '../studio/idb.ts';
-import type { Script } from '../subtitles/translate.ts';
-import { historyFromV1, isImage, type PageDoc } from './doc.ts';
-import type { Glyph } from './live-text.ts';
-import type { OcrLang } from './ocr.ts';
+import type * as H from "../editor/history.ts";
+import type { TextLayer } from "../editor/layers.ts";
+import {
+  getFile,
+  hasIndexedDb,
+  kvClear,
+  kvDel,
+  kvGet,
+  kvPut,
+  putFile,
+} from "../studio/idb.ts";
+import type { Script } from "../subtitles/translate.ts";
+import { historyFromV1, isImage, type PageDoc } from "./doc.ts";
+import type { Glyph } from "./live-text.ts";
+import type { OcrLang } from "./ocr.ts";
 
 /**
  * Keeping the photo editor's pages between visits, on the user's own device, in
@@ -66,13 +74,16 @@ export interface PhotoStore {
 }
 
 /** A version-1 record: the same, but the history is of text layers only. */
-type RecordV1 = Omit<PageRecord, 'hist' | 'layerFiles'> & { hist: H.History<TextLayer[]> };
+type RecordV1 = Omit<PageRecord, "hist" | "layerFiles"> & {
+  hist: H.History<TextLayer[]>;
+};
 
-const PREFIX = 'photo:';
-const META = 'photo:meta';
+const PREFIX = "photo:";
+const META = "photo:meta";
 export const pageKey = (id: string): string => `photo:page:${id}`;
 export const fileKey = (id: string): string => `photo:file:${id}`;
-export const objectKey = (pageId: string, fileId: string): string => `photo:obj:${pageId}:${fileId}`;
+export const objectKey = (pageId: string, fileId: string): string =>
+  `photo:obj:${pageId}:${fileId}`;
 
 /** The table and file calls a store needs; the browser's database, or a Map in a test. */
 export interface PhotoBackend {
@@ -84,15 +95,18 @@ export interface PhotoBackend {
   getFile(key: string, name?: string): Promise<File | undefined>;
 }
 
-const isV1 = (r: PageRecord | RecordV1): r is RecordV1 => Array.isArray((r as RecordV1).hist?.present);
+const isV1 = (r: PageRecord | RecordV1): r is RecordV1 =>
+  Array.isArray((r as RecordV1).hist?.present);
 
 /** Ids of the files that picture layers of a document point at. */
-const srcsOf = (d: PageDoc): string[] => d.layers.filter(isImage).map((l) => l.src);
+const srcsOf = (d: PageDoc): string[] =>
+  d.layers.filter(isImage).map((l) => l.src);
 
 /** Every file id any step of the history, or the record's own list, mentions (so undo can bring one back). */
 export function layerFileIds(r: PageRecord): string[] {
   const ids = new Set<string>(r.layerFiles ?? []);
-  for (const d of [...r.hist.past, r.hist.present, ...r.hist.future]) for (const s of srcsOf(d)) ids.add(s);
+  for (const d of [...r.hist.past, r.hist.present, ...r.hist.future])
+    for (const s of srcsOf(d)) ids.add(s);
   return [...ids];
 }
 
@@ -104,30 +118,46 @@ export function makePhotoStore(b: PhotoBackend): PhotoStore {
       if (!meta || meta.order.length === 0) return null;
       const pages: SavedPage[] = [];
       for (const id of meta.order) {
-        const stored = await b.get<PageRecord | RecordV1>(pageKey(id));
-        if (!stored) continue;
-        const file = await b.getFile(fileKey(id), stored.name);
-        if (!file) continue; // a page without its picture cannot be shown
-        const upgraded = isV1(stored);
-        const record: PageRecord = isV1(stored) ? { ...stored, hist: historyFromV1(stored.hist) } : stored;
-        const objects = new Map<string, File>();
-        for (const fid of layerFileIds(record)) {
-          const f = await b.getFile(objectKey(id, fid), fid);
-          if (f) objects.set(fid, f);
+        try {
+          const stored = await b.get<PageRecord | RecordV1>(pageKey(id));
+          if (!stored) continue;
+          const file = await b.getFile(fileKey(id), stored.name);
+          if (!file) continue; // a page without its picture cannot be shown
+          const upgraded = isV1(stored);
+          const record: PageRecord = isV1(stored)
+            ? { ...stored, hist: historyFromV1(stored.hist) }
+            : stored;
+          const objects = new Map<string, File>();
+          for (const fid of layerFileIds(record)) {
+            const f = await b.getFile(objectKey(id, fid), fid);
+            if (f) objects.set(fid, f);
+          }
+          const missing = [...new Set(srcsOf(record.hist.present))].filter(
+            (s) => !objects.has(s),
+          );
+          pages.push({
+            ...record,
+            file,
+            objects,
+            missing,
+            ...(upgraded && { upgraded }),
+          });
+        } catch {
+          // One unreadable page must not lose the others; its record stays in the database untouched.
         }
-        const missing = [...new Set(srcsOf(record.hist.present))].filter((s) => !objects.has(s));
-        pages.push({ ...record, file, objects, missing, ...(upgraded && { upgraded }) });
       }
       return pages.length === 0 ? null : { meta, pages };
     },
     saveFile: (id, file) => b.putFile(fileKey(id), file),
     savePage: (record) => b.put(pageKey(record.id), record),
     saveMeta: (meta) => b.put(META, meta),
-    saveObjectFile: (pageId, fileId, file) => b.putFile(objectKey(pageId, fileId), file),
+    saveObjectFile: (pageId, fileId, file) =>
+      b.putFile(objectKey(pageId, fileId), file),
     removeObjectFile: (pageId, fileId) => b.del(objectKey(pageId, fileId)),
     async removePage(id) {
       const stored = await b.get<PageRecord | RecordV1>(pageKey(id));
-      if (stored && !isV1(stored)) for (const fid of layerFileIds(stored)) await b.del(objectKey(id, fid));
+      if (stored && !isV1(stored))
+        for (const fid of layerFileIds(stored)) await b.del(objectKey(id, fid));
       await b.del(pageKey(id));
       await b.del(fileKey(id));
     },
@@ -135,10 +165,19 @@ export function makePhotoStore(b: PhotoBackend): PhotoStore {
   };
 }
 
-export const indexedDbStore: PhotoStore = makePhotoStore({ get: kvGet, put: kvPut, del: kvDel, clear: kvClear, putFile, getFile });
+export const indexedDbStore: PhotoStore = makePhotoStore({
+  get: kvGet,
+  put: kvPut,
+  del: kvDel,
+  clear: kvClear,
+  putFile,
+  getFile,
+});
 
 /** The browser's store, or null where there is none (a private window in some browsers, or a page being pre-rendered). */
-export const defaultStore: PhotoStore | null = hasIndexedDb ? indexedDbStore : null;
+export const defaultStore: PhotoStore | null = hasIndexedDb
+  ? indexedDbStore
+  : null;
 
 /** A store held in memory for tests: the same rules as the browser's, a Map for a database, and a way to make writes fail like a full disk. */
 export interface MemoryPhotoStore extends PhotoStore {
@@ -152,10 +191,10 @@ export function memoryPhotoStore(): MemoryPhotoStore {
   const data = new Map<string, unknown>();
   const fail = { on: false };
   const guard = () => {
-    if (fail.on) throw new Error('QuotaExceededError');
+    if (fail.on) throw new Error("QuotaExceededError");
   };
   const store = makePhotoStore({
-    get: async <T,>(key: string) => data.get(key) as T | undefined,
+    get: async <T>(key: string) => data.get(key) as T | undefined,
     put: async (key, value) => {
       guard();
       data.set(key, value);
@@ -164,7 +203,8 @@ export function memoryPhotoStore(): MemoryPhotoStore {
       data.delete(key);
     },
     clear: async (prefix) => {
-      for (const k of [...data.keys()]) if (k.startsWith(prefix)) data.delete(k);
+      for (const k of [...data.keys()])
+        if (k.startsWith(prefix)) data.delete(k);
     },
     putFile: async (key, file) => {
       guard();
@@ -175,4 +215,4 @@ export function memoryPhotoStore(): MemoryPhotoStore {
   return Object.assign(store, { fail, data });
 }
 
-export { askToKeep } from '../studio/idb.ts';
+export { askToKeep } from "../studio/idb.ts";

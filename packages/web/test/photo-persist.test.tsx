@@ -104,6 +104,18 @@ describe('keeping pages on this device', () => {
     expect(rec.glyphs.length).toBeGreaterThan(0); // the letters found, so the picture need not be read again
   });
 
+  it('keeps an edit made just before the editor closes, without waiting for the pause that normally precedes saving', async () => {
+    const m = memoryStore();
+    render(<PhotoEditor recognizer={reader({ n: 0 })} store={m.store} />);
+    await wait(50);
+    add(png('one.png'));
+    await wait();
+    fireEvent.click(screen.getByRole('button', { name: 'Add text' }));
+    cleanup(); // well within the 250 ms
+    await wait(100);
+    expect(m.pages.values()[0]!.hist.present.layers).toHaveLength(1);
+  });
+
   it('brings the pages back next time, as they were left, without reading the pictures again', async () => {
     const calls = { n: 0 };
     const seed = { meta: { order: ['a', 'b'], current: 'b' }, pages: [savedPage('a', 'first.png'), savedPage('b', 'second.png')] };
@@ -189,11 +201,19 @@ describe('keeping pages on this device', () => {
 
   it('starts empty, and says why, when the saved pictures cannot be read', async () => {
     const m = memoryStore();
+    await m.store.saveFile('keep', png('keep.png'));
+    await m.store.savePage({ id: 'keep', name: 'keep.png', lang: 'en', script: 'standard', glyphs: [], read: true, hist: { past: [], present: { base: {}, layers: [], background: 'transparent' }, future: [] } } as never);
+    await m.store.saveMeta({ order: ['keep'], current: 'keep' });
     m.store.load = async () => {
       throw new Error('StorageTimeout');
     };
     render(<PhotoEditor recognizer={reader({ n: 0 })} store={m.store} />);
     await waitFor(() => expect(screen.getByRole('alert').textContent).toContain('could not be read'));
     expect(document.querySelector('.dropzone')).toBeTruthy(); // not stuck waiting: the editor is usable
+    await act(async () => {});
+    // A failed read must not look like "no pages": the pictures that are still saved are not erased.
+    expect(m.pages.has('keep')).toBe(true);
+    expect(m.files.keys()).toContain('keep');
+    expect(m.meta()).not.toBeNull();
   });
 });

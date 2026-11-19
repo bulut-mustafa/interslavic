@@ -157,13 +157,13 @@ export async function exportPage(render: RenderFn, opts: ExportOptions, env: Exp
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, fit.width, fit.height);
   }
-  await render(ctx, { width: fit.width, height: fit.height, scale: fit.scale });
-  const quality = opts.format === 'png' ? undefined : Math.min(1, Math.max(0, opts.quality ?? 0.92));
   let blob: Blob | null;
   try {
+    await render(ctx, { width: fit.width, height: fit.height, scale: fit.scale });
+    const quality = opts.format === 'png' ? undefined : Math.min(1, Math.max(0, opts.quality ?? 0.92));
     blob = await toBlob(canvas, MIME[opts.format], quality);
   } finally {
-    // Frees the canvas's memory at once instead of when it is collected (matters on a phone).
+    // Frees the canvas's memory at once instead of when it is collected (matters on a phone), whether drawing or encoding failed or not.
     canvas.width = 0;
     canvas.height = 0;
   }

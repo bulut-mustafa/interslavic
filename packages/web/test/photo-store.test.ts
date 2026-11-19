@@ -11,6 +11,30 @@ const record = (id: string, hist: H.History<PageDoc>, over: Partial<PageRecord> 
 const meta = (...order: string[]) => ({ order, current: order[0] ?? null });
 
 describe('photo store v2', () => {
+  it('skips a page whose record cannot be read and still loads the others', async () => {
+    const real = memoryPhotoStore();
+    const hist = H.start(doc());
+    await real.saveFile('good', file('good.png'));
+    await real.savePage(record('good', hist));
+    await real.saveFile('bad', file('bad.png'));
+    await real.savePage(record('bad', hist));
+    await real.saveMeta(meta('bad', 'good'));
+    const { makePhotoStore } = await import('../src/photo/store.ts');
+    const store = makePhotoStore({
+      get: async (k) => {
+        if (k === pageKey('bad')) throw new Error('AbortError');
+        return real.data.get(k) as never;
+      },
+      put: async () => {},
+      del: async () => {},
+      clear: async () => {},
+      putFile: async () => {},
+      getFile: async (k, name) => (real.data.get(k) ? file(name ?? 'x.png') : undefined),
+    });
+    const got = await store.load();
+    expect(got!.pages.map((p) => p.id)).toEqual(['good']);
+  });
+
   it('returns nothing when nothing is saved', async () => {
     expect(await memoryPhotoStore().load()).toBeNull();
   });
