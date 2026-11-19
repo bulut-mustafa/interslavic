@@ -1,0 +1,123 @@
+.export-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: var(--space-3);
+  background: rgb(22 32 47 / 0.45);
+}
+
+.export-dialog {
+  width: min(32rem, 100%);
+  max-height: 100%;
+  overflow-y: auto;
+  padding: var(--space-4);
+  border: 1px solid var(--rule);
+  border-radius: 0.6rem;
+  background: var(--paper-raised);
+  color: var(--ink);
+  box-shadow: 0 1rem 2.5rem rgb(22 32 47 / 0.25);
+}
+
+.export-dialog h2 {
+  margin: 0 0 var(--space-3);
+  font-size: 1.15rem;
+}
+
+.export-dialog fieldset {
+  margin: 0 0 var(--space-3);
+  padding: 0;
+  border: 0;
+}
+
+.export-dialog legend {
+  margin-bottom: var(--space-2);
+  padding: 0;
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.export-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.export-choice {
+  min-width: 3.5rem;
+  padding: 0.4rem 0.8rem;
+  border: 1px solid var(--rule);
+  border-radius: 0.4rem;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.export-choice[aria-checked='true'] {
+  border-color: var(--teal);
+  background: var(--teal);
+  color: #fff;
+}
+
+.export-choice:focus-visible,
+.export-dialog input:focus-visible {
+  outline: 2px solid var(--plum);
+  outline-offset: 2px;
+}
+
+.export-dialog input[type='number'] {
+  width: 6rem;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--rule);
+  border-radius: 0.35rem;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+}
+
+.export-dialog input[type='range'] {
+  flex: 1;
+  min-width: 8rem;
+}
+
+.export-check {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.export-summary {
+  margin: 0 0 var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: 0.4rem;
+  background: var(--paper);
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+}
+
+.export-warning {
+  margin: var(--space-2) 0 0;
+  color: var(--amber);
+}
+
+.export-note {
+  margin: var(--space-2) 0 0;
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+}
+
+.export-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+@media (prefers-color-scheme: dark) {
+  .export-dialog {
+    box-shadow: 0 1rem 2.5rem rgb(0 0 0 / 0.6);
+  }
+}
