@@ -2,19 +2,23 @@ import { useEffect } from 'react';
 import { Lesson } from './learn/Lesson.tsx';
 import { LESSONS } from './learn/lessons.ts';
 import { Phrasebook } from './learn/Phrasebook.tsx';
+import { Credits } from './components/Credits.tsx';
 import Translator from './pages/Translator.tsx';
+import Studio from './studio/Studio.tsx';
 import { pageMeta } from './meta.ts';
 import { Link, usePath } from './router.tsx';
 
 /**
  * The site: the translator at the root, beside it the lessons and the
- * phrasebook. One header and one footer for all of them.
+ * phrasebook, with one header and one footer; and the Studio, whose tools
+ * live in a workspace of their own (studio/Studio.tsx).
  */
 
 const SECTIONS = [
   { href: '/', label: 'Translate', match: (p: string) => p === '/' },
   { href: '/learn', label: 'Learn', match: (p: string) => p.startsWith('/learn') },
   { href: '/phrasebook', label: 'Phrasebook', match: (p: string) => p.startsWith('/phrasebook') },
+  { href: '/studio', label: 'Studio', match: (p: string) => p.startsWith('/studio') },
 ];
 
 export default function App() {
@@ -27,6 +31,9 @@ export default function App() {
     document.title = meta.title;
     document.querySelector('meta[name="description"]')?.setAttribute('content', meta.description);
   }, [path]);
+
+  // The Studio has an interface of its own, without the site's header and footer.
+  if (path.startsWith('/studio')) return <Studio path={path} />;
 
   return (
     <div className="shell">
@@ -59,21 +66,7 @@ export default function App() {
       )}
 
       <footer className="site-footer">
-        An experimental, rule-based translator - it can be wrong, and says where it is
-        guessing. Dictionary and grammar: the Interslavic dictionary
-        (interslavic-dictionary.com) and Jan van Steenbergen&rsquo;s grammar pages
-        (steen.free.fr/interslavic), used non-commercially with thanks.{' '}
-        <a href="https://github.com/bulut-mustafa/interslavic" target="_blank" rel="noreferrer">
-          Open source on GitHub
-        </a>
-        .
-        <span className="made-by">
-          Made with love by{' '}
-          <a href="https://mustafabulut.dev" target="_blank" rel="noreferrer">
-            Mustafa
-          </a>
-          .
-        </span>
+        <Credits />
       </footer>
     </div>
   );

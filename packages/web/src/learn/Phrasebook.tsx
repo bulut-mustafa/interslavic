@@ -2,6 +2,9 @@ import { useMemo, useState } from 'react';
 import { track } from '../analytics.ts';
 import { toCyrillic } from '../../../morph/src/orthography.ts';
 import { Tabs } from '../components/Tabs.tsx';
+import { downloadText } from '../download.ts';
+import { Listen, VoicePicker } from '../speech/Listen.tsx';
+import { ankiTsv, type Direction } from './anki.ts';
 import { PHRASEBOOK, sourceUrl, type Phrase } from './phrasebook.ts';
 
 type Mode = 'list' | 'cards';
@@ -28,7 +31,9 @@ export function Phrasebook() {
           setMode(m);
         }}
       />
+      <VoicePicker />
       {mode === 'list' ? <PhraseList /> : <Flashcards />}
+      <AnkiExport />
     </main>
   );
 }
@@ -41,7 +46,9 @@ function PhraseList() {
           <h2>{group.title}</h2>
           {group.phrases.map((p) => (
             <div className="phrase" key={p.isv}>
-              <p className="phrase-isv" lang="isv">{p.isv}</p>
+              <p className="phrase-isv" lang="isv">
+                {p.isv} <Listen text={p.isv} label="Listen" where="phrasebook" />
+              </p>
               <p className="phrase-cyr" lang="isv-Cyrl">{toCyrillic(p.isv)}</p>
               <p className="phrase-en">
                 {p.en}
@@ -108,6 +115,7 @@ function Flashcards() {
       </button>
 
       <div className="cards-nav">
+        <Listen text={card.isv} where="flashcard" />
         <button type="button" className="text-button" onClick={() => go(-1)}>
           ‹ Previous
         </button>
@@ -119,5 +127,42 @@ function Flashcards() {
         </button>
       </div>
     </div>
+  );
+}
+
+/**
+ * The phrasebook as a file for Anki's "Import file". Built in the browser from
+ * the same data as the list above; each note names its source, and Tatoeba's
+ * licence travels with every Tatoeba sentence.
+ */
+function AnkiExport() {
+  const [direction, setDirection] = useState<Direction>('isv-en');
+  return (
+    <section className="anki-export" aria-label="Export for Anki">
+      <h2>Learn these in Anki</h2>
+      <p>
+        Download every phrase above as a text file and import it with <em>File &rsaquo; Import</em>{' '}
+        in Anki (version 2.1.54 or later). Each note carries its topic as a tag and its source.
+      </p>
+      <div className="anki-controls">
+        <label>
+          <span>Card shows</span>
+          <select value={direction} onChange={(e) => setDirection(e.target.value as Direction)}>
+            <option value="isv-en">Interslavic, answer in English</option>
+            <option value="en-isv">English, answer in Interslavic</option>
+          </select>
+        </label>
+        <button
+          type="button"
+          className="text-button is-primary"
+          onClick={() => {
+            downloadText('interslavic-phrasebook-anki.txt', ankiTsv(PHRASEBOOK, direction), 'text/tab-separated-values');
+            track('anki-export', { direction });
+          }}
+        >
+          Download for Anki
+        </button>
+      </div>
+    </section>
   );
 }

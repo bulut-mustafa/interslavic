@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { pageHtml, robotsTxt, ROUTES, sitemapXml } from '../src/entry-server.tsx';
 import { LESSONS } from '../src/learn/lessons.ts';
+import { TOOLS } from '../src/studio/tools.tsx';
 
 /**
  * What a crawler or a link preview receives without running JavaScript: the
@@ -19,8 +20,14 @@ const description = (html: string) => tag(html, /<meta name="description" conten
 const text = (html: string) => html.split('<div id="root">')[1]!.replace(/<[^>]+>/g, ' ');
 
 describe('every page is real HTML with its own head', () => {
-  it('has a page for the home, the phrasebook and every lesson', () => {
-    expect(ROUTES).toEqual(['/', '/phrasebook', ...LESSONS.map((l) => `/learn/${l.slug}`)]);
+  it('has a page for the home, the Studio and each of its tools, the phrasebook and every lesson', () => {
+    expect(ROUTES).toEqual([
+      '/',
+      '/studio',
+      ...TOOLS.map((t) => `/studio/${t.slug}`),
+      '/phrasebook',
+      ...LESSONS.map((l) => `/learn/${l.slug}`),
+    ]);
   });
 
   it('gives each page a unique title and description', () => {
@@ -85,5 +92,30 @@ describe('the not-found page, sitemap and robots.txt', () => {
   it('points robots.txt at the sitemap and keeps the API out', () => {
     expect(robotsTxt()).toContain('Sitemap: https://interslavic.web.app/sitemap.xml');
     expect(robotsTxt()).toContain('Disallow: /api/');
+  });
+});
+
+describe('the Studio', () => {
+  it('is its own interface: a rail of tools, and none of the site\'s header or footer', () => {
+    const html = pages.get('/studio/photo')!;
+    expect(html).toContain('studio-rail');
+    expect(html).not.toContain('class="topbar"');
+    expect(html).not.toContain('site-footer');
+  });
+
+  it('keeps the dictionary credit on every Studio page', () => {
+    for (const route of ROUTES.filter((r) => r.startsWith('/studio'))) {
+      expect(text(pages.get(route)!)).toContain('interslavic-dictionary.com');
+    }
+  });
+
+  it('lists every tool in the rail and in the site menu as one Studio entry', () => {
+    const home = pages.get('/studio')!;
+    for (const name of TOOLS.map((t) => t.label)) {
+      expect(home).toContain(`aria-label="${name}"`);
+    }
+    const site = pages.get('/')!;
+    expect(site).toContain('>Studio<');
+    expect(site).not.toContain('>Worksheets<');
   });
 });

@@ -1,10 +1,30 @@
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 
+/**
+ * Files that replace a module with vi.mock. With isolate:false the module
+ * registry is shared, so a file that mocked ../src/video/transport.ts left
+ * VideoEditor bound to that mock for the next file, which expected another one
+ * (the video-editor-integration and waveform tests failed in a full run and
+ * passed alone). These few files run isolated in their own project instead.
+ */
+const MOCKING = [
+  'packages/web/test/photo-cutout-wiring.test.tsx',
+  'packages/web/test/studio-workspace.test.tsx',
+  'packages/web/test/video-timeline-ui.test.tsx',
+  'packages/web/test/video-editor.test.tsx',
+  'packages/web/test/video-features.test.tsx',
+  'packages/web/test/video-editor-integration.test.tsx',
+];
+const INCLUDE = ['packages/**/test/**/*.test.ts', 'packages/**/test/**/*.test.tsx'];
+
 export default defineConfig({
   plugins: [react()],
   test: {
-    include: ['packages/**/test/**/*.test.ts', 'packages/**/test/**/*.test.tsx'],
+    projects: [
+      { extends: true, test: { name: 'shared', include: INCLUDE, exclude: [...MOCKING, '**/node_modules/**'], pool: 'forks', poolOptions: { forks: { maxForks: 2, isolate: false } } } },
+      { extends: true, test: { name: 'mocking', include: MOCKING, pool: 'forks', poolOptions: { forks: { maxForks: 2, isolate: true } } } },
+    ],
     testTimeout: 30000,
     /**
      * The suite is run 264 times by the mutation audit, so its per-run cost is

@@ -4,6 +4,10 @@ import type { GlossedWord, RuleCitation, Translation } from '../../../engine/src
 import type { Orthography } from '../../../morph/src/orthography.ts';
 import { ReportForm } from '../components/ReportForm.tsx';
 import { Tabs } from '../components/Tabs.tsx';
+import { CopyButton } from '../components/CopyButton.tsx';
+import { readable } from '../features.ts';
+import { permalink } from '../permalink.ts';
+import { Listen, VoicePicker } from '../speech/Listen.tsx';
 
 // Same origin: the engine serves the page in production, Vite proxies in dev.
 const API = '';
@@ -64,18 +68,19 @@ async function fetchTranslation(
 }
 
 /** A lesson's "Try it" link opens the translator with its sentence: /?lang=en&text=... */
-function fromAddress(): { text: string; lang: Lang } {
+function fromAddress(): { text: string; lang: Lang; script: Orthography } {
   const q = new URLSearchParams(typeof window === 'undefined' ? '' : window.location.search);
   return {
     text: q.get('text') ?? '',
     lang: LANGS.find((l) => l.value === q.get('lang'))?.value ?? 'en',
+    script: ORTHS.find((o) => o.value === q.get('script'))?.value ?? 'standard',
   };
 }
 
 export default function Translator() {
   const [text, setText] = useState(() => fromAddress().text);
   const [lang, setLang] = useState<Lang>(() => fromAddress().lang);
-  const [orth, setOrth] = useState<Orthography>('standard');
+  const [orth, setOrth] = useState<Orthography>(() => fromAddress().script);
   const [primary, setPrimary] = useState<Translation[]>([]);
   const [alternate, setAlternate] = useState<Translation[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -302,6 +307,12 @@ export default function Translator() {
                     >
                       Report a problem
                     </button>
+                    <CopyButton
+                      text={permalink('/', { lang, script: orth, text })}
+                      label="Copy link"
+                      event="copy-link"
+                    />
+                    <Listen text={primary.map((s) => s.text).join(' ')} where="translator" />
                     <CopyButton text={primary.map((s) => s.text).join(' ')} />
                   </div>
                 </div>
@@ -310,6 +321,8 @@ export default function Translator() {
           </section>
         </div>
       </main>
+
+      {primary.length > 0 && <VoicePicker />}
 
       {reporting && primary.length > 0 && (
         <ReportForm
@@ -414,25 +427,6 @@ export default function Translator() {
         </section>
       )}
     </>
-  );
-}
-
-function CopyButton({ text }: { text: string }) {
-  const [copied, setCopied] = useState(false);
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(text);
-      track('copy-translation');
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    } catch {
-      // Clipboard access can be refused; the text is still selectable.
-    }
-  };
-  return (
-    <button type="button" className="text-button" onClick={() => void copy()} disabled={!text}>
-      {copied ? 'Copied' : 'Copy'}
-    </button>
   );
 }
 
@@ -560,40 +554,4 @@ function WordDetail({
       )}
     </div>
   );
-}
-
-/** Feature names and values as a learner would say them aloud. */
-const CASES: Record<string, string> = {
-  Nom: 'nominative',
-  Acc: 'accusative',
-  Gen: 'genitive',
-  Dat: 'dative',
-  Ins: 'instrumental',
-  Loc: 'locative',
-  Voc: 'vocative',
-};
-
-const PLAIN: Record<string, string> = {
-  Sing: 'singular',
-  Plur: 'plural',
-  Masc: 'masculine',
-  Fem: 'feminine',
-  Neut: 'neuter',
-  Anim: 'animate',
-  Inan: 'inanimate',
-  Pres: 'present',
-  Past: 'past',
-  Imp: 'imperfective',
-  Perf: 'perfective',
-  Part: 'participle',
-  Fin: 'finite',
-  Ind: 'indicative',
-  Act: 'active',
-  Pass: 'passive',
-};
-
-function readable(name: string, value: string): string {
-  if (name === 'Case') return CASES[value] ?? value;
-  if (name === 'Person') return `${value}rd person`.replace('1rd', '1st').replace('2rd', '2nd');
-  return PLAIN[value] ?? value;
 }

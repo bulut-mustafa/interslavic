@@ -326,7 +326,7 @@ function Choice({ block, id }: { block: Extract<Block, { kind: 'choice' }>; id: 
             onClick={() => {
               setPicked(o);
               recordAnswer(id, o === block.answer);
-              track('exercise', { kind: 'choice', lesson: id.split('#')[0], right: o === block.answer });
+              track('exercise', { kind: 'choice', lesson: id.split('#')[0] ?? '', right: o === block.answer });
             }}
           >
             {o}
@@ -367,7 +367,7 @@ function Fill({ block, id }: { block: Extract<Block, { kind: 'fill' }>; id: stri
     const r = exact ? 'right' : close ? 'close' : 'wrong';
     setResult(r);
     recordAnswer(id, r !== 'wrong');
-    track('exercise', { kind: 'fill', lesson: id.split('#')[0], right: r !== 'wrong' });
+    track('exercise', { kind: 'fill', lesson: id.split('#')[0] ?? '', right: r !== 'wrong' });
   };
   return (
     <form className="exercise" onSubmit={check}>

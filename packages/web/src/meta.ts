@@ -1,4 +1,5 @@
 import { LESSONS } from './learn/lessons.ts';
+import { TOOLS, toolPath } from './studio/tools.tsx';
 
 /**
  * What each page says about itself to search engines and link previews: its
@@ -24,7 +25,7 @@ export interface PageMeta {
 }
 
 /** Every page with an address of its own, in sitemap order. */
-export const ROUTES: string[] = ['/', '/phrasebook', ...LESSONS.map((l) => `/learn/${l.slug}`)];
+export const ROUTES: string[] = ['/', '/studio', ...TOOLS.map(toolPath), '/phrasebook', ...LESSONS.map((l) => `/learn/${l.slug}`)];
 
 const NOT_FOUND: PageMeta = {
   path: '/404',
@@ -43,6 +44,69 @@ export function pageMeta(path: string): PageMeta {
         'Translate English, Russian or Ukrainian into Interslavic, with the case, aspect and form of every word explained - and lessons on the grammar.',
       index: true,
       jsonLd: { '@context': 'https://schema.org', '@type': 'WebSite', name: SITE_NAME, url: `${SITE}/` },
+    };
+  }
+  if (clean === '/studio') {
+    return {
+      path: clean,
+      title: 'Interslavic Studio - tools for learning, teaching and making',
+      description:
+        'One workspace of Interslavic tools: edit photos and videos with translated text, turn recordings into subtitles, translate subtitles, learn from a video, and print worksheets.',
+      index: true,
+    };
+  }
+  if (clean === '/studio/watch') {
+    return {
+      path: clean,
+      title: 'Learn Interslavic from a video',
+      description:
+        'Watch a video you have with its Interslavic subtitles: tap any word for its dictionary form and meaning, repeat a line, slow it down, and save sentences for Anki. The video stays on your device.',
+      index: true,
+    };
+  }
+  if (clean === '/studio/recording') {
+    return {
+      path: clean,
+      title: 'Turn a recording into subtitles - in your browser',
+      description:
+        'Transcribe the speech in an English, Russian or Ukrainian audio or video file into subtitles on your own device, then translate them into Interslavic. Nothing is uploaded.',
+      index: true,
+    };
+  }
+  if (clean === '/studio/video') {
+    return {
+      path: clean,
+      title: 'Video editor - cut a video and add styled, translated text',
+      description:
+        'Open a video, cut and rearrange it, add styled text or subtitles, translate the text into Interslavic, and save the result. The video never leaves your device.',
+      index: true,
+    };
+  }
+  if (clean === '/studio/photo') {
+    return {
+      path: clean,
+      title: 'Photo editor - change the text in a picture, into Interslavic',
+      description:
+        'Open a picture with text, find the writing on your own device, change it by hand or translate it into Interslavic, move and restyle it, and save the result. The photo is never uploaded.',
+      index: true,
+    };
+  }
+  if (clean === '/studio/subtitles') {
+    return {
+      path: clean,
+      title: 'Translate subtitles (.srt) to Interslavic',
+      description:
+        'Upload English, Russian or Ukrainian subtitles and download them in Interslavic with the same timing, with the lines the translator is unsure of marked for review.',
+      index: true,
+    };
+  }
+  if (clean === '/studio/worksheets') {
+    return {
+      path: clean,
+      title: 'Printable Interslavic worksheets for teachers',
+      description:
+        'Build a printable Interslavic worksheet from the lessons: fill-in and multiple-choice exercises, blank inflection tables and phrase translation, with an answer key.',
+      index: true,
     };
   }
   if (clean === '/phrasebook') {

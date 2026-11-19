@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render } from '@testing-library/react';
+import { screen } from './live-screen.ts';
 import App from '../src/App.tsx';
 
 /** The Learn section, through the page as a learner uses it. */
