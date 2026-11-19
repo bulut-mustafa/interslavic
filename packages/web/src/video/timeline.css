@@ -1,0 +1,425 @@
+/* The multi-track timeline. Class names start with tl- so they never meet the older .timeline rules in styles.css. */
+
+.tl {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1, 0.25rem);
+  padding: var(--space-2, 0.5rem);
+  background: var(--paper-raised, #fff);
+  border: 1px solid var(--rule, #d8d8d8);
+  border-radius: 12px;
+  min-width: 0;
+}
+
+.tl-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1, 0.25rem);
+  flex-wrap: wrap;
+}
+
+.tl-spacer {
+  flex: 1 1 auto;
+}
+
+.tl-btn {
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+  padding: 0 0.6rem;
+  border: 1px solid var(--rule, #d8d8d8);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink, #16202f);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.tl-btn.is-on {
+  background: rgba(31, 107, 107, 0.16);
+  border-color: var(--teal, #1f6b6b);
+}
+
+.tl-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.tl-zoom {
+  width: min(10rem, 30vw);
+}
+
+.tl-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  border-radius: 8px;
+  background: rgba(127, 127, 127, 0.06);
+}
+
+/* Overrides the older flex-column rule for .timeline-lanes in styles.css; this is the scrub surface the editor's tests look for. */
+.tl .timeline-lanes {
+  position: relative;
+  display: block;
+  min-width: 100%;
+  gap: 0;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: default;
+}
+
+.tl-ruler {
+  position: absolute;
+  inset: 0 0 auto 0;
+  border-bottom: 1px solid var(--rule, #d8d8d8);
+  cursor: col-resize;
+  font-size: 0.68rem;
+  color: var(--ink-soft, #566);
+}
+
+.tl-tick {
+  position: absolute;
+  bottom: 0;
+  height: 6px;
+  border-left: 1px solid var(--rule, #aaa);
+  padding-left: 3px;
+  white-space: nowrap;
+}
+
+.tl-tick.is-major {
+  height: 14px;
+  border-left-color: var(--ink-soft, #566);
+  line-height: 12px;
+}
+
+.tl-lane {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-bottom: 1px dashed var(--rule, #ddd);
+}
+
+.tl-main {
+  border-bottom: 0;
+  background: rgba(31, 107, 107, 0.05);
+}
+
+.tl-item {
+  position: absolute;
+  box-sizing: border-box;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  overflow: visible;
+  touch-action: none;
+  cursor: grab;
+}
+
+.tl-item.is-dragging {
+  cursor: grabbing;
+  opacity: 0.9;
+  z-index: 3;
+}
+
+.tl-hit {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  padding: 0 6px;
+  border: 0;
+  border-radius: 5px;
+  background: inherit;
+  color: inherit;
+  font: inherit;
+  font-size: 0.72rem;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  cursor: inherit;
+  touch-action: none;
+}
+
+.tl-hit:focus-visible {
+  outline: 2px solid var(--plum, #7a3b69);
+  outline-offset: 1px;
+}
+
+.tl-text {
+  background: #fbe9a6;
+  border-color: #c8a227;
+  color: #3d3200;
+}
+
+.tl-picture {
+  background: #cfe3f5;
+  border-color: #4b7fb0;
+  color: #12304d;
+}
+
+.tl-video,
+.tl-clip {
+  background: rgba(31, 107, 107, 0.2);
+  border-color: rgba(31, 107, 107, 0.55);
+  color: var(--ink, #16202f);
+}
+
+.tl-sound {
+  background: #d9ead3;
+  border-color: #5f9e50;
+  color: #1c3a14;
+}
+
+.tl-item.is-missing {
+  background: repeating-linear-gradient(45deg, #eee, #eee 6px, #ddd 6px, #ddd 12px);
+  border-style: dashed;
+  color: #555;
+}
+
+.tl-item.is-selected {
+  box-shadow: 0 0 0 2px var(--teal, #1f6b6b);
+  z-index: 2;
+}
+
+.tl-thumb {
+  height: 100%;
+  width: auto;
+  max-width: 3rem;
+  object-fit: cover;
+  border-radius: 3px;
+  flex: none;
+  pointer-events: none;
+}
+
+.tl-tiles {
+  position: absolute;
+  inset: 0;
+  display: flex;
+}
+
+.tl-tiles img {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.tl-label {
+  position: relative;
+  z-index: 1;
+  padding: 0 4px;
+  border-radius: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
+.tl-clip .tl-label {
+  background: rgba(22, 32, 47, 0.72);
+  color: #fff;
+}
+
+/* Edge handles: 12px wide hit areas (at most 40% of a narrow bar), with a visible grip. Every bar has them; they show on hover, on keyboard focus and when the bar is picked. */
+.tl-handle {
+  opacity: 0;
+  transition: opacity 0.12s;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: min(12px, 40%);
+  z-index: 4;
+  cursor: ew-resize;
+  touch-action: none;
+  background: var(--teal, #1f6b6b);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tl-handle::after {
+  content: '';
+  width: 2px;
+  height: 40%;
+  max-height: 16px;
+  border-radius: 1px;
+  background: #fff;
+}
+
+.tl-item:hover .tl-handle,
+.tl-item:focus-within .tl-handle,
+.tl-item.is-selected .tl-handle,
+.tl-item.is-dragging .tl-handle {
+  opacity: 1;
+}
+
+/* A bar that is not picked gets narrower handles, so pressing near an edge still mostly picks it. */
+.tl-item:not(.is-selected) .tl-handle {
+  width: min(8px, 25%);
+}
+
+.tl-handle.is-start {
+  left: -1px;
+  border-radius: 6px 0 0 6px;
+}
+
+.tl-handle.is-end {
+  right: -1px;
+  border-radius: 0 6px 6px 0;
+}
+
+.tl-playhead {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--plum, #7a3b69);
+  pointer-events: none;
+  z-index: 5;
+}
+
+.tl-guide {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  border-left: 1px dashed #e0a100;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.tl-marker {
+  position: absolute;
+  height: 52px;
+  width: 3px;
+  margin-left: -1px;
+  border-radius: 2px;
+  background: var(--plum, #7a3b69);
+  pointer-events: none;
+  z-index: 5;
+}
+
+.tl-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tl *,
+  .tl *::before,
+  .tl *::after {
+    transition: none !important;
+    animation: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Joint between two main clips: opens the transition picker. Sits on the cut, centred on the main track. */
+.tl-joint-slot {
+  position: absolute;
+  width: 0;
+  height: 0;
+  z-index: 4;
+}
+.tl-joint {
+  position: absolute;
+  left: -11px;
+  top: -11px;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--rule, #d8d8d8);
+  background: var(--paper, #fff);
+  color: var(--ink-soft, #555);
+  cursor: pointer;
+  opacity: 0.75;
+  touch-action: manipulation;
+}
+.tl-joint:hover,
+.tl-joint:focus-visible,
+.tl-joint.is-set {
+  opacity: 1;
+}
+.tl-joint.is-set {
+  background: var(--accent, #1f6b6b);
+  border-color: var(--accent, #1f6b6b);
+  color: #fff;
+}
+.tl-joint:focus-visible {
+  outline: 2px solid var(--accent, #1f6b6b);
+  outline-offset: 2px;
+}
+
+/* Waveform: drawn on a canvas on the bar. Sounds fill the bar; videos and clips get the lower part over their pictures. */
+.tl-wave {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  pointer-events: none;
+}
+.tl-wave.is-clip,
+.tl-wave.is-video {
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 0 0 5px 5px;
+}
+.tl-wave.is-sound {
+  top: 1px;
+}
+
+/* Keyframe diamonds on a bar. */
+.tl-key {
+  position: absolute;
+  bottom: 2px;
+  width: 10px;
+  height: 10px;
+  padding: 0;
+  box-sizing: border-box;
+  border: 1px solid #1a1a1a;
+  background: #ffd23f;
+  transform: rotate(45deg);
+  z-index: 3;
+  pointer-events: none;
+  touch-action: none;
+}
+button.tl-key {
+  pointer-events: auto;
+  cursor: ew-resize;
+}
+.tl-key.is-idle {
+  opacity: 0.8;
+}
+button.tl-key:hover,
+button.tl-key:focus-visible {
+  background: #fff;
+  outline: 2px solid var(--plum, #7a3b69);
+  outline-offset: 1px;
+}
+
+/* Lane names stick to the left edge of the scroller. */
+.tl-lane-label {
+  position: sticky;
+  left: 2px;
+  z-index: 3;
+  display: inline-block;
+  margin: 2px 0 0 2px;
+  padding: 0 5px;
+  border-radius: 4px;
+  background: rgba(22, 32, 47, 0.62);
+  color: #fff;
+  font-size: 0.62rem;
+  line-height: 14px;
+  pointer-events: none;
+  user-select: none;
+}

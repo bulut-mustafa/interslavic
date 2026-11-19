@@ -1,0 +1,39 @@
+/* The video editor's own layout rules. */
+
+/* The picture never takes more than about half the window's height, so the timeline stays in view while you work. */
+.editor .canvas-wrap .layer-canvas {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  min-height: 12rem;
+  max-height: 46vh;
+}
+
+.export-progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.export-progress .progress-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--rule);
+  overflow: hidden;
+}
+
+.export-progress .progress-bar span {
+  display: block;
+  height: 100%;
+  background: var(--teal);
+  transition: width 0.2s linear;
+}
+
+.export-progress .note {
+  margin: 0;
+}
+
+/* While saving, the editing surface is locked. */
+.editor [inert] {
+  opacity: 0.55;
+}

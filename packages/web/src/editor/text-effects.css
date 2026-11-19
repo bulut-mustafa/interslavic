@@ -1,0 +1,31 @@
+/* Text effects panel (see TextEffectsPanel.tsx). Rows reuse the shared .insp-row look. */
+.fxt-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(4.5rem, 1fr));
+  gap: var(--space-2);
+}
+
+.fxt-kind {
+  display: grid;
+  place-items: center;
+  min-height: 2.75rem;
+  padding: 2px;
+  border: 2px solid var(--border, rgba(0, 0, 0, 0.12));
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.fxt-kind[aria-pressed='true'] {
+  border-color: var(--accent, #2563eb);
+}
+
+.fxt-kind canvas {
+  width: 100%;
+  height: auto;
+  border-radius: 5px;
+}
+
+.fxt-none {
+  font-weight: 700;
+}

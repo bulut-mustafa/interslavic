@@ -1,0 +1,63 @@
+/* Transition picker (see TransitionPicker.tsx). Previews are two stacked boxes: .trp-a goes out, .trp-b comes in. */
+.trp { display: grid; gap: var(--space-2, 0.5rem); }
+.trp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: var(--space-1, 0.25rem); }
+.trp-opt {
+  display: grid; gap: 4px; justify-items: center; padding: 6px 4px;
+  border: 1px solid var(--rule, #d8d8d8); border-radius: 8px;
+  background: var(--paper, #fff); color: var(--ink, #16202f); font: inherit; font-size: 0.75rem; cursor: pointer;
+}
+.trp-opt:disabled { opacity: 0.45; cursor: not-allowed; }
+.trp-opt.is-on { border-color: var(--accent, #1f6b6b); box-shadow: inset 0 0 0 1px var(--accent, #1f6b6b); }
+.trp-opt:focus-visible { outline: 2px solid var(--accent, #1f6b6b); outline-offset: 2px; }
+
+.trp-pre { position: relative; display: block; width: 56px; height: 34px; overflow: hidden; border-radius: 4px; background: #222; }
+.trp-a, .trp-b { position: absolute; inset: 0; }
+.trp-a { background: #c9a227; }
+.trp-b { background: #1f6b6b; }
+.trp-none .trp-b { display: none; }
+
+@keyframes trp-fade { 0%, 15% { opacity: 0; } 85%, 100% { opacity: 1; } }
+@keyframes trp-slide-l { 0%, 15% { transform: translateX(100%); } 85%, 100% { transform: none; } }
+@keyframes trp-slide-r { 0%, 15% { transform: translateX(-100%); } 85%, 100% { transform: none; } }
+@keyframes trp-slide-u { 0%, 15% { transform: translateY(100%); } 85%, 100% { transform: none; } }
+@keyframes trp-slide-d { 0%, 15% { transform: translateY(-100%); } 85%, 100% { transform: none; } }
+@keyframes trp-out-l { 0%, 15% { transform: none; } 85%, 100% { transform: translateX(-100%); } }
+@keyframes trp-out-r { 0%, 15% { transform: none; } 85%, 100% { transform: translateX(100%); } }
+@keyframes trp-wipe-l { 0%, 15% { clip-path: inset(0 0 0 100%); } 85%, 100% { clip-path: inset(0); } }
+@keyframes trp-wipe-r { 0%, 15% { clip-path: inset(0 100% 0 0); } 85%, 100% { clip-path: inset(0); } }
+@keyframes trp-zoom-out { 0%, 15% { transform: none; } 85%, 100% { transform: scale(1.5); } }
+@keyframes trp-dip-a { 0%, 15% { opacity: 1; } 45%, 100% { opacity: 0; } }
+@keyframes trp-dip-b { 0%, 55% { opacity: 0; } 85%, 100% { opacity: 1; } }
+
+.trp-pre .trp-a, .trp-pre .trp-b { animation-duration: 1.6s; animation-iteration-count: infinite; animation-timing-function: ease-in-out; animation-direction: alternate; }
+.trp-fade .trp-b, .trp-zoom .trp-b { animation-name: trp-fade; }
+.trp-zoom .trp-a { animation-name: trp-zoom-out; }
+.trp-dip { background: #000; }
+.trp-dip .trp-a { animation-name: trp-dip-a; }
+.trp-dip .trp-b { animation-name: trp-dip-b; }
+.trp-slide-left .trp-b { animation-name: trp-slide-l; }
+.trp-slide-right .trp-b { animation-name: trp-slide-r; }
+.trp-slide-up .trp-b { animation-name: trp-slide-u; }
+.trp-slide-down .trp-b { animation-name: trp-slide-d; }
+.trp-push-left .trp-a { animation-name: trp-out-l; }
+.trp-push-left .trp-b { animation-name: trp-slide-l; }
+.trp-push-right .trp-a { animation-name: trp-out-r; }
+.trp-push-right .trp-b { animation-name: trp-slide-r; }
+.trp-wipe-left .trp-b { animation-name: trp-wipe-l; }
+.trp-wipe-right .trp-b { animation-name: trp-wipe-r; }
+
+/* Without motion the preview shows the half-way picture. */
+@media (prefers-reduced-motion: reduce) {
+  .trp-pre .trp-a, .trp-pre .trp-b { animation: none; }
+  .trp-fade .trp-b, .trp-zoom .trp-b { opacity: 0.5; }
+  .trp-wipe-left .trp-b { clip-path: inset(0 0 0 50%); }
+  .trp-wipe-right .trp-b { clip-path: inset(0 50% 0 0); }
+  .trp-slide-left .trp-b, .trp-push-left .trp-b { transform: translateX(50%); }
+  .trp-slide-right .trp-b, .trp-push-right .trp-b { transform: translateX(-50%); }
+  .trp-slide-up .trp-b { transform: translateY(50%); }
+  .trp-slide-down .trp-b { transform: translateY(-50%); }
+  .trp-dip .trp-a { opacity: 0; }
+}
+
+.trp-dur { display: grid; grid-template-columns: auto 1fr auto; gap: var(--space-2, 0.5rem); align-items: center; font-size: 0.8125rem; }
+.trp-note { margin: 0; font-size: 0.8125rem; color: var(--ink-soft, #566); }

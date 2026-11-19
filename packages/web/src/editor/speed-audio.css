@@ -1,0 +1,63 @@
+/* Speed and sound section of the right-hand panel (see SpeedAudioPanel.tsx). */
+
+.speed-audio .insp-row {
+  grid-template-columns: 5rem minmax(0, 1fr) 4.2rem;
+}
+
+.sa-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.sa-preset {
+  min-height: 1.9rem;
+  min-width: 2.6rem;
+  padding: 0 var(--space-2);
+  font: inherit;
+  font-size: var(--text-sm);
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.sa-preset:hover {
+  background: var(--paper-sunk, rgba(0, 0, 0, 0.04));
+}
+
+.sa-preset[aria-pressed='true'] {
+  color: #fff;
+  background: var(--teal, #1f6b6b);
+  border-color: var(--teal, #1f6b6b);
+}
+
+.sa-preset:focus-visible,
+.sa-extract:focus-visible {
+  outline: 2px solid var(--teal, #1f6b6b);
+  outline-offset: 2px;
+}
+
+.sa-extract {
+  align-self: flex-start;
+  min-height: 2rem;
+  padding: 0 var(--space-3);
+  font: inherit;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.sa-extract:hover {
+  background: var(--paper-sunk, rgba(0, 0, 0, 0.04));
+}
+
+@media (pointer: coarse) {
+  .sa-preset,
+  .sa-extract {
+    min-height: 2.5rem;
+  }
+}

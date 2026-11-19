@@ -1,0 +1,116 @@
+/* On-canvas transform box for pictures and videos (see TransformBox.tsx). */
+
+.tbox-root {
+  position: absolute;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.tbox {
+  position: absolute;
+  box-sizing: border-box;
+  border: 1.5px solid var(--teal, #1f6b6b);
+  outline: none;
+  pointer-events: none;
+  transform-origin: 50% 50%;
+}
+
+.tbox:focus-visible {
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--teal, #1f6b6b);
+}
+
+.tbox-body {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
+  cursor: move;
+  touch-action: none;
+}
+
+/* The hit area is 24px square; the visible dot is drawn smaller inside it. */
+.tbox-h {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.tbox-h::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  border: 1.5px solid var(--teal, #1f6b6b);
+  border-radius: 2px;
+  box-sizing: border-box;
+}
+
+.tbox-h.is-rotate {
+  cursor: grab;
+}
+
+.tbox-h.is-rotate::after {
+  border-radius: 50%;
+  width: 12px;
+  height: 12px;
+}
+
+.tbox-stem {
+  position: absolute;
+  left: 50%;
+  width: 0;
+  border-left: 1.5px solid var(--teal, #1f6b6b);
+  pointer-events: none;
+}
+
+@media (pointer: coarse) {
+  .tbox-h {
+    width: 36px;
+    height: 36px;
+  }
+  .tbox-h::after {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+/* The media inspector's own small pieces; the rest comes from the shared .insp-* rules. */
+.insp-pair {
+  display: grid;
+  grid-template-columns: 6.5rem repeat(2, minmax(0, 1fr)) auto;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.insp-pair input[type='number'] {
+  width: 100%;
+  min-width: 0;
+  padding: 0.25rem 0.4rem;
+}
+
+.insp-pair > span:first-child {
+  white-space: nowrap;
+}
+
+.insp-select {
+  grid-column: 2 / 4;
+  justify-self: start;
+}
+
+/* A number field with its caption above it (the unlabeled pairs: size, position, time). */
+.insp-cap {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.insp-cap small {
+  font-size: 0.7rem;
+  color: var(--ink-soft, inherit);
+  white-space: nowrap;
+}
