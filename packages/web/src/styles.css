@@ -4004,6 +4004,18 @@ textarea::placeholder {
   box-shadow: 0 -6px 18px rgba(22, 32, 47, 0.06);
 }
 
+/* While cropping, the crop controls hang under the picture: a strip stuck to the bottom of the screen would cover them. */
+.photo-workspace:has(.crop-bar) .page-strip {
+  position: static;
+}
+
+/* On a phone the strip would cover the lower part of the picture; let it sit below it instead. */
+@media (max-width: 640px) {
+  .page-strip {
+    position: static;
+  }
+}
+
 .page-strip .replace-banner {
   flex: 1 1 100%;
 }

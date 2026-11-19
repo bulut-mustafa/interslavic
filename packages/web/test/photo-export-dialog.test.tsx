@@ -4,7 +4,10 @@ import { cleanup, fireEvent, render } from '@testing-library/react';
 import { ExportDialog, type ExportDialogProps } from '../src/photo/ExportDialog.tsx';
 import { screen } from './live-screen.ts';
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  localStorage.clear();
+});
 const pages = [
   { id: 'a', name: 'one.png', width: 1000, height: 500 },
   { id: 'b', name: 'two.png', width: 800, height: 800 },
@@ -18,6 +21,15 @@ const setup = (over: Partial<ExportDialogProps> = {}) => {
 const radio = (name: string) => screen.getByRole('radio', { name });
 
 describe('ExportDialog', () => {
+  it('remembers the chosen format for the next time, and says the size is an upper guess', () => {
+    setup();
+    fireEvent.click(radio('JPG'));
+    cleanup();
+    setup();
+    expect(radio('JPG').getAttribute('aria-checked') ?? String((radio('JPG') as HTMLInputElement).checked)).toBe('true');
+    expect(document.querySelector('.export-summary')!.textContent).toMatch(/at most about/);
+  });
+
   it('is an accessible dialog: labelled, focus goes in, Escape closes', () => {
     const { onClose } = setup();
     const d = screen.getByRole('dialog');

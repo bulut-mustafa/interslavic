@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as
 import { track } from '../analytics.ts';
 import { Elapsed } from '../transcribe/Elapsed.tsx';
 import {
-  CUTOUT_MODELS, applyMatte, featherMatte, fitInside, levelsMatte, paintStroke, readableError, resizeMatte,
+  CUTOUT_MODELS, applyMatte, coverage, featherMatte, fitInside, levelsMatte, paintStroke, readableError, resizeMatte,
   type Box, type CutoutModel, type Matte, type Rgba, type Stroke,
 } from './cutout.ts';
 import {
@@ -322,6 +322,12 @@ export default function CutoutDialog({ source, onKeep, onReplace, onClose, deps 
                 Undo brush stroke
               </button>
             </div>
+            {result && coverage(result.matte) < 0.01 && strokeCount === 0 && (
+              <p className="cutout-error" role="status">
+                Almost nothing was found to keep.{' '}
+                {modelId === 'portrait' ? 'The quick model is made for people; choose the better model above and try again, or paint the part to keep with the brush.' : 'Paint the part to keep with the brush.'}
+              </p>
+            )}
             {error && (
               <p className="cutout-error" role="alert">
                 {error}

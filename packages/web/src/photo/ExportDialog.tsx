@@ -21,9 +21,28 @@ export interface ExportDialogProps {
 const FORMATS: ExportFormat[] = ['png', 'jpeg', 'webp', 'pdf'];
 const PRESETS = [0.5, 1, 2];
 
+const FORMAT_KEY = 'interslavic-photo-export-format';
+const rememberedFormat = (): ExportFormat => {
+  try {
+    const f = localStorage.getItem(FORMAT_KEY) as ExportFormat | null;
+    if (f && FORMATS.includes(f)) return f;
+  } catch {
+    /* storage blocked */
+  }
+  return 'png';
+};
+
 /** The window that asks how to hand the finished picture over. It makes nothing itself: `onExport` gets the choices. */
 export function ExportDialog({ pages, currentId, onExport, onClose, maxPixels }: ExportDialogProps) {
-  const [format, setFormat] = useState<ExportFormat>('png');
+  const [format, setFormatState] = useState<ExportFormat>(rememberedFormat);
+  const setFormat = (f: ExportFormat) => {
+    setFormatState(f);
+    try {
+      localStorage.setItem(FORMAT_KEY, f);
+    } catch {
+      /* not remembered where storage is blocked */
+    }
+  };
   const [quality, setQuality] = useState(0.92);
   const [scale, setScale] = useState(1);
   const [mode, setMode] = useState<'scale' | 'pixels'>('scale');
@@ -147,7 +166,7 @@ export function ExportDialog({ pages, currentId, onExport, onClose, maxPixels }:
         )}
 
         <p className="export-summary" aria-live="polite">
-          {shown.fit.width} × {shown.fit.height} px · {EXTENSION[format].toUpperCase()}, about {formatBytes(total)}
+          {shown.fit.width} × {shown.fit.height} px · {EXTENSION[format].toUpperCase()}, at most about {formatBytes(total)}
           {scope === 'all' && ` for all ${pages.length}`}
           {capped && <span className="export-warning" role="alert"> This browser cannot make a picture that large, so it is made as large as it can: the size shown.</span>}
         </p>

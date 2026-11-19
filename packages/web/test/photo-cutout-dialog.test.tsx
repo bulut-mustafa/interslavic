@@ -45,6 +45,21 @@ describe('the cut-out dialog', () => {
     expect(run).not.toHaveBeenCalled();
   });
 
+  it('says so when almost nothing was found, and points to the better model and the brush', async () => {
+    const empty = async () => ({ ...result(), matte: newMatte(8, 4) });
+    render(<CutoutDialog source={new Blob(['x'])} onKeep={vi.fn()} onReplace={vi.fn()} onClose={vi.fn()} deps={deps({ run: empty })} />);
+    fireEvent.click(screen.getByText(/Download and remove/));
+    await waitFor(() => expect(screen.getByText(/Almost nothing was found/)).toBeTruthy());
+    expect(screen.getByText(/better model/)).toBeTruthy();
+  });
+
+  it('does not say it when something was found', async () => {
+    render(<CutoutDialog source={new Blob(['x'])} onKeep={vi.fn()} onReplace={vi.fn()} onClose={vi.fn()} deps={deps()} />);
+    fireEvent.click(screen.getByText(/Download and remove/));
+    await waitFor(() => expect(screen.getByText('Keep as picture layer')).toBeTruthy());
+    expect(screen.queryByText(/Almost nothing was found/)).toBeNull();
+  });
+
   it('names the second model with its download size', () => {
     render(<CutoutDialog source={new Blob(['x'])} onKeep={vi.fn()} onReplace={vi.fn()} onClose={vi.fn()} deps={deps()} />);
     fireEvent.click(screen.getByLabelText(/Better - any subject/));
