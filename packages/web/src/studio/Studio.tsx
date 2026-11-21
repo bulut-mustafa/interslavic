@@ -8,6 +8,7 @@ import { LibraryProvider, useLibrary } from './library.tsx';
 import { GROUPS, TOOLS, toolAt, toolPath, type Tool } from './tools.tsx';
 import { PerfOverlay, wantsPerf } from './PerfOverlay.tsx';
 import { UploadsSheet } from './UploadsSheet.tsx';
+import './mobile-studio.css';
 
 /** The tools that work on pictures and clips, and so have the Uploads sheet. */
 const WITH_UPLOADS = new Set(['photo', 'video']);
@@ -148,10 +149,19 @@ export default function Studio({ path }: { path: string }) {
         </div>
       </aside>
 
-      {usesUploads && sheet && <UploadsSheet onClose={() => setSheet(false)} />}
+      {usesUploads && sheet && (
+        <>
+          {/* Phones only (hidden by CSS elsewhere): a tap outside the bottom sheet closes it. */}
+          <button type="button" className="uploads-backdrop" tabIndex={-1} aria-hidden="true" onClick={() => setSheet(false)} />
+          <UploadsSheet onClose={() => setSheet(false)} />
+        </>
+      )}
 
       <div className="studio-main">
         <header className="studio-bar">
+          <Link href="/" className="studio-bar-back">
+            ← Translator
+          </Link>
           <p className="studio-crumb">
             <Link href="/studio">STUDIO</Link>
             {tool && (

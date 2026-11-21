@@ -62,6 +62,14 @@ export default function Player() {
   const [analysis, setAnalysis] = useState<TextAnalysis | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [word, setWord] = useState<AnalyzedWord | null>(null);
+  const side = useRef<HTMLElement>(null);
+  // Where the words panel sits under the video (a phone), a tapped word's card would land off screen: bring it into view.
+  useEffect(() => {
+    if (!word || !side.current || typeof side.current.scrollIntoView !== 'function') return;
+    if (typeof window.matchMedia !== 'function' || !window.matchMedia('(max-width: 64rem)').matches) return;
+    const r = side.current.getBoundingClientRect();
+    if (r.top > window.innerHeight * 0.6) side.current.scrollIntoView({ block: 'start' });
+  }, [word]);
   const [notes, setNotes] = useState<Note[]>(loadNotes);
   const cache = useRef(new Map<string, TextAnalysis>());
   const loopRef = useRef<number | null>(null);
@@ -323,7 +331,7 @@ export default function Player() {
           )}
         </div>
 
-        <aside className="editor-side" aria-label="Words and saved sentences">
+        <aside ref={side} className="editor-side" aria-label="Words and saved sentences">
           {word ? (
             <WordCard word={word} />
           ) : (

@@ -50,6 +50,9 @@ export function UploadsSheet({ onClose }: { onClose: () => void }) {
       id="uploads-sheet"
       className={`uploads-sheet${over ? ' is-over' : ''}`}
       aria-label="Uploads"
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') onClose();
+      }}
       onDragOver={(e) => {
         e.preventDefault();
         setOver(true);

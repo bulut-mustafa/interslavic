@@ -47,6 +47,7 @@ import { Timeline } from './Timeline.tsx';
 import { topTrack } from './timeline-math.ts';
 import { createTransport } from './transport.ts';
 import './editor.css';
+import './mobile-video.css';
 import { MIN_CLIP, length as clipLength, locate, removeClip, speedOf, splitAt, startOf, total, trim, type Clip } from './timeline.ts';
 
 /** The longest side of the working frame: bigger videos are shown, and exported, at this size. */
@@ -1029,10 +1030,19 @@ export default function VideoEditor({ store = defaultVideoStore, makeTranscriber
               <button type="button" className="icon-button is-play" aria-label={playing ? 'Pause' : 'Play'} title={playing ? 'Pause' : 'Play'} onClick={() => void togglePlay()} disabled={busyOut}>
                 <Icon name={playing ? 'pause' : 'play'} />
               </button>
+              <button type="button" className="icon-button transport-step" aria-label="Back one frame" title="Back one frame (Left arrow)" onClick={() => seek(Math.max(0, time - 1 / 30))} disabled={busyOut || !ready}>
+                ‹
+              </button>
               <span className="transport-time">
                 {clock(time)} / {clock(length)}
               </span>
+              <button type="button" className="icon-button transport-step" aria-label="Forward one frame" title="Forward one frame (Right arrow)" onClick={() => seek(time + 1 / 30)} disabled={busyOut || !ready}>
+                ›
+              </button>
               <span className="editor-gap" />
+              <button type="button" className="icon-button" aria-label="Duplicate" title="Duplicate the selected layer (Ctrl+D)" disabled={!selLayer || busyOut} onClick={duplicateSelected}>
+                <Icon name="copy" />
+              </button>
               <button type="button" className="icon-button" aria-label="Split at playhead" title="Split at playhead (S)" onClick={split} disabled={busyOut}>
                 <Icon name="split" />
               </button>

@@ -189,8 +189,10 @@
   cursor: pointer;
 }
 
-.ap-cell:hover {
-  border-color: var(--teal);
+@media (hover: hover) {
+  .ap-cell:hover {
+    border-color: var(--teal);
+  }
 }
 
 .ap-cell:focus-visible {

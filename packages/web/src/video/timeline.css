@@ -249,7 +249,11 @@
   background: #fff;
 }
 
-.tl-item:hover .tl-handle,
+@media (hover: hover) {
+  .tl-item:hover .tl-handle {
+    opacity: 1;
+  }
+}
 .tl-item:focus-within .tl-handle,
 .tl-item.is-selected .tl-handle,
 .tl-item.is-dragging .tl-handle {
@@ -346,10 +350,14 @@
   opacity: 0.75;
   touch-action: manipulation;
 }
-.tl-joint:hover,
 .tl-joint:focus-visible,
 .tl-joint.is-set {
   opacity: 1;
+}
+@media (hover: hover) {
+  .tl-joint:hover {
+    opacity: 1;
+  }
 }
 .tl-joint.is-set {
   background: var(--accent, #1f6b6b);
@@ -397,10 +405,16 @@ button.tl-key {
   pointer-events: auto;
   cursor: ew-resize;
 }
+@media (hover: hover) {
+  button.tl-key:hover {
+    background: #fff;
+    outline: 2px solid var(--plum, #7a3b69);
+    outline-offset: 1px;
+  }
+}
 .tl-key.is-idle {
   opacity: 0.8;
 }
-button.tl-key:hover,
 button.tl-key:focus-visible {
   background: #fff;
   outline: 2px solid var(--plum, #7a3b69);

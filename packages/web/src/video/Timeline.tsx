@@ -21,9 +21,11 @@ export interface TimelineExtras {
   fileOf?(srcId: string): File | null;
 }
 
-const RULER_H = 26;
-const ROW_H = 36;
-const MAIN_H = 52;
+/** On a touchscreen the rows are taller so a finger can pick one (44 px is the touch-target guideline). Read once; a desktop window stays as it was. */
+const coarse = typeof window !== 'undefined' && typeof window.matchMedia === 'function' && window.matchMedia('(any-pointer: coarse)').matches;
+const RULER_H = coarse ? 40 : 26;
+const ROW_H = coarse ? 44 : 36;
+const MAIN_H = coarse ? 56 : 52;
 const SNAP_PX = 8;
 /** A press must travel this far before it counts as a drag, so a click never edits. */
 const DRAG_PX = 3;
@@ -43,6 +45,8 @@ type Edge = 'start' | 'end';
 type Target = { kind: 'clip' | 'layer'; id: string };
 type Drag =
   | { mode: 'scrub' }
+  /** A finger on an empty lane: a tap seeks, a drag is left to the browser to scroll with. */
+  | { mode: 'tap' }
   | { mode: 'key'; layerId: string; t0: number; x0: number; origin: VideoProject; moved: boolean; last: ProjectChange | null }
   | { mode: 'move' | Edge; target: Target; x0: number; y0: number; origin: VideoProject; moved: boolean; last: ProjectChange | null };
 
@@ -227,6 +231,16 @@ export function Timeline(props: TimelineProps & TimelineExtras) {
     });
   };
 
+  /** While a finger holds a drag near the left or right edge of the visible timeline, the timeline scrolls that way (a finger cannot also scroll it). */
+  const edgeScroll = (clientX: number) => {
+    const el = scroller.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const zone = 40;
+    if (clientX > r.right - zone) el.scrollLeft += Math.min(16, (clientX - (r.right - zone)) / 2 + 2);
+    else if (clientX < r.left + zone) el.scrollLeft -= Math.min(16, (r.left + zone - clientX) / 2 + 2);
+  };
+
   const capture = (el: Element, id: number) => {
     // Without capture the drag would stop when the pointer leaves the bar. It throws NotFoundError for a pointer that is no longer active.
     try {
@@ -245,7 +259,7 @@ export function Timeline(props: TimelineProps & TimelineExtras) {
     setGuide(null);
     setMarker(null);
     setActive(null);
-    if (!d || d.mode === 'scrub' || !d.moved) return;
+    if (!d || d.mode === 'scrub' || d.mode === 'tap' || !d.moved) return;
     // A cancelled drag puts the edit back as it was, as one finished change.
     const out = cancel ? { clips: d.origin.clips, layers: d.origin.layers } : d.last;
     if (out) latest.current.onChange(out, 'end');
@@ -319,6 +333,11 @@ export function Timeline(props: TimelineProps & TimelineExtras) {
             }
             const y = e.clientY - rect().top;
             if (y > RULER_H && latest.current.selection) props.onSelect(null);
+            if (e.pointerType === 'touch' && y > RULER_H) {
+              // Empty lane under a finger: the lanes allow pan-x pan-y here, so a drag scrolls the timeline or the page. Only a tap seeks (on pointerup).
+              drag.current = { mode: 'tap' };
+              return;
+            }
             drag.current = { mode: 'scrub' };
             props.onScrubStart();
             capture(e.currentTarget, e.pointerId);
@@ -327,6 +346,8 @@ export function Timeline(props: TimelineProps & TimelineExtras) {
           onPointerMove={(e) => {
             const d = drag.current;
             if (!d) return;
+            if (d.mode === 'tap') return;
+            edgeScroll(e.clientX);
             if (d.mode === 'scrub') return seekSoon(e.clientX);
             const r = rect();
             const px = e.clientX - r.left;
@@ -351,6 +372,11 @@ export function Timeline(props: TimelineProps & TimelineExtras) {
           }}
           onPointerUp={(e) => {
             const d = drag.current;
+            if (d?.mode === 'tap') {
+              finish(false);
+              props.onSeek(timeAt(e.clientX));
+              return;
+            }
             if (d?.mode === 'scrub') {
               cancelAnimationFrame(frame.current);
               frame.current = 0;

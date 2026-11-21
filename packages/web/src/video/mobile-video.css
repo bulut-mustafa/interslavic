@@ -1,0 +1,123 @@
+/* Phone rules for the video editor (docs/mobile.md). Everything touch-specific is under any-pointer: coarse, so a desktop window is unchanged. */
+
+@media (any-pointer: coarse) {
+  /* Touch design for the timeline: the lane background allows pan-x pan-y, so a finger on an empty lane scrolls the timeline sideways or the page vertically (a tap seeks). Bars, handles, keyframes, the joint and the ruler own every gesture (touch-action: none), so dragging them is the app's. The ruler is the scrub strip. */
+  .tl .timeline-lanes {
+    touch-action: pan-x pan-y;
+  }
+  .tl .tl-ruler,
+  .tl .tl-item,
+  .tl .tl-hit,
+  .tl .tl-handle,
+  .tl button.tl-key {
+    touch-action: none;
+  }
+  .tl .tl-joint {
+    touch-action: manipulation;
+  }
+  .tl .tl-scroll {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Hit areas of 44 px without changing how things look: the extra reach is a transparent pseudo-element that belongs to the control. */
+  .tl .tl-handle::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    bottom: -6px;
+    left: -16px;
+    right: -16px;
+  }
+  .tl .tl-handle.is-start::before {
+    left: -24px;
+    right: -8px;
+  }
+  .tl .tl-handle.is-end::before {
+    left: -8px;
+    right: -24px;
+  }
+  .tl button.tl-key::before,
+  .tl .tl-joint::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 44px;
+    height: 44px;
+    transform: translate(-50%, -50%);
+  }
+  .tl .tl-btn {
+    min-width: 44px;
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+  .tl .tl-zoom {
+    min-height: 44px;
+    touch-action: pan-y;
+  }
+  .tl .tl-ruler {
+    cursor: pointer;
+  }
+
+  /* The transform box on the picture: bigger handles, no browser gesture takes the drag. */
+  .tbox-h {
+    width: 44px;
+    height: 44px;
+  }
+  .tbox-h,
+  .tbox-body {
+    touch-action: none;
+  }
+
+  /* Controls in the panels. */
+  .editor .transport .icon-button,
+  .editor .editor-bar .icon-button,
+  .editor-side .icon-button,
+  .editor-side .text-button,
+  .editor-side .sa-preset,
+  .editor-side .sa-extract,
+  .editor-side .kf-btn {
+    min-width: 44px;
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+  .editor-side input[type='number'],
+  .editor-side input[type='text'],
+  .editor-side select,
+  .editor-side textarea,
+  .editor .caption-ask select,
+  .editor .caption-ask input {
+    font-size: 16px;
+    min-height: 44px;
+  }
+  .editor-side input[type='range'] {
+    min-height: 44px;
+    touch-action: pan-y;
+  }
+  .editor-side input[type='file']::file-selector-button,
+  .editor-bar input[type='file']::file-selector-button {
+    font-size: 16px;
+    min-height: 44px;
+  }
+}
+
+/* Phones and narrow windows: the preview comes first and stays visible, the timeline second, panels after; the play, step, split, duplicate and delete buttons stay in reach at the bottom of the screen. */
+@media (max-width: 40rem) {
+  .editor .canvas-wrap .layer-canvas {
+    max-height: 38vh;
+    max-height: 38svh;
+  }
+  .editor .transport {
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+    padding: var(--space-2, 0.5rem);
+    padding-bottom: calc(var(--space-2, 0.5rem) + env(safe-area-inset-bottom, 0px));
+    background: var(--paper-raised, #fff);
+    border-top: 1px solid var(--rule, #d8d8d8);
+    gap: var(--space-1, 0.25rem);
+  }
+  .editor .editor-side {
+    padding-bottom: 4rem;
+  }
+}

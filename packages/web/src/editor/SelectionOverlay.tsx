@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useState, type ReactNode, type RefObject } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
 import { boundsOf, type TextLayer } from './layers.ts';
 import type { SceneHandle } from './LayerCanvas.tsx';
 import { FONTS } from './text-style.ts';
@@ -33,6 +33,16 @@ export function SelectionOverlay(props: {
   const { scene, wrap, active } = props;
   const [anchor, setAnchor] = useState<{ left: number; top: number; width: number; height: number; k: number } | null>(null);
   const layer = active[0] ?? null;
+  const bar = useRef<HTMLDivElement>(null);
+  // Where the toolbar's left edge goes so it stays inside the picture's frame, whatever the selection's position (a phone's frame is narrow).
+  const [shift, setShift] = useState<number | null>(null);
+  useLayoutEffect(() => {
+    const b = bar.current;
+    const w = wrap.current;
+    if (!b || !w || !anchor) return;
+    const room = w.clientWidth - b.offsetWidth;
+    setShift(room > 0 ? Math.max(0, Math.min(anchor.left, room)) : null);
+  }, [anchor, wrap, props.typing, props.toolbar]);
 
   const place = useCallback(() => {
     const c = scene.current?.canvas();
@@ -109,7 +119,7 @@ export function SelectionOverlay(props: {
   }
 
   return (
-    <div className="canvas-toolbar" role="toolbar" aria-label="Selected text" style={{ left: Math.max(0, anchor.left), top: anchor.top > 56 ? anchor.top - 50 : anchor.top + anchor.height + 12 }}>
+    <div ref={bar} className="canvas-toolbar" role="toolbar" aria-label="Selected text" style={{ left: shift ?? Math.max(0, anchor.left), top: anchor.top > 56 ? anchor.top - 50 : anchor.top + anchor.height + 12 }}>
       {props.toolbar}
     </div>
   );

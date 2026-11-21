@@ -1,0 +1,374 @@
+/*
+ * The photo editor on a phone (rules 3, 6, 8, 10, 11 of docs/mobile.md). Loaded after styles.css and written
+ * with an extra class or two so it wins; everything that changes sizes sits under any-pointer: coarse or a
+ * width query, so a mouse on a desktop sees what it always saw.
+ */
+
+/* ---- zoom controls and the scroller around the picture ---- */
+
+.photo-workspace .zoom-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.photo-workspace .zoom-fit {
+  min-width: 3.2rem;
+  padding: 0.25rem 0.4rem;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink-soft);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.photo-workspace .zoom-fit:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.stage-main > .canvas-scroll {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Zoomed in, the picture is wider than the screen: this box scrolls, and its padding is bare page the finger can pan with. */
+.photo-workspace .canvas-scroll.is-zoomed {
+  overflow: auto;
+  max-height: 75vh;
+  max-height: 75svh;
+  padding: 28px;
+  overscroll-behavior: contain;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+}
+
+.photo-workspace .canvas-scroll.is-zoomed .canvas-wrap {
+  width: calc(100% * var(--pz, 1));
+  max-width: none;
+  margin: 0;
+}
+
+.photo-workspace .canvas-scroll.is-zoomed .canvas-wrap .layer-canvas {
+  width: 100%;
+  max-width: none;
+  max-height: none;
+}
+
+/* ---- the touch version of the keyboard: select all, deselect, duplicate, delete, nudge ---- */
+
+.touch-actions {
+  display: none;
+  gap: var(--space-2);
+  overflow-x: auto;
+  padding: var(--space-2);
+  background: var(--paper-raised);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  scrollbar-width: none;
+}
+
+.touch-actions button {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 0.8rem;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--text-sm);
+  touch-action: manipulation;
+}
+
+.touch-actions button:active:not(:disabled) {
+  background: rgba(31, 107, 107, 0.16);
+}
+
+.touch-actions button:disabled {
+  opacity: 0.4;
+}
+
+.touch-actions button:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 1px;
+}
+
+@media (any-pointer: coarse), (max-width: 48rem) {
+  .touch-actions {
+    display: flex;
+    position: sticky;
+    bottom: 0;
+    z-index: 5;
+    padding-bottom: calc(var(--space-2) + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* ---- touch sizing ---- */
+
+@media (any-pointer: coarse) {
+  /* Handles: the visible square stays small, the area that takes a finger is 44px. */
+  .photo-workspace .tbox-h,
+  .photo-workspace .crop-h {
+    width: 44px;
+    height: 44px;
+  }
+
+  .photo-workspace .strip-button {
+    width: 44px;
+    height: 44px;
+  }
+
+  .photo-workspace .canvas-toolbar button {
+    min-height: 44px;
+    min-width: 44px;
+    justify-content: center;
+  }
+
+  .photo-workspace .editor-bar .icon-button,
+  .photo-workspace .editor-bar .text-button,
+  .photo-workspace .zoom-fit {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .photo-workspace .insp-tool,
+  .photo-workspace .insp-stepper button,
+  .photo-workspace .adj-look,
+  .photo-workspace .page-remove {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .photo-workspace .insp-stepper input {
+    min-height: 44px;
+  }
+
+  .photo-workspace .crop-bar button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .photo-workspace .crop-chip {
+    padding: 0 0.8rem;
+  }
+
+  .photo-workspace .page-add,
+  .photo-workspace .page-tile {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* Sliders: a thumb-sized target to grab, and the rest of the row left to the page for scrolling. */
+  .photo-workspace .inspector input[type='range'],
+  .photo-workspace .crop-bar input[type='range'] {
+    min-height: 44px;
+    touch-action: pan-y;
+  }
+
+  .photo-workspace .inspector select,
+  .photo-workspace .inspector input[type='color'] {
+    min-height: 44px;
+  }
+
+  .export-dialog button,
+  .export-dialog input[type='number'],
+  .cutout button,
+  .cutout .text-button {
+    min-height: 44px;
+  }
+
+  .export-dialog input[type='range'],
+  .cutout input[type='range'] {
+    min-height: 44px;
+    touch-action: pan-y;
+  }
+
+  .export-dialog input[type='checkbox'],
+  .cutout input[type='radio'],
+  .cutout input[type='checkbox'] {
+    width: 1.4rem;
+    height: 1.4rem;
+  }
+
+  .export-check,
+  .cutout-models label,
+  .cutout-brush label,
+  .cutout-tools label {
+    min-height: 44px;
+  }
+}
+
+/* Text fields are 16px or larger, or iOS Safari zooms the page when they take focus. */
+@media (any-pointer: coarse) {
+  .photo-workspace .inspector input:not([type='range'], [type='checkbox'], [type='radio'], [type='color']),
+  .photo-workspace .inspector select,
+  .photo-workspace .inspector textarea,
+  .photo-workspace .canvas-typing,
+  .photo-workspace .page-strip input,
+  .export-dialog input[type='number'],
+  .export-dialog select,
+  .cutout input[type='number'] {
+    font-size: max(16px, 1em);
+  }
+}
+
+/* ---- the page strip: one row that scrolls sideways ---- */
+
+.photo-workspace .page-list {
+  flex-wrap: nowrap;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+
+.photo-workspace .page-strip {
+  padding-bottom: calc(var(--space-2) + env(safe-area-inset-bottom, 0px));
+}
+
+/* ---- phones ---- */
+
+@media (max-width: 48rem) {
+  /* The picture first, then its tools: the tool strip becomes one row that scrolls sideways. */
+  .photo-workspace .tool-strip {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .photo-workspace .strip-button {
+    flex: none;
+  }
+
+  .photo-workspace .editor-bar {
+    flex-wrap: wrap;
+  }
+
+  .photo-workspace .editor-file {
+    max-width: 100%;
+    flex: 1 1 100%;
+  }
+
+  /* Add and Layers open as a sheet at the bottom of the screen, above the notch, scrolling inside themselves. */
+  .photo-workspace .tool-flyout {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: auto;
+    bottom: 0;
+    z-index: 30;
+    width: auto;
+    max-height: 60vh;
+    max-height: 60svh;
+    padding-bottom: calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
+    border-radius: 16px 16px 0 0;
+    overscroll-behavior: contain;
+  }
+
+  /* Crop options: a sheet at the bottom of the screen with Apply and Cancel always at its foot. */
+  .photo-workspace .crop-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: auto;
+    bottom: 0;
+    z-index: 30;
+    margin: 0;
+    min-width: 0;
+    max-height: 45vh;
+    max-height: 45svh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+    padding-bottom: 0;
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -8px 24px rgba(22, 32, 47, 0.2);
+  }
+
+  .photo-workspace .crop-bar > .crop-row:last-child {
+    position: sticky;
+    bottom: 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    justify-content: flex-end;
+    padding: var(--space-2) 0 calc(var(--space-2) + env(safe-area-inset-bottom, 0px));
+    background: var(--paper-raised);
+    border-top: 1px solid var(--rule);
+  }
+
+  /* Leave room under the picture so the sheet never lies over the crop box. */
+  .photo-workspace:has(.crop-bar) {
+    padding-bottom: 45vh;
+    padding-bottom: 45svh;
+  }
+
+  .photo-workspace .canvas-scroll {
+    padding-inline: 12px;
+  }
+
+  .photo-workspace .canvas-scroll.is-zoomed {
+    padding: 28px;
+  }
+
+  .photo-workspace .canvas-toolbar {
+    max-width: calc(100% - 8px);
+    overflow-x: auto;
+  }
+
+  .photo-workspace .tool-flyout .ap-grid,
+  .photo-workspace .tool-flyout .lp-list {
+    max-width: 100%;
+  }
+}
+
+/* ---- dialogs at 320px ---- */
+
+@media (max-width: 30rem) {
+  .export-backdrop,
+  .cutout-backdrop {
+    padding: var(--space-2);
+    padding-bottom: calc(var(--space-2) + env(safe-area-inset-bottom, 0px));
+    align-items: end;
+  }
+
+  .export-dialog,
+  .cutout {
+    width: 100%;
+    max-height: 100%;
+    max-height: 100svh;
+    padding: var(--space-3);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .export-dialog input[type='range'] {
+    min-width: 0;
+    width: 100%;
+    flex: 1 1 100%;
+  }
+
+  .export-dialog input[type='number'] {
+    width: 5rem;
+  }
+
+  .export-actions,
+  .cutout-actions {
+    position: sticky;
+    bottom: calc(-1 * var(--space-3));
+    padding: var(--space-2) 0;
+    background: var(--paper-raised);
+  }
+
+  .cutout-canvas {
+    max-height: 40svh;
+  }
+}

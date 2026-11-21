@@ -68,6 +68,9 @@ body {
   font-family: var(--sans);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  /* viewport-fit=cover lets the page run under a landscape notch: keep text clear of it. */
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
 }
 
 button,
@@ -130,9 +133,11 @@ textarea {
   text-decoration: none;
 }
 
-.sitenav-link:hover {
-  color: var(--ink);
-  background: var(--paper-raised);
+@media (hover: hover) {
+  .sitenav-link:hover {
+    color: var(--ink);
+    background: var(--paper-raised);
+  }
 }
 
 .sitenav-link.is-current {
@@ -198,9 +203,11 @@ textarea {
   transition: color 0.12s ease, border-color 0.12s ease, background-color 0.12s ease;
 }
 
-.tab:hover {
-  color: var(--ink);
-  background: var(--paper);
+@media (hover: hover) {
+  .tab:hover {
+    color: var(--ink);
+    background: var(--paper);
+  }
 }
 
 .tab.is-selected {
@@ -263,9 +270,11 @@ textarea {
   cursor: pointer;
 }
 
-.icon-button:hover {
-  background: var(--paper);
-  color: var(--ink);
+@media (hover: hover) {
+  .icon-button:hover {
+    background: var(--paper);
+    color: var(--ink);
+  }
 }
 
 .pane-clear {
@@ -285,10 +294,12 @@ textarea {
   cursor: pointer;
 }
 
-.text-button:hover:not(:disabled) {
-  color: var(--ink);
-  border-color: var(--ink-faint);
-  background: var(--paper-raised);
+@media (hover: hover) {
+  .text-button:hover:not(:disabled) {
+    color: var(--ink);
+    border-color: var(--ink-faint);
+    background: var(--paper-raised);
+  }
 }
 
 .text-button:disabled {
@@ -399,8 +410,10 @@ textarea::placeholder {
   transition: background-color 0.12s ease, box-shadow 0.12s ease;
 }
 
-.output-word:hover {
-  box-shadow: inset 0 -2px 0 var(--rule);
+@media (hover: hover) {
+  .output-word:hover {
+    box-shadow: inset 0 -2px 0 var(--rule);
+  }
 }
 
 /* Filled, not underlined: the link between the sentence and the panel below
@@ -504,9 +517,11 @@ textarea::placeholder {
   color: var(--ink-soft);
 }
 
-.stepper button:hover:not(:disabled) {
-  color: var(--ink);
-  border-color: var(--ink-faint);
+@media (hover: hover) {
+  .stepper button:hover:not(:disabled) {
+    color: var(--ink);
+    border-color: var(--ink-faint);
+  }
 }
 
 .stepper button:disabled {
@@ -667,9 +682,11 @@ textarea::placeholder {
   display: none;
 }
 
-.citation > summary:hover,
-.citation[open] > summary {
-  color: var(--ink-soft);
+@media (hover: hover) {
+  .citation > summary:hover,
+  .citation[open] > summary {
+    color: var(--ink-soft);
+  }
 }
 
 /* The tier is the point: a grammar page and a guess at structure are not the
@@ -893,10 +910,12 @@ textarea::placeholder {
   color: var(--paper-raised);
 }
 
-.text-button.is-primary:hover:not(:disabled) {
-  background: var(--ink);
-  border-color: var(--ink);
-  color: var(--paper-raised);
+@media (hover: hover) {
+  .text-button.is-primary:hover:not(:disabled) {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper-raised);
+  }
 }
 
 .report {
@@ -1033,9 +1052,11 @@ textarea::placeholder {
   text-decoration: none;
 }
 
-.learn-nav-link:hover,
-.toc a:hover {
-  color: var(--ink);
+@media (hover: hover) {
+  .learn-nav-link:hover,
+  .toc a:hover {
+    color: var(--ink);
+  }
 }
 
 .learn-nav-link.is-current {
@@ -2278,6 +2299,7 @@ textarea::placeholder {
 
   color: var(--ink);
   min-height: 100vh;
+  min-height: 100svh;
   display: flex;
   background-color: var(--paper);
 }
@@ -2291,14 +2313,15 @@ textarea::placeholder {
 .studio-rail {
   flex: none;
   width: 14.5rem;
-  transition: width 0.18s ease;
   position: sticky;
   top: 0;
   height: 100vh;
+  height: 100svh;
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  padding: var(--space-3) var(--space-2);
+  padding: calc(var(--space-3) + env(safe-area-inset-top)) var(--space-2) var(--space-3)
+    calc(var(--space-2) + env(safe-area-inset-left));
   background: var(--paper-raised);
   border-right: 1px solid var(--rule);
 }
@@ -2375,9 +2398,11 @@ textarea::placeholder {
   transition: background-color 0.12s ease, color 0.12s ease, border-color 0.12s ease;
 }
 
-.studio-link:hover {
-  color: var(--ink);
-  background: rgba(22, 32, 47, 0.05);
+@media (hover: hover) {
+  .studio-link:hover {
+    color: var(--ink);
+    background: rgba(22, 32, 47, 0.05);
+  }
 }
 
 .studio-link.is-current {
@@ -2410,8 +2435,10 @@ textarea::placeholder {
   letter-spacing: 0.06em;
 }
 
-.studio-back:hover {
-  color: var(--teal);
+@media (hover: hover) {
+  .studio-back:hover {
+    color: var(--teal);
+  }
 }
 
 /* ---------- the bar and the canvas ---------- */
@@ -2431,7 +2458,7 @@ textarea::placeholder {
   justify-content: space-between;
   gap: var(--space-3);
   min-height: 2.75rem;
-  padding: 0 var(--space-4);
+  padding: env(safe-area-inset-top) calc(var(--space-4) + env(safe-area-inset-right)) 0 var(--space-4);
   background: rgba(246, 248, 250, 0.88);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--rule);
@@ -2449,8 +2476,10 @@ textarea::placeholder {
   text-decoration: none;
 }
 
-.studio-crumb a:hover {
-  color: var(--teal);
+@media (hover: hover) {
+  .studio-crumb a:hover {
+    color: var(--teal);
+  }
 }
 
 .studio-chips {
@@ -2574,10 +2603,12 @@ textarea::placeholder {
   transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
 }
 
-.studio-card:hover {
-  border-color: var(--teal);
-  box-shadow: var(--lift);
-  transform: translateY(-2px);
+@media (hover: hover) {
+  .studio-card:hover {
+    border-color: var(--teal);
+    box-shadow: var(--lift);
+    transform: translateY(-2px);
+  }
 }
 
 .studio-card .studio-icon {
@@ -2684,10 +2715,12 @@ textarea::placeholder {
   border-radius: 999px;
 }
 
-.studio .text-button:hover:not(:disabled) {
-  color: var(--teal);
-  border-color: var(--teal);
-  background: var(--tint);
+@media (hover: hover) {
+  .studio .text-button:hover:not(:disabled) {
+    color: var(--teal);
+    border-color: var(--teal);
+    background: var(--tint);
+  }
 }
 
 .studio .text-button.is-primary {
@@ -2697,10 +2730,12 @@ textarea::placeholder {
   font-weight: 600;
 }
 
-.studio .text-button.is-primary:hover:not(:disabled) {
-  color: #fff;
-  background: #185757;
-  box-shadow: var(--lift);
+@media (hover: hover) {
+  .studio .text-button.is-primary:hover:not(:disabled) {
+    color: #fff;
+    background: #185757;
+    box-shadow: var(--lift);
+  }
 }
 
 .studio .tab {
@@ -2834,10 +2869,12 @@ textarea::placeholder {
   transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.dropzone:hover,
-.dropzone.is-over {
-  border-color: var(--teal);
-  background: rgba(31, 107, 107, 0.06);
+@media (hover: hover) {
+  .dropzone:hover,
+  .dropzone.is-over {
+    border-color: var(--teal);
+    background: rgba(31, 107, 107, 0.06);
+  }
 }
 
 .dropzone.is-over {
@@ -3040,6 +3077,7 @@ textarea::placeholder {
   position: sticky;
   top: 3.5rem;
   max-height: calc(100vh - 4.5rem);
+  max-height: calc(100svh - 4.5rem);
   overflow-y: auto;
 }
 
@@ -3114,10 +3152,12 @@ textarea::placeholder {
   cursor: pointer;
 }
 
-.insp-preset:hover,
-.insp-chip:hover {
-  border-color: var(--teal);
-  color: var(--teal);
+@media (hover: hover) {
+  .insp-preset:hover,
+  .insp-chip:hover {
+    border-color: var(--teal);
+    color: var(--teal);
+  }
 }
 
 .insp-chip[aria-pressed='true'] {
@@ -3326,9 +3366,11 @@ textarea::placeholder {
   cursor: pointer;
 }
 
-.lookup-word:hover {
-  border-color: var(--teal);
-  color: var(--teal);
+@media (hover: hover) {
+  .lookup-word:hover {
+    border-color: var(--teal);
+    color: var(--teal);
+  }
 }
 
 .lookup-word.is-unconfirmed {
@@ -3411,9 +3453,11 @@ textarea::placeholder {
   transition: border-color 0.12s ease, box-shadow 0.12s ease;
 }
 
-.upload-item:hover {
-  border-color: var(--teal);
-  box-shadow: 0 0 0 2px rgba(31, 107, 107, 0.15);
+@media (hover: hover) {
+  .upload-item:hover {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 2px rgba(31, 107, 107, 0.15);
+  }
 }
 
 .uploads-list li.is-open .upload-item {
@@ -3470,9 +3514,21 @@ textarea::placeholder {
   opacity: 0;
 }
 
-.uploads-list li:hover .upload-remove,
+@media (hover: hover) {
+  .uploads-list li:hover .upload-remove {
+    opacity: 1;
+  }
+}
+
 .upload-remove:focus-visible {
   opacity: 1;
+}
+
+/* No hover on a touchscreen: the remove control is always shown, and big enough to tap. */
+@media (hover: none) {
+  .upload-remove {
+    opacity: 1;
+  }
 }
 
 .replace-banner {
@@ -3513,10 +3569,12 @@ textarea::placeholder {
   touch-action: manipulation;
 }
 
-.rail-toggle:hover,
-.icon-button:hover:not(:disabled) {
-  border-color: var(--teal);
-  color: var(--teal);
+@media (hover: hover) {
+  .rail-toggle:hover,
+  .icon-button:hover:not(:disabled) {
+    border-color: var(--teal);
+    color: var(--teal);
+  }
 }
 
 .icon-button:disabled {
@@ -3603,10 +3661,12 @@ textarea::placeholder {
   flex: none;
   width: 17rem;
   height: 100vh;
+  height: 100svh;
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  padding: var(--space-3);
+  padding: calc(var(--space-3) + env(safe-area-inset-top)) var(--space-3) calc(var(--space-3) + env(safe-area-inset-bottom))
+    calc(var(--space-3) + env(safe-area-inset-left));
   overflow-y: auto;
   background: #fff;
   border-right: 1px solid var(--rule);
@@ -3699,6 +3759,7 @@ textarea::placeholder {
 
 .canvas-wrap .layer-canvas {
   max-height: calc(100vh - 9.5rem);
+  max-height: calc(100svh - 9.5rem);
   min-height: 12rem;
 }
 
@@ -3765,9 +3826,11 @@ textarea::placeholder {
   touch-action: manipulation;
 }
 
-.canvas-toolbar button:hover:not(:disabled) {
-  background: rgba(31, 107, 107, 0.1);
-  color: var(--teal);
+@media (hover: hover) {
+  .canvas-toolbar button:hover:not(:disabled) {
+    background: rgba(31, 107, 107, 0.1);
+    color: var(--teal);
+  }
 }
 
 .canvas-toolbar button.is-main {
@@ -3776,9 +3839,11 @@ textarea::placeholder {
   font-weight: 600;
 }
 
-.canvas-toolbar button.is-main:hover:not(:disabled) {
-  background: #175454;
-  color: #fff;
+@media (hover: hover) {
+  .canvas-toolbar button.is-main:hover:not(:disabled) {
+    background: #175454;
+    color: #fff;
+  }
 }
 
 .canvas-toolbar button:disabled {
@@ -3867,9 +3932,11 @@ textarea::placeholder {
   cursor: pointer;
 }
 
-.insp-stepper button:hover {
-  background: rgba(31, 107, 107, 0.1);
-  color: var(--teal);
+@media (hover: hover) {
+  .insp-stepper button:hover {
+    background: rgba(31, 107, 107, 0.1);
+    color: var(--teal);
+  }
 }
 
 .insp-stepper input {
@@ -3922,9 +3989,11 @@ textarea::placeholder {
   cursor: pointer;
 }
 
-.insp-tool:hover {
-  background: rgba(22, 32, 47, 0.06);
-  color: var(--ink);
+@media (hover: hover) {
+  .insp-tool:hover {
+    background: rgba(22, 32, 47, 0.06);
+    color: var(--ink);
+  }
 }
 
 .insp-tool[aria-pressed='true'] {
@@ -3982,10 +4051,12 @@ textarea::placeholder {
   flex-direction: column;
   gap: var(--space-3);
   min-height: calc(100vh - 6rem);
+  min-height: calc(100svh - 6rem);
 }
 
 .photo-workspace .canvas-wrap .layer-canvas {
   max-height: calc(100vh - 16rem);
+  max-height: calc(100svh - 16rem);
 }
 
 .page-strip {
@@ -3997,7 +4068,7 @@ textarea::placeholder {
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-2) var(--space-3) calc(var(--space-2) + env(safe-area-inset-bottom));
   background: var(--paper-raised);
   border: 1px solid var(--rule);
   border-radius: 14px;
@@ -4069,8 +4140,10 @@ textarea::placeholder {
   box-shadow: 0 0 0 2px rgba(31, 107, 107, 0.25);
 }
 
-.page-tile:hover {
-  border-color: var(--teal);
+@media (hover: hover) {
+  .page-tile:hover {
+    border-color: var(--teal);
+  }
 }
 
 .page-tile:focus-visible,
@@ -4120,9 +4193,20 @@ textarea::placeholder {
   opacity: 0;
 }
 
-.page-list li:hover .page-remove,
+@media (hover: hover) {
+  .page-list li:hover .page-remove {
+    opacity: 1;
+  }
+}
+
 .page-remove:focus-visible {
   opacity: 1;
+}
+
+@media (hover: none) {
+  .page-remove {
+    opacity: 1;
+  }
 }
 
 .page-add {
@@ -4139,9 +4223,11 @@ textarea::placeholder {
   cursor: pointer;
 }
 
-.page-add:hover {
-  border-color: var(--teal);
-  color: var(--teal);
+@media (hover: hover) {
+  .page-add:hover {
+    border-color: var(--teal);
+    color: var(--teal);
+  }
 }
 
 .page-add input {
@@ -4178,9 +4264,11 @@ textarea::placeholder {
   color: #fff;
 }
 
-.icon-button.is-play:hover:not(:disabled) {
-  background: #175454;
-  color: #fff;
+@media (hover: hover) {
+  .icon-button.is-play:hover:not(:disabled) {
+    background: #175454;
+    color: #fff;
+  }
 }
 
 .insp-times {
@@ -4353,8 +4441,10 @@ textarea::placeholder {
   resize: none;
 }
 
-.sub-isv textarea:hover {
-  border-color: var(--rule);
+@media (hover: hover) {
+  .sub-isv textarea:hover {
+    border-color: var(--rule);
+  }
 }
 
 .sub-isv textarea:focus {
@@ -4408,7 +4498,6 @@ textarea::placeholder {
   height: 100%;
   border-radius: inherit;
   background: var(--teal);
-  transition: width 0.3s ease;
 }
 
 .progress-bar > span.is-moving {
@@ -4467,9 +4556,11 @@ textarea::placeholder {
   cursor: pointer;
 }
 
-.transcribe-time:hover {
-  border-color: var(--teal);
-  color: var(--teal);
+@media (hover: hover) {
+  .transcribe-time:hover {
+    border-color: var(--teal);
+    color: var(--teal);
+  }
 }
 
 .transcribe-cues li {
@@ -4587,9 +4678,11 @@ textarea::placeholder {
   cursor: pointer;
 }
 
-.topic-chip:hover {
-  border-color: var(--teal);
-  color: var(--teal);
+@media (hover: hover) {
+  .topic-chip:hover {
+    border-color: var(--teal);
+    color: var(--teal);
+  }
 }
 
 .topic-chip.is-on {
@@ -4624,6 +4717,7 @@ textarea::placeholder {
 .player .player-video {
   width: 100%;
   max-height: calc(100vh - 21rem);
+  max-height: calc(100svh - 21rem);
   min-height: 12rem;
   object-fit: contain;
   background: #000;
@@ -4878,10 +4972,12 @@ textarea::placeholder {
   color: #fff;
 }
 
-.icon-button.is-primary:hover:not(:disabled) {
-  background: var(--ink);
-  border-color: var(--ink);
-  color: #fff;
+@media (hover: hover) {
+  .icon-button.is-primary:hover:not(:disabled) {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: #fff;
+  }
 }
 
 .editor-bar .icon-button.open-another {
@@ -4962,9 +5058,21 @@ textarea::placeholder {
   right: auto;
 }
 
-[data-tip]:hover::after,
+@media (hover: hover) {
+  [data-tip]:hover::after {
+    opacity: 1;
+  }
+}
+
 [data-tip]:focus-visible::after {
   opacity: 1;
+}
+
+/* Touch: a tap focuses the control, which shows its label (focus on tap is browser-dependent; every data-tip control also has an aria-label). */
+@media (hover: none) {
+  [data-tip]:focus::after {
+    opacity: 1;
+  }
 }
 
 .text-list {
@@ -4992,8 +5100,10 @@ textarea::placeholder {
   cursor: pointer;
 }
 
-.text-list button:hover {
-  background: rgba(31, 107, 107, 0.08);
+@media (hover: hover) {
+  .text-list button:hover {
+    background: rgba(31, 107, 107, 0.08);
+  }
 }
 
 .text-list time {
@@ -5006,4 +5116,237 @@ textarea::placeholder {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+
+/* ======================================================================
+   Phones and touchscreens. Every rule here is scoped to a coarse pointer or
+   a narrow width, so a desktop with a mouse looks exactly as before.
+   Sources: docs/mobile.md (WCAG 2.5.5 44px, web.dev tap targets, MDN
+   touch-action, MDN env()).
+   ====================================================================== */
+
+/* The page bottoms clear the home indicator. */
+.shell {
+  padding-bottom: calc(var(--space-6) + env(safe-area-inset-bottom));
+}
+
+@media (any-pointer: coarse) {
+  a,
+  button,
+  select,
+  summary,
+  label,
+  [role='button'],
+  [role='tab'],
+  input:not([type='text'], [type='number'], [type='search'], [type='url'], [type='email']) {
+    touch-action: manipulation;
+  }
+
+  button,
+  .sitenav-link,
+  .learn-nav-link,
+  .prevnext-link,
+  .studio-link,
+  .studio-back,
+  .citation > summary,
+  .script-select,
+  select {
+    min-height: 44px;
+  }
+
+  button,
+  .icon-button,
+  .stepper button,
+  .insp-stepper button,
+  .rail-toggle {
+    min-width: 44px;
+  }
+
+  /* Links that are one word in a flex row. */
+  .sitenav-link,
+  .studio-link,
+  .studio-back,
+  .learn-nav-link,
+  .toc a,
+  .studio-crumb a {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .learn-nav-link,
+  .toc a {
+    display: flex;
+  }
+
+  .sitenav {
+    gap: var(--space-2);
+  }
+
+  .sitenav-link {
+    padding: var(--space-1) var(--space-3);
+  }
+
+  .icon-button {
+    width: 44px;
+    height: 44px;
+  }
+
+  .text-button {
+    padding: var(--space-2) var(--space-4);
+  }
+
+  /* Output words sit inside running text: enlarge the hit area with padding
+     that a negative margin cancels, so the lines do not move apart. */
+  .output-word {
+    padding-block: 0.6rem;
+    margin-block: -0.35rem;
+  }
+
+  /* Small round remove badges: the visible dot stays, the tap area grows. */
+  .upload-remove::after,
+  .page-remove::after {
+    content: '';
+    position: absolute;
+    inset: -12px;
+  }
+
+  /* Pressed feedback: hover does not exist here, so the press has to show. */
+  .sitenav-link:active,
+  .tab:active,
+  .icon-button:active,
+  .text-button:active:not(:disabled),
+  .stepper button:active:not(:disabled),
+  .learn-nav-link:active,
+  .toc a:active,
+  .studio-link:active,
+  .studio-card:active,
+  .prevnext-link:active,
+  .page-tile:active,
+  .insp-preset:active,
+  .insp-chip:active,
+  .insp-tool:active,
+  .topic-chip:active,
+  .canvas-toolbar button:active:not(:disabled),
+  .output-word:active,
+  .lookup-word:active {
+    background-color: rgba(22, 32, 47, 0.1);
+  }
+
+  .text-button.is-primary:active:not(:disabled) {
+    background-color: var(--ink);
+  }
+
+  /* Taps should not flash the browser's grey rectangle on top of ours. */
+  a,
+  button,
+  summary {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* iOS Safari zooms the page when a field under 16px is focused. Phones only. */
+@media (max-width: 48rem) and (any-pointer: coarse) {
+  input:not([type='checkbox'], [type='radio'], [type='range'], [type='color'], [type='file']),
+  select {
+    font-size: max(16px, 1rem) !important;
+  }
+
+  textarea {
+    font-size: max(16px, 1em);
+  }
+}
+
+/* ---------- the Studio on a phone ---------- */
+
+@media (max-width: 52rem) {
+  /* Brand, back link and the tab row stack in as little height as possible so
+     the picture or timeline starts on the first screenful. */
+  .studio-rail {
+    gap: 0 var(--space-2);
+    padding: calc(var(--space-1) + env(safe-area-inset-top)) var(--space-2) 0
+      calc(var(--space-2) + env(safe-area-inset-left));
+  }
+
+  .studio-brand {
+    padding: 0 var(--space-2);
+  }
+
+  .studio-brand small {
+    display: none;
+  }
+
+  /* One scrolling row of tabs. The fade on the right says there is more; the
+     end padding lets the last tab scroll clear of it. */
+  .studio-nav {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    padding-inline-end: 2rem;
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 2rem), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 2rem), transparent);
+  }
+
+  .studio-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .studio-link {
+    white-space: nowrap;
+  }
+
+  .studio-bar {
+    min-height: 2.25rem;
+    padding: 0 calc(var(--space-3) + env(safe-area-inset-right)) 0 var(--space-3);
+  }
+
+  .studio-canvas {
+    padding: var(--space-2) calc(var(--space-2) + env(safe-area-inset-right)) calc(var(--space-3) + env(safe-area-inset-bottom))
+      var(--space-2);
+    gap: var(--space-3);
+  }
+
+  .photo-workspace {
+    min-height: 0;
+  }
+
+  /* On a phone the editor panel is not a sticky side column. */
+  .editor-side {
+    position: static;
+    max-height: none;
+  }
+
+  .tool-pane {
+    min-width: 0;
+  }
+
+  .page-list {
+    scroll-snap-type: x proximity;
+    overscroll-behavior-x: contain;
+  }
+
+  .page-list li {
+    scroll-snap-align: start;
+  }
+}
+
+@media (max-width: 52rem) and (any-pointer: coarse) {
+  /* Wider than the visible box, so a thumb's fat tap does not hit a neighbour. */
+  .studio-nav,
+  .studio-group {
+    gap: var(--space-2);
+  }
+}
+
+/* A focused field scrolls into view above the on-screen keyboard and any sticky bar. */
+textarea,
+input,
+select {
+  scroll-margin-block: 5rem 8rem;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }

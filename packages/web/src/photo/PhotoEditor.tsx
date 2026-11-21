@@ -44,6 +44,7 @@ import { samplePicture } from './sample-picture.ts';
 import { thumbnailOf } from './thumb.ts';
 import { askToKeep, defaultStore, type PageRecord, type PhotoStore, type SavedPage } from './store.ts';
 import './photo-editor.css';
+import './mobile-photo.css';
 
 /** The background-removal dialog (and the model code behind it) is fetched only when it is first opened. */
 const CutoutDialog = lazy(() => import('./CutoutDialog.tsx'));
@@ -150,6 +151,10 @@ function StripButton(props: { label: string; pressed?: boolean; disabled?: boole
   );
 }
 
+/** Zoom steps for the picture, and how far one tap of a nudge button moves a layer (picture pixels). */
+const ZOOMS = [1, 1.5, 2, 3, 4];
+const NUDGE = 5;
+
 const ICON_SELECT = 'M5 3l14 8-6 2-3 6z';
 const ICON_BOX = 'M4 4h3M10.5 4h3M17 4h3M4 20h3M10.5 20h3M17 20h3M4 10.5v3M20 10.5v3';
 const ICON_CROP = 'M7 3v14h14M3 7h14v14';
@@ -247,6 +252,9 @@ const PagePane = forwardRef<
   const dragBase = useRef<PageDoc | null>(null);
   const lastCommit = useRef<{ key: string; at: number } | null>(null);
   const picking = useRef<number | null>(null);
+  /** What kind of pointer last pressed the picture's text: a finger selects a word by tapping instead of by dragging. */
+  const lastPointer = useRef<string>('mouse');
+  const [zoom, setZoom] = useState(1);
   const altDown = useRef(false);
   /** The decoded pictures of the picture layers on the page on screen, by file id. */
   const pics = useRef(new Map<string, unknown>());
@@ -715,6 +723,22 @@ const PagePane = forwardRef<
     clear();
   };
 
+  /** What Cmd/Ctrl+A does, for a thumb: all the text found in the picture, or else all the layers. */
+  const selectAll = () => {
+    if (live.length > 0 && !(sel.length > 0 && !isVirtual) && liveOn) {
+      setSelectedIds([]);
+      setPicked([0, live.length]);
+    } else if (selectable(layers).length > 0) {
+      pickLayers(selectable(layers));
+    }
+  };
+  /** What the arrow keys do, for a thumb: move the selected layers a few pixels. */
+  const nudge = (dx: number, dy: number) => {
+    const ids = movable(layers, sel);
+    if (ids.length === 0 || isVirtual) return;
+    editMerge(`nudge:${ids.join()}`, (d) => ({ ...d, layers: d.layers.map((l) => (ids.includes(l.id) ? { ...l, x: l.x + dx, y: l.y + dy } : l)) }));
+  };
+
   const orderSel = (kind: StepKind) => {
     if (sel.length === 0) return;
     const next = reorder(layers, sel, kind);
@@ -1165,6 +1189,17 @@ const PagePane = forwardRef<
                 <Icon name="addText" /> Add text
               </button>
               <span className="editor-gap" />
+              <div className="zoom-group" role="group" aria-label="Zoom the picture">
+                <button type="button" className="icon-button" aria-label="Zoom out" disabled={zoom <= ZOOMS[0]!} onClick={() => setZoom((z) => ZOOMS[Math.max(0, ZOOMS.indexOf(z) - 1)] ?? 1)}>
+                  <Icon name="minus" />
+                </button>
+                <button type="button" className="zoom-fit" aria-label="Fit the picture to the screen" disabled={zoom === 1} onClick={() => setZoom(1)}>
+                  {Math.round(zoom * 100)}%
+                </button>
+                <button type="button" className="icon-button" aria-label="Zoom in" disabled={zoom >= ZOOMS[ZOOMS.length - 1]!} onClick={() => setZoom((z) => ZOOMS[Math.min(ZOOMS.length - 1, ZOOMS.indexOf(z) + 1)] ?? 1)}>
+                  <Icon name="plus" />
+                </button>
+              </div>
               <Tip label="Undo" side="bottom">
                 <button type="button" className="icon-button" aria-label="Undo" disabled={!H.canUndo(hist) || cropping} onClick={undo}>
                   <Icon name="undo" />
@@ -1232,6 +1267,7 @@ const PagePane = forwardRef<
                 </div>
               )}
 
+              <div className={zoom > 1 ? 'canvas-scroll is-zoomed' : 'canvas-scroll'} style={{ '--pz': zoom } as React.CSSProperties}>
               <div
                 className={dropping ? 'canvas-wrap is-dropping' : 'canvas-wrap'}
                 ref={wrap}
@@ -1313,10 +1349,13 @@ const PagePane = forwardRef<
                         onPointerDown={(e) => {
                           // A layer lying over the picture's words is what the pointer means (and Shift always means a layer marquee): hand it to the page.
                           const at = toPicture(e);
+                          lastPointer.current = e.pointerType || 'mouse';
                           if (e.shiftKey || hitPage(layers, at.x, at.y, measureCtx ?? undefined) !== null) {
                             if (scene.current?.begin(e)) e.preventDefault();
                             return;
                           }
+                          // A finger cannot drag-select letters without fighting the page's scrolling: a tap picks the word (see onClick), a second tap the line.
+                          if (e.pointerType === 'touch') return;
                           // Nothing is picked by a click alone: the drag starts where the pointer goes down and ends where it is let go.
                           e.preventDefault();
                           e.currentTarget.setPointerCapture?.(e.pointerId);
@@ -1329,6 +1368,7 @@ const PagePane = forwardRef<
                           wrap.current?.focus({ preventScroll: true });
                         }}
                         onDoubleClick={(e) => {
+                          if (lastPointer.current === 'touch') return;
                           const at = toPicture(e);
                           const over = hitPage(layers, at.x, at.y, measureCtx ?? undefined);
                           const hit = layers.find((l) => l.id === over);
@@ -1341,9 +1381,17 @@ const PagePane = forwardRef<
                           if (near !== null) setPicked(wordAround(live, near));
                         }}
                         onClick={(e) => {
-                          if (e.detail < 3) return;
+                          const touch = lastPointer.current === 'touch';
+                          if (e.detail < (touch ? 1 : 3)) return;
                           const at = nearestGlyph(live, toPicture(e));
-                          if (at !== null) setPicked(lineAround(live, at));
+                          if (at === null) return;
+                          if (touch) {
+                            setSelectedIds([]);
+                            setTyping(false);
+                            setPicked(e.detail >= 2 ? lineAround(live, at) : wordAround(live, at));
+                            return;
+                          }
+                          setPicked(lineAround(live, at));
                         }}
                       />
                     ))}
@@ -1388,7 +1436,37 @@ const PagePane = forwardRef<
                   </p>
                 )}
               </div>
+              </div>
             </div>
+
+            {!cropping && (
+              <div className="touch-actions" role="toolbar" aria-label="Selection actions">
+                <button type="button" onClick={selectAll} disabled={live.length === 0 && selectable(layers).length === 0}>
+                  Select all
+                </button>
+                <button type="button" onClick={clear} disabled={sel.length === 0 && !picked && !typing}>
+                  Deselect
+                </button>
+                <button type="button" aria-label="Duplicate selection" onClick={duplicateSel} disabled={sel.length === 0 || isVirtual}>
+                  <Icon name="copy" /> Duplicate
+                </button>
+                <button type="button" aria-label="Delete selection" onClick={removeSel} disabled={sel.length === 0 || isVirtual}>
+                  <Icon name="trash" /> Delete
+                </button>
+                {(
+                  [
+                    ['Nudge left', 'arrowLeft', -NUDGE, 0],
+                    ['Nudge up', 'arrowUp', 0, -NUDGE],
+                    ['Nudge down', 'arrowDown', 0, NUDGE],
+                    ['Nudge right', 'arrowRight', NUDGE, 0],
+                  ] as const
+                ).map(([label, icon, dx, dy]) => (
+                  <button key={label} type="button" className="is-icon" aria-label={label} disabled={sel.length === 0 || isVirtual || movable(layers, sel).length === 0} onClick={() => nudge(dx, dy)}>
+                    <Icon name={icon} />
+                  </button>
+                ))}
+              </div>
+            )}
 
             {pic.scaled && <p className="note">This picture was larger than {MAX_SIDE}px, so it was scaled down to edit; the saved picture is that size.</p>}
             {geometryHint && (

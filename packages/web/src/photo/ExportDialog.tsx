@@ -131,12 +131,12 @@ export function ExportDialog({ pages, currentId, onExport, onClose, maxPixels }:
             <div className="export-row" style={{ marginTop: 'var(--space-2)' }}>
               <label>
                 Width{' '}
-                <input type="number" min={1} aria-label="Width in pixels" value={Math.round(current.width * scale)} onChange={(e) => { const v = Number(e.target.value); if (v > 0) setScale(clamp(v / current.width)); }} />
+                <input type="number" inputMode="numeric" min={1} aria-label="Width in pixels" value={Math.round(current.width * scale)} onChange={(e) => { const v = Number(e.target.value); if (v > 0) setScale(clamp(v / current.width)); }} />
               </label>
               <span aria-hidden="true">×</span>
               <label>
                 Height{' '}
-                <input type="number" min={1} aria-label="Height in pixels" value={Math.round(current.height * scale)} onChange={(e) => { const v = Number(e.target.value); if (v > 0) setScale(clamp(v / current.height)); }} />
+                <input type="number" inputMode="numeric" min={1} aria-label="Height in pixels" value={Math.round(current.height * scale)} onChange={(e) => { const v = Number(e.target.value); if (v > 0) setScale(clamp(v / current.height)); }} />
               </label>
             </div>
           )}

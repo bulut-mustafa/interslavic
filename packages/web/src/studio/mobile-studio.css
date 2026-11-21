@@ -1,0 +1,343 @@
+/* Phone layout for the Studio shell and the tools it hosts (docs/mobile.md rules 2, 3, 4, 5, 7, 10).
+   Loaded after styles.css and prefixed with .studio so it wins; desktop is untouched:
+   sizing is under any-pointer: coarse, layout under width queries. */
+
+.uploads-backdrop,
+.studio .studio-bar-back {
+  display: none;
+}
+
+/* ---------- touch sizing and input zoom (any touchscreen) ---------- */
+@media (any-pointer: coarse) {
+  .studio :is(input:not([type='checkbox']):not([type='radio']):not([type='file']), select, textarea) {
+    font-size: max(16px, 1em);
+  }
+  .studio .studio-link,
+  .studio .icon-button,
+  .studio .text-button,
+  .studio .switch,
+  .studio .studio-back,
+  .studio .studio-crumb a,
+  .studio .rail-toggle {
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+  .studio .icon-button,
+  .studio .rail-toggle {
+    min-width: 44px;
+  }
+  .studio .transcribe-time,
+  .studio .output-word,
+  .studio .topic-chip,
+  .studio .upload-item {
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+  .studio .transcribe-time {
+    padding-inline: 0.75rem;
+  }
+  .studio .sub-field select,
+  .studio .player-speed select {
+    min-height: 44px;
+  }
+  .studio .output-word {
+    padding-block: 0.25rem;
+  }
+  .studio .upload-remove,
+  .studio .upload-action {
+    width: 2.75rem;
+    height: 2.75rem;
+    background: radial-gradient(circle, rgba(22, 32, 47, 0.78) 0 0.8rem, transparent 0.85rem);
+    touch-action: manipulation;
+  }
+  .studio .upload-actions {
+    left: 4px;
+    bottom: 2rem;
+  }
+  .studio .upload-remove {
+    top: 2px;
+    right: 2px;
+  }
+  .studio .studio-link:active,
+  .studio .icon-button:active,
+  .studio .text-button:active,
+  .studio .upload-item:active {
+    opacity: 0.7;
+  }
+}
+
+/* Remove buttons were shown on hover only: show them where there is no hover. */
+@media (hover: none) {
+  .studio .upload-remove {
+    opacity: 1;
+  }
+}
+
+/* ---------- narrow screens: the rail becomes a bottom tab bar ---------- */
+@media (max-width: 52rem) {
+  .studio,
+  .studio.is-folded {
+    padding-bottom: calc(3.6rem + env(safe-area-inset-bottom));
+    min-height: 100vh;
+    min-height: 100svh;
+    max-width: 100%;
+    overflow-x: clip;
+  }
+
+  .studio .studio-rail,
+  .studio.is-folded .studio-rail {
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: 20;
+    width: auto;
+    height: auto;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 0;
+    padding: 0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    border: 0;
+    border-top: 1px solid var(--rule);
+    overflow: visible;
+  }
+
+  .studio .studio-rail-head,
+  .studio .studio-rail-foot,
+  .studio .studio-group-label,
+  .studio.is-folded .studio-rail-foot {
+    display: none;
+  }
+
+  .studio .studio-nav,
+  .studio.is-folded .studio-nav {
+    order: 0;
+    flex: 1 1 auto;
+    min-width: 0;
+    flex-direction: row;
+    gap: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+  .studio .studio-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .studio .studio-group,
+  .studio.is-folded .studio-group + .studio-group {
+    flex-direction: row;
+    flex: none;
+    border: 0;
+    padding: 0;
+  }
+
+  .studio .studio-link,
+  .studio.is-folded .studio-link {
+    flex: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 2px;
+    min-width: 4.5rem;
+    min-height: 3.5rem;
+    padding: 0.35rem 0.5rem;
+    border: 0;
+    border-top: 3px solid transparent;
+    border-radius: 0;
+    font-size: 0.7rem;
+    line-height: 1.1;
+    text-align: center;
+    white-space: nowrap;
+  }
+  .studio .studio-link.is-current {
+    border-top-color: var(--teal);
+    border-bottom-color: transparent;
+  }
+  .studio .studio-link span,
+  .studio.is-folded .studio-link span {
+    display: block;
+  }
+  .studio .studio-link.is-button {
+    flex: none;
+    position: relative;
+    background: transparent;
+  }
+  .studio .rail-badge,
+  .studio.is-folded .rail-badge {
+    position: absolute;
+    top: 0.3rem;
+    right: 0.7rem;
+    margin: 0;
+  }
+
+  .studio .studio-bar {
+    flex-wrap: wrap;
+    padding: 0 var(--space-3);
+    padding-top: env(safe-area-inset-top);
+    row-gap: 0;
+  }
+  .studio .studio-bar-back {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    color: var(--ink-soft);
+    text-decoration: none;
+    font-size: var(--text-sm);
+  }
+  .studio .studio-crumb {
+    margin-right: auto;
+  }
+  .studio .studio-chips {
+    flex-wrap: wrap;
+  }
+
+  /* Keep-alive panes and every tool inside them may never be wider than the screen. */
+  .studio .studio-canvas,
+  .studio .tool-pane,
+  .studio .tool-pane > main {
+    max-width: 100%;
+    min-width: 0;
+  }
+  .studio .tool-pane {
+    overflow-x: clip;
+  }
+  .studio .tool-pane[hidden] {
+    display: none;
+  }
+
+  /* ---------- the Uploads sheet: a bottom sheet over the tab bar ---------- */
+  .uploads-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    border: 0;
+    padding: 0;
+    background: rgba(22, 32, 47, 0.45);
+  }
+
+  .studio .uploads-sheet {
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: 31;
+    width: auto;
+    height: auto;
+    max-height: 75vh;
+    max-height: 75svh;
+    padding: var(--space-2) var(--space-3) calc(var(--space-3) + env(safe-area-inset-bottom));
+    border: 0;
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -8px 32px rgba(22, 32, 47, 0.25);
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  .studio .uploads-sheet::before {
+    content: '';
+    flex: none;
+    align-self: center;
+    width: 2.5rem;
+    height: 4px;
+    margin-bottom: calc(-1 * var(--space-1));
+    border-radius: 2px;
+    background: var(--rule);
+  }
+  .studio .uploads-head {
+    position: sticky;
+    top: calc(-1 * var(--space-2));
+    z-index: 1;
+    background: #fff;
+  }
+  .studio .uploads-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 52rem) and (max-width: 26rem) {
+  .studio .uploads-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ---------- Subtitles: rows stack, the bar's fields fill the width ---------- */
+@media (max-width: 40rem) {
+  .studio .sub-row.sub-head {
+    display: none;
+  }
+  .studio .sub-row {
+    grid-template-columns: 2rem minmax(0, 1fr);
+    gap: var(--space-1) var(--space-2);
+  }
+  .studio .sub-row .sub-isv {
+    grid-column: 1 / -1;
+  }
+  .studio .sub-isv textarea {
+    min-height: 2.75rem;
+  }
+  .studio .sub-bar .editor-file {
+    max-width: 100%;
+  }
+  .studio .sub-bar .sub-field {
+    flex: 1 1 100%;
+  }
+  .studio .sub-bar .sub-field select {
+    flex: 1;
+    min-width: 0;
+  }
+  .studio .sub-bar .editor-gap {
+    display: none;
+  }
+  .studio .sub-why {
+    flex-wrap: wrap;
+  }
+}
+
+/* ---------- Worksheets, Watch, Transcribe ---------- */
+@media (max-width: 40rem) {
+  .studio .worksheets .editor-bar.worksheet-controls > * {
+    min-width: 0;
+  }
+  .studio .worksheets .worksheet-title,
+  .studio .worksheets .worksheet-title input {
+    width: 100%;
+    max-width: 100%;
+  }
+  .studio .ws-item-head {
+    flex-wrap: wrap;
+  }
+
+  .studio .player .player-video {
+    max-height: 45vh;
+    max-height: 45svh;
+    min-height: 10rem;
+  }
+  .studio .player-controls {
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  .studio .player-controls .editor-gap {
+    display: none;
+  }
+  .studio .player-controls .text-button.is-primary {
+    flex: 1 1 100%;
+  }
+  .studio .player-cue {
+    font-size: 1.15rem;
+    line-height: 1.7;
+  }
+  .studio .transcribe-deck {
+    top: 0;
+  }
+  .studio .transcribe-deck audio {
+    width: 100%;
+  }
+  .studio .transcribe-cues li {
+    grid-template-columns: 1fr;
+  }
+  .studio .transcribe-input {
+    flex-wrap: wrap;
+  }
+  .studio .voice-picker select {
+    max-width: 100%;
+  }
+}

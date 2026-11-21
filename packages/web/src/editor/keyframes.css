@@ -46,8 +46,10 @@
   cursor: pointer;
 }
 
-.kf-btn:hover:not(:disabled) {
-  background: rgba(127, 127, 127, 0.15);
+@media (hover: hover) {
+  .kf-btn:hover:not(:disabled) {
+    background: rgba(127, 127, 127, 0.15);
+  }
 }
 
 .kf-btn:disabled {

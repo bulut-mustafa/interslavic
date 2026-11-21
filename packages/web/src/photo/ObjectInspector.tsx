@@ -79,6 +79,7 @@ function Num(props: { label: string; caption?: string; value: number; min?: numb
       <small>{props.caption ?? props.label}</small>
       <input
         type="number"
+        inputMode="decimal"
         aria-label={props.label}
         min={props.min}
         value={round(props.value)}

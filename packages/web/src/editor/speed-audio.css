@@ -23,8 +23,10 @@
   cursor: pointer;
 }
 
-.sa-preset:hover {
-  background: var(--paper-sunk, rgba(0, 0, 0, 0.04));
+@media (hover: hover) {
+  .sa-preset:hover {
+    background: var(--paper-sunk, rgba(0, 0, 0, 0.04));
+  }
 }
 
 .sa-preset[aria-pressed='true'] {
@@ -51,8 +53,10 @@
   cursor: pointer;
 }
 
-.sa-extract:hover {
-  background: var(--paper-sunk, rgba(0, 0, 0, 0.04));
+@media (hover: hover) {
+  .sa-extract:hover {
+    background: var(--paper-sunk, rgba(0, 0, 0, 0.04));
+  }
 }
 
 @media (pointer: coarse) {

@@ -21,7 +21,12 @@
   cursor: pointer;
 }
 
-.upload-action:hover,
 .upload-action:focus-visible {
   background: var(--teal);
+}
+
+@media (hover: hover) {
+  .upload-action:hover {
+    background: var(--teal);
+  }
 }

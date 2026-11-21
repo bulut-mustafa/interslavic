@@ -83,7 +83,7 @@ export function Inspector(props: {
           <button type="button" aria-label="Smaller text" onClick={() => setSize(s.size * 0.9)}>
             <Icon name="minus" size="0.9rem" />
           </button>
-          <input type="number" aria-label="Size" min={8} max={maxSize} value={Math.round(s.size)} onChange={(e) => setSize(Number(e.target.value) || s.size)} />
+          <input type="number" inputMode="numeric" aria-label="Size" min={8} max={maxSize} value={Math.round(s.size)} onChange={(e) => setSize(Number(e.target.value) || s.size)} />
           <button type="button" aria-label="Larger text" onClick={() => setSize(s.size * 1.1)}>
             <Icon name="plus" size="0.9rem" />
           </button>
