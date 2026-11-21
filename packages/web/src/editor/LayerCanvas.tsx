@@ -1,6 +1,7 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef } from 'react';
 import { hitLayers } from '../video/boxes.ts';
 import { drawFrame } from '../video/compositor.ts';
+import { perfBump } from '../video/perf.ts';
 import type { MediaFeed } from '../video/contracts.ts';
 import type { VideoProject } from '../video/project.ts';
 import { boundsOf, clampPosition, hitTest, type TextLayer } from './layers.ts';
@@ -79,6 +80,10 @@ interface Props {
   /** Double-click on text, or Enter with text selected: the caller can start typing on the picture. */
   onActivate?: (id: string) => void;
   label?: string;
+  /** Project mode: the canvas holds `width * renderScale` pixels but is drawn in frame units (a phone shows a small picture, so it need not fill 1280 px every frame). Default 1. */
+  renderScale?: number;
+  /** Project mode: where the time is read from at each redraw, instead of `time` (playback moves faster than React renders). */
+  timeSource?: () => number;
 }
 
 export const LayerCanvas = forwardRef<SceneHandle, Props>(function LayerCanvas(props, ref) {
@@ -92,21 +97,24 @@ export const LayerCanvas = forwardRef<SceneHandle, Props>(function LayerCanvas(p
     if (!ctx) return;
     const p = latest.current;
     const selected = p.selectedIds ?? p.selectedId;
+    const k = p.renderScale ?? 1;
+    if (k !== 1) ctx.setTransform(k, 0, 0, k, 0, 0);
     if (p.project && p.media) {
-      drawFrame(ctx, { project: p.project, time: p.time ?? 0, size: { w: p.width, h: p.height }, media: p.media, selected: selected === null ? [] : typeof selected === 'string' ? [selected] : selected });
+      perfBump('draw');
+      drawFrame(ctx, { project: p.project, time: p.timeSource ? p.timeSource() : (p.time ?? 0), size: { w: p.width, h: p.height }, media: p.media, selected: selected === null ? [] : typeof selected === 'string' ? [selected] : selected });
       return;
     }
     renderScene(ctx, { w: p.width, h: p.height }, p.drawBase ?? (() => {}), p.layers, selected);
   }, []);
 
   useImperativeHandle(ref, () => ({ redraw, canvas: () => el.current }), [redraw]);
-  useEffect(redraw, [redraw, props.width, props.height, props.drawBase, props.layers, props.selectedId, props.selectedIds, props.project, props.media, props.time]);
+  useEffect(redraw, [redraw, props.width, props.height, props.drawBase, props.layers, props.selectedId, props.selectedIds, props.project, props.media, props.time, props.renderScale]);
 
   /** Pixel position on the picture of a pointer event, whatever size the canvas is shown at. */
   const at = (e: { clientX: number; clientY: number }) => {
     const c = el.current!;
     const r = c.getBoundingClientRect();
-    return { x: ((e.clientX - r.left) * c.width) / (r.width || c.width), y: ((e.clientY - r.top) * c.height) / (r.height || c.height) };
+    return { x: ((e.clientX - r.left) * props.width) / (r.width || props.width), y: ((e.clientY - r.top) * props.height) / (r.height || props.height) };
   };
 
   const measure = () => el.current?.getContext('2d') ?? null;
@@ -119,8 +127,9 @@ export const LayerCanvas = forwardRef<SceneHandle, Props>(function LayerCanvas(p
     <canvas
       ref={el}
       className="layer-canvas"
-      width={props.width}
-      height={props.height}
+      width={Math.round(props.width * (props.renderScale ?? 1))}
+      height={Math.round(props.height * (props.renderScale ?? 1))}
+      data-frame-w={props.width}
       tabIndex={0}
       role="img"
       aria-label={props.label ?? 'Editor canvas. Drag text to move it; arrow keys nudge the selected text.'}

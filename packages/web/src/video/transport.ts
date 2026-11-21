@@ -1,7 +1,8 @@
 import type { CreateTransport, Transport, TransportOptions } from './contracts.ts';
 import { createPool, type MediaPool, type PoolEntry, type PoolOptions } from './media-pool.ts';
 import { editLength } from './project.ts';
-import { activeItems, isDrifted, upcomingItems, type ScheduledItem } from './schedule.ts';
+import { perfBump } from './perf.ts';
+import { activeItems, DRIFT_LIMIT, upcomingItems, type ScheduledItem } from './schedule.ts';
 import { total } from './timeline.ts';
 
 /**
@@ -24,6 +25,11 @@ export const SEEK_TIMEOUT = 1500;
 const SAME_FRAME = 0.034;
 /** Pressing play this close to the end starts from the beginning. */
 const END_SLACK = 0.05;
+/** `gentle` mode: how far an element may stray, and the least time between two corrective seeks of one element. */
+export const GENTLE_DRIFT = 0.4;
+export const GENTLE_GAP_MS = 1000;
+/** `gentle` mode keeps fewer videos alive: iOS Safari decodes only a few at once and publishes no number. */
+export const GENTLE_MAX_VIDEOS = 3;
 
 export const clampRate = (r: number): number => Math.min(Math.max(r, RATE_MIN), RATE_MAX);
 
@@ -52,6 +58,9 @@ export function createTransportWith(o: TransportOptions, deps: TransportDeps = {
   let waiting = new Set<PoolEntry>();
   let pictureQueued = false;
   let waitTimer: ReturnType<typeof setTimeout> | undefined;
+  const gentle = !!o.gentle;
+  const limit = gentle ? GENTLE_DRIFT : DRIFT_LIMIT;
+  const lastFix = new WeakMap<PoolEntry, number>();
 
   const length = (): number => {
     const p = o.getProject();
@@ -156,8 +165,10 @@ export function createTransportWith(o: TransportOptions, deps: TransportDeps = {
         // A pinned target (held at 0 or at the file's end) is not chased: the element waits on that frame.
         const needs = force
           ? !e.primed || Math.abs(el.currentTime - wanted) > SAME_FRAME
-          : !e.seeking && (!e.primed || (playing && !item.pinned && isDrifted(el.currentTime, wanted)));
+          : !e.seeking && (!e.primed || (playing && !item.pinned && Math.abs(el.currentTime - wanted) > limit && (!gentle || now() - (lastFix.get(e) ?? -Infinity) >= GENTLE_GAP_MS)));
         if (needs) {
+          perfBump(force ? 'seek' : 'fix');
+          if (gentle && !force) lastFix.set(e, now());
           seekEl(e, wanted);
           if (force || !playing) seeks.push(e);
         }
@@ -285,4 +296,4 @@ export function createTransportWith(o: TransportOptions, deps: TransportDeps = {
   return self;
 }
 
-export const createTransport: CreateTransport = (o) => createTransportWith(o);
+export const createTransport: CreateTransport = (o) => createTransportWith(o, o.gentle ? { maxVideos: GENTLE_MAX_VIDEOS } : {});

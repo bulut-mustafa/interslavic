@@ -65,7 +65,7 @@
   align-items: center;
   gap: 4px;
   min-height: 44px;
-  padding: 0 10px;
+  padding: 0 12px;
   border: 0;
   border-radius: 8px;
   background: none;
@@ -81,7 +81,7 @@
 }
 .pv-export {
   min-height: 44px;
-  padding: 0 18px;
+  padding: 0 16px;
   margin: 0 4px;
   border: 0;
   border-radius: 22px;
@@ -103,7 +103,7 @@
 .pv-note {
   flex: none;
   margin: 0;
-  padding: 8px 14px;
+  padding: 8px 16px;
   background: var(--pv-raised);
   color: var(--pv-soft);
   font-size: 0.85rem;
@@ -124,8 +124,8 @@
   flex: none;
   display: grid;
   gap: 8px;
-  margin: 8px 12px 0;
-  padding: 12px 14px;
+  margin: 8px 16px 0;
+  padding: 12px 16px;
   border-radius: 12px;
   background: var(--pv-raised);
   border: 1px solid var(--pv-line);
@@ -189,7 +189,7 @@
   min-width: 0;
   display: grid;
   place-items: center;
-  padding: 8px;
+  padding: 8px 16px;
   container-type: size;
 }
 .pv-frame {
@@ -264,7 +264,7 @@
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   min-height: 56px;
-  padding: 0 8px 0 14px;
+  padding: 0 8px 0 16px;
   background: var(--pv-bg);
   border-top: 1px solid var(--pv-line);
 }
@@ -353,10 +353,7 @@
   height: 100%;
   will-change: transform;
 }
-/* While playing, the time arrives about twelve times a second: a short linear glide makes the slide look continuous. */
-.pv-tl.is-playing .pv-tl-content {
-  transition: transform 100ms linear;
-}
+/* While playing the content is moved by the editor's clock every animation frame (PhoneTimeline writes the transform directly), so it needs no glide. */
 .pv-tl-over {
   position: absolute;
   inset: 0;
@@ -630,7 +627,7 @@
 .pv-section {
   display: grid;
   gap: 8px;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 .pv-section h3 {
   margin: 4px 0 0;
@@ -642,8 +639,8 @@
 }
 .pv-slider {
   display: grid;
-  gap: 2px;
-  margin: 6px 0;
+  gap: 4px;
+  margin: 8px 0;
 }
 .pv-slider-top {
   display: flex;
@@ -666,11 +663,11 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin: 6px 0;
+  margin: 8px 0;
 }
 .pv-chip {
   min-height: 44px;
-  padding: 0 14px;
+  padding: 0 16px;
   border: 1px solid var(--rule);
   border-radius: 22px;
   background: #fff;
@@ -809,7 +806,7 @@
   justify-content: center;
   gap: 8px;
   min-height: 48px;
-  padding: 0 18px;
+  padding: 0 16px;
   border: 1px solid var(--rule);
   border-radius: 24px;
   background: #fff;
@@ -876,7 +873,7 @@
 .pv-fields {
   display: grid;
   gap: 8px;
-  margin: 6px 0;
+  margin: 8px 0;
 }
 .pv-fields label {
   display: grid;
@@ -900,7 +897,7 @@
 }
 .pv-text-list button {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   width: 100%;
   min-height: 44px;
   padding: 0 12px;
@@ -949,7 +946,7 @@
 }
 .pv-sheet-body .kf-row {
   grid-template-columns: 4.5rem 3rem auto minmax(0, 1fr);
-  gap: 6px;
+  gap: 8px;
   min-height: 48px;
 }
 .pv-sheet-body .kf-btn {
@@ -981,7 +978,7 @@
 
 /* ---- keyboard bar ---- */
 .pv-kb-done {
-  padding: 0 14px;
+  padding: 0 16px;
   font-weight: 600;
   color: var(--teal);
 }

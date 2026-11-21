@@ -52,16 +52,19 @@ export function ToolStrip({ items, selected = null, onSelect, mode = 'default', 
     return () => ro.disconnect();
   }, [measure]);
 
-  // Bring a newly selected tool into view.
+  // Bring a newly selected tool into view. Scroll the strip itself: scrollIntoView would also scroll every ancestor (the clipped editor shell), which is how a tap slid the whole layout on iOS.
   useEffect(() => {
     if (!selected) return;
-    const b = scroller.current?.querySelector<HTMLElement>('[aria-pressed="true"]');
-    b?.scrollIntoView?.({ inline: 'center', block: 'nearest' });
+    const n = scroller.current;
+    const b = n?.querySelector<HTMLElement>('[aria-pressed="true"]');
+    if (!n || !b) return;
+    const left = b.offsetLeft - (n.clientWidth - b.offsetWidth) / 2;
+    n.scrollTo?.({ left: Math.max(0, left) });
   }, [selected]);
 
   return (
     <div className={`ph-strip-wrap${more.left ? ' fade-left' : ''}${more.right ? ' fade-right' : ''}`}>
-      <div key={mode} ref={scroller} className="ph-strip" role="toolbar" aria-label={label} data-mode={mode} onScroll={measure}>
+      <div key={mode} ref={scroller} className="ph-strip" role="toolbar" aria-label={label} data-mode={mode} data-no-gesture onScroll={measure}>
         {items.map((it) => (
           <button key={it.id} type="button" className={`ph-strip-item${selected === it.id ? ' is-selected' : ''}`} aria-pressed={selected === it.id} disabled={it.disabled} onClick={() => onSelect(it.id)}>
             <span className="ph-strip-icon">

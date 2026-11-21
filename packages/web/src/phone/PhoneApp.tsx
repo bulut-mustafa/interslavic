@@ -12,6 +12,7 @@ import { phoneElementFor } from './registry.ts';
 import { StudioHome } from './StudioHome.tsx';
 import { TabBar, type TabItem } from './TabBar.tsx';
 import { TopBar } from './TopBar.tsx';
+import { useViewportLock } from './useViewportLock.ts';
 import './phone.css';
 import './screens.css';
 
@@ -30,6 +31,7 @@ const WITH_UPLOADS = new Set(['photo', 'video']);
 
 /** The page itself must not scroll: only `.ph-content` does. */
 function useLockPage(): void {
+  useViewportLock();
   useEffect(() => {
     document.documentElement.classList.add('ph-locked');
     return () => document.documentElement.classList.remove('ph-locked');

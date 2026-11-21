@@ -325,7 +325,7 @@ function LayerIcon({ layer }: { layer: PhotoLayer }) {
 }
 
 /** Every layer, front first: tap to select, eye, lock, and buttons to move it up or down (no drag needed). */
-export function LayersSheet(props: { layers: PhotoLayer[]; selected: string[]; onSelect: (id: string) => void; onChange: (next: PhotoLayer[]) => void }) {
+export function LayersSheet(props: { layers: PhotoLayer[]; selected: string[]; onSelect: (id: string) => void; onChange: (next: PhotoLayer[]) => void; onDelete?: (id: string) => void }) {
   const { layers } = props;
   if (layers.length === 0) return <p className="pp-note">No layers yet. Add text, a picture or a shape.</p>;
   const shown = [...layers].reverse();
@@ -356,6 +356,11 @@ export function LayersSheet(props: { layers: PhotoLayer[]; selected: string[]; o
             <button type="button" className="pp-icon-btn" aria-label={locked ? `Unlock ${name}` : `Lock ${name}`} aria-pressed={locked} onClick={() => props.onChange(setLocked(layers, [l.id], !locked))}>
               <PathIcon d={locked ? LOCK : UNLOCK} />
             </button>
+            {props.onDelete && (
+              <button type="button" className="pp-icon-btn" aria-label={`Delete ${name}`} onClick={() => props.onDelete?.(l.id)}>
+                <Icon name="trash" />
+              </button>
+            )}
           </li>
         );
       })}

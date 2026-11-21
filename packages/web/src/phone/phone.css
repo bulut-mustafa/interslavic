@@ -1,11 +1,45 @@
 /* The phone shell, top/tab bars and Studio home. Visual language: docs/mobile-design.md. */
 
+/* Phone spacing tokens: use these in every phone part (docs/mobile-parts.md). */
+:root {
+  --ph-space-1: 4px;
+  --ph-space-2: 8px;
+  --ph-space-3: 12px;
+  --ph-space-4: 16px;
+  --ph-space-5: 24px;
+  --ph-space-6: 32px;
+  --ph-gutter: 16px;
+  --ph-row: 48px;
+  --ph-radius: 16px;
+}
+
 html.ph-locked,
 html.ph-locked body {
   height: 100vh;
   height: 100svh;
   overflow: hidden;
   overscroll-behavior: none;
+}
+
+/* Keyboard open (viewportLock.ts sets --vvh, --vv-top, --kb): the shell is pinned to the visible part of the screen, so iOS panning the visual viewport to a focused field cannot slide it away. Fixed without a transform, so fixed children (sheet, keyboard bar) keep the layout viewport as their reference. */
+html.ph-locked.ph-kb-open .ph-app {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: var(--vv-top, 0px);
+  height: var(--vvh, 100svh);
+}
+
+/* Text controls: 16px or more (iOS Safari zooms the page on focus below that) and no double-tap delay. */
+html.ph-locked input:not([type='range'], [type='checkbox'], [type='radio'], [type='color'], [type='file'], [type='button'], [type='submit']),
+html.ph-locked textarea,
+html.ph-locked select,
+html.ph-locked [contenteditable='true'] {
+  font-size: max(16px, 1em) !important;
+  touch-action: manipulation;
+}
+html.ph-locked input[type='range'] {
+  touch-action: pan-y;
 }
 
 .ph-app {
@@ -19,9 +53,9 @@ html.ph-locked body {
 .ph-topbar {
   display: flex;
   align-items: center;
-  gap: 4px;
-  min-height: 48px;
-  padding: env(safe-area-inset-top) 4px 0 12px;
+  gap: var(--ph-space-1);
+  min-height: var(--ph-row);
+  padding: env(safe-area-inset-top) var(--ph-space-1) 0 var(--ph-space-3);
   background: #fff;
   border-bottom: 1px solid var(--rule);
 }
@@ -64,7 +98,13 @@ html.ph-locked body {
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
-  padding: var(--space-3);
+  padding: var(--ph-gutter);
+}
+/* Full-screen editors lay out their own panes; nothing may scroll the box itself (focus scrolling reaches even overflow: hidden, `clip` cannot be scrolled at all). */
+.ph-tool-frame[data-tool='photo'] .ph-tool,
+.ph-tool-frame[data-tool='video'] .ph-tool {
+  overflow: hidden;
+  overflow: clip;
 }
 .ph-tool {
   padding: 0;

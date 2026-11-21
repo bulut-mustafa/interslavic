@@ -47,3 +47,10 @@ export function transformedText(base: { size: number; rotation: number }, scale:
   const s = Number.isFinite(scale) && scale > 0 ? scale : 1;
   return { size: Math.min(maxSize, Math.max(MIN_TEXT, Math.round(base.size * s))), rotation: snapAngle(base.rotation + rotation) };
 }
+
+/** Canvas pixels per frame pixel for a preview shown at most `screenW` CSS px wide: enough for `dpr` (at most 2) pixels per CSS px, never above 1, never below a quarter, and never fewer than 640 pixels across. */
+export function previewScale(frameW: number, screenW: number, dpr: number): number {
+  if (!(frameW > 0) || !(screenW > 0)) return 1;
+  const want = Math.max(640, screenW * Math.min(Math.max(dpr || 1, 1), 2));
+  return Math.min(1, Math.max(0.25, want / frameW));
+}

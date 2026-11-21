@@ -1,0 +1,412 @@
+/* Phone worksheet editor. Spacing 4/8/12/16/24, text 16px (iOS does not zoom on focus), controls 44-48px. */
+
+.wse {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+  /* The sheet body already pads the sides and the bottom; the bar below lives in that padding. */
+  margin-bottom: calc(-1 * (var(--space-3) + env(safe-area-inset-bottom)));
+  font-size: 16px;
+  line-height: 1.4;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+.wse button,
+.wse select,
+.wse textarea {
+  font: inherit;
+  font-size: 16px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Text boxes: native chrome off (iOS adds inner shadow, rounding and its own padding), never an inner scroll. */
+.wse-input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 48px;
+  margin: 0;
+  padding: 12px;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--ink);
+  line-height: 24px;
+  resize: none;
+  overflow: hidden;
+  -webkit-appearance: none;
+  appearance: none;
+  /* A focused box is brought above the keyboard with room to spare. */
+  scroll-margin-top: 96px;
+  scroll-margin-bottom: 160px;
+}
+.wse-input:focus {
+  outline: none;
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgba(31, 107, 107, 0.18);
+}
+.wse-input::placeholder {
+  color: var(--ink-faint);
+}
+
+.wse-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.wse-label {
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 600;
+}
+.wse-hint {
+  color: var(--ink-soft);
+  font-size: 16px;
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* cards */
+.wse-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--rule);
+  border-radius: 16px;
+  background: var(--paper-raised, #fafaf7);
+  scroll-margin-top: 16px;
+  scroll-margin-bottom: 160px;
+}
+.wse-card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.wse-num {
+  display: grid;
+  place-items: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 4px;
+  box-sizing: border-box;
+  border-radius: 14px;
+  background: var(--teal);
+  color: #fff;
+  font-weight: 600;
+}
+.wse-kind {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+}
+.wse-badge {
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid var(--teal);
+  color: var(--teal);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.wse-preview {
+  margin: 0;
+  padding: 12px;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px dashed var(--rule);
+  overflow-wrap: anywhere;
+}
+.wse-blank {
+  display: inline-block;
+  width: 64px;
+  margin: 0 4px;
+  border-bottom: 2px solid var(--ink);
+  vertical-align: baseline;
+}
+.wse-blank.wide {
+  width: 96px;
+}
+
+/* choices */
+.wse-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.wse-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+}
+.wse-option-text {
+  flex: 1;
+  min-width: 0;
+}
+.wse-radio {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 48px;
+  height: 48px;
+}
+.wse-radio input {
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  border: 2px solid var(--ink-faint);
+  border-radius: 50%;
+  background: #fff;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.wse-radio input:checked {
+  border-color: var(--teal);
+  background: var(--teal);
+  box-shadow: inset 0 0 0 4px #fff;
+}
+.wse-radio input:disabled {
+  opacity: 0.45;
+}
+.wse-option.is-correct .wse-input {
+  border-color: var(--teal);
+}
+.wse-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--ink-soft);
+}
+.wse-icon:active {
+  background: var(--paper);
+}
+.wse-icon:disabled {
+  opacity: 0.35;
+}
+.wse-status {
+  margin: 0;
+  color: var(--ink-soft);
+}
+.wse-status.is-warn {
+  color: var(--guess);
+  font-weight: 600;
+}
+
+/* buttons */
+.wse-small,
+.wse-wide,
+.wse-switch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 16px;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--ink);
+}
+.wse-small {
+  align-self: flex-start;
+}
+.wse-wide {
+  width: 100%;
+}
+.wse-small:active,
+.wse-wide:active,
+.wse-switch:active {
+  background: var(--paper);
+}
+.wse-switch.is-on {
+  border-color: var(--teal);
+  color: var(--teal);
+}
+.is-danger {
+  color: #b3261e;
+}
+.wse-row {
+  display: flex;
+  gap: 8px;
+}
+.wse-row > * {
+  flex: 1;
+}
+
+.wse-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--rule);
+}
+.wse-act {
+  display: inline-flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 44px;
+  padding: 0 8px;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--ink);
+}
+.wse-act:active {
+  background: var(--paper);
+}
+.wse-act:disabled {
+  opacity: 0.4;
+}
+
+/* folding groups */
+.wse-settings,
+.wse-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.wse-settings {
+  padding: 4px 16px;
+  border: 1px solid var(--rule);
+  border-radius: 16px;
+  background: #fff;
+}
+.wse-settings-body,
+.wse-group-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 12px;
+}
+.wse-fold {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 48px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  text-align: left;
+}
+.wse-fold.is-group {
+  padding: 4px 0;
+  border-bottom: 1px solid var(--rule);
+}
+.wse-fold-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.wse-empty {
+  margin: 0;
+  padding: 16px;
+  border: 1px dashed var(--rule);
+  border-radius: 12px;
+  color: var(--ink-soft);
+}
+
+/* sticky add bar: rides in the sheet's own bottom padding, hidden while the keyboard is up */
+.wse-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 -16px;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), #fff 12px);
+}
+.wse-bar.is-hidden {
+  display: none;
+}
+.wse-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--teal);
+  color: #fff;
+  font-weight: 600;
+}
+.wse-add:active {
+  opacity: 0.85;
+}
+.wse-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--rule);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 6px 24px rgba(22, 32, 47, 0.18);
+}
+.wse-menu-target {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.wse-menu-target select {
+  min-height: 48px;
+  padding: 0 12px;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--ink);
+}
+.wse-menu-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-height: 48px;
+  padding: 8px 12px;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--ink);
+  text-align: left;
+}
+.wse-menu-item:active {
+  background: var(--paper);
+}
+.wse-toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 4px 4px 16px;
+  border-radius: 12px;
+  background: var(--ink);
+  color: #fff;
+}
+.wse-toast span {
+  flex: 1;
+}
+.wse-undo {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: #fff;
+  font-weight: 700;
+  text-decoration: underline;
+}

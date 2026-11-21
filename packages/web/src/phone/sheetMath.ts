@@ -41,3 +41,13 @@ export function settle(offset: number, velocity: number, offsets: number[], hidd
 
 /** The detent a tap on the grabber moves to: the next taller, wrapping to the shortest after the tallest. */
 export const nextIndex = (i: number, count: number): number => (count <= 1 ? 0 : (i + 1) % count);
+
+/**
+ * New scrollTop for a scroller so a focused field sits in the middle of the
+ * visible part (`box` and `field` are viewport rects). Clamped to >= 0; the
+ * browser clamps the upper end.
+ */
+export function centerScrollTop(scrollTop: number, box: { top: number; height: number }, field: { top: number; height: number }): number {
+  const delta = field.top + field.height / 2 - (box.top + box.height / 2);
+  return Math.max(0, Math.round(scrollTop + delta));
+}

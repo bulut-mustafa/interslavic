@@ -46,6 +46,8 @@ import { defaultVideoStore, type VideoStore } from './store.ts';
 import { Timeline } from './Timeline.tsx';
 import { topTrack } from './timeline-math.ts';
 import { createTransport } from './transport.ts';
+import { createLiveClock } from './live-clock.ts';
+import { perfBump } from './perf.ts';
 import './editor.css';
 import './mobile-video.css';
 import { MIN_CLIP, length as clipLength, locate, removeClip, speedOf, splitAt, startOf, total, trim, type Clip } from './timeline.ts';
@@ -103,7 +105,12 @@ export const EMPTY_FEED = { picture: () => null };
  * faces over this one hook, so the project, history, transport, saving,
  * exporting and captions behave the same on both.
  */
-export function useVideoEditor({ store = defaultVideoStore, makeTranscriber, decodeAudio }: Deps & { store?: VideoStore | null } = {}) {
+export function useVideoEditor({ store = defaultVideoStore, makeTranscriber, decodeAudio, phone = false }: Deps & { store?: VideoStore | null; phone?: boolean } = {}) {
+  perfBump('render');
+  /** The playhead for things that must follow it every frame without rendering (the phone timeline). */
+  const [liveClock] = useState(createLiveClock);
+  /** React hears the playing time this often (ms); the desktop timeline is drawn by React, the phone's is not. */
+  const tickMs = phone ? 250 : 80;
   const [hist, setHist] = useState<H.History<Project>>(() => H.start(emptyProject()));
   const [sel, setSel] = useState<Selection>(null);
   const [time, setTime] = useState(0);
@@ -293,14 +300,19 @@ export function useVideoEditor({ store = defaultVideoStore, makeTranscriber, dec
     const t = createTransport({
       getProject: () => projectRef.current,
       files,
+      gentle: phone,
       hooks: {
         onFrame: () => {
+          perfBump('frame');
+          const at = t.time;
+          liveClock.set(at);
           scene.current?.redraw();
           const now = performance.now();
-          if (t.playing && voiceOverOn.current) reader.update(t.time, projectRef.current.layers.filter(isText), editLength(projectRef.current, total(projectRef.current.clips)));
-          if (now - lastTick.current > 80 || !t.playing) {
+          if (t.playing && voiceOverOn.current) reader.update(at, projectRef.current.layers.filter(isText), editLength(projectRef.current, total(projectRef.current.clips)));
+          if (now - lastTick.current > tickMs || !t.playing) {
             lastTick.current = now;
-            setTime(t.time);
+            perfBump('tick');
+            setTime(at);
           }
         },
         onEnded: () => setPlaying(false),
@@ -334,6 +346,11 @@ export function useVideoEditor({ store = defaultVideoStore, makeTranscriber, dec
       setPlaying(false);
     }
   }, [active]);
+
+  // Whatever moved the playhead while paused (a fresh video, an undo), the live clock follows it.
+  useEffect(() => {
+    if (!playing) liveClock.set(time);
+  }, [time, playing, liveClock]);
 
   // The playhead never sits past the end of an edit that got shorter.
   useEffect(() => {
@@ -389,6 +406,7 @@ export function useVideoEditor({ store = defaultVideoStore, makeTranscriber, dec
 
   const seek = (t: number) => {
     const clamped = Math.min(Math.max(t, 0), length);
+    liveClock.set(clamped);
     transportRef.current?.seek(clamped);
     reader.arm(clamped);
     setTime(clamped);
@@ -523,10 +541,19 @@ export function useVideoEditor({ store = defaultVideoStore, makeTranscriber, dec
 
   /** The selected thing removed. The last clip of the main track stays. */
   const removeSelected = () => {
+    let cutAt: number | null = null;
     if (selLayer) commit({ layers: layers.filter((l) => l.id !== selLayer.id) });
-    else if (selClip && clips.length > 1) commit({ clips: removeClip(clips, clipIndex) });
-    else return;
+    else if (selClip && clips.length > 1) {
+      // The clips after it slide back to close the gap (the main track has none). A playhead that was inside it goes to where it was.
+      const from = startOf(clips, clipIndex);
+      if (time >= from - 0.001 && time <= from + clipLength(selClip) + 0.001) cutAt = from;
+      commit({ clips: removeClip(clips, clipIndex) });
+    } else if (selClip) {
+      setStatus('The last clip of the main track stays. Add another video first, or trim this one.');
+      return;
+    } else return;
     setSel(null);
+    if (cutAt !== null) seek(Math.min(cutAt, total(removeClip(clips, clipIndex))));
   };
 
   /** A speed change on a layer changes how long it is on the edit (twice as fast, half as long), never past the end of its file. */
@@ -905,6 +932,7 @@ export function useVideoEditor({ store = defaultVideoStore, makeTranscriber, dec
     makeCaptions,
     save,
     busyOut,
+    liveClock,
     onKeys,
     keysRef,
     files,

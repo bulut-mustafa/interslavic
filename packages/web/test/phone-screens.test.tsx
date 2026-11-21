@@ -244,7 +244,7 @@ describe('Worksheets on a phone', () => {
     fireEvent.click(screen.getByRole('button', { name: /Edit/ }));
     const dialog = await waitFor(() => screen.getByRole('dialog', { name: 'Edit worksheet' }));
     expect(dialog.querySelector('[aria-label="Move question 2 later"]') ?? dialog.querySelector('[aria-label="Move question 1 later"]')).toBeTruthy();
-    fireEvent.click(screen.getByRole('button', { name: 'Title and key' }));
+    fireEvent.click(screen.getByRole('button', { name: /Sheet settings/ }));
     fireEvent.change(screen.getByLabelText('Worksheet title'), { target: { value: 'Quiz' } });
     expect(screen.getByLabelText('Worksheet preview').querySelector('h2')?.textContent).toBe('Quiz');
   });

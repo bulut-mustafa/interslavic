@@ -1,4 +1,4 @@
-import { useRef, type PointerEvent as ReactPointerEvent } from 'react';
+import { useMemo, useRef, type PointerEvent as ReactPointerEvent } from 'react';
 import { LayerCanvas } from '../../editor/LayerCanvas.tsx';
 import { SelectionOverlay } from '../../editor/SelectionOverlay.tsx';
 import { HANDLES, handlePositions, resizeBox, rotateBox, type Handle, type Pt } from '../../editor/transform-math.ts';
@@ -8,7 +8,7 @@ import type { ChangeMode } from '../../video/contracts.ts';
 import { isMedia, isText, type Layer, type MediaLayer } from '../../video/project.ts';
 import type { VideoEditorState } from '../../video/useVideoEditor.ts';
 import { useGestures } from '../useGestures.ts';
-import { movedTo, transformedMedia, transformedText } from './preview-math.ts';
+import { movedTo, previewScale, transformedMedia, transformedText } from './preview-math.ts';
 
 const CORNERS: Handle[] = HANDLES.filter((h) => h.length === 2);
 
@@ -27,6 +27,9 @@ export function PhonePreview({ ed }: { ed: VideoEditorState }) {
   const surface = useRef<HTMLDivElement>(null);
   const live = useRef(ed);
   live.current = ed;
+  /** The canvas needs about as many pixels as the screen shows (up to 2 per CSS px), not the project's 1280: a quarter to a half of the work each frame, and much less memory. */
+  const renderScale = useMemo(() => previewScale(frame.w, typeof window === 'undefined' ? 0 : window.innerWidth, typeof window === 'undefined' ? 1 : window.devicePixelRatio), [frame.w]);
+  const timeSource = useRef(() => live.current.transport?.time ?? live.current.time).current;
   /** What a drag or pinch started from: the layer as it was (keyframes resolved), by id. */
   const base = useRef<{ id: string; layer: Layer } | null>(null);
 
@@ -135,6 +138,8 @@ export function PhonePreview({ ed }: { ed: VideoEditorState }) {
           project={project}
           media={transport ?? { picture: () => null }}
           time={time}
+          timeSource={timeSource}
+          renderScale={renderScale}
           selectedId={sel?.kind === 'layer' ? sel.id : null}
           onSelect={(id) => ed.setSel(id ? { kind: 'layer', id } : null)}
           onDrag={(id, x, y) => ed.change({ layers: ed.patchKeyed(ed.projectRef.current.layers, id, { x, y }) }, 'preview')}

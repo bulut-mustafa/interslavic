@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { Icon } from '../components/Icon.tsx';
-import { layout, nextIndex, settle, type Detent } from './sheetMath.ts';
+import { centerScrollTop, layout, nextIndex, settle, type Detent } from './sheetMath.ts';
 import './bottom-sheet.css';
 
 export type { Detent } from './sheetMath.ts';
@@ -50,6 +50,7 @@ export function BottomSheet({ open, onClose, detents = ['half', 'full'], initial
   const [index, setIndex] = useState(initialDetent);
   const [vh, setVh] = useState(viewportH);
   const el = useRef<HTMLElement>(null);
+  const body = useRef<HTMLDivElement>(null);
   const geo = layout(detents, vh);
   const count = geo.offsets.length;
   const i = Math.min(index, Math.max(0, count - 1));
@@ -128,6 +129,28 @@ export function BottomSheet({ open, onClose, detents = ['half', 'full'], initial
       document.removeEventListener('keydown', onKey);
     };
   }, [open]);
+
+  // A focused field is centred in the sheet's body once the keyboard has settled. Scrolls the body only (scrollIntoView would also move the clipped shell).
+  useEffect(() => {
+    if (!mounted) return;
+    const n = body.current;
+    if (!n) return;
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    const reveal = (f: Element) => {
+      if (!n.contains(f)) return;
+      n.scrollTop = centerScrollTop(n.scrollTop, n.getBoundingClientRect(), f.getBoundingClientRect());
+    };
+    const onFocusIn = (e: FocusEvent) => {
+      const f = e.target;
+      if (!(f instanceof HTMLElement) || !f.matches('input, textarea, select, [contenteditable="true"]')) return;
+      timers.push(setTimeout(() => reveal(f), 120), setTimeout(() => reveal(f), 420));
+    };
+    n.addEventListener('focusin', onFocusIn);
+    return () => {
+      n.removeEventListener('focusin', onFocusIn);
+      timers.forEach(clearTimeout);
+    };
+  }, [mounted]);
 
   // ---- dragging the grabber / header ----
   const drag = useRef<{ id: number; y0: number; off0: number; active: boolean; samples: { t: number; y: number }[] } | null>(null);
@@ -221,7 +244,9 @@ export function BottomSheet({ open, onClose, detents = ['half', 'full'], initial
           )}
         </div>
       </div>
-      <div className="ph-sheet-body">{children}</div>
+      <div className="ph-sheet-body" ref={body}>
+        {children}
+      </div>
     </section>
   );
 }

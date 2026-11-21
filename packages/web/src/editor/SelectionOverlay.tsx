@@ -29,11 +29,26 @@ export function SelectionOverlay(props: {
   toolbar: ReactNode;
   /** Told where the picture is on screen, for anything else that has to be laid over it. */
   onView?: (v: View | null) => void;
+  /** Smallest font size of the typing box, px. A phone passes 16: iOS Safari zooms the page when a field under 16px gets focus. */
+  minFontPx?: number;
 }) {
   const { scene, wrap, active } = props;
   const [anchor, setAnchor] = useState<{ left: number; top: number; width: number; height: number; k: number } | null>(null);
   const layer = active[0] ?? null;
   const bar = useRef<HTMLDivElement>(null);
+  const typingBox = useRef<HTMLTextAreaElement>(null);
+  const showBox = props.typing && !!layer && !!anchor;
+  // Focus without scrolling: autoFocus would let iOS Safari scroll every ancestor (even overflow:hidden ones) to reveal the box, sliding the whole editor.
+  useEffect(() => {
+    if (!showBox) return;
+    const n = typingBox.current;
+    if (!n) return;
+    try {
+      n.focus({ preventScroll: true });
+    } catch {
+      n.focus();
+    }
+  }, [showBox]);
   // Where the toolbar's left edge goes so it stays inside the picture's frame, whatever the selection's position (a phone's frame is narrow).
   const [shift, setShift] = useState<number | null>(null);
   useLayoutEffect(() => {
@@ -54,7 +69,7 @@ export function SelectionOverlay(props: {
     }
     const cr = c.getBoundingClientRect();
     const wr = w.getBoundingClientRect();
-    const k = cr.width / c.width || 1;
+    const k = cr.width / (Number(c.dataset.frameW) || c.width) || 1;
     const left = cr.left - wr.left;
     const top = cr.top - wr.top;
     props.onView?.({ left, top, k });
@@ -93,7 +108,7 @@ export function SelectionOverlay(props: {
       <textarea
         className="canvas-typing"
         aria-label="Type on the picture"
-        autoFocus
+        ref={typingBox}
         spellCheck={false}
         value={layer.text}
         style={{
@@ -102,7 +117,7 @@ export function SelectionOverlay(props: {
           width: Math.max(anchor.width, 160) + 12,
           minHeight: anchor.height + 12,
           fontFamily: FONTS[layer.style.font].css,
-          fontSize: Math.max(13, layer.style.size * anchor.k),
+          fontSize: Math.max(props.minFontPx ?? 13, layer.style.size * anchor.k),
           lineHeight: layer.style.lineHeight,
           textAlign: layer.style.align,
         }}

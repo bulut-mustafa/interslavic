@@ -1,6 +1,12 @@
 .ph-strip-wrap {
   position: relative;
   flex: none;
+  /* The strip's width must come from its container, never from its items: in a grid with an auto column (or any shrink-to-fit parent) a scroller's min-content is the sum of its items, which makes the column as wide as every tool and leaves nothing to scroll (ROOT CAUSE of "the strip does not slide", e.g. Photo's .pp grid). */
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  contain: inline-size;
   background: #fff;
   border-top: 1px solid var(--rule);
   padding-bottom: env(safe-area-inset-bottom);
@@ -8,14 +14,16 @@
 
 .ph-strip {
   display: flex;
-  gap: 4px;
+  gap: var(--ph-space-1);
+  min-width: 0;
   overflow-x: auto;
+  overflow-y: hidden;
   overscroll-behavior-x: contain;
   scroll-snap-type: x proximity;
-  scroll-padding-inline: 12px;
+  scroll-padding-inline: var(--ph-space-3);
   touch-action: pan-x;
   scrollbar-width: none;
-  padding: 0 12px;
+  padding: 0 var(--ph-space-3);
   animation: ph-strip-in 160ms ease-out;
 }
 .ph-strip::-webkit-scrollbar {
@@ -54,6 +62,7 @@
   scroll-snap-align: start;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
 }
 .ph-strip-item:active:not(:disabled) {
   background: var(--paper);

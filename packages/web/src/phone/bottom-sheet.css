@@ -11,9 +11,15 @@
   max-height: 100svh;
   background: #fff;
   color: var(--ink);
-  border-radius: 18px 18px 0 0;
+  border-radius: calc(var(--ph-radius) + 2px) calc(var(--ph-radius) + 2px) 0 0;
   box-shadow: 0 -6px 28px rgba(22, 32, 47, 0.2);
   will-change: transform;
+}
+
+/* Keyboard up: the sheet rides on it and shrinks to the visible height (its body scrolls). */
+html.ph-kb-open .ph-sheet {
+  bottom: var(--kb, 0px);
+  max-height: calc(var(--vvh, 100svh) - var(--ph-space-2));
 }
 
 .ph-sheet-head {
@@ -50,8 +56,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-2);
-  padding: 0 var(--space-3) var(--space-2);
+  gap: var(--ph-space-2);
+  padding: 0 var(--ph-gutter) var(--ph-space-2);
 }
 .ph-sheet-title {
   margin: 0;
@@ -79,9 +85,25 @@
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
-  padding: 0 var(--space-3) calc(var(--space-3) + env(safe-area-inset-bottom));
+  /* Content scrolls natively; no touch rule on purpose (see docs/mobile-parts.md). Only the grabber and header drag the sheet. */
+  padding: 0 var(--ph-gutter) calc(var(--ph-gutter) + env(safe-area-inset-bottom));
+}
+/* The sheet already sits above the keyboard, so the home-indicator inset is not needed there. */
+html.ph-kb-open .ph-sheet-body {
+  padding-bottom: var(--ph-gutter);
+}
+.ph-sheet-body textarea,
+.ph-sheet-body input[type='text'],
+.ph-sheet-body input[type='search'],
+.ph-sheet-body input:not([type]) {
+  touch-action: manipulation;
+  scroll-margin-block: var(--ph-space-4);
+}
+.ph-sheet-body input[type='range'] {
+  touch-action: pan-y;
 }
 
 @media (prefers-reduced-motion: reduce) {

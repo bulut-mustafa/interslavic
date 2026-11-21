@@ -47,7 +47,8 @@ export function useKeyboardInset(target?: HTMLElement | null): number {
       vv?.removeEventListener('scroll', update);
       document.removeEventListener('focusout', settleLater);
       window.removeEventListener('orientationchange', settleLater);
-      node.style.removeProperty('--kb');
+      // The viewport lock owns --kb on <html>; only a custom target is cleaned here.
+      if (target) node.style.removeProperty('--kb');
     };
   }, [target]);
   return inset;

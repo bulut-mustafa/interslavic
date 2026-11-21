@@ -3,6 +3,7 @@ import { track } from '../analytics.ts';
 import { Icon } from '../components/Icon.tsx';
 import { BottomSheet } from '../phone/BottomSheet.tsx';
 import { Chip, ChipRow } from '../phone/parts.tsx';
+import { WorksheetEditor } from '../phone/worksheets-edit.tsx';
 import { useIsPhone } from '../phone/useIsPhone.ts';
 import { toCyrillic } from '../../../morph/src/orthography.ts';
 import { Text } from '../learn/Lesson.tsx';
@@ -91,7 +92,7 @@ export default function Worksheets() {
   const [confirmReset, setConfirmReset] = useState(false);
   const [focusId, setFocusId] = useState<string | null>(null);
   const phone = useIsPhone();
-  const [editSheet, setEditSheet] = useState<null | 'questions' | 'topics' | 'options'>(null);
+  const [editSheet, setEditSheet] = useState<null | 'questions' | 'topics'>(null);
 
   useEffect(() => {
     const t = setTimeout(() => save({ draft, title, key, selection: sel }), 300);
@@ -179,6 +180,7 @@ export default function Worksheets() {
           onClose={() => setEditSheet(null)}
           title="Edit worksheet"
           detents={['half', 'full']}
+          initialDetent={1}
           headerAction={
             <button type="button" className="ph-sheet-done" onClick={() => setEditSheet(null)}>
               Done
@@ -187,66 +189,13 @@ export default function Worksheets() {
         >
           <div className="ph-sheet-stack">
             <ChipRow label="What to edit">
-              <Chip selected={editSheet === 'questions'} onClick={() => setEditSheet('questions')}>
+              <Chip selected={editSheet !== 'topics'} onClick={() => setEditSheet('questions')}>
                 Questions
               </Chip>
               <Chip selected={editSheet === 'topics'} onClick={() => setEditSheet('topics')}>
                 Topics
               </Chip>
-              <Chip selected={editSheet === 'options'} onClick={() => setEditSheet('options')}>
-                Title and key
-              </Chip>
             </ChipRow>
-
-            {editSheet === 'questions' && (
-              <>
-                {sheet.length === 0 && <p className="ph-hint-strong">No questions yet. Pick topics, or add your own.</p>}
-                {sheet.map((s) => (
-                  <section key={s.key} className="ph-ws-section" aria-label={s.title}>
-                    <input className="ws-field ws-h3" aria-label={`Title of section ${s.title}`} value={s.title} placeholder="Section title" onChange={(e) => setDraft((d) => setSectionText(d, s.key, { title: e.target.value }))} />
-                    <input className="ws-field ws-instruction" aria-label={`Instruction for ${s.title}`} value={s.instruction} placeholder="What the student should do" onChange={(e) => setDraft((d) => setSectionText(d, s.key, { instruction: e.target.value }))} />
-                    {s.items.map((item, i) => (
-                      <div key={item.id} className="ph-ws-item">
-                        <ItemEditor
-                          item={item}
-                          first={i === 0}
-                          last={i === s.items.length - 1}
-                          autoFocus={focusId === item.id}
-                          onChange={(p) => change(item, p)}
-                          onRemove={() => setDraft((d) => removeItem(d, item.id))}
-                          onReset={() => setDraft((d) => resetItem(d, item.id))}
-                          onMove={(by) => setDraft((d) => moveItem(d, s.key, s.items.map((x) => x.id), item.id, by))}
-                        />
-                      </div>
-                    ))}
-                    <div className="ph-sheet-row" role="group" aria-label={`Add to ${s.title}`}>
-                      <button type="button" className="ph-secondary" onClick={() => add(s.key, 'question')}>
-                        <Icon name="plus" /> Question
-                      </button>
-                      <button type="button" className="ph-secondary" onClick={() => add(s.key, 'choice')}>
-                        <Icon name="plus" /> Choice
-                      </button>
-                      <button type="button" className="ph-secondary" onClick={() => add(s.key, 'translate')}>
-                        <Icon name="plus" /> Phrase
-                      </button>
-                    </div>
-                  </section>
-                ))}
-                <button
-                  type="button"
-                  className="ph-secondary is-wide"
-                  onClick={() =>
-                    setDraft((d) => {
-                      const r = addSection(d);
-                      setFocusId(r.id);
-                      return r.draft;
-                    })
-                  }
-                >
-                  <Icon name="plus" /> Add a section
-                </button>
-              </>
-            )}
 
             {editSheet === 'topics' && (
               <>
@@ -263,50 +212,8 @@ export default function Worksheets() {
                 <Picker legend="Phrases from" options={PHRASEBOOK.map((g) => ({ value: g.title, label: g.title, count: g.phrases.length }))} chosen={sel.phrases} onToggle={(v) => setSel({ ...sel, phrases: toggle(sel.phrases, v) })} />
               </>
             )}
-
-            {editSheet === 'options' && (
-              <>
-                <label>
-                  Title
-                  <input value={title} onChange={(e) => setTitle(e.target.value)} aria-label="Worksheet title" />
-                </label>
-                <button type="button" className={`ph-secondary is-wide${key ? ' is-on' : ''}`} role="switch" aria-checked={key} aria-label="Add an answer key on a new page" onClick={() => setKey((k) => !k)}>
-                  <Icon name="check" /> {key ? 'Answer key on' : 'Answer key off'}
-                </button>
-                <p className="ph-hint-strong" role="status">
-                  {count === 0 ? 'Nothing selected yet.' : `${count} ${count === 1 ? 'item' : 'items'} on the worksheet.`}
-                </p>
-                {draft.removed.length > 0 && (
-                  <button type="button" className="ph-secondary is-wide" onClick={() => setDraft(restoreRemoved)}>
-                    Bring back {draft.removed.length} removed {draft.removed.length === 1 ? 'question' : 'questions'}
-                  </button>
-                )}
-                {(hasChanges(draft) || draft.removed.length > 0) &&
-                  (confirmReset ? (
-                    <div className="ph-sheet-row">
-                      <button
-                        type="button"
-                        className="ph-primary"
-                        onClick={() => {
-                          setDraft(emptyDraft());
-                          setConfirmReset(false);
-                        }}
-                      >
-                        Discard my changes
-                      </button>
-                      <button type="button" className="ph-secondary" onClick={() => setConfirmReset(false)}>
-                        Keep them
-                      </button>
-                    </div>
-                  ) : (
-                    <button type="button" className="ph-secondary is-wide" onClick={() => setConfirmReset(true)}>
-                      Start over
-                    </button>
-                  ))}
-                <p className="ph-hint-strong">In a question, write ___ for a blank and **two stars** around a word to make it bold. Questions you change are marked as yours and have not been checked.</p>
-              </>
-            )}
           </div>
+          {editSheet !== 'topics' && <WorksheetEditor sheet={sheet} draft={draft} setDraft={setDraft} title={title} onTitle={setTitle} keyOn={key} onKey={setKey} count={count} />}
         </BottomSheet>
       </div>
     );

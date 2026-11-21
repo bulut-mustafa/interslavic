@@ -131,6 +131,11 @@ export interface TransportOptions {
    * with gain nodes; without it, on the elements themselves.
    */
   sink?: { context: AudioContext; destination: AudioNode };
+  /**
+   * Phone preview: fewer live decoders, a wider drift allowance and at most one corrective seek a second per element, because on
+   * a phone every seek stalls the decoder for longer than the drift it fixes. The desktop leaves it off.
+   */
+  gentle?: boolean;
 }
 
 /** Part A exports this from `transport.ts`. */

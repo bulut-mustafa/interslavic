@@ -175,6 +175,41 @@ export function moveItem(d: Draft, section: string, visible: string[], id: strin
   return { ...d, order: { ...d.order, [section]: next } };
 }
 
+/** What is needed to put a deleted question back exactly where it was, without touching anything changed since. */
+export interface ItemSnapshot {
+  id: string;
+  section: string;
+  /** A hand-written question: its entry and where it stood among the hand-written ones. */
+  custom: { id: string; section: string; item: Bare } | null;
+  customAt: number;
+  /** The section's order before, or undefined when it had no saved order. */
+  order: string[] | undefined;
+}
+
+export const snapshotItem = (d: Draft, id: string, section: string): ItemSnapshot => {
+  const at = d.custom.findIndex((c) => c.id === id);
+  return { id, section, custom: at === -1 ? null : d.custom[at]!, customAt: at, order: d.order[section] };
+};
+
+/** Undoes `removeItem`. */
+export function restoreItem(d: Draft, s: ItemSnapshot): Draft {
+  const custom = s.custom && !d.custom.some((c) => c.id === s.id) ? [...d.custom.slice(0, s.customAt), s.custom, ...d.custom.slice(s.customAt)] : d.custom;
+  const { [s.section]: _old, ...order } = d.order;
+  return { ...d, custom, removed: d.removed.filter((x) => x !== s.id), order: s.order ? { ...order, [s.section]: s.order } : order };
+}
+
+/** Copies a question (as shown now, edits included) into a hand-written one just after it. A copied phrase is the teacher's own, so it no longer points at a source. */
+export function duplicateItem(d: Draft, section: string, visible: string[], item: SheetItem): { draft: Draft; id: string } {
+  const { number: _n, id: _i, custom: _c, edited: _e, ...rest } = item;
+  const bare = structuredClone(rest) as unknown as Bare;
+  if (bare.kind === 'phrase') bare.phrase = { ...bare.phrase, source: 'custom' } as CustomPhrase;
+  const id = fresh('custom');
+  const at = visible.indexOf(item.id);
+  const next = [...visible];
+  next.splice(at === -1 ? next.length : at + 1, 0, id);
+  return { id, draft: { ...d, custom: [...d.custom, { id, section, item: bare }], order: { ...d.order, [section]: next } } };
+}
+
 export const setSectionText = (d: Draft, key: string, t: { title?: string; instruction?: string }): Draft => {
   const extra = d.extra.find((e) => e.id === key);
   if (extra) return { ...d, extra: d.extra.map((e) => (e.id === key ? { ...e, ...t } : e)) };
@@ -227,3 +262,18 @@ export function save(s: Saved, storage: Pick<Storage, 'setItem'> | null = typeof
     /* a private window, or a full store: the worksheet just is not kept */
   }
 }
+
+/** What is needed to put a deleted hand-written section back. */
+export interface SectionSnapshot {
+  extra: { id: string; title: string; instruction: string };
+  at: number;
+  custom: Draft['custom'];
+}
+
+export const snapshotSection = (d: Draft, id: string): SectionSnapshot | null => {
+  const at = d.extra.findIndex((e) => e.id === id);
+  return at === -1 ? null : { extra: d.extra[at]!, at, custom: d.custom.filter((c) => c.section === id) };
+};
+
+export const restoreSection = (d: Draft, s: SectionSnapshot): Draft =>
+  d.extra.some((e) => e.id === s.extra.id) ? d : { ...d, extra: [...d.extra.slice(0, s.at), s.extra, ...d.extra.slice(s.at)], custom: [...d.custom, ...s.custom] };

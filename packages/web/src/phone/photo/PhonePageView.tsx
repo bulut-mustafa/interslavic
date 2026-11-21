@@ -26,6 +26,8 @@ import { useKeyboardInset } from '../useKeyboardInset.ts';
 import { clampPan, placement, revealPan, toPage, toStageRect, zoomAbout, type Pan, type Size } from './canvas-view.ts';
 import { pinchLayer, planMove, softRotation } from './gesture-actions.ts';
 import { ICONS } from './icons.ts';
+import { emptyTextToRemove, holdInPlace } from './typing.ts';
+import { remove } from '../../photo/layer-ops.ts';
 import { AddSheet, ColourSheet, LayersSheet, MoreSheet, PagesSheet, PositionSheet, TextSheet } from './sheets.tsx';
 import type { PhoneCtx } from './types.ts';
 import './phone-photo.css';
@@ -217,6 +219,17 @@ export default function PhonePageView({ ctx: c }: { ctx: PhoneCtx }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [c.typing, stage.h, kb]);
 
+  /** Ends typing; a text left empty is removed (it would be an invisible layer that cannot be hit or seen). */
+  const stopTyping = () => {
+    if (c.typing && emptyTextToRemove(c.layer, c.isVirtual)) c.removeSel();
+    else c.setTyping(false);
+  };
+  // iOS scrolls the editor's boxes and the page to reveal the typing box: hold everything in place while typing.
+  useEffect(() => {
+    if (!c.typing) return;
+    return holdInPlace([root, stageEl.current]);
+  }, [c.typing, root]);
+
   // ---- touch ----
   const slack = Math.max(HIT_SLACK, 12 / at.k);
   const hitAt = (p: Pan): string | null => {
@@ -230,7 +243,7 @@ export default function PhonePageView({ ctx: c }: { ctx: PhoneCtx }) {
     {
       onTap: (p) => {
         const wasTyping = c.typing;
-        if (wasTyping) c.setTyping(false);
+        if (wasTyping) stopTyping();
         const id = hitAt(p);
         if (id) {
           c.pickLayers([id]);
@@ -347,6 +360,11 @@ export default function PhonePageView({ ctx: c }: { ctx: PhoneCtx }) {
 
   // ---- what the sheet holds ----
   const layer = c.layer;
+  /** Deletes one layer from the Layers sheet (hidden and locked ones cannot be picked on the picture, so this is their only way out); one undo step. */
+  const deleteLayer = (id: string) => {
+    c.commit(remove(c.layers, [id]));
+    if (c.sel.includes(id)) c.setSelectedIds(c.sel.filter((x) => x !== id));
+  };
   const done = () => setSheet(null);
   const objectPatch = (patch: Record<string, unknown>, mode: 'commit' | 'preview' | 'end') => c.objectChange(patch, mode);
   const objectSheet = (only: readonly ObjectPart[]) =>
@@ -434,7 +452,7 @@ export default function PhonePageView({ ctx: c }: { ctx: PhoneCtx }) {
         return (
           <>
             {notes}
-            <LayersSheet layers={c.layers} selected={c.sel} onSelect={(id) => c.pickLayers([id])} onChange={(next) => c.edit((d) => ({ ...d, layers: next }))} />
+            <LayersSheet layers={c.layers} selected={c.sel} onSelect={(id) => c.pickLayers([id])} onChange={(next) => c.edit((d) => ({ ...d, layers: next }))} onDelete={deleteLayer} />
           </>
         );
       case 'font':
@@ -582,7 +600,8 @@ export default function PhonePageView({ ctx: c }: { ctx: PhoneCtx }) {
             watch={[c.virtual, c.sel, c.layers, c.pic, c.shownSize.w, c.shownSize.h, c.crop, at.width, at.height, at.left, at.top, c.typing]}
             typing={c.typing}
             onType={c.text.onType}
-            onStopTyping={() => c.setTyping(false)}
+            onStopTyping={stopTyping}
+            minFontPx={16}
             onView={c.setView}
             toolbar={null}
           />
@@ -669,7 +688,7 @@ export default function PhonePageView({ ctx: c }: { ctx: PhoneCtx }) {
             </button>
           ))}
           <span className="pp-kb-gap" />
-          <button type="button" className="pp-kb-btn is-primary" onPointerDown={(e) => e.preventDefault()} onMouseDown={(e) => e.preventDefault()} onClick={() => c.setTyping(false)}>
+          <button type="button" className="pp-kb-btn is-primary" onPointerDown={(e) => e.preventDefault()} onMouseDown={(e) => e.preventDefault()} onClick={stopTyping}>
             Done
           </button>
         </KeyboardBar>

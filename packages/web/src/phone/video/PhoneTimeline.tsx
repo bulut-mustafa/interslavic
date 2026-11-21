@@ -1,4 +1,5 @@
 import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent } from 'react';
+import type { LiveClock } from '../../video/live-clock.ts';
 import type { ChangeMode, FrameStrip, ProjectChange, Selection } from '../../video/contracts.ts';
 import { makeTileCache } from '../../video/frames.ts';
 import { isText, sourceOf, trackOf, type VideoProject } from '../../video/project.ts';
@@ -10,8 +11,10 @@ import { flingAt, pinchZoom, scrubSnap, scrubTime, screenXOf, timeAtScreenX, vel
 
 export interface PhoneTimelineProps {
   project: VideoProject;
-  /** The edit second under the (fixed, centre) playhead. */
+  /** The edit second under the (fixed, centre) playhead, as React last heard it (a few times a second while playing). */
   time: number;
+  /** The playhead every frame: the content is moved from this directly, so playing costs no render. */
+  clock?: LiveClock;
   playing: boolean;
   selection: Selection;
   /** Pixels per second. */
@@ -56,6 +59,10 @@ export function PhoneTimeline(props: PhoneTimelineProps) {
   const surface = useRef<HTMLDivElement>(null);
   const latest = useRef(props);
   latest.current = props;
+  /** The playhead right now: the live clock when there is one, else the last rendered time. */
+  const nowT = (): number => latest.current.clock?.get() ?? latest.current.time;
+  const contentA = useRef<HTMLDivElement>(null);
+  const contentB = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(FALLBACK_W);
   const [rowScroll, setRowScroll] = useState(0);
   const rowRef = useRef(0);
@@ -92,7 +99,7 @@ export function PhoneTimeline(props: PhoneTimelineProps) {
   const contentX = (clientX: number): number => {
     const r = surface.current?.getBoundingClientRect();
     const p = latest.current;
-    return (clientX - (r?.left ?? 0)) - (r?.width || FALLBACK_W) / 2 + p.time * p.zoom;
+    return (clientX - (r?.left ?? 0)) - (r?.width || FALLBACK_W) / 2 + nowT() * p.zoom;
   };
 
   // ---- scrubbing, flinging, zooming, tapping ----
@@ -116,21 +123,21 @@ export function PhoneTimeline(props: PhoneTimelineProps) {
 
   const startMove = (pt: { x: number; y: number }) => {
     const p = latest.current;
-    const t = timeAtScreenX(pt.x, p.time, p.zoom, (surface.current?.getBoundingClientRect().width || FALLBACK_W) / 2);
+    const t = timeAtScreenX(pt.x, nowT(), p.zoom, (surface.current?.getBoundingClientRect().width || FALLBACK_W) / 2);
     const hit = hitAt(p.project, pt.y, t, p.zoom, rowRef.current);
     if (hit.kind !== 'clip' && hit.kind !== 'layer') return;
     const target: Target = { kind: hit.kind, id: hit.id };
     p.onScrubStart();
     p.onSelect({ kind: hit.kind, id: hit.id });
     const r = surface.current?.getBoundingClientRect();
-    const x0 = pt.x - (r?.width || FALLBACK_W) / 2 + p.time * p.zoom;
+    const x0 = pt.x - (r?.width || FALLBACK_W) / 2 + nowT() * p.zoom;
     moving.current = { base: { target, x0, origin: p.project }, moved: false };
     setLifted(hit.id);
     const move = (e: PointerEvent) => {
       const m = moving.current;
       if (!m) return;
       const q = latest.current;
-      const r = moveDrag(m.base, contentX(e.clientX), { zoom: q.zoom, time: q.time, snapping: q.snapping ?? true });
+      const r = moveDrag(m.base, contentX(e.clientX), { zoom: q.zoom, time: nowT(), snapping: q.snapping ?? true });
       m.moved = true;
       setMarker(r.marker);
       setGuide(r.guide);
@@ -162,7 +169,7 @@ export function PhoneTimeline(props: PhoneTimelineProps) {
     {
       onTap: (pt) => {
         const p = latest.current;
-        const t = timeAtScreenX(pt.x, p.time, p.zoom, (surface.current?.getBoundingClientRect().width || FALLBACK_W) / 2);
+        const t = timeAtScreenX(pt.x, nowT(), p.zoom, (surface.current?.getBoundingClientRect().width || FALLBACK_W) / 2);
         stopFling();
         if (pt.y < RULER_H) return p.onSeek(Math.max(0, t));
         const hit = hitAt(p.project, pt.y, t, p.zoom, rowRef.current);
@@ -175,9 +182,9 @@ export function PhoneTimeline(props: PhoneTimelineProps) {
         stopFling();
         const p = latest.current;
         const axis = Math.abs(e.dx) >= Math.abs(e.dy) || g.maxRowScroll === 0 ? 'x' : 'y';
-        drag.current = { axis, t0: p.time, r0: rowRef.current, samples: [{ x: e.x, t: performance.now() }] };
+        drag.current = { axis, t0: nowT(), r0: rowRef.current, samples: [{ x: e.x, t: performance.now() }] };
         if (axis === 'x') p.onScrubStart();
-        if (axis === 'x') scrubTo(scrubTime(p.time, e.dx, p.zoom, projectEnd(p.project)));
+        if (axis === 'x') scrubTo(scrubTime(drag.current.t0, e.dx, p.zoom, projectEnd(p.project)));
         else setRowScroll(clampRowScroll(drag.current.r0 - e.dy, g));
       },
       onDrag: (e) => {
@@ -195,7 +202,7 @@ export function PhoneTimeline(props: PhoneTimelineProps) {
         if (!d || d.axis !== 'x' || typeof requestAnimationFrame !== 'function') return;
         const v = velocityOf(d.samples);
         if (Math.abs(v) < 0.2) return;
-        const t0 = latest.current.time;
+        const t0 = nowT();
         const born = performance.now();
         const step = () => {
           const p = latest.current;
@@ -220,7 +227,7 @@ export function PhoneTimeline(props: PhoneTimelineProps) {
   const onKeyDown = (e: ReactKeyboardEvent) => {
     if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
     e.preventDefault();
-    props.onSeek(time + (e.key === 'ArrowLeft' ? -1 : 1) * (e.shiftKey ? 1 : KEY_STEP));
+    props.onSeek(nowT() + (e.key === 'ArrowLeft' ? -1 : 1) * (e.shiftKey ? 1 : KEY_STEP));
   };
 
   // ---- trim handles (outside the gesture surface, so a handle drag is never a scrub) ----
@@ -252,7 +259,7 @@ export function PhoneTimeline(props: PhoneTimelineProps) {
   const moveTrim = (e: ReactPointerEvent) => {
     const t = trimming.current;
     if (!t) return;
-    const r = trimDrag(t.base, t.edge, contentX(e.clientX), { zoom, time, snapping: props.snapping ?? true });
+    const r = trimDrag(t.base, t.edge, contentX(e.clientX), { zoom, time: nowT(), snapping: props.snapping ?? true });
     t.moved = true;
     setGuide(r.guide);
     props.onChange(r.change, 'preview');
@@ -264,13 +271,28 @@ export function PhoneTimeline(props: PhoneTimelineProps) {
     if (t?.moved) props.onChange({}, 'end');
   };
 
+  // The content follows the live clock directly (one transform write per animation frame, no render).
+  const widthRef = useRef(width);
+  widthRef.current = width;
+  useEffect(() => {
+    const clock = props.clock;
+    if (!clock) return;
+    return clock.subscribe((t) => {
+      const v = `translate3d(${screenXOf(0, t, latest.current.zoom, widthRef.current / 2)}px, 0, 0)`;
+      if (contentA.current) contentA.current.style.transform = v;
+      if (contentB.current) contentB.current.style.transform = v;
+    });
+  }, [props.clock]);
+
   // ---- drawing ----
   const px = (t: number) => t * zoom;
-  const from = Math.max(0, time - centre / zoom);
-  const ticks = rulerTicks(zoom, width + 64, from);
+  const shown = props.clock?.get() ?? time;
+  const from = Math.max(0, shown - centre / zoom);
+  // The time reaches React a few times a second while playing, so the ruler is drawn a little past the right edge.
+  const ticks = rulerTicks(zoom, width + 64 + Math.round(zoom * 0.5), from);
   const stripOf = (srcId: string | undefined) => strips.find((s) => s.srcId === srcId);
 
-  const contentStyle = { transform: `translate3d(${screenXOf(0, time, zoom, centre)}px, 0, 0)` };
+  const contentStyle = { transform: `translate3d(${screenXOf(0, shown, zoom, centre)}px, 0, 0)` };
   const rowsInStyle = { transform: `translate3d(0, ${-rowScroll}px, 0)` };
   const handleRow = selSpan && selSpan.row >= 0 ? RULER_H + selSpan.row * ROW_H - rowScroll : g.mainTop;
   const handleH = selSpan && selSpan.row >= 0 ? ROW_H : MAIN_H;
@@ -279,7 +301,7 @@ export function PhoneTimeline(props: PhoneTimelineProps) {
   return (
     <div ref={root} className={`pv-tl${playing ? ' is-playing' : ''}`} style={{ height: g.height }} data-testid="phone-timeline">
       <div ref={surface} className="pv-tl-surface" role="group" tabIndex={0} aria-label="Timeline. Swipe to move the playhead, pinch to zoom, tap to pick, press and hold to move." onKeyDown={onKeyDown}>
-        <div className="pv-tl-content" style={contentStyle} data-px-per-second={zoom}>
+        <div ref={contentA} className="pv-tl-content" style={contentStyle} data-px-per-second={zoom}>
           <div className="pv-ruler" aria-hidden="true" style={{ height: RULER_H }}>
             {ticks.map((k) => (
               <span key={k.t} className={`pv-tick${k.major ? ' is-major' : ''}`} style={{ left: px(k.t) }}>
@@ -330,7 +352,7 @@ export function PhoneTimeline(props: PhoneTimelineProps) {
 
       {/* Controls that must not be scrubs: they sit above the surface and move with the content. */}
       <div className="pv-tl-over" aria-hidden={false}>
-        <div className="pv-tl-content" style={contentStyle}>
+        <div ref={contentB} className="pv-tl-content" style={contentStyle}>
           {project.clips.slice(1).map((c, i) => (
             <button key={c.id} type="button" className={`pv-joint${c.transitionIn ? ' has-transition' : ''}`} style={{ left: px(startOf(project.clips, i + 1)), top: g.mainTop + MAIN_H / 2 - 22 }} aria-label={`Transition between clip ${i + 1} and clip ${i + 2}`} disabled={props.disabled} onClick={() => props.onTransition(c.id)}>
               <span aria-hidden="true">{c.transitionIn ? '✕' : '+'}</span>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { perfTake } from '../video/perf.ts';
 
 /**
  * A small readout for whoever is working on the Studio: add ?perf=1 to the
@@ -13,6 +14,8 @@ interface Reading {
   canvases: number;
   canvasMb: number;
   pages: number;
+  /** Video editor, per second: React renders, compositor draws, transport frames, clock ticks React heard, corrective seeks, jumps. */
+  video: Record<string, number>;
 }
 
 const read = (): Reading => {
@@ -23,6 +26,7 @@ const read = (): Reading => {
     canvases: canvases.length,
     canvasMb: Math.round(canvases.reduce((n, c) => n + c.width * c.height * 4, 0) / 1048576),
     pages: document.querySelectorAll('.page-tile').length,
+    video: perfTake(),
   };
 };
 
@@ -42,6 +46,11 @@ export function PerfOverlay() {
         canvases {r.canvases} ({r.canvasMb} MB)
       </span>
       <span>pages {r.pages}</span>
+      {Object.keys(r.video).length > 0 && (
+        <span>
+          video/s: render {r.video.render ?? 0} draw {r.video.draw ?? 0} frame {r.video.frame ?? 0} tick {r.video.tick ?? 0} fix {r.video.fix ?? 0} seek {r.video.seek ?? 0}
+        </span>
+      )}
     </aside>
   );
 }

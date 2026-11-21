@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Icon } from '../../components/Icon.tsx';
 import * as H from '../../editor/history.ts';
 import { updateStyle } from '../../editor/layers.ts';
@@ -19,6 +19,9 @@ import { diamondOn, isAction, ratioLabel, toggleDiamond, toolsFor, type ToolId }
 import './phone-video.css';
 
 type SheetTool = ToolId | 'uploads';
+
+/** The strip is redrawn only when its own items change, not at every tick of the playing clock. */
+const Strip = memo(ToolStrip);
 
 const TITLES: Partial<Record<SheetTool, string>> = {
   edit: 'Edit', audio: 'Audio', text: 'Text', overlay: 'Overlay', effects: 'Effects', transitions: 'Transitions', ratio: 'Ratio', captions: 'Captions', voice: 'Read aloud',
@@ -56,7 +59,7 @@ function iconOf(id: ToolId): ReactNode {
  * controls over it (preview, centre-playhead timeline, tool strip, one sheet).
  */
 export default function PhoneVideo({ store = defaultVideoStore, makeTranscriber, decodeAudio }: Deps & { store?: VideoStore | null } = {}) {
-  const ed = useVideoEditor({ store, makeTranscriber, decodeAudio });
+  const ed = useVideoEditor({ store, makeTranscriber, decodeAudio, phone: true });
   const { project, clips, sel, hist, ready, restoring, busyOut, exporting, time, length, playing, textLayer, mediaLayer } = ed;
   const [tool, setTool] = useState<SheetTool | null>(null);
   const [zoom, setZoom] = useState(PHONE_ZOOM);
@@ -77,8 +80,11 @@ export default function PhoneVideo({ store = defaultVideoStore, makeTranscriber,
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selKey]);
 
-  const { mode, items } = toolsFor(project, sel, { canDeleteClip: clips.length > 1 });
-  const strip: StripItem[] = items.map((t) => ({ id: t.id, label: t.label, disabled: t.disabled || busyOut, icon: iconOf(t.id) }));
+  const { mode, strip } = useMemo(() => {
+    const r = toolsFor(project, sel, { canDeleteClip: clips.length > 1 });
+    const items: StripItem[] = r.items.map((t) => ({ id: t.id, label: t.label, disabled: t.disabled || busyOut, icon: iconOf(t.id) }));
+    return { mode: r.mode, strip: items };
+  }, [project, sel, clips.length, busyOut]);
 
   const act = (id: ToolId) => {
     if (id === 'split') ed.split();
@@ -90,11 +96,13 @@ export default function PhoneVideo({ store = defaultVideoStore, makeTranscriber,
       ed.setTyping(true);
     }
   };
-  const onTool = (id: string) => {
+  const actRef = useRef(act);
+  actRef.current = act;
+  const onTool = useCallback((id: string) => {
     const t = id as ToolId;
-    if (isAction(t)) return act(t);
+    if (isAction(t)) return actRef.current(t);
     setTool((cur) => (cur === t ? null : t));
-  };
+  }, []);
 
   const layer = mediaLayer ?? textLayer;
   const tLocal = layer ? time - (layer.start ?? 0) : 0;
@@ -233,6 +241,7 @@ export default function PhoneVideo({ store = defaultVideoStore, makeTranscriber,
         <PhoneTimeline
           project={project}
           time={time}
+          clock={ed.liveClock}
           playing={playing}
           selection={sel}
           zoom={zoom}
@@ -247,7 +256,7 @@ export default function PhoneVideo({ store = defaultVideoStore, makeTranscriber,
           onTransition={(id) => { ed.setJoint(id); setTool('transitions'); }}
           onAddFiles={(l) => void ed.addFiles(l, 'append')}
         />
-        <ToolStrip items={strip} selected={tool} onSelect={onTool} mode={mode} label="Video tools" />
+        <Strip items={strip} selected={tool} onSelect={onTool} mode={mode} label="Video tools" />
       </div>
 
       <BottomSheet open={tool !== null} onClose={() => setTool(null)} title={TITLES[shownTool] ?? 'Tool'} heightTarget={rootEl} headerAction={<button type="button" className="pv-done" onClick={() => setTool(null)}>Done</button>}>
