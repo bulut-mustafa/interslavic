@@ -1,0 +1,244 @@
+/* The phone shell, top/tab bars and Studio home. Visual language: docs/mobile-design.md. */
+
+html.ph-locked,
+html.ph-locked body {
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+.ph-app {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  height: 100vh;
+  height: 100svh;
+  background: var(--paper);
+}
+
+.ph-topbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 48px;
+  padding: env(safe-area-inset-top) 4px 0 12px;
+  background: #fff;
+  border-bottom: 1px solid var(--rule);
+}
+.ph-topbar-title {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+.ph-topbar-right {
+  display: flex;
+  align-items: center;
+}
+.ph-bar-btn {
+  display: grid;
+  place-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--ink);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.ph-bar-btn:active {
+  background: var(--paper);
+}
+.ph-topbar .ph-bar-btn:first-child:not(:last-child) {
+  margin-left: -8px;
+}
+
+.ph-content {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: var(--space-3);
+}
+.ph-tool {
+  padding: 0;
+  background: #e4e6ea; /* the neutral grey surround editors sit on */
+}
+
+.ph-tabbar {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  background: #fff;
+  border-top: 1px solid var(--rule);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.ph-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 56px;
+  color: var(--ink-faint);
+  text-decoration: none;
+  font-size: 12px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.ph-tab:active {
+  background: var(--paper);
+}
+.ph-tab.is-current {
+  color: var(--teal);
+  font-weight: 600;
+}
+.ph-tab-icon {
+  display: grid;
+  place-items: center;
+  height: 24px;
+}
+
+.ph-menu {
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+  line-height: 1.6;
+}
+.ph-menu a {
+  color: var(--teal);
+}
+
+.ph-hint {
+  color: var(--ink-faint);
+  font-size: var(--text-sm);
+}
+
+/* ---------- Studio home ---------- */
+.ph-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ph-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  height: 100%;
+  min-height: 7.5rem;
+  padding: var(--space-3);
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: 16px;
+  color: var(--ink-soft);
+  text-decoration: none;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.2s ease;
+}
+.ph-card:active {
+  transform: scale(0.97);
+}
+.ph-card strong {
+  color: var(--ink);
+  font-size: 1.05rem;
+}
+.ph-card-icon {
+  width: 1.9rem;
+  height: 1.9rem;
+  color: var(--teal);
+}
+.ph-card span {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ph-uploads {
+  margin-top: var(--space-4);
+}
+.ph-uploads h2 {
+  margin: 0 0 var(--space-2);
+  font-size: 1rem;
+}
+.ph-uploads-row {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x;
+  scrollbar-width: none;
+}
+.ph-uploads-row::-webkit-scrollbar {
+  display: none;
+}
+.ph-upload,
+.ph-upload-add {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 4.5rem;
+  height: 4.5rem;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--ink-soft);
+  touch-action: manipulation;
+}
+.ph-upload img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ph-upload-add {
+  position: relative;
+  border-style: dashed;
+  color: var(--teal);
+  font-size: 1.4rem;
+  line-height: 1;
+}
+.ph-upload-add small {
+  font-size: 0.7rem;
+}
+.ph-upload-add input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  font-size: 16px;
+}
+
+/* The desktop Uploads panel, reused inside a sheet: drop its own frame and header. */
+.ph-uploads-pane .uploads-sheet {
+  position: static;
+  width: auto;
+  height: auto;
+  max-height: none;
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+}
+.ph-uploads-pane .uploads-head {
+  display: none;
+}
+.ph-uploads-pane .uploads-list {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ph-card {
+    transition: none;
+  }
+}

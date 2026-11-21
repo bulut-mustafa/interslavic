@@ -1,0 +1,118 @@
+.ph-strip-wrap {
+  position: relative;
+  flex: none;
+  background: #fff;
+  border-top: 1px solid var(--rule);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.ph-strip {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: 12px;
+  touch-action: pan-x;
+  scrollbar-width: none;
+  padding: 0 12px;
+  animation: ph-strip-in 160ms ease-out;
+}
+.ph-strip::-webkit-scrollbar {
+  display: none;
+}
+
+/* Fade only the side that has more to scroll to. */
+.ph-strip-wrap.fade-left .ph-strip {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 28px);
+  mask-image: linear-gradient(to right, transparent, #000 28px);
+}
+.ph-strip-wrap.fade-right .ph-strip {
+  -webkit-mask-image: linear-gradient(to left, transparent, #000 28px);
+  mask-image: linear-gradient(to left, transparent, #000 28px);
+}
+.ph-strip-wrap.fade-left.fade-right .ph-strip {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 28px, #000 calc(100% - 28px), transparent);
+  mask-image: linear-gradient(to right, transparent, #000 28px, #000 calc(100% - 28px), transparent);
+}
+
+.ph-strip-item {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 56px;
+  min-height: 56px;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: var(--ink-soft);
+  font: inherit;
+  scroll-snap-align: start;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.ph-strip-item:active:not(:disabled) {
+  background: var(--paper);
+}
+.ph-strip-item.is-selected {
+  color: var(--teal);
+  background: rgba(31, 107, 107, 0.1);
+}
+.ph-strip-item:disabled {
+  opacity: 0.38;
+}
+.ph-strip-icon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+}
+.ph-strip-icon .icon {
+  width: 24px;
+  height: 24px;
+}
+.ph-strip-label {
+  font-size: 12px;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+.ph-badge {
+  position: absolute;
+  top: -4px;
+  right: -8px;
+  min-width: 8px;
+  height: 8px;
+  padding: 0 3px;
+  border-radius: 8px;
+  background: var(--plum);
+  color: #fff;
+  font-style: normal;
+  font-size: 10px;
+  line-height: 8px;
+}
+.ph-badge:not(:empty) {
+  height: 14px;
+  line-height: 14px;
+  top: -6px;
+}
+
+@keyframes ph-strip-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ph-strip {
+    animation: none;
+  }
+}

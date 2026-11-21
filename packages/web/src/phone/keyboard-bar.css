@@ -1,0 +1,28 @@
+.ph-kbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 45;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 48px;
+  padding: 2px 8px;
+  overflow-x: auto;
+  background: #fff;
+  border-top: 1px solid var(--rule);
+  touch-action: pan-x;
+  overscroll-behavior: contain;
+}
+.ph-kbar button {
+  min-width: 44px;
+  min-height: 44px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--ink);
+  touch-action: manipulation;
+}
+.ph-kbar button:active {
+  background: var(--paper);
+}

@@ -7,6 +7,8 @@ import Translator from './pages/Translator.tsx';
 import Studio from './studio/Studio.tsx';
 import { pageMeta } from './meta.ts';
 import { Link, usePath } from './router.tsx';
+import PhoneApp from './phone/PhoneApp.tsx';
+import { useIsPhone } from './phone/useIsPhone.ts';
 
 /**
  * The site: the translator at the root, beside it the lessons and the
@@ -23,6 +25,7 @@ const SECTIONS = [
 
 export default function App() {
   const path = usePath();
+  const phone = useIsPhone();
 
   // The prerendered head is right for the first page; keep it right after
   // moving to another without a reload.
@@ -31,6 +34,19 @@ export default function App() {
     document.title = meta.title;
     document.querySelector('meta[name="description"]')?.setAttribute('content', meta.description);
   }, [path]);
+
+  const page = path.startsWith('/learn') ? (
+    <Lesson slug={path.replace(/^\/learn\/?/, '').replace(/\/$/, '') || LESSONS[0]!.slug} />
+  ) : path.startsWith('/phrasebook') ? (
+    <Phrasebook />
+  ) : path === '/' ? (
+    <Translator />
+  ) : (
+    <NotFound />
+  );
+
+  // On a phone the app is a different layout (src/phone), not the desktop one made smaller.
+  if (phone) return <PhoneApp path={path} page={page} />;
 
   // The Studio has an interface of its own, without the site's header and footer.
   if (path.startsWith('/studio')) return <Studio path={path} />;
@@ -55,15 +71,7 @@ export default function App() {
         </nav>
       </header>
 
-      {path.startsWith('/learn') ? (
-        <Lesson slug={path.replace(/^\/learn\/?/, '').replace(/\/$/, '') || LESSONS[0]!.slug} />
-      ) : path.startsWith('/phrasebook') ? (
-        <Phrasebook />
-      ) : path === '/' ? (
-        <Translator />
-      ) : (
-        <NotFound />
-      )}
+      {page}
 
       <footer className="site-footer">
         <Credits />

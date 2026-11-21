@@ -1,0 +1,91 @@
+/* BottomSheet: white, rounded top, soft shadow; moves by transform only. */
+
+.ph-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  max-height: 100svh;
+  background: #fff;
+  color: var(--ink);
+  border-radius: 18px 18px 0 0;
+  box-shadow: 0 -6px 28px rgba(22, 32, 47, 0.2);
+  will-change: transform;
+}
+
+.ph-sheet-head {
+  flex: none;
+  /* The grabber and header are the only parts that own touch drags. */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.ph-sheet-grabber {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: grab;
+  touch-action: none;
+}
+.ph-sheet-grabber span {
+  width: 40px;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--rule);
+}
+.ph-sheet-grabber:active span {
+  background: var(--ink-faint);
+}
+
+.ph-sheet-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: 0 var(--space-3) var(--space-2);
+}
+.ph-sheet-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+.ph-sheet-close {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-right: -10px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--ink-soft);
+  touch-action: manipulation;
+}
+.ph-sheet-close:active {
+  background: var(--paper);
+}
+
+.ph-sheet-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 var(--space-3) calc(var(--space-3) + env(safe-area-inset-bottom));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ph-sheet {
+    transition: none !important;
+  }
+}

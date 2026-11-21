@@ -42,6 +42,10 @@ const PATHS = {
   forward: 'M12 20V5M6 11l6-6 6 6M5 20h14',
   backward: 'M12 4v15M6 13l6 6 6-6M5 4h14',
   swap: 'M7 7h13M16 3l4 4-4 4M17 17H4M8 13l-4 4 4 4',
+  menu: 'M4 7h16M4 12h16M4 17h16',
+  book: 'M5 4h10a3 3 0 013 3v13H8a3 3 0 01-3-3zM5 17a3 3 0 013-3h10',
+  phrasebook: 'M4 5h16v11H9l-5 4zM8 9h8M8 12h5',
+  studio: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',
 } as const;
 
 export type IconName = keyof typeof PATHS;
