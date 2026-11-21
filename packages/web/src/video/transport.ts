@@ -26,7 +26,7 @@ const SAME_FRAME = 0.034;
 /** Pressing play this close to the end starts from the beginning. */
 const END_SLACK = 0.05;
 /** `gentle` mode: how far an element may stray, and the least time between two corrective seeks of one element. */
-export const GENTLE_DRIFT = 0.4;
+export const GENTLE_DRIFT = 0.8;
 export const GENTLE_GAP_MS = 1000;
 /** `gentle` mode keeps fewer videos alive: iOS Safari decodes only a few at once and publishes no number. */
 export const GENTLE_MAX_VIDEOS = 3;
@@ -61,6 +61,13 @@ export function createTransportWith(o: TransportOptions, deps: TransportDeps = {
   const gentle = !!o.gentle;
   const limit = gentle ? GENTLE_DRIFT : DRIFT_LIMIT;
   const lastFix = new WeakMap<PoolEntry, number>();
+  /**
+   * How long a seek of a PLAYING element takes to land (call to `seeked`), smoothed. A corrective seek aims that far ahead:
+   * otherwise the element resumes exactly that far behind the clock, drifts past the limit again, and is seeked again
+   * every second, each time freezing the picture (measured in WebKit: one freeze per second, forever).
+   */
+  let seekLatency = 0;
+  const seekStart = new WeakMap<PoolEntry, number>();
 
   const length = (): number => {
     const p = o.getProject();
@@ -90,6 +97,12 @@ export function createTransportWith(o: TransportOptions, deps: TransportDeps = {
       });
     },
     onSettled: (e) => {
+      const began = seekStart.get(e);
+      if (began !== undefined) {
+        seekStart.delete(e);
+        const d = Math.min(Math.max((now() - began) / 1000, 0), 1);
+        seekLatency = seekLatency === 0 ? d : seekLatency * 0.5 + d * 0.5;
+      }
       if (waiting.delete(e) && waiting.size === 0) frameReady();
     },
   });
@@ -103,6 +116,7 @@ export function createTransportWith(o: TransportOptions, deps: TransportDeps = {
       return;
     }
     e.seeking = true;
+    seekStart.set(e, now());
     el.currentTime = t;
   }
 
@@ -169,7 +183,7 @@ export function createTransportWith(o: TransportOptions, deps: TransportDeps = {
         if (needs) {
           perfBump(force ? 'seek' : 'fix');
           if (gentle && !force) lastFix.set(e, now());
-          seekEl(e, wanted);
+          seekEl(e, gentle && !force && playing ? wanted + seekLatency : wanted);
           if (force || !playing) seeks.push(e);
         }
         e.primed = true;

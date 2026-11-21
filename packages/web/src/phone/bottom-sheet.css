@@ -22,6 +22,14 @@ html.ph-kb-open .ph-sheet {
   max-height: calc(var(--vvh, 100svh) - var(--ph-space-2));
 }
 
+/* Keyboard up: every pixel counts, so the handle row and the title row get tighter. */
+html.ph-kb-open .ph-sheet-grabber {
+  height: 16px;
+}
+html.ph-kb-open .ph-sheet-title-row {
+  padding-bottom: var(--ph-space-1);
+}
+
 .ph-sheet-head {
   flex: none;
   /* The grabber and header are the only parts that own touch drags. */

@@ -1,5 +1,6 @@
 import { useMemo, useRef, type PointerEvent as ReactPointerEvent } from 'react';
 import { LayerCanvas } from '../../editor/LayerCanvas.tsx';
+import { DEFAULT_TEXT } from '../../editor/layers.ts';
 import { SelectionOverlay } from '../../editor/SelectionOverlay.tsx';
 import { HANDLES, handlePositions, resizeBox, rotateBox, type Handle, type Pt } from '../../editor/transform-math.ts';
 import { boxOfMedia, patchOfBox } from '../../editor/transform-math.ts';
@@ -149,7 +150,7 @@ export function PhonePreview({ ed }: { ed: VideoEditorState }) {
         <div ref={surface} className="pv-gesture" aria-hidden="true" data-testid="preview-surface" />
         {mediaLayer && !typing && <PhoneBox ed={ed} layer={mediaLayer} frameEl={frameEl} />}
       </div>
-      <SelectionOverlay scene={scene} wrap={wrap} active={typing ? onFrame : []} watch={[onFrame, frame, typing]} typing={typing} onType={(text) => textLayer && ed.commitMerge(`t:${textLayer.id}`, { layers: ed.layers.map((l) => (l.id === textLayer.id ? ({ ...l, text } as Layer) : l)) })} onStopTyping={() => ed.setTyping(false)} toolbar={null} />
+      <SelectionOverlay scene={scene} wrap={wrap} active={typing ? onFrame : []} watch={[onFrame, frame, typing]} typing={typing} minFontPx={16} selectOnOpen={textLayer?.text === DEFAULT_TEXT} onType={(text) => textLayer && ed.commitMerge(`t:${textLayer.id}`, { layers: ed.layers.map((l) => (l.id === textLayer.id ? ({ ...l, text } as Layer) : l)) })} onStopTyping={() => ed.setTyping(false)} toolbar={null} />
     </div>
   );
 }

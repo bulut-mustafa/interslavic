@@ -46,3 +46,15 @@ export function holdInPlace(boxes: readonly (HTMLElement | null | undefined)[], 
 export function emptyTextToRemove(layer: { text: string } | null, isVirtual: boolean): boolean {
   return !!layer && !isVirtual && layer.text.trim() === '';
 }
+
+/** Height of the bar that rides on the keyboard, px (keyboard-bar.css: min-height 48 plus its 1px border). */
+export const KEYBOARD_BAR_H = 49;
+
+/**
+ * Bottom padding of the editor while typing. The phone shell is already pinned to the VISIBLE part of the screen when a keyboard is up
+ * (viewportLock: height = visualViewport.height), so only the keyboard bar is reserved. Adding the keyboard's own height as well made the
+ * padding larger than the shell and squeezed the stage to 0px: the picture vanished.
+ */
+export function typingPadding(typing: boolean, keyboardPx: number): number {
+  return typing && keyboardPx > 0 ? KEYBOARD_BAR_H : 0;
+}

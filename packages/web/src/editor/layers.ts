@@ -48,8 +48,11 @@ export interface TextLayer {
 let counter = 0;
 export const newId = (prefix = 'l'): string => `${prefix}${Date.now().toString(36)}${(counter++).toString(36)}`;
 
+/** What a new text layer says until the person types: a phone selects it when typing starts, so the first key replaces it. */
+export const DEFAULT_TEXT = 'Your text';
+
 export function newLayer(over: Partial<TextLayer> & { x: number; y: number }): TextLayer {
-  return { id: newId(), text: 'Your text', maxWidth: 0, style: { ...DEFAULT_STYLE }, ...over };
+  return { id: newId(), text: DEFAULT_TEXT, maxWidth: 0, style: { ...DEFAULT_STYLE }, ...over };
 }
 
 export const updateLayer = (layers: TextLayer[], id: string, patch: Partial<TextLayer>): TextLayer[] =>

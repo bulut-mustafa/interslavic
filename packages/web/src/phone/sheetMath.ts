@@ -51,3 +51,16 @@ export function centerScrollTop(scrollTop: number, box: { top: number; height: n
   const delta = field.top + field.height / 2 - (box.top + box.height / 2);
   return Math.max(0, Math.round(scrollTop + delta));
 }
+
+/**
+ * Like centerScrollTop, but leaves the scroller alone when the field already
+ * sits inside the visible part with `margin` px to spare (so tapping a field
+ * that is in view never moves the page under the finger). When the field is
+ * too close to an edge or outside, it is centred, once.
+ */
+export function revealScrollTop(scrollTop: number, box: { top: number; height: number }, field: { top: number; height: number }, margin = 16): number {
+  const inside = field.top >= box.top + margin && field.top + field.height <= box.top + box.height - margin;
+  if (inside) return scrollTop;
+  if (field.height + 2 * margin > box.height) return Math.max(0, Math.round(scrollTop + field.top - (box.top + margin)));
+  return centerScrollTop(scrollTop, box, field);
+}

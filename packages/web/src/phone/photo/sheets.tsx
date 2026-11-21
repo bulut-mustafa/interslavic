@@ -327,44 +327,83 @@ function LayerIcon({ layer }: { layer: PhotoLayer }) {
 /** Every layer, front first: tap to select, eye, lock, and buttons to move it up or down (no drag needed). */
 export function LayersSheet(props: { layers: PhotoLayer[]; selected: string[]; onSelect: (id: string) => void; onChange: (next: PhotoLayer[]) => void; onDelete?: (id: string) => void }) {
   const { layers } = props;
+  // One row is "the one": the list rows only select, and ONE bar of actions (move, hide, lock, delete) acts on that row. Hidden and
+  // locked layers cannot be picked on the picture, so the row tapped here is remembered separately from the picture's selection.
+  const [tapped, setTapped] = useState<string | null>(null);
   if (layers.length === 0) return <p className="pp-note">No layers yet. Add text, a picture or a shape.</p>;
   const shown = [...layers].reverse();
+  const focusId = [tapped, props.selected[0]].find((id) => !!id && layers.some((l) => l.id === id)) ?? null;
+  const at = shown.findIndex((l) => l.id === focusId);
+  const cur = at >= 0 ? shown[at]! : null;
+  const name = cur ? layerName(cur) : '';
+  const hidden = !!cur && isHidden(cur);
+  const locked = !!cur && isLocked(cur);
   return (
-    <ul className="pp-layers" aria-label="Layer list, front first">
-      {shown.map((l, i) => {
-        const name = layerName(l);
-        const hidden = isHidden(l);
-        const locked = isLocked(l);
-        const sel = props.selected.includes(l.id);
-        return (
-          <li key={l.id} className={`pp-layer${sel ? ' is-selected' : ''}${hidden ? ' is-hidden' : ''}`}>
-            <button type="button" className="pp-layer-main" aria-pressed={sel} aria-label={name} onClick={() => props.onSelect(l.id)}>
-              <span className="pp-layer-thumb">
-                <LayerIcon layer={l} />
-              </span>
-              <span className="pp-layer-name">{name}</span>
-            </button>
-            <button type="button" className="pp-icon-btn" aria-label={`Move ${name} up`} disabled={i === 0} onClick={() => props.onChange(reorder(layers, [l.id], 'forward'))}>
+    <>
+      <div className="pp-actionbar" role="toolbar" aria-label={cur ? `Actions for ${name}` : 'Layer actions'}>
+        {cur ? (
+          <>
+            <span className="pp-actionbar-name">{name}</span>
+            <button type="button" className="pp-icon-btn" aria-label={`Move ${name} up`} disabled={at === 0} onClick={() => props.onChange(reorder(layers, [cur.id], 'forward'))}>
               <Icon name="arrowUp" />
             </button>
-            <button type="button" className="pp-icon-btn" aria-label={`Move ${name} down`} disabled={i === shown.length - 1} onClick={() => props.onChange(reorder(layers, [l.id], 'backward'))}>
+            <button type="button" className="pp-icon-btn" aria-label={`Move ${name} down`} disabled={at === shown.length - 1} onClick={() => props.onChange(reorder(layers, [cur.id], 'backward'))}>
               <Icon name="arrowDown" />
             </button>
-            <button type="button" className="pp-icon-btn" aria-label={hidden ? `Show ${name}` : `Hide ${name}`} aria-pressed={hidden} onClick={() => props.onChange(setHidden(layers, [l.id], !hidden))}>
+            <button type="button" className="pp-icon-btn" aria-label={hidden ? `Show ${name}` : `Hide ${name}`} aria-pressed={hidden} onClick={() => props.onChange(setHidden(layers, [cur.id], !hidden))}>
               <PathIcon d={hidden ? EYE_OFF : EYE} />
             </button>
-            <button type="button" className="pp-icon-btn" aria-label={locked ? `Unlock ${name}` : `Lock ${name}`} aria-pressed={locked} onClick={() => props.onChange(setLocked(layers, [l.id], !locked))}>
+            <button type="button" className="pp-icon-btn" aria-label={locked ? `Unlock ${name}` : `Lock ${name}`} aria-pressed={locked} onClick={() => props.onChange(setLocked(layers, [cur.id], !locked))}>
               <PathIcon d={locked ? LOCK : UNLOCK} />
             </button>
             {props.onDelete && (
-              <button type="button" className="pp-icon-btn" aria-label={`Delete ${name}`} onClick={() => props.onDelete?.(l.id)}>
+              <button
+                type="button"
+                className="pp-icon-btn is-danger"
+                aria-label={`Delete ${name}`}
+                onClick={() => {
+                  // The next layer in the list takes over, so Delete can be pressed again for the one below.
+                  const next = shown[at + 1] ?? shown[at - 1];
+                  setTapped(next ? next.id : null);
+                  props.onDelete?.(cur.id);
+                }}
+              >
                 <Icon name="trash" />
               </button>
             )}
-          </li>
-        );
-      })}
-    </ul>
+          </>
+        ) : (
+          <span className="pp-actionbar-name">Tap a layer to move, hide, lock or delete it</span>
+        )}
+      </div>
+      <ul className="pp-layers" aria-label="Layer list, front first">
+        {shown.map((l) => {
+          const n = layerName(l);
+          const sel = l.id === focusId;
+          return (
+            <li key={l.id} className={`pp-layer${sel ? ' is-selected' : ''}${isHidden(l) ? ' is-hidden' : ''}`}>
+              <button
+                type="button"
+                className="pp-layer-main"
+                aria-pressed={sel}
+                aria-label={n}
+                onClick={() => {
+                  setTapped(l.id);
+                  props.onSelect(l.id);
+                }}
+              >
+                <span className="pp-layer-thumb">
+                  <LayerIcon layer={l} />
+                </span>
+                <span className="pp-layer-name">{n}</span>
+                {isHidden(l) && <span className="pp-layer-flag">hidden</span>}
+                {isLocked(l) && <span className="pp-layer-flag">locked</span>}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </>
   );
 }
 
@@ -381,44 +420,62 @@ export function PagesSheet(props: {
 }) {
   const [asking, setAsking] = useState<string | null>(null);
   const n = props.pages.length;
+  // Tiles only choose a page; ONE bar of actions (move, duplicate, delete) acts on the chosen page. Four buttons on every tile did not fit
+  // the tile (160px of buttons in 111px), so each tile's trash sat under its neighbour's arrow and could not be tapped.
+  const at = Math.max(0, props.pages.findIndex((p) => p.id === props.currentId));
+  const cur = props.pages[at];
   return (
     <div className="pp-pages-sheet">
+      {cur && (
+        <div className="pp-actionbar" role="toolbar" aria-label={`Actions for page ${at + 1}`}>
+          {asking === cur.id ? (
+            <div className="pp-page-ask" role="alertdialog" aria-label={`Remove page ${at + 1}?`}>
+              <span>Page {at + 1} has changes that will be lost.</span>
+              <button type="button" className="pp-chip is-danger" onClick={() => { setAsking(null); props.onRemove(cur.id); }}>
+                Remove
+              </button>
+              <button type="button" className="pp-chip" onClick={() => setAsking(null)}>
+                Keep
+              </button>
+            </div>
+          ) : (
+            <>
+              <span className="pp-actionbar-name">Page {at + 1}</span>
+              <button type="button" className="pp-icon-btn" aria-label={`Move page ${at + 1} earlier`} disabled={at === 0} onClick={() => props.onMove(cur.id, -1)}>
+                <Icon name="arrowLeft" />
+              </button>
+              <button type="button" className="pp-icon-btn" aria-label={`Move page ${at + 1} later`} disabled={at === n - 1} onClick={() => props.onMove(cur.id, 1)}>
+                <Icon name="arrowRight" />
+              </button>
+              <button type="button" className="pp-icon-btn" aria-label={`Duplicate page ${at + 1}`} onClick={() => props.onDuplicate(cur.id)}>
+                <Icon name="copy" />
+              </button>
+              <button type="button" className="pp-icon-btn is-danger" aria-label={`Delete page ${at + 1}`} onClick={() => (cur.edited ? setAsking(cur.id) : props.onRemove(cur.id))}>
+                <Icon name="trash" />
+              </button>
+            </>
+          )}
+        </div>
+      )}
       <ol className="pp-page-grid">
         {props.pages.map((p, i) => (
           <li key={p.id} className={p.id === props.currentId ? 'pp-page is-current' : 'pp-page'}>
-            <button type="button" className="pp-page-thumb" aria-label={`Page ${i + 1}: ${p.name}`} aria-current={p.id === props.currentId ? 'page' : undefined} onClick={() => props.onShow(p.id)}>
+            <button
+              type="button"
+              className="pp-page-thumb"
+              aria-label={`Page ${i + 1}: ${p.name}`}
+              aria-current={p.id === props.currentId ? 'page' : undefined}
+              onClick={() => {
+                setAsking(null);
+                props.onShow(p.id);
+              }}
+            >
               {p.thumb ? <img src={p.thumb} alt="" /> : <span className="pp-page-blank" aria-hidden="true" />}
               <span className="pp-page-number" aria-hidden="true">
                 {i + 1}
               </span>
               {p.edited && <span className="pp-page-dot" aria-hidden="true" />}
             </button>
-            {asking === p.id ? (
-              <div className="pp-page-ask" role="alertdialog" aria-label={`Remove page ${i + 1}?`}>
-                <span>Changes will be lost.</span>
-                <button type="button" className="pp-chip is-danger" onClick={() => { setAsking(null); props.onRemove(p.id); }}>
-                  Remove
-                </button>
-                <button type="button" className="pp-chip" onClick={() => setAsking(null)}>
-                  Keep
-                </button>
-              </div>
-            ) : (
-              <div className="pp-page-actions">
-                <button type="button" className="pp-icon-btn" aria-label={`Move page ${i + 1} earlier`} disabled={i === 0} onClick={() => props.onMove(p.id, -1)}>
-                  <Icon name="arrowLeft" />
-                </button>
-                <button type="button" className="pp-icon-btn" aria-label={`Move page ${i + 1} later`} disabled={i === n - 1} onClick={() => props.onMove(p.id, 1)}>
-                  <Icon name="arrowRight" />
-                </button>
-                <button type="button" className="pp-icon-btn" aria-label={`Duplicate page ${i + 1}`} onClick={() => props.onDuplicate(p.id)}>
-                  <Icon name="copy" />
-                </button>
-                <button type="button" className="pp-icon-btn" aria-label={`Delete page ${i + 1}`} onClick={() => (p.edited ? setAsking(p.id) : props.onRemove(p.id))}>
-                  <Icon name="trash" />
-                </button>
-              </div>
-            )}
           </li>
         ))}
         <li className="pp-page">

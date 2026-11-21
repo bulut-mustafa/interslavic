@@ -168,6 +168,12 @@
   to { transform: scaleX(0.6); }
 }
 
+.pv-empty-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  text-align: center;
+}
 .pv-empty {
   flex: 1;
   display: grid;

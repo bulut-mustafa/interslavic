@@ -17,6 +17,8 @@ class FakeVideo extends EventTarget {
   preload = '';
   playsInline = false;
   sets: number[] = [];
+  /** False: the test says when a seek lands. */
+  auto = true;
   private t = 0;
   get currentTime() {
     return this.t;
@@ -24,7 +26,7 @@ class FakeVideo extends EventTarget {
   set currentTime(v: number) {
     this.t = v;
     this.sets.push(v);
-    queueMicrotask(() => this.dispatchEvent(new Event('seeked')));
+    if (this.auto) queueMicrotask(() => this.dispatchEvent(new Event('seeked')));
   }
   play() {
     this.paused = false;
@@ -74,7 +76,7 @@ describe('gentle transport (phone preview)', () => {
     el.sets.length = 0;
     g.step(300); // 0.3 s behind: over the desktop limit (0.15), under GENTLE_DRIFT
     expect(el.sets).toEqual([]);
-    g.step(200); // 0.5 s behind: a real drift, corrected
+    g.step(700); // 1 s behind: a real drift, corrected
     expect(el.sets.length).toBe(1);
     el.currentTime = 0; // stuck again straight away
     el.sets.length = 0;
@@ -85,6 +87,36 @@ describe('gentle transport (phone preview)', () => {
     expect(el.sets.length).toBe(1);
     expect(GENTLE_DRIFT).toBeGreaterThan(0.15);
     g.tr.dispose();
+  });
+
+  it('aims a corrective seek as far ahead as the last seek took to land, so it does not fall behind again and loop', async () => {
+    let ms = 0;
+    let cb: (() => void) | null = null;
+    const els: FakeVideo[] = [];
+    const p = project();
+    const tr = createTransportWith(
+      { getProject: () => p, files: { urlOf: (id) => `blob:${id}` }, hooks: { onFrame: () => {}, onEnded: () => {} }, gentle: true },
+      { now: () => ms, raf: (f) => ((cb = f), 1), caf: () => (cb = null), create: () => { const e = new FakeVideo(); els.push(e); return e as never; } },
+    );
+    const step = (d: number) => { ms += d; const f = cb; cb = null; f?.(); };
+    await tr.play();
+    await new Promise<void>((r) => setTimeout(r, 0));
+    const el = els[0]!;
+    el.auto = false; // seeks now take as long as the test says
+    el.currentTime = 0; // the element is stuck while the clock runs
+    el.sets.length = 0;
+    step(1000); // 1 s behind: corrected
+    expect(el.sets.length).toBe(1);
+    ms += 500; // the seek lands half a second later
+    el.dispatchEvent(new Event('seeked'));
+    el.currentTime = 0; // stuck again
+    el.dispatchEvent(new Event('seeked'));
+    el.sets.length = 0;
+    step(GENTLE_GAP_MS + 1500);
+    const clockNow = tr.time;
+    expect(el.sets.length).toBe(1);
+    expect(el.sets[0]!).toBeGreaterThan(clockNow + 0.2); // ahead of the clock by about the latency
+    tr.dispose();
   });
 
   it('the desktop transport still corrects at 0.15 s with no gap', async () => {
@@ -141,5 +173,15 @@ describe('deleting a clip', () => {
     ];
     expect(removeClip(clips, 1).map((c) => c.id)).toEqual(['a', 'c']);
     expect(removeClip([clips[0]!], 0)).toHaveLength(1);
+  });
+});
+
+describe('adding text at the end', () => {
+  it('starts in the last second when the playhead is at the end, else at the playhead', async () => {
+    const { textStartFor } = await import('../src/video/useVideoEditor.ts');
+    expect(textStartFor(20, 20)).toBe(19);
+    expect(textStartFor(19.5, 20)).toBe(19);
+    expect(textStartFor(5, 20)).toBe(5);
+    expect(textStartFor(0, 0.5)).toBe(0);
   });
 });

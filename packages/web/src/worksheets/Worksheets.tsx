@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { track } from '../analytics.ts';
 import { Icon } from '../components/Icon.tsx';
 import { BottomSheet } from '../phone/BottomSheet.tsx';
@@ -47,8 +47,7 @@ import {
 const withExercises = LESSONS.filter((l) => contributions(l).exercises > 0);
 const withTables = LESSONS.filter((l) => contributions(l).tables > 0);
 
-const toggle = (list: string[], value: string): string[] =>
-  list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
+const toggle = (list: string[], value: string): string[] => (list.includes(value) ? list.filter((v) => v !== value) : [...list, value]);
 
 const STARTER: Selection = {
   exercises: withExercises.slice(0, 1).map((l) => l.slug),
@@ -117,6 +116,56 @@ export default function Worksheets() {
       return r.draft;
     });
 
+  // The preview sits behind the sheet: while typing it follows at low priority, so a keystroke only pays for the editor.
+  const shownSheet = useDeferredValue(sheet);
+  const shownTitle = useDeferredValue(title);
+  const phonePreview = useMemo(
+    () => (
+      <article className="worksheet" aria-label="Worksheet preview">
+        <header className="worksheet-head">
+          <h2>{shownTitle}</h2>
+          <p className="worksheet-name">
+            Name <span className="blank" /> Date <span className="blank" />
+          </p>
+        </header>
+        {shownSheet.map((s) => (
+          <SectionView
+            key={s.key}
+            section={s}
+            editing={false}
+            focusId={null}
+            onText={() => undefined}
+            onRemoveSection={() => undefined}
+            onAdd={() => undefined}
+            onChange={() => undefined}
+            onRemove={() => undefined}
+            onReset={() => undefined}
+            onMove={() => undefined}
+          />
+        ))}
+        <footer className="worksheet-foot">interslavic.web.app</footer>
+        {key && (
+          <section className="worksheet-answers">
+            <h2>Answer key - {shownTitle}</h2>
+            {shownSheet.map((s) => (
+              <div key={s.key} className="worksheet-section">
+                <h3>{s.title}</h3>
+                <ol className="worksheet-items" start={s.items[0]?.number ?? 1}>
+                  {s.items.map((item) => (
+                    <li key={item.id} value={item.number}>
+                      <Answer item={item} />
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            ))}
+          </section>
+        )}
+      </article>
+    ),
+    [shownSheet, shownTitle, key],
+  );
+
   if (phone) {
     const printNow = () => {
       track('worksheet-print', { items: count, key });
@@ -134,35 +183,7 @@ export default function Worksheets() {
               </button>
             </div>
           ) : (
-            <article className="worksheet" aria-label="Worksheet preview">
-              <header className="worksheet-head">
-                <h2>{title}</h2>
-                <p className="worksheet-name">
-                  Name <span className="blank" /> Date <span className="blank" />
-                </p>
-              </header>
-              {sheet.map((s) => (
-                <SectionView key={s.key} section={s} editing={false} focusId={null} onText={() => undefined} onRemoveSection={() => undefined} onAdd={() => undefined} onChange={() => undefined} onRemove={() => undefined} onReset={() => undefined} onMove={() => undefined} />
-              ))}
-              <footer className="worksheet-foot">interslavic.web.app</footer>
-              {key && (
-                <section className="worksheet-answers">
-                  <h2>Answer key - {title}</h2>
-                  {sheet.map((s) => (
-                    <div key={s.key} className="worksheet-section">
-                      <h3>{s.title}</h3>
-                      <ol className="worksheet-items" start={s.items[0]?.number ?? 1}>
-                        {s.items.map((item) => (
-                          <li key={item.id} value={item.number}>
-                            <Answer item={item} />
-                          </li>
-                        ))}
-                      </ol>
-                    </div>
-                  ))}
-                </section>
-              )}
-            </article>
+            phonePreview
           )}
         </div>
 
@@ -207,9 +228,36 @@ export default function Worksheets() {
                     Clear
                   </button>
                 </div>
-                <Picker legend="Exercises from" options={withExercises.map((l) => ({ value: l.slug, label: l.title, count: contributions(l).exercises }))} chosen={sel.exercises} onToggle={(v) => setSel({ ...sel, exercises: toggle(sel.exercises, v) })} />
-                <Picker legend="Inflection tables from" options={withTables.map((l) => ({ value: l.slug, label: l.title, count: contributions(l).tables }))} chosen={sel.tables} onToggle={(v) => setSel({ ...sel, tables: toggle(sel.tables, v) })} />
-                <Picker legend="Phrases from" options={PHRASEBOOK.map((g) => ({ value: g.title, label: g.title, count: g.phrases.length }))} chosen={sel.phrases} onToggle={(v) => setSel({ ...sel, phrases: toggle(sel.phrases, v) })} />
+                <Picker
+                  legend="Exercises from"
+                  options={withExercises.map((l) => ({
+                    value: l.slug,
+                    label: l.title,
+                    count: contributions(l).exercises,
+                  }))}
+                  chosen={sel.exercises}
+                  onToggle={(v) => setSel({ ...sel, exercises: toggle(sel.exercises, v) })}
+                />
+                <Picker
+                  legend="Inflection tables from"
+                  options={withTables.map((l) => ({
+                    value: l.slug,
+                    label: l.title,
+                    count: contributions(l).tables,
+                  }))}
+                  chosen={sel.tables}
+                  onToggle={(v) => setSel({ ...sel, tables: toggle(sel.tables, v) })}
+                />
+                <Picker
+                  legend="Phrases from"
+                  options={PHRASEBOOK.map((g) => ({
+                    value: g.title,
+                    label: g.title,
+                    count: g.phrases.length,
+                  }))}
+                  chosen={sel.phrases}
+                  onToggle={(v) => setSel({ ...sel, phrases: toggle(sel.phrases, v) })}
+                />
               </>
             )}
           </div>
@@ -316,7 +364,17 @@ export default function Worksheets() {
                   onChange={change}
                   onRemove={(it) => setDraft((d) => removeItem(d, it.id))}
                   onReset={(it) => setDraft((d) => resetItem(d, it.id))}
-                  onMove={(it, by) => setDraft((d) => moveItem(d, s.key, s.items.map((x) => x.id), it.id, by))}
+                  onMove={(it, by) =>
+                    setDraft((d) =>
+                      moveItem(
+                        d,
+                        s.key,
+                        s.items.map((x) => x.id),
+                        it.id,
+                        by,
+                      ),
+                    )
+                  }
                 />
               ))}
               {editing && (
@@ -371,30 +429,50 @@ export default function Worksheets() {
           </div>
           <Picker
             legend="Exercises from"
-            options={withExercises.map((l) => ({ value: l.slug, label: l.title, count: contributions(l).exercises }))}
+            options={withExercises.map((l) => ({
+              value: l.slug,
+              label: l.title,
+              count: contributions(l).exercises,
+            }))}
             chosen={sel.exercises}
             onToggle={(v) => setSel({ ...sel, exercises: toggle(sel.exercises, v) })}
           />
           <Picker
             legend="Inflection tables from"
-            options={withTables.map((l) => ({ value: l.slug, label: l.title, count: contributions(l).tables }))}
+            options={withTables.map((l) => ({
+              value: l.slug,
+              label: l.title,
+              count: contributions(l).tables,
+            }))}
             chosen={sel.tables}
             onToggle={(v) => setSel({ ...sel, tables: toggle(sel.tables, v) })}
           />
           <Picker
             legend="Phrases from"
-            options={PHRASEBOOK.map((g) => ({ value: g.title, label: g.title, count: g.phrases.length }))}
+            options={PHRASEBOOK.map((g) => ({
+              value: g.title,
+              label: g.title,
+              count: g.phrases.length,
+            }))}
             chosen={sel.phrases}
             onToggle={(v) => setSel({ ...sel, phrases: toggle(sel.phrases, v) })}
           />
-          <p className="note">The ready-made questions are exercises and tables from the lessons and phrases from the phrasebook, so their answers are the ones the lessons already check. Change any of them, or write your own, on the page itself. In a question, write ___ for a blank and **two stars** around a word to make it bold.</p>
+          <p className="note">
+            The ready-made questions are exercises and tables from the lessons and phrases from the phrasebook, so their answers are the ones the lessons already check. Change any of them, or write
+            your own, on the page itself. In a question, write ___ for a blank and **two stars** around a word to make it bold.
+          </p>
         </aside>
       </div>
     </main>
   );
 }
 
-const KIND_LABEL: Record<SheetItem['kind'], string> = { fill: 'Question', choice: 'Multiple choice', phrase: 'Translate', table: 'Table' };
+const KIND_LABEL: Record<SheetItem['kind'], string> = {
+  fill: 'Question',
+  choice: 'Multiple choice',
+  phrase: 'Translate',
+  table: 'Table',
+};
 
 function SectionView(props: {
   section: SheetSection;
@@ -414,7 +492,13 @@ function SectionView(props: {
       {editing ? (
         <div className="ws-editor ws-section-edit">
           <input className="ws-field ws-h3" aria-label={`Title of section ${s.title}`} value={s.title} placeholder="Section title" onChange={(e) => props.onText({ title: e.target.value })} />
-          <input className="ws-field ws-instruction" aria-label={`Instruction for ${s.title}`} value={s.instruction} placeholder="What the student should do" onChange={(e) => props.onText({ instruction: e.target.value })} />
+          <input
+            className="ws-field ws-instruction"
+            aria-label={`Instruction for ${s.title}`}
+            value={s.instruction}
+            placeholder="What the student should do"
+            onChange={(e) => props.onText({ instruction: e.target.value })}
+          />
           {s.custom && (
             <button type="button" className="icon-button ws-edit-only" aria-label={`Remove the section ${s.title}`} title="Remove this section" onClick={props.onRemoveSection}>
               <Icon name="trash" size="0.9rem" />
@@ -509,11 +593,22 @@ function ItemEditor(props: {
           <Grow label={`Question ${n}`} value={it.prompt} placeholder="Write the question. Use ___ for a blank." onChange={(prompt) => props.onChange({ prompt })} className="ws-prompt" />
           <label className="ws-row ws-top">
             <span>Answer</span>
-            <Grow label={`Answer to question ${n}`} value={it.answers.join('\n')} placeholder="The answer. If more than one is correct, put each on its own line." onChange={(v) => props.onChange({ answers: lines(v) })} />
+            <Grow
+              label={`Answer to question ${n}`}
+              value={it.answers.join('\n')}
+              placeholder="The answer. If more than one is correct, put each on its own line."
+              onChange={(v) => props.onChange({ answers: lines(v) })}
+            />
           </label>
           <label className="ws-row">
             <span>Why</span>
-            <input className="ws-field" aria-label={`Explanation for question ${n}`} placeholder="Optional: shown beside the answer in the key" value={it.why} onChange={(e) => props.onChange({ why: e.target.value })} />
+            <input
+              className="ws-field"
+              aria-label={`Explanation for question ${n}`}
+              placeholder="Optional: shown beside the answer in the key"
+              value={it.why}
+              onChange={(e) => props.onChange({ why: e.target.value })}
+            />
           </label>
         </>
       )}
@@ -527,18 +622,31 @@ function ItemEditor(props: {
           </label>
           <label className="ws-row">
             <span>Right one</span>
-            <select className="ws-field" aria-label={`Right answer to question ${n}`} value={it.options.includes(it.answer) ? it.answer : ''} onChange={(e) => props.onChange({ answer: e.target.value })}>
+            <select
+              className="ws-field"
+              aria-label={`Right answer to question ${n}`}
+              value={it.options.includes(it.answer) ? it.answer : ''}
+              onChange={(e) => props.onChange({ answer: e.target.value })}
+            >
               <option value="">Choose…</option>
-              {it.options.filter((o) => o.trim() !== '').map((o, k) => (
-                <option key={`${o}${k}`} value={o}>
-                  {o}
-                </option>
-              ))}
+              {it.options
+                .filter((o) => o.trim() !== '')
+                .map((o, k) => (
+                  <option key={`${o}${k}`} value={o}>
+                    {o}
+                  </option>
+                ))}
             </select>
           </label>
           <label className="ws-row">
             <span>Why</span>
-            <input className="ws-field" aria-label={`Explanation for question ${n}`} placeholder="Optional: shown beside the answer in the key" value={it.why} onChange={(e) => props.onChange({ why: e.target.value })} />
+            <input
+              className="ws-field"
+              aria-label={`Explanation for question ${n}`}
+              placeholder="Optional: shown beside the answer in the key"
+              value={it.why}
+              onChange={(e) => props.onChange({ why: e.target.value })}
+            />
           </label>
         </>
       )}
@@ -547,15 +655,35 @@ function ItemEditor(props: {
         <>
           <label className="ws-row">
             <span>To translate</span>
-            <input ref={first as React.RefObject<HTMLInputElement>} className="ws-field" aria-label={`Phrase to translate in question ${n}`} placeholder="The phrase the student is given" value={it.phrase.en} onChange={(e) => props.onChange({ en: e.target.value })} />
+            <input
+              ref={first as React.RefObject<HTMLInputElement>}
+              className="ws-field"
+              aria-label={`Phrase to translate in question ${n}`}
+              placeholder="The phrase the student is given"
+              value={it.phrase.en}
+              onChange={(e) => props.onChange({ en: e.target.value })}
+            />
           </label>
           <label className="ws-row">
             <span>Answer</span>
-            <input className="ws-field" lang="isv" aria-label={`Interslavic answer to question ${n}`} placeholder="Its Interslavic" value={it.phrase.isv} onChange={(e) => props.onChange({ isv: e.target.value })} />
+            <input
+              className="ws-field"
+              lang="isv"
+              aria-label={`Interslavic answer to question ${n}`}
+              placeholder="Its Interslavic"
+              value={it.phrase.isv}
+              onChange={(e) => props.onChange({ isv: e.target.value })}
+            />
           </label>
           <label className="ws-row">
             <span>Note</span>
-            <input className="ws-field" aria-label={`Note for question ${n}`} placeholder="Optional: shown in brackets after the phrase" value={it.phrase.note ?? ''} onChange={(e) => props.onChange({ note: e.target.value })} />
+            <input
+              className="ws-field"
+              aria-label={`Note for question ${n}`}
+              placeholder="Optional: shown in brackets after the phrase"
+              value={it.phrase.note ?? ''}
+              onChange={(e) => props.onChange({ note: e.target.value })}
+            />
           </label>
         </>
       )}
@@ -570,12 +698,7 @@ function ItemEditor(props: {
   );
 }
 
-function Picker(props: {
-  legend: string;
-  options: { value: string; label: string; count: number }[];
-  chosen: string[];
-  onToggle: (value: string) => void;
-}) {
+function Picker(props: { legend: string; options: { value: string; label: string; count: number }[]; chosen: string[]; onToggle: (value: string) => void }) {
   return (
     <fieldset className="worksheet-picker">
       <legend>{props.legend}</legend>

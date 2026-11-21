@@ -209,6 +209,25 @@ export function useGestures(ref: RefObject<HTMLElement | null>, handlers: Gestur
       lastTap = null;
     };
 
+    // iOS Safari sometimes never reports the end of a touch (it ends outside the element, or the system takes it). A finger
+    // that is still in the Map would make the NEXT single finger look like the second of a pinch, and a swipe would zoom.
+    // The browser's own touch list is the truth: when it holds fewer fingers than the Map, the Map is wrong.
+    const reconcile = (e: TouchEvent) => {
+      if (pointers.size === 0 || e.touches.length >= pointers.size) return;
+      if (e.touches.length === 0) {
+        clearTimer();
+        endDragOrPinch();
+        pointers.clear();
+        mode = 'idle';
+        lastTap = null;
+      }
+    };
+    const strayEnd = (e: PointerEvent) => {
+      // A touch that ended somewhere the element could not hear (its pointer is not captured): same as ending here.
+      if (e.pointerType !== 'touch' || !pointers.has(e.pointerId)) return;
+      if (e.type === 'pointercancel') cancel(e);
+      else up(e);
+    };
     const noGesture = (e: Event) => e.preventDefault(); // Safari's page pinch
     const noMenu = (e: Event) => {
       if (h.current.onLongPress) e.preventDefault();
@@ -222,6 +241,10 @@ export function useGestures(ref: RefObject<HTMLElement | null>, handlers: Gestur
     el.addEventListener('pointerup', up);
     el.addEventListener('pointercancel', cancel);
     el.addEventListener('gesturestart', noGesture, { passive: false } as AddEventListenerOptions);
+    window.addEventListener('pointerup', strayEnd, true);
+    window.addEventListener('pointercancel', strayEnd, true);
+    window.addEventListener('touchend', reconcile, true);
+    window.addEventListener('touchcancel', reconcile, true);
     el.addEventListener('contextmenu', noMenu);
     return () => {
       clearTimer();
@@ -230,6 +253,10 @@ export function useGestures(ref: RefObject<HTMLElement | null>, handlers: Gestur
       el.removeEventListener('pointerup', up);
       el.removeEventListener('pointercancel', cancel);
       el.removeEventListener('gesturestart', noGesture);
+      window.removeEventListener('pointerup', strayEnd, true);
+      window.removeEventListener('pointercancel', strayEnd, true);
+      window.removeEventListener('touchend', reconcile, true);
+      window.removeEventListener('touchcancel', reconcile, true);
       el.removeEventListener('contextmenu', noMenu);
       el.style.userSelect = prevSelect;
       (el.style as CSSStyleDeclaration & { webkitUserSelect?: string }).webkitUserSelect = '';

@@ -1,7 +1,7 @@
 /** A line icon from a path on the 24x24 grid, in the look of components/Icon.tsx (which only takes names from its own closed list). */
 export function PathIcon({ d, size = '1.1rem' }: { d: string; size?: string }) {
   return (
-    <svg className="icon" width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <svg className="icon" style={{ width: size, height: size }} viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d={d} />
     </svg>
   );

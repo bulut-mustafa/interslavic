@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from 'react';
+import { memo, useEffect, useLayoutEffect, useRef, useState, type RefObject } from 'react';
 import { Icon } from '../components/Icon.tsx';
 import { Text } from '../learn/Lesson.tsx';
 import {
@@ -26,7 +26,6 @@ import {
   type SheetSection,
 } from '../worksheets/draft.ts';
 import { centerScrollTop } from './sheetMath.ts';
-import { useKeyboardInset } from './useKeyboardInset.ts';
 import './worksheets-edit.css';
 
 /**
@@ -43,11 +42,28 @@ import './worksheets-edit.css';
 
 const UNDO_MS = 5000;
 
-const KIND_LABEL: Record<SheetItem['kind'], string> = { fill: 'Fill in the blank', choice: 'Multiple choice', phrase: 'Translate', table: 'Table' };
+const KIND_LABEL: Record<SheetItem['kind'], string> = {
+  fill: 'Fill in the blank',
+  choice: 'Multiple choice',
+  phrase: 'Translate',
+  table: 'Table',
+};
 const ADD_KINDS: { kind: CustomKind; label: string; help: string }[] = [
-  { kind: 'question', label: 'Fill in the blank', help: 'A sentence with a gap to fill' },
-  { kind: 'choice', label: 'Multiple choice', help: 'Pick the right one from several answers' },
-  { kind: 'translate', label: 'Translate', help: 'A phrase to write in Interslavic' },
+  {
+    kind: 'question',
+    label: 'Fill in the blank',
+    help: 'A sentence with a gap to fill',
+  },
+  {
+    kind: 'choice',
+    label: 'Multiple choice',
+    help: 'Pick the right one from several answers',
+  },
+  {
+    kind: 'translate',
+    label: 'Translate',
+    help: 'A phrase to write in Interslavic',
+  },
 ];
 
 const oneLine = (s: string): string => s.replace(/[\r\n]+/g, ' ');
@@ -83,9 +99,12 @@ export function GrowField(props: {
     // Shrinking to "auto" first makes some browsers jump the scroller; put it back where it was.
     const scroller = el.closest('.ph-sheet-body') as HTMLElement | null;
     const top = scroller?.scrollTop ?? 0;
+    const was = el.style.height;
     el.style.height = 'auto';
     const border = el.offsetHeight - el.clientHeight;
-    el.style.height = `${Math.max(48, el.scrollHeight + border)}px`;
+    const next = `${Math.max(48, el.scrollHeight + border)}px`;
+    // Only touch the style when the height really changed: most keystrokes do not wrap a new line.
+    el.style.height = next === was ? was : next;
     if (scroller && scroller.scrollTop !== top) scroller.scrollTop = top;
   };
   useLayoutEffect(fit, [props.value]);
@@ -100,7 +119,14 @@ export function GrowField(props: {
       }
     });
     ro.observe(el);
-    return () => ro.disconnect();
+    // The web font arrives after the first measure and wraps text differently: measure again when it has loaded.
+    const fonts = document.fonts;
+    void fonts?.ready.then(fit);
+    fonts?.addEventListener?.('loadingdone', fit);
+    return () => {
+      ro.disconnect();
+      fonts?.removeEventListener?.('loadingdone', fit);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
@@ -156,8 +182,18 @@ function BlankPreview({ prompt }: { prompt: string }) {
   );
 }
 
-function ItemCard(props: {
+/**
+ * A card only re-renders when its own question changed. applyDraft rebuilds every item object on each keystroke, so
+ * items are compared by value; the handlers are not compared (they only close over this card's item, section and
+ * the latest draft, which the editor reads through a ref).
+ */
+const sameCard = (a: CardProps, b: CardProps): boolean =>
+  a.first === b.first && a.last === b.last && a.autoFocus === b.autoFocus && a.order === b.order && JSON.stringify(a.item) === JSON.stringify(b.item);
+
+interface CardProps {
   item: SheetItem;
+  /** The ids of the section in order: a card's Up/Down handlers close over it. */
+  order: string;
   first: boolean;
   last: boolean;
   autoFocus: boolean;
@@ -166,7 +202,9 @@ function ItemCard(props: {
   onDuplicate: () => void;
   onDelete: () => void;
   onReset: () => void;
-}) {
+}
+
+const ItemCard = memo(function ItemCard(props: CardProps) {
   const { item: it } = props;
   const n = it.number;
   const card = useRef<HTMLElement>(null);
@@ -208,7 +246,9 @@ function ItemCard(props: {
     const el = promptRef.current;
     const s = el?.selectionStart ?? it.prompt.length;
     const e = el?.selectionEnd ?? s;
-    props.onChange({ prompt: `${it.prompt.slice(0, s)}___${it.prompt.slice(e)}` });
+    props.onChange({
+      prompt: `${it.prompt.slice(0, s)}___${it.prompt.slice(e)}`,
+    });
     requestAnimationFrame(() => {
       el?.focus();
       el?.setSelectionRange?.(s + 3, s + 3);
@@ -263,11 +303,19 @@ function ItemCard(props: {
             <GrowField inputRef={promptRef} single label={`Question ${n}`} value={it.prompt} placeholder="Write the question" onChange={(prompt) => props.onChange({ prompt })} />
           </Field>
           <div className="wse-choices" role="radiogroup" aria-label={`Choices for question ${n}`}>
-            <span className="wse-label">Choices (tap the circle to mark the correct one)</span>
+            <span className="wse-label">Choices</span>
+            <span className="wse-hint">Tap the circle next to the right answer.</span>
             {options.map((o, k) => (
               <div key={k} className={`wse-option${k === correct ? ' is-correct' : ''}`}>
                 <label className="wse-radio" title={o === '' ? 'Write the choice first' : 'Mark as the correct answer'}>
-                  <input type="radio" name={`correct-${it.id}`} aria-label={`Choice ${k + 1} is the correct answer`} disabled={o === ''} checked={k === correct} onChange={() => props.onChange({ answer: o })} />
+                  <input
+                    type="radio"
+                    name={`correct-${it.id}`}
+                    aria-label={`Choice ${k + 1} is the correct answer`}
+                    disabled={o === ''}
+                    checked={k === correct}
+                    onChange={() => props.onChange({ answer: o })}
+                  />
                 </label>
                 <div className="wse-option-text">
                   <GrowField
@@ -308,7 +356,14 @@ function ItemCard(props: {
       {it.kind === 'phrase' && (
         <>
           <Field label="Phrase to translate" hint="What the student is given.">
-            <GrowField inputRef={firstField} single label={`Phrase to translate in question ${n}`} value={it.phrase.en} placeholder="Example: Where is the station?" onChange={(en) => props.onChange({ en })} />
+            <GrowField
+              inputRef={firstField}
+              single
+              label={`Phrase to translate in question ${n}`}
+              value={it.phrase.en}
+              placeholder="Example: Where is the station?"
+              onChange={(en) => props.onChange({ en })}
+            />
           </Field>
           <Field label="Answer in Interslavic" hint="Only in the answer key.">
             <GrowField single lang="isv" label={`Interslavic answer to question ${n}`} value={it.phrase.isv} placeholder="Its Interslavic" onChange={(isv) => props.onChange({ isv })} />
@@ -351,7 +406,7 @@ function ItemCard(props: {
       </div>
     </article>
   );
-}
+}, sameCard);
 
 export interface WorksheetEditorProps {
   sheet: SheetSection[];
@@ -366,14 +421,19 @@ export interface WorksheetEditorProps {
 
 export function WorksheetEditor(props: WorksheetEditorProps) {
   const { sheet, draft, setDraft } = props;
-  const kb = useKeyboardInset();
+  const latest = useRef(draft);
+  latest.current = draft;
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [confirmReset, setConfirmReset] = useState(false);
   const [closed, setClosed] = useState<Record<string, boolean>>({});
   const [focusId, setFocusId] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [targetKey, setTargetKey] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ n: number; text: string; undo: () => void } | null>(null);
+  const [toast, setToast] = useState<{
+    n: number;
+    text: string;
+    undo: () => void;
+  } | null>(null);
 
   useEffect(() => {
     if (!toast) return;
@@ -394,10 +454,8 @@ export function WorksheetEditor(props: WorksheetEditorProps) {
     setMenuOpen(false);
   };
 
-  const keyboardUp = kb > 0;
-
   return (
-    <div className="wse" style={{ paddingBottom: kb }}>
+    <div className="wse">
       <section className="wse-settings" aria-label="Sheet settings">
         <button type="button" className="wse-fold" aria-expanded={settingsOpen} onClick={() => setSettingsOpen((o) => !o)}>
           <Icon name={settingsOpen ? 'chevronDown' : 'chevronRight'} size="1.1rem" />
@@ -413,7 +471,14 @@ export function WorksheetEditor(props: WorksheetEditorProps) {
             <Field label="Title of the worksheet">
               <GrowField single label="Worksheet title" value={props.title} onChange={props.onTitle} />
             </Field>
-            <button type="button" className={`wse-switch${props.keyOn ? ' is-on' : ''}`} role="switch" aria-checked={props.keyOn} aria-label="Add an answer key on a new page" onClick={() => props.onKey(!props.keyOn)}>
+            <button
+              type="button"
+              className={`wse-switch${props.keyOn ? ' is-on' : ''}`}
+              role="switch"
+              aria-checked={props.keyOn}
+              aria-label="Add an answer key on a new page"
+              onClick={() => props.onKey(!props.keyOn)}
+            >
               <Icon name="check" size="1.1rem" /> {props.keyOn ? 'Answer key on' : 'Answer key off'}
             </button>
             <p className="wse-status" role="status">
@@ -472,7 +537,13 @@ export function WorksheetEditor(props: WorksheetEditorProps) {
                   <GrowField single label={`Title of section ${s.key}`} value={s.title} placeholder="Section title" onChange={(t) => setDraft((d) => setSectionText(d, s.key, { title: t }))} />
                 </Field>
                 <Field label="What the student should do">
-                  <GrowField single label={`Instruction for section ${s.key}`} value={s.instruction} placeholder="Example: Fill in the blank." onChange={(t) => setDraft((d) => setSectionText(d, s.key, { instruction: t }))} />
+                  <GrowField
+                    single
+                    label={`Instruction for section ${s.key}`}
+                    value={s.instruction}
+                    placeholder="Example: Fill in the blank."
+                    onChange={(t) => setDraft((d) => setSectionText(d, s.key, { instruction: t }))}
+                  />
                 </Field>
                 {s.custom && (
                   <button
@@ -491,6 +562,7 @@ export function WorksheetEditor(props: WorksheetEditorProps) {
                   <ItemCard
                     key={item.id}
                     item={item}
+                    order={s.items.map((x) => x.id).join()}
                     first={i === 0}
                     last={i === s.items.length - 1}
                     autoFocus={focusId === item.id}
@@ -509,7 +581,7 @@ export function WorksheetEditor(props: WorksheetEditorProps) {
                     }
                     onDuplicate={() => {
                       const r = duplicateItem(
-                        draft,
+                        latest.current,
                         s.key,
                         s.items.map((x) => x.id),
                         item,
@@ -518,7 +590,7 @@ export function WorksheetEditor(props: WorksheetEditorProps) {
                       setFocusId(r.id);
                     }}
                     onDelete={() => {
-                      const snap = snapshotItem(draft, item.id, s.key);
+                      const snap = snapshotItem(latest.current, item.id, s.key);
                       setDraft((d) => removeItem(d, item.id));
                       say(`Question ${item.number} deleted`, () => setDraft((d) => restoreItem(d, snap)));
                     }}
@@ -543,7 +615,7 @@ export function WorksheetEditor(props: WorksheetEditorProps) {
         <Icon name="plus" size="1.1rem" /> Add a section
       </button>
 
-      <div className={`wse-bar${keyboardUp ? ' is-hidden' : ''}`}>
+      <div className="wse-bar">
         {toast && (
           <div className="wse-toast" role="status" key={toast.n}>
             <span>{toast.text}</span>

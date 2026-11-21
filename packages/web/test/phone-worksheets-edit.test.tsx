@@ -37,7 +37,7 @@ describe('the phone worksheet editor', () => {
     expect(within(cards[0]!).getByLabelText('Question 1')).toBeTruthy();
     expect(within(cards[0]!).getByLabelText('Answer to question 1')).toBeTruthy();
     expect(within(cards[0]!).getByRole('button', { name: /Insert a blank/ })).toBeTruthy();
-    expect(within(cards[1]!).getByText('Choices (tap the circle to mark the correct one)')).toBeTruthy();
+    expect(within(cards[1]!).getByText('Choices')).toBeTruthy();
     expect(within(cards[1]!).getAllByRole('radio')).toHaveLength(2);
     expect(within(cards[2]!).getByLabelText('Phrase to translate in question 3')).toBeTruthy();
     expect(within(cards[2]!).getByLabelText('Interslavic answer to question 3')).toBeTruthy();
@@ -185,5 +185,13 @@ describe('draft helpers for the editor', () => {
     const copy = applyDraft(built, r.draft)[0]!.items[1]!;
     expect(copy.id).toBe(r.id);
     expect(copy.kind === 'phrase' && copy.phrase.source).toBe('custom');
+  });
+});
+
+describe('worksheet editor css', () => {
+  it('keeps text boxes out of the page-wide textarea flex rule (it made them ignore their measured height)', async () => {
+    const { readFileSync } = await import('node:fs');
+    const css = readFileSync('packages/web/src/phone/worksheets-edit.css', 'utf8');
+    expect(css).toMatch(/\.wse \.wse-input \{[^}]*flex: none;/);
   });
 });

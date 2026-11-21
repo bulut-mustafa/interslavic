@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { layout, nextIndex, settle } from '../src/phone/sheetMath.ts';
+import { layout, nextIndex, revealScrollTop, settle } from '../src/phone/sheetMath.ts';
 import { placeBar } from '../src/phone/FloatingBar.tsx';
 
 describe('sheet math', () => {
@@ -44,5 +44,19 @@ describe('placeBar', () => {
   it('stays inside the container', () => {
     expect(placeBar({ x: -50, y: 100, width: 40, height: 40 }, bar, bounds).x).toBe(8);
     expect(placeBar({ x: 380, y: 100, width: 40, height: 40 }, bar, bounds).x).toBe(292);
+  });
+});
+
+describe('revealScrollTop', () => {
+  const box = { top: 100, height: 260 };
+  it('leaves the scroller alone when the field is comfortably in view', () => {
+    expect(revealScrollTop(300, box, { top: 150, height: 48 })).toBe(300);
+  });
+  it('centres once when the field is outside or hugging an edge', () => {
+    expect(revealScrollTop(300, box, { top: 420, height: 48 })).toBe(300 + 420 + 24 - 230);
+    expect(revealScrollTop(300, box, { top: 104, height: 48 })).toBe(300 + 104 + 24 - 230);
+  });
+  it('shows the top of a field taller than the visible part', () => {
+    expect(revealScrollTop(300, box, { top: 90, height: 400 })).toBe(300 + 90 - 116);
   });
 });

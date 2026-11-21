@@ -170,10 +170,15 @@ describe('phone Video editor', () => {
     expect(document.querySelector('.pv-clip-len')!.textContent).toBe('60s');
   });
 
-  it('Delete is off for the only clip', async () => {
+  it('Delete works on the only clip: the empty screen shows, and Undo brings the video back', async () => {
     await open();
     tap(surface(), 200, MAIN_Y);
-    expect((screen.getByRole('button', { name: 'Delete' }) as HTMLButtonElement).disabled).toBe(true);
+    const del = screen.getByRole('button', { name: 'Delete' }) as HTMLButtonElement;
+    expect(del.disabled).toBe(false);
+    await act(async () => { fireEvent.click(del); });
+    await waitFor(() => expect(screen.getByText('Add a video to start')).toBeTruthy());
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: /Undo/ })); });
+    await waitFor(() => expect(screen.getByTestId('phone-timeline')).toBeTruthy());
   });
 
   it('Add text from the Text sheet picks the new text, shows the text strip and starts typing', async () => {

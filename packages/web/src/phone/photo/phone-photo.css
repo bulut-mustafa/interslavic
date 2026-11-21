@@ -621,12 +621,42 @@
   border-radius: 50%;
   background: var(--teal);
 }
-.pp-page-actions {
+.pp-actionbar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
   display: flex;
-  justify-content: space-between;
+  align-items: center;
+  gap: 4px;
+  min-height: 52px;
+  margin-bottom: 8px;
+  padding: 4px 0;
+  background: #fff;
+  border-bottom: 1px solid var(--rule);
 }
-.pp-page-actions .pp-icon-btn {
-  min-width: 40px;
+.pp-actionbar-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+.pp-actionbar .pp-icon-btn {
+  flex: none;
+  min-width: 44px;
+  min-height: 44px;
+}
+.pp-actionbar .pp-icon-btn.is-danger {
+  color: #b3261e;
+}
+.pp-layer-flag {
+  flex: none;
+  padding: 1px 8px;
+  border-radius: 10px;
+  background: var(--paper);
+  color: var(--ink-soft);
+  font-size: 0.75rem;
 }
 .pp-page-ask {
   display: flex;

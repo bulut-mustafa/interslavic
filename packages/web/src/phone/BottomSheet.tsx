@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { Icon } from '../components/Icon.tsx';
-import { centerScrollTop, layout, nextIndex, settle, type Detent } from './sheetMath.ts';
+import { layout, nextIndex, revealScrollTop, settle, type Detent } from './sheetMath.ts';
 import './bottom-sheet.css';
 
 export type { Detent } from './sheetMath.ts';
@@ -130,25 +130,45 @@ export function BottomSheet({ open, onClose, detents = ['half', 'full'], initial
     };
   }, [open]);
 
-  // A focused field is centred in the sheet's body once the keyboard has settled. Scrolls the body only (scrollIntoView would also move the clipped shell).
+  // A focused field is brought into view ONCE, after the keyboard has settled, and only if it is not already comfortably visible
+  // (centring a field that is in view makes the sheet jump under the finger). Each keyboard resize restarts the short wait, so
+  // there is a single scroll instead of one per timer. Scrolls the body only (scrollIntoView would also move the clipped shell).
   useEffect(() => {
     if (!mounted) return;
     const n = body.current;
     if (!n) return;
-    const timers: ReturnType<typeof setTimeout>[] = [];
-    const reveal = (f: Element) => {
-      if (!n.contains(f)) return;
-      n.scrollTop = centerScrollTop(n.scrollTop, n.getBoundingClientRect(), f.getBoundingClientRect());
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let target: HTMLElement | null = null;
+    let deadline = 0;
+    const reveal = () => {
+      timer = undefined;
+      const f = target;
+      target = null;
+      if (!f || !n.contains(f) || document.activeElement !== f) return;
+      const next = revealScrollTop(n.scrollTop, n.getBoundingClientRect(), f.getBoundingClientRect());
+      if (next !== n.scrollTop) n.scrollTop = next;
+    };
+    const wait = (ms: number) => {
+      clearTimeout(timer);
+      timer = setTimeout(reveal, ms);
     };
     const onFocusIn = (e: FocusEvent) => {
       const f = e.target;
       if (!(f instanceof HTMLElement) || !f.matches('input, textarea, select, [contenteditable="true"]')) return;
-      timers.push(setTimeout(() => reveal(f), 120), setTimeout(() => reveal(f), 420));
+      target = f;
+      deadline = Date.now() + 800;
+      wait(160);
     };
+    const onViewport = () => {
+      if (target && Date.now() < deadline) wait(110);
+    };
+    const vv = window.visualViewport;
     n.addEventListener('focusin', onFocusIn);
+    vv?.addEventListener('resize', onViewport);
     return () => {
       n.removeEventListener('focusin', onFocusIn);
-      timers.forEach(clearTimeout);
+      vv?.removeEventListener('resize', onViewport);
+      clearTimeout(timer);
     };
   }, [mounted]);
 

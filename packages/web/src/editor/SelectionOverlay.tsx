@@ -31,6 +31,8 @@ export function SelectionOverlay(props: {
   onView?: (v: View | null) => void;
   /** Smallest font size of the typing box, px. A phone passes 16: iOS Safari zooms the page when a field under 16px gets focus. */
   minFontPx?: number;
+  /** Select all the text when typing starts (a phone does this for the placeholder, so the first key replaces it). */
+  selectOnOpen?: boolean;
 }) {
   const { scene, wrap, active } = props;
   const [anchor, setAnchor] = useState<{ left: number; top: number; width: number; height: number; k: number } | null>(null);
@@ -48,6 +50,14 @@ export function SelectionOverlay(props: {
     } catch {
       n.focus();
     }
+    if (props.selectOnOpen) {
+      try {
+        n.setSelectionRange(0, n.value.length);
+      } catch {
+        n.select();
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showBox]);
   // Where the toolbar's left edge goes so it stays inside the picture's frame, whatever the selection's position (a phone's frame is narrow).
   const [shift, setShift] = useState<number | null>(null);
@@ -91,11 +101,19 @@ export function SelectionOverlay(props: {
   useEffect(place, [place]);
   useEffect(() => {
     window.addEventListener('resize', place);
+    // A phone's keyboard shrinks the visual viewport and the box around the picture moves without the canvas itself resizing: measure again then too.
+    const vv = typeof window !== 'undefined' ? window.visualViewport : null;
+    vv?.addEventListener('resize', place);
+    vv?.addEventListener('scroll', place);
     const c = scene.current?.canvas();
     const ro = typeof ResizeObserver !== 'undefined' && c ? new ResizeObserver(place) : null;
     if (ro && c) ro.observe(c);
+    const wrapEl = wrap.current;
+    if (ro && wrapEl) ro.observe(wrapEl);
     return () => {
       window.removeEventListener('resize', place);
+      vv?.removeEventListener('resize', place);
+      vv?.removeEventListener('scroll', place);
       ro?.disconnect();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

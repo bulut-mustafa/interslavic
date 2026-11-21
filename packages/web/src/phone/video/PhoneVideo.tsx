@@ -81,10 +81,10 @@ export default function PhoneVideo({ store = defaultVideoStore, makeTranscriber,
   }, [selKey]);
 
   const { mode, strip } = useMemo(() => {
-    const r = toolsFor(project, sel, { canDeleteClip: clips.length > 1 });
+    const r = toolsFor(project, sel);
     const items: StripItem[] = r.items.map((t) => ({ id: t.id, label: t.label, disabled: t.disabled || busyOut, icon: iconOf(t.id) }));
     return { mode: r.mode, strip: items };
-  }, [project, sel, clips.length, busyOut]);
+  }, [project, sel, busyOut]);
 
   const act = (id: ToolId) => {
     if (id === 'split') ed.split();
@@ -126,7 +126,13 @@ export default function PhoneVideo({ store = defaultVideoStore, makeTranscriber,
     return (
       <div className="pv" ref={setRootEl}>
         {back}
-        <div className="pv-empty">
+        <div className="pv-empty" data-testid="phone-video-empty">
+          <h2 className="pv-empty-title">Add a video to start</h2>
+          {H.canUndo(hist) && (
+            <button type="button" className="pv-button" onClick={() => ed.setHist((h) => H.undo(h))}>
+              <Icon name="undo" size="1.2rem" /> Undo: bring the video back
+            </button>
+          )}
           <PickButton primary label="Choose a video" accept="video/*" hint="MP4, WebM, MOV. It stays on your phone." icon={<PIcon d={PATHS.overlay} size={28} />} onFiles={(l) => ed.requestOpen(l[0]!)} />
           <button type="button" className="pv-button" onClick={() => setTool('uploads')}>
             <PIcon d={PATHS.upload} /> From your uploads

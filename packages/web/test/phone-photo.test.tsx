@@ -269,6 +269,13 @@ describe('phone photo editor: one sheet per tool', () => {
     await tap('Layers');
     const sheet = screen.getByRole('dialog', { name: 'Layers' });
     expect(within(sheet).getByRole('list', { name: 'Layer list, front first' })).toBeTruthy();
+    // One bar of actions, for the one layer tapped: not a row of buttons on every layer.
+    expect(within(sheet).queryAllByRole('button', { name: /^(Move|Hide|Lock|Delete) / }).filter((b) => b.getAttribute('aria-label')?.includes('Ellipse'))).toHaveLength(5);
+    expect(within(sheet).queryAllByRole('button', { name: /^Delete / })).toHaveLength(1);
+    await act(async () => {
+      fireEvent.click(within(sheet).getByRole('button', { name: 'Rectangle' }));
+    });
+    expect(within(sheet).queryAllByRole('button', { name: /^Delete / })).toHaveLength(1);
     await act(async () => {
       fireEvent.click(within(sheet).getByRole('button', { name: 'Move Rectangle up' }));
     });
@@ -278,6 +285,9 @@ describe('phone photo editor: one sheet per tool', () => {
     });
     expect((layers().find((l) => isShape(l) && l.shape === 'rect') as ShapeLayer & { hidden?: boolean }).hidden).toBe(true);
     await act(async () => {
+      fireEvent.click(within(sheet).getByRole('button', { name: 'Ellipse' }));
+    });
+    await act(async () => {
       fireEvent.click(within(sheet).getByRole('button', { name: 'Lock Ellipse' }));
     });
     expect((layers().find((l) => isShape(l) && l.shape === 'ellipse') as ShapeLayer & { locked?: boolean }).locked).toBe(true);
@@ -285,6 +295,12 @@ describe('phone photo editor: one sheet per tool', () => {
       fireEvent.click(within(sheet).getByRole('button', { name: 'Rectangle' }));
     });
     expect(within(sheet).getByRole('button', { name: 'Rectangle' }).getAttribute('aria-pressed')).toBe('true');
+    // Delete removes the tapped layer only and hands the bar to the next one.
+    await act(async () => {
+      fireEvent.click(within(sheet).getByRole('button', { name: 'Delete Rectangle' }));
+    });
+    expect(layers()).toHaveLength(1);
+    expect(within(sheet).queryAllByRole('button', { name: /^Delete / })).toHaveLength(1);
   });
 
   it('Position: align, arrange, nudge and rotation act on the selection', async () => {
@@ -584,6 +600,9 @@ describe('phone photo editor: pages and the saved copy', () => {
     await waitFor(() => expect(screen.getByRole('button', { name: /^Pages: 2 of 2/ })).toBeTruthy());
     const grid = screen.getByRole('dialog', { name: 'Pages' });
     expect(within(grid).getAllByRole('button', { name: /^Page \d/ })).toHaveLength(2);
+    // The actions are one bar for the chosen page, not four buttons on every tile (they overlapped and the trash could not be tapped).
+    expect(within(grid).getAllByRole('button', { name: /^Delete page/ })).toHaveLength(1);
+    expect(within(grid).getAllByRole('button', { name: /^Duplicate page/ })).toHaveLength(1);
     await act(async () => {
       fireEvent.click(within(grid).getByRole('button', { name: 'Duplicate page 2' }));
     });
@@ -592,7 +611,7 @@ describe('phone photo editor: pages and the saved copy', () => {
       fireEvent.click(within(screen.getByRole('dialog', { name: 'Pages' })).getByRole('button', { name: 'Move page 3 earlier' }));
     });
     await act(async () => {
-      fireEvent.click(within(screen.getByRole('dialog', { name: 'Pages' })).getByRole('button', { name: 'Delete page 3' }));
+      fireEvent.click(within(screen.getByRole('dialog', { name: 'Pages' })).getByRole('button', { name: /^Delete page \d/ }));
     });
     await waitFor(() => expect(screen.getByRole('button', { name: /^Pages: \d of 2/ })).toBeTruthy());
   });

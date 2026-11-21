@@ -26,7 +26,7 @@ import { useKeyboardInset } from '../useKeyboardInset.ts';
 import { clampPan, placement, revealPan, toPage, toStageRect, zoomAbout, type Pan, type Size } from './canvas-view.ts';
 import { pinchLayer, planMove, softRotation } from './gesture-actions.ts';
 import { ICONS } from './icons.ts';
-import { emptyTextToRemove, holdInPlace } from './typing.ts';
+import { emptyTextToRemove, holdInPlace, typingPadding } from './typing.ts';
 import { remove } from '../../photo/layer-ops.ts';
 import { AddSheet, ColourSheet, LayersSheet, MoreSheet, PagesSheet, PositionSheet, TextSheet } from './sheets.tsx';
 import type { PhoneCtx } from './types.ts';
@@ -107,6 +107,9 @@ export function stripItems(mode: StripMode, c: Pick<PhoneCtx, 'isVirtual' | 'cut
 const ALWAYS = new Set<SheetId>(['add', 'layers', 'pages', 'export', 'cutout', 'crop', 'more', 'adjust', 'text']);
 
 const insideRect = (p: { x: number; y: number }, b: { x0: number; y0: number; x1: number; y1: number }, pad: number): boolean => p.x >= b.x0 - pad && p.x <= b.x1 + pad && p.y >= b.y0 - pad && p.y <= b.y1 + pad;
+
+/** How far a transform handle's touch area reaches past the box, px (44px handles centred on the edge). */
+export const HANDLE_REACH = 22;
 
 const FALLBACK: Size = { w: 360, h: 480 };
 
@@ -208,7 +211,11 @@ export default function PhonePageView({ ctx: c }: { ctx: PhoneCtx }) {
     if (ids.length === 0) return null;
     return boundsOfSelection(pool, ids, c.measureCtx ?? undefined);
   }, [c.isVirtual, c.activeIds, c.sel, c.textActive, c.layers, c.measureCtx]);
-  const anchor = selection ? toStageRect(selection, at) : null;
+  const rawAnchor = selection ? toStageRect(selection, at) : null;
+  // A picture or shape has transform handles whose 44px touch areas reach 22px past its edges; the bar keeps clear of them
+  // (otherwise its top row of pixels sat on the bottom handles and taps there turned into a resize).
+  const pad = c.boxed && !c.crop ? HANDLE_REACH : 0;
+  const anchor = rawAnchor ? { x: rawAnchor.x - pad, y: rawAnchor.y - pad, width: rawAnchor.width + pad * 2, height: rawAnchor.height + pad * 2 } : null;
   const barShown = !!anchor && !gesturing && !c.typing && !c.crop && !c.cutting && !c.shell.exportNode;
 
   // ---- text typing: the picture slides up above the keyboard ----
@@ -501,10 +508,7 @@ export default function PhonePageView({ ctx: c }: { ctx: PhoneCtx }) {
         return <MoreSheet items={list} done={done} />;
       }
       case 'pages':
-        return <PagesSheet pages={c.shell.pages} currentId={c.shell.currentId} onShow={(id) => {
-          c.shell.onShow(id);
-          c.shell.setPagesOpen(false);
-        }} onAddFiles={c.shell.onAddFiles} onDuplicate={c.shell.onDuplicate} onRemove={c.shell.onRemove} onMove={c.shell.onMove} />;
+        return <PagesSheet pages={c.shell.pages} currentId={c.shell.currentId} onShow={c.shell.onShow} onAddFiles={c.shell.onAddFiles} onDuplicate={c.shell.onDuplicate} onRemove={c.shell.onRemove} onMove={c.shell.onMove} />;
       case 'export':
         return c.shell.exportNode;
       case 'cutout':
@@ -539,7 +543,9 @@ export default function PhonePageView({ ctx: c }: { ctx: PhoneCtx }) {
   const isError = !!(c.error ?? c.shell.problem);
   const pageIndex = Math.max(0, c.shell.pages.findIndex((p) => p.id === c.shell.currentId));
   const typingKb = c.typing && kb > 0;
-  const rootStyle: CSSProperties = typingKb ? { paddingBottom: kb + 48 } : {};
+  // The shell is already pinned to the visible part of the screen while a keyboard is up (viewportLock: height = --vvh), so only the
+  // keyboard bar's own height is reserved here; adding the keyboard's height again squeezed the stage to nothing (the picture vanished).
+  const rootStyle: CSSProperties = typingKb ? { paddingBottom: typingPadding(c.typing, kb) } : {};
   const sheetOpen = derived !== null;
 
   return (

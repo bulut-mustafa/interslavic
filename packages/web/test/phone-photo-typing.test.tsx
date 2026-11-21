@@ -6,7 +6,7 @@ import { isText } from '../src/photo/doc.ts';
 import type { Recognizer } from '../src/photo/ocr.ts';
 import PhotoEditor from '../src/photo/PhotoEditor.tsx';
 import { setRenderProbe } from '../src/photo/render-probe.ts';
-import { emptyTextToRemove, holdInPlace, resetScroll } from '../src/phone/photo/typing.ts';
+import { emptyTextToRemove, holdInPlace, KEYBOARD_BAR_H, resetScroll, typingPadding } from '../src/phone/photo/typing.ts';
 import { screen } from './live-screen.ts';
 import { fakeContext } from './photo-canvas.ts';
 
@@ -170,5 +170,14 @@ describe('phone photo: deleting', () => {
       fireEvent.click(within(screen.getByRole('list', { name: 'More' })).getByRole('button', { name: 'Delete' }));
     });
     expect(layers()).toHaveLength(0);
+  });
+});
+
+describe('phone typing: the room kept for the keyboard', () => {
+  it('reserves only the keyboard bar, never the keyboard height (the shell is already as short as the visible screen)', () => {
+    expect(typingPadding(true, 324)).toBe(KEYBOARD_BAR_H);
+    expect(typingPadding(true, 324)).toBeLessThan(80);
+    expect(typingPadding(true, 0)).toBe(0);
+    expect(typingPadding(false, 324)).toBe(0);
   });
 });

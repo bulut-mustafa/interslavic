@@ -62,6 +62,9 @@ export const LANGS: { value: SourceLang; label: string }[] = [
   { value: 'uk', label: 'Ukrainian' },
 ];
 
+/** Where a new text starts: the playhead, unless that leaves under a second of the edit (then the last second). */
+export const textStartFor = (time: number, length: number): number => (length - time < 1 ? Math.max(0, length - 1) : time);
+
 export const clock = (s: number): string => `${Math.floor(s / 60)}:${(s % 60).toFixed(1).padStart(4, '0')}`;
 export const readText = (f: File): Promise<string> =>
   new Promise((resolve, reject) => {
@@ -182,6 +185,8 @@ export function useVideoEditor({ store = defaultVideoStore, makeTranscriber, dec
   const stripCtl = useRef(new AbortController());
   /** Set once the person has started something, so a slow restore of the saved edit cannot replace it. */
   const touched = useRef(false);
+  /** The kept copy was cleared because the phone's edit was emptied. */
+  const emptied = useRef(false);
   const lastCommit = useRef<{ key: string; at: number } | null>(null);
 
   const project = hist.present;
@@ -360,13 +365,29 @@ export function useVideoEditor({ store = defaultVideoStore, makeTranscriber, dec
 
   // The edit is kept as it changes, a moment after the last change.
   useEffect(() => {
-    if (!store || !ready) return;
+    if (!store) return;
+    if (!ready) {
+      // Everything was deleted (phone): what is kept goes too, or a reload would bring the deleted video back. Undo in this visit still can.
+      if (H.canUndo(hist) && !restoring) {
+        emptied.current = true;
+        keep(() => store.clear());
+      }
+      return;
+    }
+    if (emptied.current) {
+      // Undo brought the video back after its files were cleared away: keep them again.
+      emptied.current = false;
+      for (const s of project.sources) {
+        const f = files.fileOf(s.id);
+        if (f) keep(() => store.saveSource(s.id, f));
+      }
+    }
     const t = setTimeout(() => {
       keep(() => store.saveRecord({ version: 2, hist, lang, script, muted, volume, voiceOver }));
     }, 500);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hist, lang, script, muted, volume, voiceOver, ready]);
+  }, [hist, lang, script, muted, volume, voiceOver, ready, restoring]);
 
   // Little pictures along each video, for the timeline. One controller for the editor's whole life (a new file must not cancel the pictures of an earlier one).
   useEffect(() => {
@@ -539,7 +560,7 @@ export function useVideoEditor({ store = defaultVideoStore, makeTranscriber, dec
     if (next !== clips) commit({ clips: next });
   };
 
-  /** The selected thing removed. The last clip of the main track stays. */
+  /** The selected thing removed. On the desktop the last clip of the main track stays; on the phone it can go (empty state, undo-able). */
   const removeSelected = () => {
     let cutAt: number | null = null;
     if (selLayer) commit({ layers: layers.filter((l) => l.id !== selLayer.id) });
@@ -548,6 +569,13 @@ export function useVideoEditor({ store = defaultVideoStore, makeTranscriber, dec
       const from = startOf(clips, clipIndex);
       if (time >= from - 0.001 && time <= from + clipLength(selClip) + 0.001) cutAt = from;
       commit({ clips: removeClip(clips, clipIndex) });
+    } else if (selClip && phone) {
+      // The phone lets the last video go: the editor falls back to its empty "Add a video" screen, and Undo brings everything back.
+      grabbed.current.clear();
+      commit({ clips: [] });
+      setPlaying(false);
+      setTime(0);
+      liveClock.set(0);
     } else if (selClip) {
       setStatus('The last clip of the main track stays. Add another video first, or trim this one.');
       return;
@@ -646,17 +674,20 @@ export function useVideoEditor({ store = defaultVideoStore, makeTranscriber, dec
   const canFreeze = !!atPlayhead && sourceOf(project, atPlayhead.srcId)?.kind === 'video';
 
   const addText = () => {
+    // At the very end of the edit there is no room after the playhead: a text there would last no time and could never be seen (or typed on). It goes to the last second instead, and the playhead goes with it.
+    const start = textStartFor(time, length);
     const l = newLayer({
       x: frame.w * 0.1,
       y: frame.h * 0.4,
       maxWidth: frame.w * 0.8,
-      start: time,
-      end: Math.min(length, time + 3),
+      start,
+      end: Math.min(length, start + 3),
       style: defaultTextStyle(frame.h),
       track: topTrack(project) + 1,
     });
     commit({ layers: [...layers, l] });
     setSel({ kind: 'layer', id: l.id });
+    if (start !== time) seek(start);
   };
 
   const importSubtitles = async (f: File) => {
