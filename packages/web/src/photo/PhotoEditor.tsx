@@ -30,8 +30,9 @@ import { canvasProber, matchFont } from './font-match.ts';
 import { retargetLayers } from './geometry.ts';
 import { snapMove, snapResize, type Guide } from './guides.ts';
 import { boxOfLayer, hitPage, isHidden as hiddenIn } from './hit.ts';
-import { addImage, addShape, addSticker, alignToPage, copyPayload, duplicate, estimateText, parsePayload, paste, remove, reorder, type AlignKind, type Measure } from './layer-ops.ts';
+import { addImage, addShape, addSticker, alignToPage, copyPayload, duplicate, estimateText, parsePayload, patchLayers, paste, remove, reorder, type AlignKind, type Measure } from './layer-ops.ts';
 import { LayersPanel } from './LayersPanel.tsx';
+import type { PhoneCtx, PhoneShell } from '../phone/photo/types.ts';
 import { caretAt, glyphsFrom, isCovered, layersFromRuns, lineAround, nearestGlyph, runsIn, stretch, unionBox, wordAround, type Glyph } from './live-text.ts';
 import { ObjectInspector, type ObjectLayer } from './ObjectInspector.tsx';
 import { tesseractRecognizer, type OcrLang, type Recognizer } from './ocr.ts';
@@ -48,6 +49,9 @@ import './mobile-photo.css';
 
 /** The background-removal dialog (and the model code behind it) is fetched only when it is first opened. */
 const CutoutDialog = lazy(() => import('./CutoutDialog.tsx'));
+
+/** The phone's page view (phone/photo): the same page state, drawn and driven by touch. Fetched only on a phone. */
+const PhonePageView = lazy(() => import('../phone/photo/PhonePageView.tsx'));
 
 /** The longest side of the working picture: larger photos are scaled down so editing stays quick. */
 const MAX_SIDE = 2400;
@@ -199,8 +203,10 @@ const PagePane = forwardRef<
     /** An export is being made: the editing surface is inert. */
     exporting: boolean;
     onExport: () => void;
+    /** Given on a phone: the page is drawn by the phone view (phone/photo/PhonePageView.tsx) instead of the desktop layout. */
+    phone?: PhoneShell;
   }
->(function PagePane({ file, recognizer, restored, warnOnLeave, onScreen, onInfo, pageId, objects, store, keep, dialogOpen, exporting, onExport }, handle) {
+>(function PagePane({ file, recognizer, restored, warnOnLeave, onScreen, onInfo, pageId, objects, store, keep, dialogOpen, exporting, onExport, phone }, handle) {
   const [pic, setPic] = useState<Picture | null>(null);
   const [hist, setHist] = useState<H.History<PageDoc>>(() => restored?.hist ?? H.start(emptyDoc()));
   /** The picture's letters, found as soon as it opens. They stay part of the picture until some are picked and changed. */
@@ -1170,6 +1176,173 @@ const PagePane = forwardRef<
   const showLayersFlyout = tool === 'layers' && !cropping;
   const geometryHint = !isIdentityGeometry(doc.base) && !cropping && glyphs.length > 0;
 
+  if (phone) {
+    if (!onScreen) return null;
+    if (!pic) {
+      return (
+        <p className={error ? 'error-line' : 'note'} role={error ? 'alert' : 'status'}>
+          {error ?? 'Opening the picture…'}
+        </p>
+      );
+    }
+    const objectIds = objectSel.map((l) => l.id);
+    const restorable = textActive.filter((l) => l.erase && l.original !== undefined);
+    const ctx: PhoneCtx = {
+      shell: phone,
+      file,
+      pic,
+      shownDoc,
+      shownSize,
+      page,
+      drawBase,
+      images,
+      picsVersion,
+      outlined,
+      guides,
+      scene,
+      wrap,
+      view,
+      setView,
+      measureCtx,
+      measure,
+      canUndo: H.canUndo(hist),
+      canRedo: H.canRedo(hist),
+      undo,
+      redo,
+      edit,
+      editMerge,
+      commit,
+      commitAdded,
+      cancelEdit,
+      setGuides,
+      layers,
+      sel,
+      selLayers,
+      objectSel,
+      textSel,
+      textActive,
+      virtual,
+      layer,
+      isVirtual,
+      boxed,
+      activeIds,
+      pickLayers,
+      clear,
+      selectAll,
+      typing,
+      setTyping,
+      startTyping,
+      translate,
+      copyText,
+      busy,
+      restoreOriginal:
+        restorable.length > 0
+          ? () => {
+              // The picture's own words come back, exactly as they were: the text that stood in for them goes.
+              const gone = restorable.map((l) => l.id);
+              mutate((all) => all.filter((l) => !gone.includes(l.id)));
+              setStatus(null);
+              clear();
+            }
+          : null,
+      text: {
+        onText: ({ text, ...rest }) =>
+          mutate(
+            (all, ids) => {
+              const spread = Object.keys(rest).length > 0 ? patchText(all, ids, rest) : all;
+              return text === undefined ? spread : patchText(spread, [ids[0]!], { text });
+            },
+            undefined,
+            `x:${activeIds.join()}:${Object.keys(rest).join()}`,
+          ),
+        onStyle: (patch) => mutate((all, ids) => mapText(all, ids, (l) => ({ ...l, style: { ...l.style, ...patch } })), undefined, `s:${activeIds.join()}:${Object.keys(patch).join()}`),
+        onPreset: (id) => mutate((all, ids) => mapText(all, ids, (l) => ({ ...l, style: applyPreset(l.style, id) }))),
+        onDuplicate: () => {
+          if (!layer) return;
+          const all = isVirtual ? [...layers, ...virtual] : layers;
+          commitAdded(duplicate(all, [layer.id]), all);
+        },
+        onDelete: () => {
+          if (!layer) return;
+          commit(remove(layers, [layer.id]));
+          clear();
+        },
+        onFront: () => layer && mutate((all) => reorder(all, [layer.id], 'front')),
+        onInsertWord: (w) => layer && mutate((all) => patchText(all, [layer.id], { text: layer.text + (layer.text && !/\s$/.test(layer.text) ? ' ' : '') + w })),
+        onEffects: (patch) => mutate((all, ids) => mapText(all, ids, (l) => ({ ...l, style: { ...l.style, ...patch } })), undefined, `fx:${activeIds.join()}`),
+        onType: (text) => mutate((all, ids) => patchText(all, [ids[0]!], { text }), undefined, `t:${activeIds.join()}`),
+      },
+      live,
+      picked,
+      setPicked,
+      lineAreas,
+      bands,
+      liveOn,
+      reading,
+      readingNote,
+      readError,
+      retryRead: () => void detect(pic, lang),
+      lang,
+      changeLang,
+      script,
+      setScript,
+      setSelectedIds,
+      addText,
+      addImageFiles,
+      addShape: (kind) => commitAdded(addShape(layers, kind, page)),
+      addSticker: (c) => commitAdded(addSticker(layers, c, page)),
+      duplicateSel,
+      removeSel,
+      copyLayers,
+      orderSel,
+      nudge,
+      align: (kind: AlignKind) => edit((d) => ({ ...d, layers: alignToPage(d.layers, sel, kind, page, measureForAlign) })),
+      objectChange: (patch, mode) => {
+        if (mode === 'commit') editMerge(`o:${objectIds.join()}:${Object.keys(patch).join()}`, (d) => ({ ...d, layers: patchObjects(d.layers, objectIds, patch) }));
+        else edit((d) => ({ ...d, layers: patchObjects(d.layers, objectIds, patch) }), mode);
+      },
+      patchSel: (patch, mode) => edit((d) => ({ ...d, layers: patchLayers(d.layers, sel, patch) }), mode),
+      crop,
+      setCrop,
+      startCrop,
+      applyCrop,
+      resetGeometry,
+      geometryHint,
+      adjust: { adjust: doc.base.adjust, preset: doc.base.preset, presetAmount: doc.base.presetAmount },
+      adjustChange,
+      autoAdjust,
+      resetColour,
+      setCompare,
+      hasBackground: !!bgId,
+      restoreBackground,
+      cutting,
+      startCutout,
+      cancelCutout: () => setCutting(false),
+      keepCutout: (o) => void keepCutout(o),
+      replaceBackground,
+      transform,
+      status,
+      error,
+      dismissMessages: () => {
+        setStatus(null);
+        setError(null);
+      },
+      notes: [
+        ...(pic.scaled ? [`This picture was larger than ${MAX_SIDE}px, so it was scaled down to edit; the saved picture is that size.`] : []),
+        ...(lost.length > 0 ? [`${lost.length} ${lost.length === 1 ? 'picture' : 'pictures'} on this page could not be found on this device (the browser may have cleared its storage), so ${lost.length === 1 ? 'it is' : 'they are'} left out.`] : []),
+        ...(bgId && (bgLost || bgFailed) ? [`The picture with its background replaced ${bgLost ? 'could not be found on this device' : `could not be shown: ${bgFailed}`}, so the original picture is shown.`] : []),
+        ...Object.values(failedPics).map((m) => `A picture on this page could not be shown: ${m}`),
+      ],
+      exporting,
+      onExport,
+    };
+    return (
+      <Suspense fallback={null}>
+        <PhonePageView ctx={ctx} />
+      </Suspense>
+    );
+  }
+
   return (
     <main className="editor-page">
       {!pic && (
@@ -1704,7 +1877,7 @@ const newPageId = (): string => `page-${Date.now().toString(36)}${Math.random().
  * and come back the next time the editor is opened; when the work is done, one
  * picture or all of them can be downloaded (PNG, JPG, WebP or a PDF).
  */
-export default function PhotoEditor({ recognizer = tesseractRecognizer, store = defaultStore }: { recognizer?: Recognizer; store?: PhotoStore | null }) {
+export default function PhotoEditor({ recognizer = tesseractRecognizer, store = defaultStore, phone = false }: { recognizer?: Recognizer; store?: PhotoStore | null; /** The phone layout (phone/photo): the same pages, history and saved copy, drawn for a thumb. */ phone?: boolean }) {
   const lib = useLibrary();
   const [pages, setPages] = useState<Page[]>([]);
   const [current, setCurrent] = useState<string | null>(null);
@@ -1712,6 +1885,8 @@ export default function PhotoEditor({ recognizer = tesseractRecognizer, store = 
   const [leaving, setLeaving] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
   const [dialog, setDialog] = useState(false);
+  /** Phone: the page grid sheet is open (kept here, since the page shown changes under it). */
+  const [pagesOpen, setPagesOpen] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
   const [exportNote, setExportNote] = useState<string | null>(null);
   /** The sizes of pages never shown this visit, read from their files' headers for the export dialog. */
@@ -1853,6 +2028,37 @@ export default function PhotoEditor({ recognizer = tesseractRecognizer, store = 
     }
   };
 
+  /** A copy of a page, right after it, with its edits, its pictures and its text; the saved copy gets its own files. */
+  const duplicatePage = (id: string) => {
+    const src = pages.find((p) => p.id === id);
+    if (!src) return;
+    const snap = info[id]?.snapshot;
+    const restored: Restored | undefined = snap ? { lang: snap.lang, script: snap.script, hist: snap.hist, glyphs: snap.glyphs, read: snap.read } : src.restored;
+    const copy: Page = { id: newPageId(), file: src.file, itemId: src.itemId, restored, thumb: info[id]?.thumb ?? src.thumb, objects: new Map(src.objects) };
+    setPages((all) => {
+      const at = all.findIndex((p) => p.id === id);
+      return [...all.slice(0, at + 1), copy, ...all.slice(at + 1)];
+    });
+    if (store) {
+      keep(async () => {
+        await store.saveFile(copy.id, copy.file);
+        for (const [oid, f] of copy.objects) await store.saveObjectFile(copy.id, oid, f);
+      });
+    }
+    show(copy);
+  };
+
+  /** One place earlier or later in the order of the pages (the order is saved with the rest). */
+  const movePage = (id: string, by: -1 | 1) =>
+    setPages((all) => {
+      const at = all.findIndex((p) => p.id === id);
+      const to = at + by;
+      if (at < 0 || to < 0 || to >= all.length) return all;
+      const next = all.slice();
+      [next[at], next[to]] = [next[to]!, next[at]!];
+      return next;
+    });
+
   /** A page says how it now looks; the strip shows it, and the saved copy is brought up to date. */
   const heard = (page: Page, i: PageInfo) => {
     setInfo((all) => ({ ...all, [page.id]: i }));
@@ -1925,6 +2131,42 @@ export default function PhotoEditor({ recognizer = tesseractRecognizer, store = 
     );
   }
 
+  if (pages.length === 0 && phone) {
+    return (
+      <main className="ph-photo-empty">
+        <h1>Photo</h1>
+        <p>Change the text in a picture, or crop, colour and decorate it. {store ? 'Your pictures and changes are kept on this device, and nowhere else.' : 'The picture stays on your device.'}</p>
+        {restoreFailed && (
+          <p className="error-line" role="alert">
+            Your saved pictures could not be read just now, so you are starting empty. They are still on this device and may come back after a reload.
+          </p>
+        )}
+        <label className="ph-photo-pick">
+          <Icon name="image" size="1.6rem" />
+          <span>Choose a picture</span>
+          <input
+            type="file"
+            multiple
+            accept="image/*"
+            aria-label="Photo"
+            onChange={(e) => {
+              addMany(e.target.files);
+              e.target.value = '';
+            }}
+          />
+        </label>
+        {problem && (
+          <p className="error-line" role="alert">
+            {problem}
+          </p>
+        )}
+        <button type="button" className="ph-photo-sample" onClick={() => void samplePicture().then((f) => addPicture(f))}>
+          Try a sample picture
+        </button>
+      </main>
+    );
+  }
+
   if (pages.length === 0) {
     return (
       <main className="editor-page">
@@ -1947,6 +2189,57 @@ export default function PhotoEditor({ recognizer = tesseractRecognizer, store = 
           </p>
         </div>
       </main>
+    );
+  }
+
+  if (phone) {
+    const shell: PhoneShell = {
+      pages: pages.map((p) => ({ id: p.id, name: p.file.name, thumb: info[p.id]?.thumb ?? p.thumb, edited: hasChanges(p) })),
+      currentId: current ?? pages[0]!.id,
+      onShow: (id) => {
+        const page = pages.find((p) => p.id === id);
+        if (page) show(page);
+      },
+      onAddFiles: (files) => files.forEach((f) => addPicture(f)),
+      onDuplicate: duplicatePage,
+      onRemove: removePage,
+      onMove: movePage,
+      exportNode:
+        dialog && current ? (
+          <ExportDialog inline pages={dialogPages} currentId={current} onExport={(req) => void runExport(req)} onClose={() => setDialog(false)} />
+        ) : null,
+      onExportClose: () => setDialog(false),
+      pagesOpen,
+      setPagesOpen,
+      note: exporting ? 'Making the file…' : kept === 'failed' ? 'Could not keep your work on this device (the browser may be out of room). Download your pictures to be safe.' : exportNote,
+      problem,
+    };
+    return (
+      <div className="ph-photo-workspace">
+        {pages.map((p) => (
+          <div key={p.id} className="ph-photo-page" hidden={p.id !== current}>
+            <PagePane
+              ref={(h) => {
+                handles.current.set(p.id, h);
+              }}
+              file={p.file}
+              recognizer={recognizer}
+              restored={p.restored}
+              onScreen={p.id === current}
+              warnOnLeave={store === null}
+              onInfo={(i) => heard(p, i)}
+              pageId={p.id}
+              objects={p.objects}
+              store={store}
+              keep={keep}
+              dialogOpen={dialog}
+              exporting={exporting}
+              onExport={() => setDialog(true)}
+              phone={shell}
+            />
+          </div>
+        ))}
+      </div>
     );
   }
 

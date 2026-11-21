@@ -2,6 +2,9 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { track } from '../analytics.ts';
 import { DropZone } from '../components/DropZone.tsx';
 import { Icon } from '../components/Icon.tsx';
+import { BottomSheet } from '../phone/BottomSheet.tsx';
+import { PhoneIconButton } from '../phone/parts.tsx';
+import { useIsPhone } from '../phone/useIsPhone.ts';
 import { useToolActive } from '../studio/active.tsx';
 import { downloadText } from '../download.ts';
 import type { Direction } from '../learn/anki.ts';
@@ -43,6 +46,7 @@ const readText = (file: File): Promise<string> =>
  * and the words are looked up with the same dictionary as the Read page.
  */
 export default function Player() {
+  const phone = useIsPhone();
   const video = useRef<HTMLVideoElement>(null);
   const active = useToolActive();
   // Moving to another tool must not leave a video playing out of sight.
@@ -65,7 +69,7 @@ export default function Player() {
   const side = useRef<HTMLElement>(null);
   // Where the words panel sits under the video (a phone), a tapped word's card would land off screen: bring it into view.
   useEffect(() => {
-    if (!word || !side.current || typeof side.current.scrollIntoView !== 'function') return;
+    if (phone || !word || !side.current || typeof side.current.scrollIntoView !== 'function') return;
     if (typeof window.matchMedia !== 'function' || !window.matchMedia('(max-width: 64rem)').matches) return;
     const r = side.current.getBoundingClientRect();
     if (r.top > window.innerHeight * 0.6) side.current.scrollIntoView({ block: 'start' });
@@ -221,6 +225,137 @@ export default function Player() {
           </p>
         )}
       </main>
+    );
+  }
+
+  if (phone) {
+    return (
+      <div className="ph-tool-screen ph-watch">
+        <div className="ph-watch-video">
+          {src ? <video ref={video} src={src} controls playsInline className="player-video" /> : <p className="ph-note-card">Add the video to watch it with the subtitles.</p>}
+        </div>
+
+        <div className={`ph-tool-scroll ph-watch-words${word ? ' ph-sheet-open' : ''}`}>
+          {problem && (
+            <p className="ph-note-card is-error" role="alert">
+              {problem}
+            </p>
+          )}
+          {src && isv.length === 0 && <p className="ph-note-card">Add the Interslavic subtitles (an .srt) to see them here.</p>}
+          {isv.length > 0 && (
+            <section className="ph-card-box" aria-label="Current subtitle">
+              <p className="ph-watch-cue" lang="isv" aria-live="polite">
+                {cue === null
+                  ? '…'
+                  : (analysis?.tokens ?? [{ kind: 'gap' as const, text: cueText }]).map((t, i) =>
+                      t.kind === 'gap' ? (
+                        <span key={i}>{t.text}</span>
+                      ) : (
+                        <button
+                          key={i}
+                          type="button"
+                          className={['output-word', t.status === 'unknown' ? 'is-unfound' : '', t.status === 'maybe-name' ? 'is-name' : '', word === t ? 'is-active' : ''].filter(Boolean).join(' ')}
+                          onClick={() => {
+                            video.current?.pause();
+                            setWord(t);
+                          }}
+                        >
+                          {t.text}
+                        </button>
+                      ),
+                    )}
+              </p>
+              {originalCue && <p className="player-original">{originalCue.lines.join(' ')}</p>}
+              {error && <p className="error-line">{error}</p>}
+              {cue && <p className="ph-hint-strong">Tap a word to see what it is.</p>}
+            </section>
+          )}
+
+          <section className="ph-card-box ph-watch-files" aria-label="Files">
+            <p className="ph-hint-strong">
+              <Icon name="play" size="0.8rem" /> {src ? videoName : 'No video yet'}
+              <br />
+              <Icon name="subtitles" size="0.9rem" /> {isvSub ? isvSub.name : 'No subtitles yet'}
+              {origSub && <> and {origSub.name}</>}
+            </p>
+            <div className="ph-sheet-row">
+              <label className="ph-secondary">
+                <Icon name="plus" /> Add files
+                <input
+                  type="file"
+                  multiple
+                  accept={FILES}
+                  aria-label="Video and subtitle files"
+                  onChange={(e) => {
+                    void takeFiles([...(e.target.files ?? [])]);
+                    e.target.value = '';
+                  }}
+                />
+              </label>
+              {origSub && (
+                <button type="button" className="ph-secondary" onClick={() => setSubtitles(origSub, isvSub)}>
+                  <Icon name="swap" /> Swap subtitles
+                </button>
+              )}
+            </div>
+          </section>
+
+          {notes.length > 0 && (
+            <section className="ph-card-box" aria-label="Saved sentences">
+              <h2>Saved sentences ({notes.length})</h2>
+              <ul className="ph-list">
+                {notes.map((n) => (
+                  <li key={n.id} className="ph-note-row">
+                    <span>
+                      <span lang="isv">{n.isv}</span>
+                      <small>
+                        {n.video}, {clock(n.at)}
+                      </small>
+                    </span>
+                    <PhoneIconButton icon="trash" label={`Remove: ${n.isv}`} onClick={() => setNotes(removeNote(n.id))} />
+                  </li>
+                ))}
+              </ul>
+              <div className="ph-sheet-stack">
+                {(['isv-en', 'en-isv'] as Direction[]).map((d) => (
+                  <button
+                    key={d}
+                    type="button"
+                    className="ph-secondary is-wide"
+                    onClick={() => {
+                      downloadText('interslavic-video-sentences-anki.txt', notesTsv(notes, d), 'text/tab-separated-values');
+                      track('anki-export', { direction: d, from: 'video' });
+                    }}
+                  >
+                    {d === 'isv-en' ? 'Anki: Interslavic first' : 'Anki: original first'}
+                  </button>
+                ))}
+                <button type="button" className="ph-secondary is-wide" onClick={() => setNotes(clearNotes())}>
+                  Clear all
+                </button>
+              </div>
+            </section>
+          )}
+        </div>
+
+        {src && isv.length > 0 && (
+          <div className="ph-tool-bar ph-watch-controls" role="toolbar" aria-label="Watch controls">
+            <PhoneIconButton icon="arrowLeft" label="Previous line" onClick={() => jump(Math.max(0, current - 1))} disabled={current <= 0} />
+            <PhoneIconButton icon="arrowRight" label="Next line" onClick={() => jump(Math.min(isv.length - 1, current + 1))} disabled={current >= isv.length - 1} />
+            <PhoneIconButton icon="redo" label={loopCue !== null ? 'Stop repeating' : 'Repeat this line'} pressed={loopCue !== null} disabled={current < 0} onClick={() => setLoopCue(loopCue === null && current >= 0 ? current : null)} />
+            <button type="button" className="ph-chip" aria-label={`Speed ${rate}×. Tap to change`} onClick={() => setRate(SPEEDS[(SPEEDS.indexOf(rate) + 1) % SPEEDS.length]!)}>
+              {rate}×
+            </button>
+            <button type="button" className="ph-primary ph-watch-save" onClick={save} disabled={!cue}>
+              <Icon name="plus" /> Save sentence
+            </button>
+          </div>
+        )}
+
+        <BottomSheet open={word !== null} onClose={() => setWord(null)} title={word?.text ?? 'Word'} detents={['half', 'full']}>
+          {word && <WordCard word={word} />}
+        </BottomSheet>
+      </div>
     );
   }
 

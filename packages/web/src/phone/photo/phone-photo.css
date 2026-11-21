@@ -1,0 +1,759 @@
+/* This editor has its own top bar (back, undo, redo, Download), so the shell's is not drawn and the tool gets the whole screen. */
+.ph-tool-frame[data-tool='photo'] {
+  grid-template-rows: minmax(0, 1fr);
+}
+.ph-tool-frame[data-tool='photo'] > .ph-topbar {
+  display: none;
+}
+
+/* The phone photo editor (docs/mobile-design.md, docs/mobile-parts.md). Plain CSS, classes start with pp-; only transform and opacity move. */
+
+.ph-photo-workspace,
+.ph-photo-page {
+  height: 100%;
+  min-height: 0;
+}
+.ph-photo-page[hidden] {
+  display: none;
+}
+
+/* Nothing opened yet. */
+.ph-photo-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-3);
+  height: 100%;
+  padding: var(--space-4) var(--space-3);
+  background: var(--paper);
+  overflow-y: auto;
+}
+.ph-photo-empty h1 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+.ph-photo-empty p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+.ph-photo-pick {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 11rem;
+  border: 2px dashed var(--teal);
+  border-radius: 20px;
+  background: #fff;
+  color: var(--teal);
+  font-weight: 600;
+  touch-action: manipulation;
+}
+.ph-photo-pick input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+}
+.ph-photo-sample {
+  min-height: 48px;
+  border: 0;
+  background: none;
+  color: var(--teal);
+  font: inherit;
+  text-decoration: underline;
+  touch-action: manipulation;
+}
+
+/* The editor: bar, stage, page row, tool strip. The sheet pushes everything up by its height (--sheet-h on this element). */
+.pp {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  height: 100%;
+  min-height: 0;
+  padding-bottom: var(--sheet-h, 0px);
+  background: #e4e6ea;
+  overflow: hidden;
+}
+
+.pp-bar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-height: 48px;
+  padding: 0 8px;
+  background: #fff;
+  border-bottom: 1px solid var(--rule);
+}
+.pp-icon-btn {
+  display: grid;
+  place-items: center;
+  flex: none;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--ink);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.pp-icon-btn:active:not(:disabled) {
+  background: var(--paper);
+}
+.pp-icon-btn:disabled {
+  opacity: 0.35;
+}
+.pp-icon-btn[aria-pressed='true'] {
+  color: var(--teal);
+}
+.pp-page-indicator {
+  margin: 0 auto;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 22px;
+  background: none;
+  color: var(--ink-soft);
+  font: inherit;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+  touch-action: manipulation;
+}
+.pp-page-indicator:active {
+  background: var(--paper);
+}
+.pp-download {
+  min-height: 40px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 20px;
+  background: var(--teal);
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  touch-action: manipulation;
+}
+.pp-download:active:not(:disabled) {
+  opacity: 0.85;
+}
+.pp-download:disabled {
+  opacity: 0.45;
+}
+
+/* The stage. The picture is sized in JS (fit, zoom) and moved by transform; the surface under it takes every touch except the handles. */
+.pp-stage {
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+  touch-action: none;
+}
+.pp-surface {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.pp-wrap {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  pointer-events: none;
+  will-change: transform;
+}
+.pp .pp-wrap .layer-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  min-height: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 2px;
+  box-shadow: 0 2px 14px rgba(22, 32, 47, 0.25);
+  pointer-events: none;
+}
+.pp-bands {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Only the handles, the crop box and the typing box take touches themselves; handles keep a 44px hit area round a small mark. */
+.pp-wrap .tbox-h,
+.pp-wrap .crop-h {
+  width: 44px;
+  height: 44px;
+  pointer-events: auto;
+}
+.pp-wrap .tbox-body {
+  pointer-events: none;
+}
+.pp-wrap .crop-body,
+.pp-wrap .canvas-typing {
+  pointer-events: auto;
+}
+.pp-wrap .canvas-typing {
+  font-size: max(16px, 1em);
+}
+.pp-wrap .canvas-toolbar {
+  display: none;
+}
+
+.pp-pill {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  z-index: 6;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(22, 32, 47, 0.86);
+  color: #fff;
+  font-size: 0.8rem;
+  pointer-events: none;
+}
+.pp-toast {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 10px;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  padding: 2px 2px 2px 14px;
+  border-radius: 14px;
+  background: rgba(22, 32, 47, 0.92);
+  color: #fff;
+  font-size: 0.85rem;
+  line-height: 1.35;
+}
+.pp-toast span {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 0;
+}
+.pp-toast.is-error {
+  background: #8d1d3f;
+}
+.pp-toast .pp-icon-btn {
+  color: #fff;
+}
+
+.ph-fbar button.is-main {
+  color: var(--teal);
+  font-weight: 600;
+}
+.ph-fbar button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: inherit;
+  font-size: 0.9rem;
+}
+
+/* The page row under the picture. */
+.pp-pages {
+  display: block;
+  width: 100%;
+  min-height: 56px;
+  padding: 6px 12px;
+  border: 0;
+  border-top: 1px solid var(--rule);
+  background: #fff;
+  touch-action: manipulation;
+}
+.pp-pages-row {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  overflow: hidden;
+}
+.pp-thumb {
+  flex: none;
+  width: 34px;
+  height: 44px;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--paper);
+}
+.pp-thumb.is-current {
+  border-color: var(--teal);
+}
+.pp-thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.pp-page-blank {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--rule);
+}
+
+/* On the keyboard bar. */
+.pp-kb-btn {
+  flex: none;
+  min-width: 56px;
+  padding: 0 14px;
+  font: inherit;
+  font-size: 0.95rem;
+}
+.pp-kb-btn.is-primary {
+  color: var(--teal);
+  font-weight: 600;
+}
+.pp-kb-gap {
+  flex: 1;
+}
+
+/* ---- inside the sheet ---- */
+.pp-sheet-content {
+  padding-bottom: var(--space-2);
+}
+.pp-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--rule);
+  border-radius: 22px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.95rem;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.pp-chip:active:not(:disabled) {
+  background: var(--paper);
+}
+.pp-chip.is-primary {
+  border-color: var(--teal);
+  background: var(--teal);
+  color: #fff;
+  font-weight: 600;
+}
+.pp-chip.is-danger {
+  color: #b3261e;
+}
+.pp-chip:disabled {
+  opacity: 0.45;
+}
+.pp-head-actions {
+  display: flex;
+  gap: 8px;
+  margin-right: -4px;
+}
+
+.pp-note,
+.pp-hint {
+  margin: 0 0 var(--space-2);
+  color: var(--ink-soft);
+  font-size: var(--text-sm);
+  line-height: 1.45;
+}
+.pp-note.is-error {
+  color: #b3261e;
+}
+.pp-notes {
+  margin: 0 0 var(--space-2);
+  padding-left: 1.1rem;
+  color: var(--ink-soft);
+  font-size: var(--text-sm);
+}
+.pp-section h3 {
+  margin: var(--space-3) 0 var(--space-2);
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.pp-tiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: var(--space-2);
+}
+.pp-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 88px;
+  border: 1px solid var(--rule);
+  border-radius: 16px;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.9rem;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.pp-tile:active:not(:disabled) {
+  background: #fff;
+}
+.pp-tile:disabled {
+  opacity: 0.45;
+}
+.pp-tile input[type='file'] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+}
+.pp-tile-icon {
+  display: grid;
+  place-items: center;
+  color: var(--teal);
+}
+.pp-grid,
+.pp-row-icons {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
+  gap: 8px;
+  margin-bottom: var(--space-2);
+}
+.pp-cell {
+  display: grid;
+  place-items: center;
+  min-height: 52px;
+  padding: 0;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 1.5rem;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.pp-cell:active:not(:disabled) {
+  background: #fff;
+}
+.pp-cell:disabled {
+  opacity: 0.35;
+}
+.pp-swatches {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: var(--space-3);
+}
+.pp-swatch {
+  min-height: 48px;
+  border: 2px solid var(--rule);
+  border-radius: 50%;
+  touch-action: manipulation;
+}
+.pp-swatch[aria-pressed='true'] {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 2px #fff inset;
+}
+.pp-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 48px;
+  font-size: 0.95rem;
+}
+.pp-row select,
+.pp-row input[type='color'] {
+  min-height: 44px;
+  font-size: max(16px, 1em);
+}
+.pp-row input[type='color'] {
+  width: 4rem;
+  padding: 0;
+}
+
+.pp-list,
+.pp-layers,
+.pp-page-grid {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.pp-list-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 52px;
+  padding: 0 4px;
+  border: 0;
+  border-bottom: 1px solid var(--rule);
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  touch-action: manipulation;
+}
+.pp-list-row:active:not(:disabled) {
+  background: var(--paper);
+}
+.pp-list-row:disabled {
+  opacity: 0.45;
+}
+.pp-list-row.is-danger {
+  color: #b3261e;
+}
+.pp-list-icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+}
+
+.pp-layer {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  min-height: 56px;
+  border-bottom: 1px solid var(--rule);
+}
+.pp-layer.is-selected {
+  background: rgba(31, 107, 107, 0.1);
+}
+.pp-layer.is-hidden .pp-layer-name {
+  opacity: 0.5;
+}
+.pp-layer-main {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  min-height: 56px;
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  touch-action: manipulation;
+}
+.pp-layer-thumb {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--paper);
+}
+.pp-layer-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pp-page-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+  gap: 12px;
+}
+.pp-page {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.pp-page-thumb {
+  position: relative;
+  display: block;
+  aspect-ratio: 3 / 4;
+  padding: 0;
+  border: 2px solid var(--rule);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--paper);
+  touch-action: manipulation;
+}
+.pp-page.is-current .pp-page-thumb {
+  border-color: var(--teal);
+}
+.pp-page-thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.pp-page-number {
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  min-width: 22px;
+  padding: 1px 6px;
+  border-radius: 11px;
+  background: rgba(22, 32, 47, 0.75);
+  color: #fff;
+  font-size: 0.75rem;
+}
+.pp-page-dot {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--teal);
+}
+.pp-page-actions {
+  display: flex;
+  justify-content: space-between;
+}
+.pp-page-actions .pp-icon-btn {
+  min-width: 40px;
+}
+.pp-page-ask {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+.pp-page-add {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  aspect-ratio: 3 / 4;
+  border: 2px dashed var(--teal);
+  border-radius: 10px;
+  color: var(--teal);
+  font-size: 0.85rem;
+  touch-action: manipulation;
+}
+.pp-page-add input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+}
+
+/* The desktop panels, as sheet content: no card round them, a thumb-size target for every control, 16px text fields. */
+.pp-sheet-content .inspector {
+  padding: 0;
+  border: 0;
+  background: none;
+  border-radius: 0;
+}
+.pp-sheet-content .insp-tool,
+.pp-sheet-content .insp-stepper button,
+.pp-sheet-content .adj-look,
+.pp-sheet-content .insp-preset,
+.pp-sheet-content .crop-bar button,
+.pp-sheet-content .ap-cell {
+  min-width: 44px;
+  min-height: 44px;
+}
+.pp-sheet-content .insp-stepper input,
+.pp-sheet-content .insp-font,
+.pp-sheet-content .inspector select,
+.pp-sheet-content .inspector input[type='color'] {
+  min-height: 44px;
+}
+.pp-sheet-content .inspector input:not([type='range'], [type='checkbox'], [type='radio'], [type='color']),
+.pp-sheet-content .inspector select,
+.pp-sheet-content .inspector textarea,
+.pp-sheet-content .export-dialog input[type='number'],
+.pp-sheet-content .export-dialog select,
+.pp-sheet-content .cutout input[type='number'] {
+  font-size: max(16px, 1em);
+}
+.pp-sheet-content input[type='range'] {
+  min-height: 44px;
+  touch-action: pan-y;
+}
+.pp-sheet-content .insp-row {
+  grid-template-columns: 6rem minmax(0, 1fr) 2.8rem;
+}
+.pp-sheet-content .adj-strip {
+  padding-bottom: var(--space-2);
+}
+
+/* Crop options sit in the sheet; Apply and Cancel are in its header (CropTool leaves its own row out when it has a host). */
+.pp-crop-host .crop-bar {
+  position: static;
+  margin: 0;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+.pp-crop-host .crop-row {
+  gap: 8px;
+}
+.pp-crop-host .crop-chip {
+  min-height: 44px;
+  padding: 0 14px;
+}
+.pp-crop-host .crop-row[role='group'] {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  touch-action: pan-x;
+  scrollbar-width: none;
+}
+.pp-crop-host .crop-chip {
+  flex: none;
+}
+
+/* Download and Remove background as sheet content: the dialog frame goes, its content stays. */
+.pp-sheet-content .export-dialog.is-inline,
+.pp-sheet-content .cutout.is-inline {
+  width: 100%;
+  max-height: none;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  overflow: visible;
+}
+.pp-sheet-content .export-dialog.is-inline h2,
+.pp-sheet-content .cutout.is-inline h2 {
+  display: none;
+}
+.pp-sheet-content .export-dialog button,
+.pp-sheet-content .cutout button,
+.pp-sheet-content .cutout .text-button {
+  min-height: 44px;
+}
+.pp-sheet-content .export-actions,
+.pp-sheet-content .cutout-actions {
+  position: sticky;
+  bottom: 0;
+  padding: var(--space-2) 0 calc(var(--space-2) + env(safe-area-inset-bottom, 0px));
+  background: #fff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pp * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

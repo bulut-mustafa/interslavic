@@ -104,6 +104,9 @@ function Group(props: { label: string; children: ReactNode }) {
   );
 }
 
+/** The parts of the object controls, so a narrow layout can show them one at a time. Without `only` all of them show. */
+export type ObjectPart = 'look' | 'shape' | 'frame' | 'border' | 'shadow' | 'place' | 'order' | 'fx';
+
 const percent = (v: number) => `${Math.round(v * 100)}%`;
 
 /**
@@ -122,8 +125,11 @@ export function ObjectInspector(props: {
   onAlign: (kind: AlignKind) => void;
   onDuplicate: () => void;
   onDelete: () => void;
+  /** Show only these parts (default: all). */
+  only?: readonly ObjectPart[];
 }) {
   const { layer, onChange } = props;
+  const show = (part: ObjectPart): boolean => !props.only || props.only.includes(part);
   const [ratio, setRatio] = useState(true);
   const set = (patch: Patch) => onChange(patch, 'commit');
   const image = isImage(layer) ? layer : null;
@@ -145,8 +151,10 @@ export function ObjectInspector(props: {
 
   return (
     <section className="inspector" aria-label="Object settings">
-      <h3 className="insp-title">{layerName(layer)}</h3>
+      {!props.only && <h3 className="insp-title">{layerName(layer)}</h3>}
 
+      {show('look') && (
+      <>
       <Range label="Opacity" value={layer.opacity} min={0} max={1} step={0.01} show={percent} onPreview={(opacity) => onChange({ opacity }, 'preview')} onEnd={(opacity) => onChange({ opacity }, 'end')} />
 
       {roundable && (
@@ -181,8 +189,10 @@ export function ObjectInspector(props: {
         <Tool label="Duplicate" icon="copy" onClick={props.onDuplicate} />
         <Tool label="Delete" icon="trash" onClick={props.onDelete} />
       </div>
+      </>
+      )}
 
-      {shape && (
+      {show('shape') && shape && (
         <Group label="Shape colours">
           {!linear && (
             <div className="oi-colors">
@@ -219,7 +229,7 @@ export function ObjectInspector(props: {
         </Group>
       )}
 
-      {image && (
+      {show('frame') && image && (
         <Group label="Frame">
           <h4 className="fx-head">Frame</h4>
           <div className="oi-frames">
@@ -230,6 +240,7 @@ export function ObjectInspector(props: {
         </Group>
       )}
 
+      {show('border') && (
       <Group label="Border settings">
         <div className="oi-colors">
           <label className="oi-check">
@@ -240,7 +251,9 @@ export function ObjectInspector(props: {
           {border && <Num label="Border width" caption="Width" value={border.width} min={0} onSet={(width) => set({ border: { ...border, width: Math.max(0, width) } })} />}
         </div>
       </Group>
+      )}
 
+      {show('shadow') && (
       <Group label="Shadow settings">
         <label className="oi-check">
           <input type="checkbox" aria-label="Shadow" checked={!!shadow} onChange={(e) => set({ shadow: e.target.checked ? DEFAULT_SHADOW : undefined })} />
@@ -263,7 +276,9 @@ export function ObjectInspector(props: {
           </>
         )}
       </Group>
+      )}
 
+      {show('place') && (
       <Group label="Position and size">
         <div className="insp-pair" role="group" aria-label="Size">
           <span>Size</span>
@@ -289,15 +304,18 @@ export function ObjectInspector(props: {
           ))}
         </div>
       </Group>
+      )}
 
+      {show('order') && (
       <div className="insp-line insp-foot" role="group" aria-label="Order">
         <Tool label="Bring to front" icon="front" onClick={() => props.onOrder('front')} />
         <Tool label="Bring forward" icon="forward" onClick={() => props.onOrder('forward')} />
         <Tool label="Send backward" icon="backward" onClick={() => props.onOrder('backward')} />
         <Tool label="Send to back" icon="toBack" onClick={() => props.onOrder('back')} />
       </div>
+      )}
 
-      {image && <EffectsPanel adjust={image.adjust ?? {}} mask={image.mask} chroma={image.chroma} onChange={(p: EffectsPatch) => set(p)} />}
+      {show('fx') && image && <EffectsPanel adjust={image.adjust ?? {}} mask={image.mask} chroma={image.chroma} onChange={(p: EffectsPatch) => set(p)} />}
     </section>
   );
 }

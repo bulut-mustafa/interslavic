@@ -1,0 +1,1101 @@
+/* Phone screens other than the editors: Translator, Learn, Phrasebook and the small Studio tools.
+   The site's paper and teal, more air, 16px inputs, 44px targets, 200ms transform/opacity only. */
+
+.ph-screen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-height: 100%;
+}
+.ph-screen > * {
+  flex: none;
+}
+.ph-screen-grow {
+  flex: 1 0 auto;
+}
+
+.ph-card-box {
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: 18px;
+  padding: var(--space-3);
+}
+.ph-card-box h2,
+.ph-card-box h3 {
+  margin: 0 0 var(--space-2);
+  font-size: 1rem;
+}
+
+/* ---------- buttons ---------- */
+.ph-icon-btn {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--ink-soft);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+.ph-icon-btn:active {
+  transform: scale(0.92);
+  background: var(--paper);
+}
+.ph-icon-btn:disabled {
+  opacity: 0.35;
+}
+.ph-icon-btn[aria-pressed='true'] {
+  color: var(--teal);
+}
+
+.ph-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 54px;
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: 18px;
+  background: var(--teal);
+  color: #fff;
+  font: inherit;
+  font-size: 1.05rem;
+  font-weight: 600;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 6px 18px rgba(31, 107, 107, 0.28);
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+.ph-primary:active {
+  transform: scale(0.98);
+}
+.ph-primary:disabled {
+  opacity: 0.45;
+  box-shadow: none;
+}
+.ph-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 48px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--rule);
+  border-radius: 16px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  font-size: 1rem;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.2s ease;
+}
+.ph-secondary:active {
+  transform: scale(0.97);
+}
+.ph-secondary:disabled {
+  opacity: 0.45;
+}
+.ph-secondary.is-wide {
+  width: 100%;
+}
+
+/* The sticky action: bottom of the scrolling content, so it sits right above the tab bar. */
+.ph-sticky {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  margin: 0 calc(-1 * var(--space-3)) calc(-1 * var(--space-3));
+  padding: var(--space-2) var(--space-3);
+  background: linear-gradient(to top, var(--paper) 70%, rgba(236, 239, 243, 0));
+}
+.ph-sticky-solid {
+  background: #fff;
+  border-top: 1px solid var(--rule);
+}
+.ph-kbar .ph-primary {
+  min-height: 46px;
+  margin: 0 4px;
+}
+
+/* ---------- fields ---------- */
+.ph-field {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 14px;
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  font-size: 16px;
+  line-height: 1.4;
+}
+.ph-field:focus {
+  outline: 2px solid var(--teal);
+  outline-offset: 0;
+}
+textarea.ph-field {
+  resize: none;
+}
+.ph-search {
+  position: sticky;
+  top: 0;
+  z-index: 6;
+  margin: calc(-1 * var(--space-3)) calc(-1 * var(--space-3)) 0;
+  padding: var(--space-2) var(--space-3);
+  background: var(--paper);
+}
+
+/* ---------- chips ---------- */
+.ph-chips {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  margin: 0 calc(-1 * var(--space-3));
+  padding: 2px var(--space-3);
+  overscroll-behavior-x: contain;
+  touch-action: pan-x;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 12px, #000 calc(100% - 20px), transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 12px, #000 calc(100% - 20px), transparent 100%);
+}
+.ph-chips::-webkit-scrollbar {
+  display: none;
+}
+.ph-chip {
+  flex: none;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--rule);
+  border-radius: 22px;
+  background: #fff;
+  color: var(--ink-soft);
+  font: inherit;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  scroll-snap-align: start;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+.ph-chip:active {
+  transform: scale(0.95);
+}
+.ph-chip.is-selected {
+  background: var(--teal);
+  border-color: var(--teal);
+  color: #fff;
+  font-weight: 600;
+}
+.ph-chip-sep {
+  flex: none;
+  align-self: center;
+  width: 1px;
+  height: 22px;
+  background: var(--rule);
+}
+
+/* ---------- lists / rows ---------- */
+.ph-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ph-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  min-height: 56px;
+  padding: 12px var(--space-3);
+  border: 1px solid var(--rule);
+  border-radius: 16px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.2s ease;
+}
+button.ph-row:active {
+  transform: scale(0.985);
+}
+.ph-row.is-flagged {
+  border-left: 4px solid var(--guess);
+}
+.ph-row small {
+  color: var(--ink-faint);
+  font-size: 0.8rem;
+}
+.ph-hint-strong {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.ph-menu-list {
+  margin: 0 0 var(--space-3);
+  padding: 0;
+  list-style: none;
+}
+.ph-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: 52px;
+  padding: 0 4px;
+  border: 0;
+  border-bottom: 1px solid var(--rule);
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 1rem;
+  text-align: left;
+  touch-action: manipulation;
+}
+.ph-menu-item:active {
+  background: var(--paper);
+}
+
+/* ---------- sheet content ---------- */
+.ph-sheet-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-top: var(--space-1);
+}
+.ph-sheet-stack label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+.ph-sheet-stack select,
+.ph-sheet-stack input:not([type='checkbox']):not([type='file']),
+.ph-sheet-stack textarea {
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 12px;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  background: #fff;
+  font: inherit;
+  font-size: 16px;
+  color: var(--ink);
+}
+.ph-sheet-stack textarea {
+  resize: none;
+}
+.ph-sheet-stack .ph-primary {
+  min-height: 50px;
+}
+.ph-sheet-row {
+  display: flex;
+  gap: var(--space-2);
+}
+.ph-sheet-row > * {
+  flex: 1;
+}
+.ph-sheet-open {
+  padding-bottom: calc(var(--sheet-h, 0px) + var(--space-3));
+}
+
+/* ---------- tables in cards ---------- */
+.ph-scrollcard {
+  position: relative;
+  margin: var(--space-3) 0;
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.ph-scrollcard-in {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+.ph-scrollcard-in .table-wrap {
+  overflow: visible;
+  margin: 0;
+}
+.ph-scrollcard-in table {
+  min-width: 100%;
+}
+.ph-scrollcard::before,
+.ph-scrollcard::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 28px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 1;
+}
+.ph-scrollcard::before {
+  left: 0;
+  background: linear-gradient(to right, rgba(31, 107, 107, 0.22), transparent);
+}
+.ph-scrollcard::after {
+  right: 0;
+  background: linear-gradient(to left, rgba(31, 107, 107, 0.22), transparent);
+}
+.ph-scrollcard[data-more-left='true']::before,
+.ph-scrollcard[data-more-right='true']::after {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ph-icon-btn,
+  .ph-primary,
+  .ph-secondary,
+  .ph-chip,
+  .ph-row,
+  .ph-scrollcard::before,
+  .ph-scrollcard::after {
+    transition: none;
+  }
+}
+
+.ph-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- Translator ---------- */
+.pt-input {
+  position: relative;
+  padding: var(--space-2);
+}
+.pt-input .pt-text {
+  border: 0;
+  padding: 10px 10px 4px;
+  font-size: 18px;
+  min-height: 9rem;
+  background: transparent;
+}
+.pt-input .pt-text:focus {
+  outline: none;
+}
+.pt-input:focus-within {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 2px rgba(31, 107, 107, 0.2);
+}
+.pt-input-tools {
+  display: flex;
+  justify-content: flex-end;
+  gap: 2px;
+  min-height: 44px;
+}
+.pt-results {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  scroll-margin-top: var(--space-2);
+}
+.pt-out {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 1.4rem;
+  line-height: 1.7;
+}
+.pt-alt {
+  margin: var(--space-2) 0 0;
+  font-family: var(--serif);
+  font-size: 1.1rem;
+  color: var(--ink-faint);
+}
+.pt-warn {
+  margin: var(--space-2) 0 0;
+  padding-left: 1.1rem;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+.pt-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin: var(--space-2) -8px -8px;
+}
+.pt-actions .text-button {
+  min-height: 44px;
+  margin-left: auto;
+}
+.pt-card.is-busy {
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+.pt-meter .meter-bar {
+  display: block;
+  height: 6px;
+  margin-bottom: var(--space-2);
+  border-radius: 3px;
+  background: var(--rule);
+  overflow: hidden;
+}
+.pt-meter .meter-bar span {
+  display: block;
+  height: 100%;
+  background: var(--teal);
+}
+.pt-meter p,
+.pt-notes p {
+  margin: 0;
+}
+.pt-notes div + div {
+  margin-top: var(--space-3);
+}
+.pt-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+.pt-count {
+  color: var(--ink-faint);
+  font-size: 0.9rem;
+}
+.pt-legend i {
+  display: inline-block;
+  width: 0.8rem;
+  height: 0.8rem;
+  margin-right: 6px;
+  border-radius: 50%;
+  vertical-align: -1px;
+}
+.pt-legend h3 {
+  margin: 0 0 var(--space-2);
+  font-size: 1rem;
+}
+.pt-legend p {
+  margin: 0 0 var(--space-1);
+}
+.pt .voice-picker select {
+  min-height: 48px;
+  font-size: 16px;
+}
+.pt-word .entry,
+.ph-sheet .entry {
+  border: 0;
+  padding: 0;
+}
+
+/* ---------- Learn ---------- */
+.ph-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  align-self: flex-start;
+  min-height: 44px;
+  margin-left: -6px;
+  padding: 0 6px;
+  color: var(--teal);
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+.ph-section-title {
+  margin: var(--space-2) 0;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.ph-lesson-card {
+  text-decoration: none;
+  gap: 4px;
+}
+.ph-lesson-card strong {
+  font-size: 1.05rem;
+}
+.ph-lesson-card small {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+.ph-lesson-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.ph-done {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--teal);
+  color: #fff;
+}
+.ph-progress-bar {
+  display: block;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--rule);
+  overflow: hidden;
+}
+.ph-progress-bar span {
+  display: block;
+  height: 100%;
+  background: var(--teal);
+}
+.ph-learn-hero {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.ph-learn-hero .ph-hint-strong {
+  margin: 0;
+}
+.ph-learn-hero .ph-primary {
+  text-decoration: none;
+  text-align: center;
+  padding: 10px var(--space-3);
+  font-size: 1rem;
+}
+.ph-lesson h1 {
+  margin: 0 0 var(--space-2);
+  font-size: 1.6rem;
+  line-height: 1.2;
+}
+.ph-lesson .lesson-section {
+  margin: 0 0 4px;
+}
+.ph-lesson .lesson-summary {
+  margin: 0;
+  font-size: 1rem;
+}
+.ph-lesson .lesson {
+  max-width: none;
+  padding: 0;
+  font-size: 1.02rem;
+  line-height: 1.65;
+}
+.ph-lesson .lesson h2 {
+  margin: var(--space-4) 0 var(--space-2);
+  font-size: 1.25rem;
+}
+.ph-lesson .example {
+  margin: var(--space-3) 0;
+  padding: var(--space-3);
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: 16px;
+}
+.ph-lesson .example-try {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+.ph-lesson .lesson-foot {
+  padding: var(--space-3);
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: 16px;
+}
+.ph-lesson .lesson-done {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 48px;
+}
+.ph-lesson .lesson-done input {
+  width: 24px;
+  height: 24px;
+}
+.ph-lesson .exercise {
+  margin: var(--space-3) 0;
+  padding: var(--space-3);
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: 16px;
+}
+.ph-lesson .exercise-option {
+  min-height: 48px;
+  font-size: 1rem;
+}
+.ph-lesson .exercise-fill {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+.ph-lesson .exercise-fill input {
+  width: 100%;
+  min-height: 48px;
+  font-size: 16px;
+}
+.ph-lesson .exercise-fill .text-button,
+.ph-lesson .exercise .text-button {
+  min-height: 44px;
+}
+.ph-lesson table {
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+.ph-lesson-nav {
+  gap: var(--space-2);
+  padding-bottom: var(--space-2);
+}
+.ph-lesson-progress {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  text-align: center;
+}
+.ph-lesson-next {
+  width: auto;
+  min-height: 48px;
+  padding: 0 var(--space-3);
+  text-decoration: none;
+  font-size: 1rem;
+  box-shadow: none;
+}
+
+/* ---------- Phrasebook ---------- */
+.ph-phrase {
+  gap: 2px;
+}
+.ph-phrase-isv {
+  font-family: var(--serif);
+  font-size: 1.2rem;
+  line-height: 1.35;
+}
+.ph-phrase-en {
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+}
+.ph-sheet-isv {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 1.6rem;
+  line-height: 1.3;
+}
+.ph-sheet-cyr {
+  margin: 0;
+  color: var(--ink-faint);
+  font-size: 1.1rem;
+}
+.ph-source-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--teal);
+  font-size: 0.9rem;
+}
+.ph-sheet-row .text-button {
+  min-height: 48px;
+  border: 1px solid var(--rule);
+  border-radius: 16px;
+  background: #fff;
+}
+.ph-flash {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 15rem;
+  padding: var(--space-4) var(--space-3);
+  border: 1px solid var(--rule);
+  border-radius: 20px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  text-align: center;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.ph-flash-en {
+  margin-top: var(--space-2);
+  color: var(--ink-soft);
+  font-size: 1.05rem;
+}
+.ph-flash.is-shown {
+  border-color: var(--teal);
+}
+.ph-flash-count {
+  min-width: 4.5rem;
+  color: var(--ink-faint);
+  font-size: 0.85rem;
+  text-align: center;
+}
+.ph-flash-next {
+  width: auto;
+  flex: 1;
+  min-height: 48px;
+  box-shadow: none;
+}
+
+/* ---------- Studio tools on a phone (inside .ph-tool) ---------- */
+.ph-tool > main,
+.ph-tool > .subtitles,
+.ph-tool > .player,
+.ph-tool > .transcribe {
+  min-height: 100%;
+  padding: var(--space-3);
+  background: var(--paper);
+}
+.ph-tool input[type='text'],
+.ph-tool input:not([type]),
+.ph-tool select,
+.ph-tool textarea {
+  font-size: 16px;
+}
+
+.ph-tool-screen {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: var(--paper);
+}
+.ph-tool-screen > * {
+  flex: none;
+}
+.ph-tool-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.ph-tool-scroll > * {
+  flex: none;
+}
+.ph-tool-scroll.ph-sheet-open {
+  padding-bottom: calc(var(--sheet-h, 0px) + var(--space-3));
+}
+.ph-tool-head {
+  padding: var(--space-2) var(--space-3) var(--space-2);
+  background: #fff;
+  border-bottom: 1px solid var(--rule);
+}
+.ph-tool-head .ph-chips {
+  margin-top: var(--space-1);
+}
+.ph-tool-head-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.ph-tool-head-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+.ph-tool-head-text strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ink);
+  font-size: 1rem;
+}
+.ph-tool-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3) calc(var(--space-2) + env(safe-area-inset-bottom));
+  background: #fff;
+  border-top: 1px solid var(--rule);
+}
+.ph-tool-bar-split > .ph-primary {
+  flex: 1;
+  width: auto;
+}
+.ph-tool-bar .ph-secondary {
+  min-height: 54px;
+}
+.ph-tool-bar > .ph-primary {
+  box-shadow: none;
+}
+.ph-sheet-done {
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 0;
+  border-radius: 22px;
+  background: none;
+  color: var(--teal);
+  font: inherit;
+  font-weight: 600;
+  touch-action: manipulation;
+}
+.ph-sheet-done:active {
+  background: var(--paper);
+}
+.ph-note-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-3);
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: 16px;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+.ph-note-card.is-error {
+  border-color: var(--guess);
+}
+.ph-note-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 4px 4px 4px var(--space-3);
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+}
+.ph-note-row > span {
+  flex: 1;
+  min-width: 0;
+}
+.ph-note-row small {
+  display: block;
+  color: var(--ink-faint);
+}
+.ph-file-pick {
+  position: relative;
+  overflow: hidden;
+}
+.ph-file-pick input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  width: 100%;
+  font-size: 16px;
+}
+
+/* Subtitles */
+.ph-subrow {
+  gap: 4px;
+}
+.ph-subrow-isv {
+  font-size: 1rem;
+  line-height: 1.4;
+}
+.ph-subrow-orig {
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+.ph-sub-orig {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  background: var(--paper);
+  border-radius: 12px;
+  color: var(--ink-soft);
+}
+
+/* Worksheets */
+.ph-ws .ph-tool-scroll {
+  background: #e4e6ea;
+}
+.ph-ws .worksheet {
+  padding: var(--space-3);
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 2px 10px rgba(22, 32, 47, 0.18);
+  font-size: 0.95rem;
+  overflow-x: auto;
+}
+.ph-ws-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--rule);
+}
+.ph-ws-item {
+  padding: var(--space-2);
+  background: var(--paper-raised);
+  border-radius: 14px;
+}
+.ph-sheet-stack .ws-field {
+  width: 100%;
+  min-height: 48px;
+  font-size: 16px;
+}
+.ph-sheet-stack .ws-row {
+  flex-direction: column;
+  align-items: stretch;
+}
+.ph-sheet-stack .ws-item-head .icon-button,
+.ph-sheet-stack .ws-item-head .text-button {
+  min-width: 44px;
+  min-height: 44px;
+}
+.ph-sheet-stack .topic-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+.ph-secondary.is-on {
+  border-color: var(--teal);
+  color: var(--teal);
+}
+
+/* Watch */
+.ph-watch-video {
+  background: #000;
+  max-height: 38svh;
+}
+.ph-watch-video .player-video {
+  display: block;
+  width: 100%;
+  max-height: 38svh;
+}
+.ph-watch-video .ph-note-card {
+  margin: var(--space-3);
+}
+.ph-watch-cue {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 1.5rem;
+  line-height: 1.7;
+}
+.ph-watch-files input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+.ph-watch-files .ph-secondary {
+  position: relative;
+}
+.ph-watch-controls {
+  gap: 2px;
+}
+.ph-watch-save {
+  flex: 1;
+  width: auto;
+  min-height: 48px;
+  margin-left: var(--space-1);
+  padding: 0 var(--space-2);
+  font-size: 0.95rem;
+}
+.ph-watch-controls .ph-chip {
+  min-width: 48px;
+  padding: 0 10px;
+}
+
+/* Recording */
+.ph-rec-start {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+  text-align: center;
+}
+.ph-rec-big {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 9rem;
+  height: 9rem;
+  border: 0;
+  border-radius: 50%;
+  background: var(--teal);
+  color: #fff;
+  font: inherit;
+  font-size: 1.05rem;
+  font-weight: 600;
+  box-shadow: 0 10px 28px rgba(31, 107, 107, 0.35);
+  touch-action: manipulation;
+  transition: transform 0.2s ease;
+}
+.ph-rec-big:active {
+  transform: scale(0.96);
+}
+.ph-rec-big.is-live {
+  background: var(--guess);
+}
+.ph-rec-audio {
+  width: 100%;
+  margin-bottom: var(--space-3);
+}
+
+/* Printing from a phone: only the paper, not the shell around it. */
+@media print {
+  html.ph-locked,
+  html.ph-locked body {
+    height: auto;
+    overflow: visible;
+  }
+  .ph-app,
+  .ph-content,
+  .ph-tool,
+  .ph-tool-screen,
+  .ph-tool-scroll {
+    display: block;
+    height: auto;
+    overflow: visible;
+    padding: 0;
+    background: #fff;
+  }
+  .ph-topbar,
+  .ph-tabbar,
+  .ph-tool-bar,
+  .ph-sheet {
+    display: none !important;
+  }
+  .ph-ws .worksheet {
+    box-shadow: none;
+    padding: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ph-rec-big {
+    transition: none;
+  }
+}

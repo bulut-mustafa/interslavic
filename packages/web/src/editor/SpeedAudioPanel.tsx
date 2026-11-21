@@ -24,6 +24,8 @@ export function SpeedAudioPanel(props: {
   duration: number;
   onChange: (patch: SpeedAudioPatch) => void;
   onExtract?: () => void;
+  /** Which half to show: the phone has a Speed sheet and a Volume sheet. Default both (the desktop panel). */
+  parts?: 'speed' | 'sound' | 'both';
 }) {
   const { duration, onChange } = props;
   const speed = clampSpeed(props.speed);
@@ -45,9 +47,13 @@ export function SpeedAudioPanel(props: {
   const inLimits = fadeLimits(duration, fadeOut);
   const outLimits = fadeLimits(duration, fadeIn);
   const seconds = (v: number) => `${v.toFixed(1)} s`;
+  const showSpeed = props.parts !== 'sound';
+  const showSound = props.parts !== 'speed';
 
   return (
     <section className="inspector speed-audio" aria-label="Speed and sound">
+      {showSpeed && (
+        <>
       <h3 className="insp-title">Speed</h3>
       <div className="sa-presets" role="group" aria-label="Speed presets">
         {SPEED_PRESETS.map((p) => (
@@ -61,7 +67,11 @@ export function SpeedAudioPanel(props: {
         <input aria-label="Speed" type="range" min={-2} max={2} step={0.01} value={speedToSlider(speed)} onChange={(e) => setSpeed(sliderToSpeed(Number(e.target.value)))} />
         <output>{speedLabel(speed)}</output>
       </label>
+        </>
+      )}
 
+      {showSound && (
+        <>
       <h3 className="insp-title">Sound</h3>
       <label className="insp-row">
         <span>Volume</span>
@@ -83,6 +93,8 @@ export function SpeedAudioPanel(props: {
         <button type="button" className="sa-extract" onClick={props.onExtract}>
           Extract audio
         </button>
+      )}
+        </>
       )}
     </section>
   );

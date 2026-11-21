@@ -1,4 +1,6 @@
+import { createPortal } from 'react-dom';
 import { useEffect, useRef, useState, type KeyboardEvent as RKeyboardEvent, type PointerEvent as RPointerEvent } from 'react';
+import type { ReactNode } from 'react';
 import { Icon } from '../components/Icon.tsx';
 import { Tip } from '../components/Tip.tsx';
 import { HANDLES, type Handle } from '../editor/transform-math.ts';
@@ -31,6 +33,8 @@ export function CropTool(props: {
   onChange: (g: Geometry, mode: Mode) => void;
   onApply: () => void;
   onCancel: () => void;
+  /** Where to put the options (ratio chips, straighten, turn and flip) instead of under the picture: the phone's bottom sheet, whose header holds Apply and Cancel (so the options have none of their own). */
+  controlsHost?: HTMLElement | null;
 }) {
   const { src, geometry, view } = props;
   const d = displaySize(src, geometry.turns ?? 0);
@@ -142,6 +146,7 @@ export function CropTool(props: {
         ))}
       </div>
 
+      {(props.controlsHost ? (node: ReactNode) => createPortal(node, props.controlsHost!) : (node: ReactNode) => node)(
       <div className="crop-bar" role="toolbar" aria-label="Crop options">
         <div className="crop-row" role="group" aria-label="Aspect ratio">
           {ASPECTS.map((a) => (
@@ -183,6 +188,7 @@ export function CropTool(props: {
           </Tip>
           <span className="crop-size" aria-live="polite">{`${Math.round(box.w)} × ${Math.round(box.h)} px`}</span>
         </div>
+        {!props.controlsHost && (
         <div className="crop-row">
           <button type="button" onClick={props.onCancel}>
             Cancel
@@ -191,7 +197,9 @@ export function CropTool(props: {
             Apply
           </button>
         </div>
-      </div>
+        )}
+      </div>,
+      )}
     </div>
   );
 }

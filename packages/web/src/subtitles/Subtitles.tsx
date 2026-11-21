@@ -2,6 +2,9 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { track } from '../analytics.ts';
 import { DropZone, OpenAnother } from '../components/DropZone.tsx';
 import { Icon } from '../components/Icon.tsx';
+import { BottomSheet } from '../phone/BottomSheet.tsx';
+import { Chip, ChipRow, PhoneIconButton } from '../phone/parts.tsx';
+import { useIsPhone } from '../phone/useIsPhone.ts';
 import { downloadText } from '../download.ts';
 import { useToolActive } from '../studio/active.tsx';
 import { guessLang } from './guess.ts';
@@ -48,6 +51,10 @@ export default function Subtitles() {
   // A transcript sent here from the Recording page arrives once, ready to translate.
   const [arrived] = useState(takeHandoff);
   const active = useToolActive();
+  const phone = useIsPhone();
+  /** Phone: the row being edited in the sheet, or the import/export sheet. */
+  const [editing, setEditing] = useState<number | null>(null);
+  const [fileSheet, setFileSheet] = useState(false);
   const [text, setText] = useState(arrived?.srt ?? '');
   const [fileName, setFileName] = useState(arrived?.name ?? 'subtitles.srt');
   const [lang, setLang] = useState<SourceLang>(arrived?.lang ?? 'en');
@@ -149,6 +156,201 @@ export default function Subtitles() {
   const flagged = results ? results.filter((_, i) => toCheck(i)).length : 0;
   const rows = (results ?? []).map((r, i) => ({ r, cue: cues[i]!, i })).filter((x) => !onlyFlagged || toCheck(x.i));
   const hasFile = cues.length > 0 && !tooMany;
+
+  if (phone && hasFile) {
+    const shown = rows.map((x) => x.i);
+    const at = editing === null ? -1 : shown.indexOf(editing);
+    const row = editing === null ? null : { r: results?.[editing], cue: cues[editing] };
+    const step = (d: number) => {
+      const n = shown[at + d];
+      if (n !== undefined) setEditing(n);
+    };
+    return (
+      <div className="ph-tool-screen ph-sub">
+        <header className="ph-tool-head">
+          <div className="ph-tool-head-row">
+            <div className="ph-tool-head-text">
+              <strong title={fileName}>{fileName}</strong>
+              <span role="status">
+                {progress
+                  ? `Translating… ${progress[0]} of ${progress[1]} lines`
+                  : results
+                    ? `${cues.length} subtitles. ${flagged === 0 ? 'None needs a second look.' : `${flagged} to check.`}`
+                    : `${cues.length} subtitles found.`}
+              </span>
+            </div>
+            <PhoneIconButton icon="fileText" label="Import and export" onClick={() => setFileSheet(true)} />
+          </div>
+          <ChipRow label="Language and script">
+            {LANGS.map((l) => (
+              <Chip key={l.value} selected={lang === l.value} onClick={() => setLang(l.value)}>
+                {l.label}
+              </Chip>
+            ))}
+            <span className="ph-chip-sep" aria-hidden="true" />
+            {SCRIPTS.map((sc) => (
+              <Chip key={sc.value} selected={script === sc.value} onClick={() => setScript(sc.value)} label={`${sc.label} script`}>
+                {sc.label}
+              </Chip>
+            ))}
+            {flagged > 0 && (
+              <>
+                <span className="ph-chip-sep" aria-hidden="true" />
+                <Chip selected={onlyFlagged} onClick={() => setOnlyFlagged(!onlyFlagged)}>
+                  To check ({flagged})
+                </Chip>
+              </>
+            )}
+          </ChipRow>
+        </header>
+
+        <div className={`ph-tool-scroll${editing !== null || fileSheet ? ' ph-sheet-open' : ''}`}>
+          {stale && !running && (
+            <p className="ph-note-card" role="status">
+              The settings changed, but you have corrected some lines, and translating again would replace them.
+            </p>
+          )}
+          {error && (
+            <div className="ph-note-card is-error" role="alert">
+              <strong>The translation stopped</strong>
+              <span>{error}</span>
+            </div>
+          )}
+          {results ? (
+            <ul className="ph-list" aria-label="Subtitles">
+              {rows.map(({ r, cue, i }) => (
+                <li key={i}>
+                  <button type="button" className={`ph-row ph-subrow${toCheck(i) ? ' is-flagged' : ''}`} aria-label={`Edit subtitle ${cue.index ?? i + 1}`} onClick={() => setEditing(i)}>
+                    <small>{cue.index ?? i + 1}</small>
+                    <span className="ph-subrow-isv" lang="isv">{r.lines.join(' ')}</span>
+                    <span className="ph-subrow-orig">{cue.lines.join(' ')}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <ul className="ph-list" aria-label="Subtitles to translate">
+              {cues.map((cue, i) => (
+                <li key={i} className="ph-row ph-subrow">
+                  <small>{cue.index ?? i + 1}</small>
+                  <span className="ph-subrow-orig">{cue.lines.join(' ')}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div className="ph-tool-bar">
+          {running ? (
+            <button type="button" className="ph-secondary is-wide" onClick={() => abort.current?.abort()}>
+              Cancel
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="ph-primary"
+              onClick={() => {
+                corrected.current = false;
+                void run();
+              }}
+            >
+              <Icon name="translate" /> Translate all
+            </button>
+          )}
+        </div>
+
+        <BottomSheet
+          open={editing !== null || fileSheet}
+          onClose={() => {
+            setEditing(null);
+            setFileSheet(false);
+          }}
+          title={fileSheet ? 'Import and export' : row ? `Subtitle ${row.cue?.index ?? (editing ?? 0) + 1}` : 'Subtitle'}
+          detents={['half', 'full']}
+          headerAction={
+            <button
+              type="button"
+              className="ph-sheet-done"
+              onClick={() => {
+                setEditing(null);
+                setFileSheet(false);
+              }}
+            >
+              Done
+            </button>
+          }
+        >
+          {fileSheet ? (
+            <div className="ph-sheet-stack">
+              <label className="ph-secondary is-wide ph-file-pick">
+                <Icon name="plus" /> Open another .srt file
+                <input
+                  type="file"
+                  accept=".srt,text/plain"
+                  aria-label="Subtitle file (.srt)"
+                  onChange={async (e) => {
+                    const f = e.target.files?.[0];
+                    e.target.value = '';
+                    if (!f) return;
+                    setResults(null);
+                    load(await readFile(f), f.name, true);
+                    setFileSheet(false);
+                  }}
+                />
+              </label>
+              <label>
+                File contains
+                <select value={output} onChange={(e) => setOutput(e.target.value as Output)} aria-label="File contains">
+                  {OUTPUTS.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <button
+                type="button"
+                className="ph-primary"
+                disabled={!results || running}
+                onClick={() => {
+                  downloadText(fileName.replace(/\.srt$/i, '') + '.isv.srt', buildSrt(cues, results!, output), 'application/x-subrip');
+                  track('subtitles-download', { output });
+                }}
+              >
+                <Icon name="save" /> Download .srt
+              </button>
+            </div>
+          ) : row && row.cue ? (
+            <div className="ph-sheet-stack">
+              <p className="ph-sub-orig">{row.cue.lines.join(' ')}</p>
+              {row.r && (
+                <label>
+                  Interslavic
+                  <textarea lang="isv" spellCheck={false} rows={Math.max(3, row.r.lines.length + 1)} aria-label={`Interslavic for subtitle ${row.cue.index ?? (editing ?? 0) + 1}`} value={row.r.lines.join('\n')} onChange={(e) => correct(editing!, e.target.value)} />
+                </label>
+              )}
+              {editing !== null && toCheck(editing) && (
+                <div className="ph-note-card">
+                  <span>{results?.[editing]?.reasons.join('; ') || 'Worth a look'}</span>
+                  <button type="button" className="ph-secondary" onClick={() => setLooked((x) => new Set(x).add(editing))}>
+                    <Icon name="check" /> Mark as checked
+                  </button>
+                </div>
+              )}
+              <div className="ph-sheet-row">
+                <button type="button" className="ph-secondary" disabled={at <= 0} onClick={() => step(-1)} aria-label="Previous subtitle">
+                  <Icon name="chevronLeft" /> Previous
+                </button>
+                <button type="button" className="ph-secondary" disabled={at < 0 || at >= shown.length - 1} onClick={() => step(1)} aria-label="Next subtitle">
+                  Next <Icon name="chevronRight" />
+                </button>
+              </div>
+            </div>
+          ) : null}
+        </BottomSheet>
+      </div>
+    );
+  }
 
   if (!hasFile) {
     return (

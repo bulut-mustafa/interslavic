@@ -52,6 +52,8 @@ export interface CutoutDialogProps {
   onReplace: (out: CutoutOutput) => void;
   onClose: () => void;
   deps?: CutoutDeps;
+  /** Shown inside something that is already a dialog (the phone's bottom sheet): no backdrop, no dialog role, no heading. */
+  inline?: boolean;
 }
 
 const PREVIEW_MAX = 760;
@@ -69,7 +71,7 @@ function shrinkCanvas(c: HTMLCanvasElement, w: number, h: number): Rgba {
 
 const mb = (n: number) => (n < 10 ? n.toFixed(1) : String(Math.round(n)));
 
-export default function CutoutDialog({ source, onKeep, onReplace, onClose, deps = {} }: CutoutDialogProps) {
+export default function CutoutDialog({ source, onKeep, onReplace, onClose, deps = {}, inline = false }: CutoutDialogProps) {
   const run = deps.run ?? removeBackground;
   const readRgba = deps.readRgba ?? canvasToRgba;
   const shrink = deps.shrink ?? shrinkCanvas;
@@ -229,9 +231,9 @@ export default function CutoutDialog({ source, onKeep, onReplace, onClose, deps 
 
   const sizeText = useMemo(() => `${mb(model.downloadMb)} MB`, [model]);
 
-  return (
-    <div className="cutout-backdrop">
-      <div className="cutout" role="dialog" aria-modal="true" aria-label="Remove the background">
+  const body = (
+    <>
+      <div className={inline ? 'cutout is-inline' : 'cutout'} role={inline ? 'group' : 'dialog'} aria-modal={inline ? undefined : true} aria-label="Remove the background">
         <h2>Remove the background</h2>
 
         {!result && !running && (
@@ -347,6 +349,8 @@ export default function CutoutDialog({ source, onKeep, onReplace, onClose, deps 
           </>
         )}
       </div>
-    </div>
+    </>
   );
+  if (inline) return body;
+  return <div className="cutout-backdrop">{body}</div>;
 }

@@ -16,6 +16,8 @@ export interface ExportDialogProps {
   onClose(): void;
   /** Canvas pixel limit for the size warning; the browser's own by default (a test gives one). */
   maxPixels?: number;
+  /** Shown inside something that is already a dialog (the phone's bottom sheet): no backdrop, no dialog role, no heading. */
+  inline?: boolean;
 }
 
 const FORMATS: ExportFormat[] = ['png', 'jpeg', 'webp', 'pdf'];
@@ -33,7 +35,7 @@ const rememberedFormat = (): ExportFormat => {
 };
 
 /** The window that asks how to hand the finished picture over. It makes nothing itself: `onExport` gets the choices. */
-export function ExportDialog({ pages, currentId, onExport, onClose, maxPixels }: ExportDialogProps) {
+export function ExportDialog({ pages, currentId, onExport, onClose, maxPixels, inline = false }: ExportDialogProps) {
   const [format, setFormatState] = useState<ExportFormat>(rememberedFormat);
   const setFormat = (f: ExportFormat) => {
     setFormatState(f);
@@ -88,9 +90,9 @@ export function ExportDialog({ pages, currentId, onExport, onClose, maxPixels }:
   const total = fits.reduce((n, f) => n + estimateBytes(f.fit.width, f.fit.height, format === 'pdf' ? 'jpeg' : format, quality), 0);
   const clamp = (n: number) => Math.min(SCALE_MAX, Math.max(SCALE_MIN, n));
 
-  return (
-    <div className="export-backdrop" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
-      <div ref={dialog} className="export-dialog" role="dialog" aria-modal="true" aria-labelledby={titleId} onKeyDown={onKeyDown}>
+  const body = (
+    <>
+      <div ref={dialog} className={inline ? 'export-dialog is-inline' : 'export-dialog'} role={inline ? 'group' : 'dialog'} aria-modal={inline ? undefined : true} aria-labelledby={titleId} onKeyDown={onKeyDown}>
         <h2 id={titleId}>Download</h2>
 
         <fieldset>
@@ -180,6 +182,12 @@ export function ExportDialog({ pages, currentId, onExport, onClose, maxPixels }:
           </button>
         </div>
       </div>
+    </>
+  );
+  if (inline) return body;
+  return (
+    <div className="export-backdrop" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+      {body}
     </div>
   );
 }

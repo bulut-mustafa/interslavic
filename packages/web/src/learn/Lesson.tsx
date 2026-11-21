@@ -1,17 +1,27 @@
-import { useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { track } from '../analytics.ts';
 import { toCyrillic } from '../../../morph/src/orthography.ts';
 import { ReportForm } from '../components/ReportForm.tsx';
+import { BottomSheet } from '../phone/BottomSheet.tsx';
+import { useMenuItems, type MenuItem } from '../phone/menu.tsx';
+import { ScrollCard } from '../phone/parts.tsx';
+import { useIsPhone } from '../phone/useIsPhone.ts';
+import { Icon } from '../components/Icon.tsx';
 import { Link } from '../router.tsx';
+import { LearnHome } from './LearnHome.tsx';
 import { anchor, parseInline } from './inline.ts';
 import { LESSONS, SECTIONS } from './lessons.ts';
 import { answered, isDone, recordAnswer, setDone } from './progress.ts';
 import type { Block, LessonPage } from './types.ts';
 
 /** One lesson page: sidebar, the lesson, "on this page", previous/next. */
-export function Lesson({ slug }: { slug: string }) {
+export function Lesson({ slug, home = false }: { slug: string; home?: boolean }) {
+  const phone = useIsPhone();
   const index = LESSONS.findIndex((l) => l.slug === slug);
   const lesson = LESSONS[index];
+
+  // On a phone /learn is the list of lessons as cards; a lesson is one column with its own bottom bar.
+  if (phone && (home || !lesson)) return <LearnHome missing={!home && !lesson} />;
 
   if (!lesson) {
     return (
@@ -31,6 +41,53 @@ export function Lesson({ slug }: { slug: string }) {
   const prev = LESSONS[index - 1];
   const next = LESSONS[index + 1];
   const headings = lesson.blocks.filter((b): b is Extract<Block, { kind: 'h2' }> => b.kind === 'h2');
+
+  if (phone) {
+    return (
+      <div className="ph-screen ph-lesson" key={lesson.slug}>
+        <Link href="/learn" className="ph-back-link">
+          <Icon name="chevronLeft" size="1.1rem" /> All lessons
+        </Link>
+        <header>
+          <p className="lesson-section">{lesson.section}</p>
+          <h1>{lesson.title}</h1>
+          <p className="lesson-summary">{lesson.summary}</p>
+        </header>
+        <article className="lesson">
+          {lesson.blocks.map((b, i) => (
+            <BlockView key={i} block={b} id={`${lesson.slug}#${i}`} />
+          ))}
+        </article>
+        <LessonFoot lesson={lesson} />
+        <nav className="ph-sticky ph-sticky-solid ph-lesson-nav" aria-label="Lessons">
+          {prev ? (
+            <Link href={`/learn/${prev.slug}`} className="ph-icon-btn" aria-label={`Previous: ${prev.title}`}>
+              <Icon name="chevronLeft" size="1.4rem" />
+            </Link>
+          ) : (
+            <span className="ph-icon-btn" aria-hidden="true" />
+          )}
+          <div className="ph-lesson-progress" role="status">
+            <span>
+              Lesson {index + 1} of {LESSONS.length}
+            </span>
+            <span className="ph-progress-bar" aria-hidden="true">
+              <span style={{ width: `${Math.round(((index + 1) / LESSONS.length) * 100)}%` }} />
+            </span>
+          </div>
+          {next ? (
+            <Link href={`/learn/${next.slug}`} className="ph-primary ph-lesson-next" aria-label={`Next: ${next.title}`}>
+              Next <Icon name="chevronRight" size="1.2rem" />
+            </Link>
+          ) : (
+            <Link href="/learn" className="ph-secondary ph-lesson-next">
+              All lessons
+            </Link>
+          )}
+        </nav>
+      </div>
+    );
+  }
 
   return (
     <main className="learn">
@@ -113,6 +170,13 @@ function LearnNav({ current }: { current: string | null }) {
 function LessonFoot({ lesson }: { lesson: LessonPage }) {
   const [done, setDoneState] = useState(() => isDone(lesson.slug));
   const [reporting, setReporting] = useState(false);
+  const phone = useIsPhone();
+  // On a phone "Report a problem" is in the top-bar menu, and the form opens in a sheet.
+  const menu = useMemo<MenuItem[]>(
+    () => (phone ? [{ id: 'lesson-report', label: 'Report a problem', icon: 'flag', onSelect: () => { track('report-open', { where: 'lesson' }); setReporting(true); } }] : []),
+    [phone],
+  );
+  useMenuItems('lesson', menu);
   return (
     <div className="lesson-foot">
       <label className="lesson-done">
@@ -126,13 +190,20 @@ function LessonFoot({ lesson }: { lesson: LessonPage }) {
         />
         I have finished this lesson
       </label>
-      <button type="button" className="text-button" onClick={() => {
-          if (!reporting) track('report-open', { where: 'lesson' });
-          setReporting((r) => !r);
-        }} aria-expanded={reporting}>
-        Report a problem
-      </button>
-      {reporting && (
+      {!phone && (
+        <button type="button" className="text-button" onClick={() => {
+            if (!reporting) track('report-open', { where: 'lesson' });
+            setReporting((r) => !r);
+          }} aria-expanded={reporting}>
+          Report a problem
+        </button>
+      )}
+      {phone && (
+        <BottomSheet open={reporting} onClose={() => setReporting(false)} title="Report a problem" detents={['full']}>
+          <ReportForm source={`/learn/${lesson.slug}`} output="" lang="lesson" orthography="standard" onClose={() => setReporting(false)} />
+        </BottomSheet>
+      )}
+      {!phone && reporting && (
         <ReportForm
           source={`/learn/${lesson.slug}`}
           output=""
@@ -180,6 +251,11 @@ export function Text({ text }: { text: string }) {
   );
 }
 
+/** On a phone a table scrolls sideways inside its own card, with an edge fade; the page never does. */
+function TableShell({ children }: { children: ReactNode }) {
+  return useIsPhone() ? <ScrollCard>{children}</ScrollCard> : <>{children}</>;
+}
+
 function BlockView({ block, id }: { block: Block; id: string }) {
   switch (block.kind) {
     case 'h2':
@@ -219,6 +295,7 @@ function BlockView({ block, id }: { block: Block; id: string }) {
       );
     case 'table':
       return (
+        <TableShell>
         <div className="table-wrap">
           <table>
             {block.caption && <caption>{block.caption}</caption>}
@@ -253,9 +330,11 @@ function BlockView({ block, id }: { block: Block; id: string }) {
             </tbody>
           </table>
         </div>
+        </TableShell>
       );
     case 'forms':
       return (
+        <TableShell>
         <div className="table-wrap">
           <table>
             <caption>{block.caption}</caption>
@@ -283,6 +362,7 @@ function BlockView({ block, id }: { block: Block; id: string }) {
             </tbody>
           </table>
         </div>
+        </TableShell>
       );
     case 'choice':
       return <Choice block={block} id={id} />;

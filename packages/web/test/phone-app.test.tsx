@@ -40,7 +40,7 @@ describe('the phone shell', () => {
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: 'Menu' }));
     });
-    expect(screen.getByRole('dialog', { name: 'About' }).textContent).toContain('Made with love');
+    expect(screen.getByRole('dialog', { name: /About|Menu/ }).textContent).toContain('Made with love');
   });
 
   it('shows the Studio home: a card per tool, no left rail, an uploads row', () => {

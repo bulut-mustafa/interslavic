@@ -7,11 +7,13 @@ import { LibraryProvider } from '../studio/library.tsx';
 import { UploadsSheet } from '../studio/UploadsSheet.tsx';
 import { toolAt, type Tool } from '../studio/tools.tsx';
 import { BottomSheet } from './BottomSheet.tsx';
+import { PhoneMenuProvider, useMenuList } from './menu.tsx';
 import { phoneElementFor } from './registry.ts';
 import { StudioHome } from './StudioHome.tsx';
 import { TabBar, type TabItem } from './TabBar.tsx';
 import { TopBar } from './TopBar.tsx';
 import './phone.css';
+import './screens.css';
 
 /** The phone's four tabs; the same sections as the desktop header. */
 export const PHONE_TABS: TabItem[] = [
@@ -44,26 +46,55 @@ function useLockPage(): void {
  */
 export default function PhoneApp({ path, page }: { path: string; page: ReactNode }) {
   useLockPage();
-  if (path.startsWith('/studio')) return <PhoneStudio path={path} />;
+  // Only `.ph-content` scrolls, so a new page must start at its top by hand.
+  useEffect(() => {
+    document.querySelector('.ph-content')?.scrollTo?.({ top: 0, left: 0 });
+  }, [path]);
   return (
-    <div className="ph-app">
-      <TopBar title={titleFor(path)} right={<MenuButton />} />
-      <main className="ph-content">{page}</main>
-      <TabBar items={PHONE_TABS} path={path} />
-    </div>
+    <PhoneMenuProvider>
+      {path.startsWith('/studio') ? (
+        <PhoneStudio path={path} />
+      ) : (
+        <div className="ph-app">
+          <TopBar title={titleFor(path)} right={<MenuButton />} />
+          <main className="ph-content">{page}</main>
+          <TabBar items={PHONE_TABS} path={path} />
+        </div>
+      )}
+    </PhoneMenuProvider>
   );
 }
 
-/** The menu: what the desktop footer holds (credits and the source link). Opens a half-height sheet. */
+/** The menu: the current screen's actions (history, link, report, export), then what the desktop footer holds (credits). Opens a half-height sheet. */
 function MenuButton() {
   const [open, setOpen] = useState(false);
+  const items = useMenuList();
   return (
     <>
       <button type="button" className="ph-bar-btn" aria-label="Menu" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
         <Icon name="menu" size="1.4rem" />
       </button>
-      <BottomSheet open={open} onClose={() => setOpen(false)} title="About" detents={['half']}>
+      <BottomSheet open={open} onClose={() => setOpen(false)} title={items.length ? 'Menu' : 'About'} detents={items.length > 3 ? ['half', 'full'] : ['half']}>
         <div className="ph-menu">
+          {items.length > 0 && (
+            <ul className="ph-menu-list">
+              {items.map((it) => (
+                <li key={it.id}>
+                  <button
+                    type="button"
+                    className="ph-menu-item"
+                    onClick={() => {
+                      setOpen(false);
+                      it.onSelect();
+                    }}
+                  >
+                    {it.icon && <Icon name={it.icon} size="1.3rem" />}
+                    {it.label}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
           <Credits />
         </div>
       </BottomSheet>

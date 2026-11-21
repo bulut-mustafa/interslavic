@@ -46,6 +46,13 @@ const PATHS = {
   book: 'M5 4h10a3 3 0 013 3v13H8a3 3 0 01-3-3zM5 17a3 3 0 013-3h10',
   phrasebook: 'M4 5h16v11H9l-5 4zM8 9h8M8 12h5',
   studio: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',
+  share: 'M8 12l8-5M8 12l8 5M6 15a3 3 0 100-6 3 3 0 000 6zM18 9a3 3 0 100-6 3 3 0 000 6zM18 21a3 3 0 100-6 3 3 0 000 6z',
+  clipboard: 'M9 4h6v3H9zM7 5H5v16h14V5h-2',
+  sliders: 'M4 7h9M17 7h3M4 17h3M11 17h9M15 5v4M9 15v4',
+  volume: 'M11 5L6 9H3v6h3l5 4zM15.5 8.5a5 5 0 010 7',
+  link: 'M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1',
+  flag: 'M5 21V4M5 4h12l-2 4 2 4H5',
+  chevronDown: 'M6 9l6 6 6-6',
 } as const;
 
 export type IconName = keyof typeof PATHS;

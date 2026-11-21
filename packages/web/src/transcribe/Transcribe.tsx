@@ -2,6 +2,9 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { track } from '../analytics.ts';
 import { DropZone, OpenAnother } from '../components/DropZone.tsx';
 import { Icon } from '../components/Icon.tsx';
+import { BottomSheet } from '../phone/BottomSheet.tsx';
+import { Chip, ChipRow, PhoneIconButton } from '../phone/parts.tsx';
+import { useIsPhone } from '../phone/useIsPhone.ts';
 import { downloadText } from '../download.ts';
 import { navigate } from '../router.tsx';
 import { putHandoff } from '../subtitles/handoff.ts';
@@ -29,6 +32,11 @@ const LANGS: { value: Lang; label: string }[] = [
  * or sent on to the Subtitles page to be translated into Interslavic.
  */
 export default function Transcribe({ makeTranscriber, decodeAudio }: Deps) {
+  const phone = useIsPhone();
+  /** Phone: the cue being edited in the sheet, or the options sheet. */
+  const [editing, setEditing] = useState<number | null>(null);
+  const [optionsOpen, setOptionsOpen] = useState(false);
+  const [recording, setRecording] = useState<MediaRecorder | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [lang, setLang] = useState<Lang>('en');
   const [modelId, setModelId] = useState<WhisperModel['id']>('small');
@@ -99,6 +107,227 @@ export default function Transcribe({ makeTranscriber, decodeAudio }: Deps) {
   );
 
   const fraction = stageFraction(stage);
+
+  /** Record with the microphone where the browser can; the take then goes the same way as a chosen file. */
+  const canRecord = typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getUserMedia && typeof MediaRecorder !== 'undefined';
+  const toggleRecording = async () => {
+    if (recording) {
+      recording.stop();
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const rec = new MediaRecorder(stream);
+      const chunks: Blob[] = [];
+      rec.ondataavailable = (e) => e.data.size > 0 && chunks.push(e.data);
+      rec.onstop = () => {
+        stream.getTracks().forEach((t) => t.stop());
+        setRecording(null);
+        const type = rec.mimeType || 'audio/webm';
+        pick(new File(chunks, `recording.${type.includes('mp4') ? 'm4a' : 'webm'}`, { type }));
+      };
+      rec.start();
+      setRecording(rec);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'The microphone is not available.');
+    }
+  };
+
+  if (phone) {
+    const rows = cues ?? [];
+    const row = editing === null ? null : rows[editing];
+    return (
+      <div className="ph-tool-screen ph-rec">
+        <div className={`ph-tool-scroll${editing !== null || optionsOpen ? ' ph-sheet-open' : ''}`}>
+          {!file ? (
+            <section className="ph-rec-start" aria-label="Choose a recording">
+              {canRecord && (
+                <button type="button" className={`ph-rec-big${recording ? ' is-live' : ''}`} onClick={() => void toggleRecording()} aria-label={recording ? 'Stop recording' : 'Record with the microphone'}>
+                  <Icon name="mic" size="2.4rem" />
+                  <span>{recording ? 'Stop' : 'Record'}</span>
+                </button>
+              )}
+              <label className={canRecord ? 'ph-secondary is-wide ph-file-pick' : 'ph-rec-big ph-file-pick'}>
+                <Icon name="upload" size={canRecord ? '1.2rem' : '2.4rem'} />
+                <span>{canRecord ? 'Upload a recording' : 'Choose a recording'}</span>
+                <input
+                  type="file"
+                  accept="audio/*,video/*"
+                  aria-label="Audio or video file"
+                  disabled={running}
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    e.target.value = '';
+                    if (f) pick(f);
+                  }}
+                />
+              </label>
+              <p className="ph-hint-strong">Turns the speech in a recording into subtitles. It is processed on your phone and never uploaded. MP3, WAV, M4A, MP4, WebM, up to 200 MB.</p>
+            </section>
+          ) : (
+            <section className="ph-card-box ph-rec-file" aria-label="Recording">
+              <div className="ph-tool-head-row">
+                <div className="ph-tool-head-text">
+                  <strong title={file.name}>{file.name}</strong>
+                  <span>{MODELS.find((m) => m.id === modelId)?.label} model, {LANGS.find((l) => l.value === lang)?.label}</span>
+                </div>
+                <PhoneIconButton icon="sliders" label="Options" onClick={() => setOptionsOpen(true)} />
+              </div>
+              <ChipRow label="Spoken language">
+                {LANGS.map((l) => (
+                  <Chip key={l.value} selected={lang === l.value} onClick={() => !running && setLang(l.value)}>
+                    {l.label}
+                  </Chip>
+                ))}
+              </ChipRow>
+            </section>
+          )}
+
+          {stage.kind !== 'idle' && stage.kind !== 'done' && (
+            <div role="status" className="ph-card-box transcribe-progress">
+              <div className="progress-bar" aria-hidden="true">
+                <span className={fraction === null ? 'is-moving' : undefined} style={fraction === null ? undefined : { width: `${Math.round(fraction * 100)}%` }} />
+              </div>
+              <p className="ph-hint-strong">
+                {stageText(stage)} <Elapsed />
+              </p>
+            </div>
+          )}
+          {error && (
+            <div className="ph-note-card is-error" role="alert">
+              <strong>Transcription stopped</strong>
+              <span>{error}</span>
+            </div>
+          )}
+
+          {cues && (
+            <section aria-label="Transcript">
+              <p role="status" className="ph-hint-strong">
+                {cues.length === 0 ? 'No speech was found.' : `${cues.length} subtitles. Tap one to listen and correct it.`}
+              </p>
+              {url && cues.length > 0 && <audio ref={audioRef} src={url} controls preload="metadata" aria-label="The recording" className="ph-rec-audio" />}
+              <ol className="ph-list">
+                {cues.map((c, i) => {
+                  const at = c.timing.split(' --> ')[0]!.slice(0, 8);
+                  return (
+                    <li key={i}>
+                      <button type="button" className="ph-row" aria-label={`Edit subtitle ${i + 1} from ${at}`} onClick={() => setEditing(i)}>
+                        <small>{at}</small>
+                        <span>{c.lines.join(' ')}</span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ol>
+            </section>
+          )}
+        </div>
+
+        {file && (
+          <div className="ph-tool-bar ph-tool-bar-split">
+            {cues && cues.length > 0 && !running ? (
+              <>
+                <button type="button" className="ph-secondary" onClick={() => downloadText(`${base}.srt`, formatSrt(cues), 'application/x-subrip')}>
+                  <Icon name="save" /> .srt
+                </button>
+                <button
+                  type="button"
+                  className="ph-primary"
+                  onClick={() => {
+                    putHandoff({ srt: formatSrt(cues), lang, name: `${base}.srt` });
+                    navigate('/studio/subtitles');
+                  }}
+                >
+                  <Icon name="translate" /> Translate to Interslavic
+                </button>
+              </>
+            ) : running ? (
+              <button
+                type="button"
+                className="ph-secondary is-wide"
+                onClick={() => {
+                  stop();
+                  setStage({ kind: 'idle' });
+                }}
+              >
+                Cancel
+              </button>
+            ) : (
+              <button type="button" className="ph-primary" onClick={() => void start()}>
+                <Icon name="mic" /> Transcribe
+              </button>
+            )}
+          </div>
+        )}
+
+        <BottomSheet
+          open={editing !== null || optionsOpen}
+          onClose={() => {
+            setEditing(null);
+            setOptionsOpen(false);
+          }}
+          title={optionsOpen ? 'Options' : `Subtitle ${(editing ?? 0) + 1}`}
+          detents={['half', 'full']}
+          headerAction={
+            <button
+              type="button"
+              className="ph-sheet-done"
+              onClick={() => {
+                setEditing(null);
+                setOptionsOpen(false);
+              }}
+            >
+              Done
+            </button>
+          }
+        >
+          {optionsOpen ? (
+            <div className="ph-sheet-stack">
+              <label>
+                Model
+                <select value={modelId} onChange={(e) => setModelId(e.target.value as WhisperModel['id'])} disabled={running} aria-label="Model">
+                  {MODELS.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.label} ({m.downloadMb} MB)
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="ph-secondary is-wide ph-file-pick">
+                <Icon name="plus" /> Choose another file
+                <input type="file" accept="audio/*,video/*" aria-label="Choose another file" disabled={running} onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) { pick(f); setOptionsOpen(false); } }} />
+              </label>
+              {notes}
+            </div>
+          ) : row && cues && editing !== null ? (
+            <div className="ph-sheet-stack">
+              <label>
+                Subtitle {editing + 1}
+                <textarea
+                  aria-label={`Subtitle ${editing + 1}`}
+                  rows={4}
+                  spellCheck={false}
+                  value={row.lines.join(' ')}
+                  onChange={(e) => setCues(cues.map((x, j) => (j === editing ? { ...x, lines: [e.target.value] } : x)))}
+                />
+              </label>
+              <button type="button" className="ph-secondary is-wide" onClick={() => playFrom(startOf(row.timing))}>
+                <Icon name="play" size="0.9rem" /> Play from {row.timing.split(' --> ')[0]!.slice(0, 8)}
+              </button>
+              <div className="ph-sheet-row">
+                <button type="button" className="ph-secondary" disabled={editing <= 0} onClick={() => setEditing(editing - 1)} aria-label="Previous subtitle">
+                  <Icon name="chevronLeft" /> Previous
+                </button>
+                <button type="button" className="ph-secondary" disabled={editing >= cues.length - 1} onClick={() => setEditing(editing + 1)} aria-label="Next subtitle">
+                  Next <Icon name="chevronRight" />
+                </button>
+              </div>
+            </div>
+          ) : null}
+        </BottomSheet>
+      </div>
+    );
+  }
 
   return (
     <main className="transcribe">

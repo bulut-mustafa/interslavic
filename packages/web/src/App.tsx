@@ -35,8 +35,9 @@ export default function App() {
     document.querySelector('meta[name="description"]')?.setAttribute('content', meta.description);
   }, [path]);
 
+  const lessonSlug = path.replace(/^\/learn\/?/, '').replace(/\/$/, '');
   const page = path.startsWith('/learn') ? (
-    <Lesson slug={path.replace(/^\/learn\/?/, '').replace(/\/$/, '') || LESSONS[0]!.slug} />
+    <Lesson slug={lessonSlug || LESSONS[0]!.slug} home={lessonSlug === ''} />
   ) : path.startsWith('/phrasebook') ? (
     <Phrasebook />
   ) : path === '/' ? (

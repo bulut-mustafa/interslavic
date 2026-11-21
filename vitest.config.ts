@@ -15,6 +15,7 @@ const MOCKING = [
   'packages/web/test/video-editor.test.tsx',
   'packages/web/test/video-features.test.tsx',
   'packages/web/test/video-editor-integration.test.tsx',
+  'packages/web/test/phone-video.test.tsx',
 ];
 const INCLUDE = ['packages/**/test/**/*.test.ts', 'packages/**/test/**/*.test.tsx'];
 

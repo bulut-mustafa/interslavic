@@ -6,12 +6,15 @@ import { downloadText } from '../download.ts';
 import { Listen, VoicePicker } from '../speech/Listen.tsx';
 import { ankiTsv, type Direction } from './anki.ts';
 import { PHRASEBOOK, sourceUrl, type Phrase } from './phrasebook.ts';
+import { useIsPhone } from '../phone/useIsPhone.ts';
+import { PhrasebookPhone } from './PhrasebookPhone.tsx';
 
 type Mode = 'list' | 'cards';
 
 /** Everyday phrases, to read as a list or to learn as flashcards. */
 export function Phrasebook() {
   const [mode, setMode] = useState<Mode>('list');
+  if (useIsPhone()) return <PhrasebookPhone />;
   return (
     <main className="phrasebook">
       <h1>Phrasebook</h1>

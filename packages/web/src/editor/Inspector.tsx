@@ -5,9 +5,9 @@ import { FONTS, PRESETS, type FontKey, type TextStyle } from './text-style.ts';
 import { WordLookup } from './WordLookup.tsx';
 
 /** #rrggbb for a colour input, whatever form the style holds the colour in. */
-const hex = (c: string): string => (/^#[0-9a-f]{6}$/i.test(c) ? c : '#000000');
+export const hex = (c: string): string => (/^#[0-9a-f]{6}$/i.test(c) ? c : '#000000');
 
-function Slider(props: { label: string; value: number; min: number; max: number; step?: number; onChange: (v: number) => void }) {
+export function Slider(props: { label: string; value: number; min: number; max: number; step?: number; onChange: (v: number) => void }) {
   return (
     <label className="insp-row">
       <span>{props.label}</span>
@@ -38,6 +38,9 @@ function Tool(props: { label: string; icon?: IconName; text?: string; on?: boole
   );
 }
 
+/** The parts of the text controls, so a narrow layout can show them one at a time (a phone sheet per tool). Without `only` all of them show. */
+export type InspectorPart = 'text' | 'font' | 'size' | 'format' | 'lookup' | 'styles' | 'spacing' | 'effects' | 'actions';
+
 /**
  * Everything that can be changed about the selected text. The few things people
  * reach for first - font, size, colour, bold, italic, alignment - are in two
@@ -57,21 +60,28 @@ export function Inspector(props: {
   /** A word from the Slavic-language lookup, to add to the text. */
   onInsertWord: (word: string) => void;
   extra?: ReactNode;
+  /** Show only these parts (default: all). `extra` shows with 'text'. */
+  only?: readonly InspectorPart[];
 }) {
   const { layer, frame } = props;
+  const show = (part: InspectorPart): boolean => !props.only || props.only.includes(part);
   const s = layer.style;
   const maxSize = Math.max(60, Math.round(frame.h / 2));
   const setSize = (n: number) => props.onStyle({ size: Math.min(maxSize, Math.max(8, Math.round(n))) });
   return (
     <section className="inspector" aria-label="Text settings">
-      <label className="insp-text">
-        <span>Text</span>
-        <textarea value={layer.text} rows={2} spellCheck={false} onChange={(e) => props.onText({ text: e.target.value })} />
-      </label>
+      {show('text') && (
+        <label className="insp-text">
+          <span>Text</span>
+          <textarea value={layer.text} rows={2} spellCheck={false} onChange={(e) => props.onText({ text: e.target.value })} />
+        </label>
+      )}
 
-      {props.extra}
+      {show('text') && props.extra}
 
+      {(show('font') || show('size')) && (
       <div className="insp-line">
+        {show('font') && (
         <select className="insp-font" aria-label="Font" value={s.font} onChange={(e) => props.onStyle({ font: e.target.value as FontKey })}>
           {(Object.keys(FONTS) as FontKey[]).map((k) => (
             <option key={k} value={k}>
@@ -79,6 +89,8 @@ export function Inspector(props: {
             </option>
           ))}
         </select>
+        )}
+        {show('size') && (
         <div className="insp-stepper" role="group" aria-label="Size">
           <button type="button" aria-label="Smaller text" onClick={() => setSize(s.size * 0.9)}>
             <Icon name="minus" size="0.9rem" />
@@ -88,8 +100,11 @@ export function Inspector(props: {
             <Icon name="plus" size="0.9rem" />
           </button>
         </div>
+        )}
       </div>
+      )}
 
+      {show('format') && (
       <div className="insp-line insp-tools" role="group" aria-label="Emphasis and alignment">
         <input className="insp-swatch" type="color" aria-label="Text colour" title="Text colour" value={hex(s.color)} onChange={(e) => props.onStyle({ color: e.target.value })} />
         <Tool label="Bold" icon="bold" on={s.bold} onClick={() => props.onStyle({ bold: !s.bold })} />
@@ -100,9 +115,11 @@ export function Inspector(props: {
         <Tool label="Align centre" icon="alignCenter" on={s.align === 'center'} onClick={() => props.onStyle({ align: 'center' })} />
         <Tool label="Align right" icon="alignRight" on={s.align === 'right'} onClick={() => props.onStyle({ align: 'right' })} />
       </div>
+      )}
 
-      <WordLookup onInsert={props.onInsertWord} />
+      {show('lookup') && <WordLookup onInsert={props.onInsertWord} />}
 
+      {show('styles') && (
       <details className="insp-group" open>
         <summary>Styles</summary>
         <div className="insp-presets" role="group" aria-label="Styles">
@@ -113,16 +130,20 @@ export function Inspector(props: {
           ))}
         </div>
       </details>
+      )}
 
-      <details className="insp-group">
+      {show('spacing') && (
+      <details className="insp-group" open={!!props.only}>
         <summary>Spacing and fit</summary>
         <Slider label="Letter spacing" value={s.letterSpacing} min={-2} max={20} step={0.5} onChange={(letterSpacing) => props.onStyle({ letterSpacing })} />
         <Slider label="Line height" value={s.lineHeight} min={0.8} max={2.2} step={0.05} onChange={(lineHeight) => props.onStyle({ lineHeight })} />
         <Slider label="Opacity" value={s.opacity} min={0.1} max={1} step={0.05} onChange={(opacity) => props.onStyle({ opacity })} />
         <Slider label="Wrap width" value={layer.maxWidth} min={0} max={frame.w} step={10} onChange={(maxWidth) => props.onText({ maxWidth })} />
       </details>
+      )}
 
-      <details className="insp-group">
+      {show('effects') && (
+      <details className="insp-group" open={!!props.only}>
         <summary>Effects</summary>
         <Toggle label="Outline" on={s.outline !== null} onChange={(on) => props.onStyle({ outline: on ? { width: 4, color: '#000000' } : null })}>
           {s.outline && (
@@ -158,12 +179,15 @@ export function Inspector(props: {
           )}
         </Toggle>
       </details>
+      )}
 
+      {show('actions') && (
       <div className="insp-line insp-foot" role="group" aria-label="This text">
         <Tool label="Duplicate" icon="copy" onClick={props.onDuplicate} />
         <Tool label="Bring to front" icon="front" onClick={props.onFront} />
         <Tool label="Delete" icon="trash" onClick={props.onDelete} />
       </div>
+      )}
     </section>
   );
 }

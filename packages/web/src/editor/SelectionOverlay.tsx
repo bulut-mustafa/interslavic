@@ -25,7 +25,7 @@ export function SelectionOverlay(props: {
   typing: boolean;
   onType: (text: string) => void;
   onStopTyping: () => void;
-  /** The buttons of the toolbar. */
+  /** The buttons of the toolbar; null for no toolbar (the phone shows its own floating bar). */
   toolbar: ReactNode;
   /** Told where the picture is on screen, for anything else that has to be laid over it. */
   onView?: (v: View | null) => void;
@@ -117,6 +117,8 @@ export function SelectionOverlay(props: {
       />
     );
   }
+
+  if (props.toolbar === null) return null;
 
   return (
     <div ref={bar} className="canvas-toolbar" role="toolbar" aria-label="Selected text" style={{ left: shift ?? Math.max(0, anchor.left), top: anchor.top > 56 ? anchor.top - 50 : anchor.top + anchor.height + 12 }}>

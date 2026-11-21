@@ -158,19 +158,47 @@ html.ph-locked body {
   height: 1.9rem;
   color: var(--teal);
 }
-.ph-card span {
+.ph-card .ph-card-purpose {
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  font-size: 0.85rem;
+}
+.ph-card-badge {
+  display: grid;
+  place-items: center;
+  width: 2.8rem;
+  height: 2.8rem;
+  margin-bottom: 4px;
+  border-radius: 14px;
+  background: rgba(31, 107, 107, 0.12);
+}
+.ph-card-badge .ph-card-icon {
+  width: 1.6rem;
+  height: 1.6rem;
+}
+.ph-card-tag {
+  margin-top: auto;
+  padding-top: 4px;
+  color: var(--ink-faint);
+  font-size: 0.7rem;
+}
+.ph-tool-group + .ph-tool-group {
+  margin-top: var(--space-3);
+}
+.ph-empty {
+  margin: var(--space-2) 0 0;
+  padding: var(--space-3);
+  border: 1.5px dashed var(--rule);
+  border-radius: 16px;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  line-height: 1.5;
 }
 
 .ph-uploads {
   margin-top: var(--space-4);
-}
-.ph-uploads h2 {
-  margin: 0 0 var(--space-2);
-  font-size: 1rem;
 }
 .ph-uploads-row {
   display: flex;
@@ -188,12 +216,12 @@ html.ph-locked body {
   flex: none;
   display: grid;
   place-items: center;
-  width: 4.5rem;
-  height: 4.5rem;
+  width: 5rem;
+  height: 5rem;
   padding: 0;
   overflow: hidden;
   border: 1px solid var(--rule);
-  border-radius: 12px;
+  border-radius: 16px;
   background: #fff;
   color: var(--ink-soft);
   touch-action: manipulation;
