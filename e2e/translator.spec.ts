@@ -65,7 +65,7 @@ test.describe('translator on a phone', () => {
     await expect(busy).toBeVisible();
     await expect(busy).toBeDisabled();
     await expect(page.getByRole('article', { name: 'Translation 1' })).toBeVisible();
-    expect(api.calls.length, 'one request pair (both scripts)').toBe(2);
+    expect(api.calls.length, 'one request, carrying both scripts').toBe(1);
   });
 
   test('Translate button is sticky: visible above the tab bar even when the page is scrolled to the end of a long result', async ({ page }) => {
