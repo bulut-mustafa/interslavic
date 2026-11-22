@@ -13,7 +13,7 @@
     "typecheck": "tsc --noEmit",
     "lexicon:index": "node --experimental-strip-types packages/lexicon/scripts/build-index.ts",
     "parser": "cd services/parser && PYTHONPATH=src .venv/bin/uvicorn parser_service.app:app --host 127.0.0.1 --port 8765",
-    "parser:setup": "cd services/parser && uv venv && uv pip install -q stanza simplemma fastapi \"uvicorn[standard]\" && PYTHONPATH=src .venv/bin/python -c \"import stanza; [stanza.download(l, processors=\"tokenize,pos,lemma,depparse\", verbose=False) for l in (\"en\",\"ru\",\"uk\")]\"",
+    "parser:setup": "cd services/parser && uv venv && uv pip install -q stanza==1.15.0 simplemma==2.0.0 transformers==5.24.0 fastapi \"uvicorn[standard]\" && PYTHONPATH=src .venv/bin/python -c \"import stanza; [stanza.download(l, processors=\\\"tokenize,pos,lemma,depparse\\\", verbose=False) for l in (\\\"en\\\",\\\"ru\\\",\\\"uk\\\")]; stanza.download(\\\"en\\\", processors={\\\"pos\\\": \\\"combined_electra-large\\\"}, package=None, verbose=False); from huggingface_hub import snapshot_download; snapshot_download(\\\"google/electra-large-discriminator\\\", allow_patterns=[\\\"*.json\\\", \\\"*.txt\\\", \\\"pytorch_model.bin\\\"])\"",
     "fixtures:check": "cd services/parser && PYTHONPATH=src .venv/bin/python -m parser_service.fixtures",
     "fixtures:write": "cd services/parser && PYTHONPATH=src .venv/bin/python -m parser_service.fixtures --write",
     "parser:test": "cd services/parser && PYTHONPATH=src .venv/bin/python -m parser_service.test_lemmas",

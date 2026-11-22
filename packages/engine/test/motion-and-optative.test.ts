@@ -109,7 +109,9 @@ describe('the aspect of a past movement', () => {
     // expresses movement without any particular direction" (verbs page).
     expect(out('ran-every-morning.conllu')).toBe('Ona běgala vsako utro.');
     // And it outranks the direct object, which alone would make it perfective.
-    expect(out('read-a-book-every-night.conllu')).toContain('jesm čital knigu');
+    // "I read" is past or present - the parser decides - but imperfective either way.
+    expect(out('read-a-book-every-night.conllu')).toMatch(/ čita(l|ju) knigu/);
+    expect(out('read-a-book-every-night.conllu')).not.toMatch(/pročita/);
   });
 });
 

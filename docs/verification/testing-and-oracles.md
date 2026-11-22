@@ -417,4 +417,21 @@ and the lemma repairs were unchanged.
   weights in the image.
 - Production peaks at about 2.1 GB of 4 GiB, so it would reach about 3.3 GB.
 
-Not adopted yet: the cost is the user's decision.
+**Decision (2026-11-23): adopted for English POS only.** `app.py` `ENGLISH` uses
+`combined_electra-large` for tagging; parsing, lemma and Russian stay on the default
+packages (the transformer parser was 1.5x slower again for little gain, and Russian's
+accurate model broke the engine's Russian rules). `/parse-many` batches lines: 157 → 48
+ms/sentence, identical output on 200/200 sentences. Fixtures were re-frozen with the
+production pipeline: 2 of 705 translations changed (g11 better; "I read a book every
+night" now reads as present). `fixtures:check` shows 140 files differing, but all are
+XPOS-only (the new tagger's tag names) except the hand-written Russian
+`synthetic-byt-aux-participle`, which is meant to differ.
+
+**Memory (measured on the laptop).** The service with en+ru+uk loaded: 2.8 GB footprint,
+3.3 GB peak. Cloud Run has 4 GiB, so the margin is about 0.7 GB. Raise the limit before
+deploy if the peak grows.
+
+**Safety rule for this 8 GB laptop.** One accurate English pipeline is about 3.4 GB. Never
+load two at once, and never run it over the whole Tatoeba set in one call. A trial that did
+both (int8 quantisation) filled memory and restarted the machine on 2026-11-23. It was not
+repeated; run such trials on a small sample with a memory watchdog.

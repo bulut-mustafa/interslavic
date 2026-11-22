@@ -13,6 +13,7 @@ import {
   ParserError,
   ParserUnavailable,
   parseText,
+  parseTexts,
   parserHealthy,
 } from '../../engine/src/source/parse-client.ts';
 import type { Orthography } from '../../morph/src/orthography.ts';
@@ -198,13 +199,14 @@ const server = http.createServer((req, res) => {
           : null;
 
         const { lex, validator } = boot();
-        // Each input line is parsed on its own: the parser reads a single
-        // newline as a space and would join two lines into one sentence.
+        // Each input line is parsed on its own (the parser reads a single
+        // newline as a space and would join two lines into one sentence), all
+        // in one batch.
+        const lines = text.split(/\r?\n/).filter((l) => l.trim());
         const parsed: ParsedSentence[] = [];
         const breaks = new Set<number>();
-        for (const line of text.split(/\r?\n/)) {
-          if (!line.trim()) continue;
-          parsed.push(...(await parseText(line, lang, { url: PARSER_URL })));
+        for (const sentences of await parseTexts(lines, lang, { url: PARSER_URL })) {
+          parsed.push(...sentences);
           breaks.add(parsed.length - 1);
         }
         // Orthography is applied after the analysis, so one parse serves both scripts.
@@ -263,6 +265,7 @@ const server = http.createServer((req, res) => {
         const { lex, validator } = boot();
         const results = await translateLines(body.lines as string[], {
           parse: (text) => parseText(text, lang, { url: PARSER_URL }),
+          parseMany: (texts) => parseTexts(texts, lang, { url: PARSER_URL }),
           translate: (s) => translate(s, lex, { orthography, validator }),
         });
         json(res, 200, { results });

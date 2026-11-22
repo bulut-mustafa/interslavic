@@ -17,7 +17,7 @@ import sys
 
 import stanza
 
-from .app import PROCESSORS, with_terminator
+from .app import build_pipeline, with_terminator
 from .lemmas import check_words
 from .to_conllu import format_feats
 
@@ -84,9 +84,7 @@ def main() -> None:
             sys.stdout.write(f"SKIP   {path.name}: no '# text ='/'# lang =' header\n")
             continue
         if lang not in pipelines:
-            pipelines[lang] = stanza.Pipeline(
-                lang=lang, processors=PROCESSORS, download_method=None, verbose=False
-            )
+            pipelines[lang] = build_pipeline(lang)
         # Same terminator fix the service and the CLI apply, so a fixture
         # generated through either path round-trips here. See
         # `parser_service.app.with_terminator`.

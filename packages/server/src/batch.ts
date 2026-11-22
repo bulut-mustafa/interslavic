@@ -25,6 +25,8 @@ export interface LineResult {
 
 export interface BatchDeps {
   parse(text: string): Promise<ParsedSentence[]>;
+  /** All lines in one parser batch; on a parser error each line is retried alone. */
+  parseMany?(texts: string[]): Promise<ParsedSentence[][]>;
   translate(sentence: ParsedSentence): Translation;
 }
 
@@ -58,7 +60,20 @@ export function reasonsFor(t: Translation): string[] {
 }
 
 export async function translateLines(lines: string[], deps: BatchDeps): Promise<LineResult[]> {
+  const worded = lines.filter((l) => /\p{L}/u.test(l));
+  // One batch is several times faster for the transformer tagger. If it fails,
+  // one line may be the cause, so every line is retried on its own and only
+  // the line that fails is lost (a dead parser still fails the request).
+  let batch: ParsedSentence[][] | null = null;
+  if (deps.parseMany && worded.length > 0) {
+    try {
+      batch = await deps.parseMany(worded);
+    } catch (err) {
+      if (err instanceof ParserUnavailable) throw err;
+    }
+  }
   const out: LineResult[] = [];
+  let next = 0;
   for (const line of lines) {
     if (!/\p{L}/u.test(line)) {
       out.push({ text: line, flagged: false, reasons: [] });
@@ -66,7 +81,8 @@ export async function translateLines(lines: string[], deps: BatchDeps): Promise<
     }
     let sentences: Translation[];
     try {
-      sentences = (await deps.parse(line)).map((s) => deps.translate(s));
+      const parsed = batch ? batch[next++]! : await deps.parse(line);
+      sentences = parsed.map((s) => deps.translate(s));
     } catch (err) {
       // A dead parser fails every line alike, so it fails the request; any
       // other error is this line's own and must not cost the other lines.

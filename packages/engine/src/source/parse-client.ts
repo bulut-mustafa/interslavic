@@ -48,53 +48,71 @@ export interface ParseOptions {
   timeoutMs?: number;
 }
 
+type WireSentence = WireResponse['sentences'][number];
+
+/** POST to the parser and read its JSON, mapping failures to the two error kinds. */
+async function post<T>(route: string, payload: unknown, opts: ParseOptions): Promise<T> {
+  const url = opts.url ?? DEFAULT_PARSER_URL;
+  let res: Response;
+  try {
+    res = await fetch(`${url}${route}`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(opts.timeoutMs ?? 120_000),
+    });
+  } catch (cause) {
+    throw new ParserUnavailable(url, cause);
+  }
+  if (!res.ok) {
+    const detail = await res.text().catch(() => '');
+    throw new ParserError(`parser returned HTTP ${res.status}: ${detail.slice(0, 400)}`);
+  }
+  return (await res.json().catch((e: unknown) => {
+    throw new ParserError(`parser sent a body that is not JSON: ${String(e)}`);
+  })) as T;
+}
+
+const toSentence = (s: WireSentence): ParsedSentence => ({
+  text: s.text,
+  lang: s.lang,
+  tokens: s.tokens.map(
+    (t): UdToken => ({
+      id: t.id,
+      form: t.form,
+      lemma: t.lemma,
+      upos: t.upos,
+      ...(t.xpos ? { xpos: t.xpos } : {}),
+      feats: t.feats ?? {},
+      head: t.head,
+      deprel: t.deprel,
+    }),
+  ),
+});
+
 export async function parseText(
   text: string,
   lang: SourceLang,
   opts: ParseOptions = {},
 ): Promise<ParsedSentence[]> {
-  const url = opts.url ?? DEFAULT_PARSER_URL;
-  const timeoutMs = opts.timeoutMs ?? 120_000;
+  // Look-alike Latin letters inside Cyrillic words would mislead the parser.
+  const body = await post<WireResponse>('/parse', { text: fixMixedScript(text, lang), lang }, opts);
+  return body.sentences.map(toSentence);
+}
 
-  let res: Response;
-  try {
-    res = await fetch(`${url}/parse`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      // Look-alike Latin letters inside Cyrillic words would mislead the parser.
-      body: JSON.stringify({ text: fixMixedScript(text, lang), lang }),
-      signal: AbortSignal.timeout(timeoutMs),
-    });
-  } catch (cause) {
-    throw new ParserUnavailable(url, cause);
-  }
-
-  if (!res.ok) {
-    const detail = await res.text().catch(() => '');
-    throw new ParserError(`parser returned HTTP ${res.status}: ${detail.slice(0, 400)}`);
-  }
-
-  const body = (await res.json().catch((e: unknown) => {
-    throw new ParserError(`parser sent a body that is not JSON: ${String(e)}`);
-  })) as WireResponse;
-  return body.sentences.map(
-    (s): ParsedSentence => ({
-      text: s.text,
-      lang: s.lang,
-      tokens: s.tokens.map(
-        (t): UdToken => ({
-          id: t.id,
-          form: t.form,
-          lemma: t.lemma,
-          upos: t.upos,
-          ...(t.xpos ? { xpos: t.xpos } : {}),
-          feats: t.feats ?? {},
-          head: t.head,
-          deprel: t.deprel,
-        }),
-      ),
-    }),
-  );
+/**
+ * Several texts in one request, one list of sentences per text, in order. The
+ * English tagger is a transformer, and in a batch it ran about 3x faster per
+ * sentence (docs/verification/testing-and-oracles.md, 2026-11-22).
+ */
+export async function parseTexts(
+  texts: string[],
+  lang: SourceLang,
+  opts: ParseOptions = {},
+): Promise<ParsedSentence[][]> {
+  const body = await post<{ results: WireSentence[][] }>(
+    '/parse-many', { texts: texts.map((t) => fixMixedScript(t, lang)), lang }, opts);
+  return body.results.map((sentences) => sentences.map(toSentence));
 }
 
 /** Quick liveness probe, so the CLI can fail with advice instead of a timeout. */

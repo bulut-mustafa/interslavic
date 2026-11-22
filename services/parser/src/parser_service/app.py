@@ -26,6 +26,21 @@ Lang = Literal["en", "ru", "uk", "pl", "sh"]
 
 PROCESSORS = "tokenize,pos,lemma,depparse"
 
+# English tags parts of speech with Stanza's transformer model (ELECTRA-large);
+# everything else is the default package. Measured on the Tatoeba sample
+# (docs/verification/testing-and-oracles.md, 2026-11-22): held-out chrF +0.25
+# [0.01, 0.51], mostly short sentences the default tagger misread ("Fire
+# burns" as two nouns). Only the tagger: the transformer for parsing too was
+# 1.5x slower again for little more, and Russian's transformer models broke
+# the engine's Russian rules.
+ENGLISH = {
+    "tokenize": "combined_nocharlm",
+    "mwt": "combined",
+    "pos": "combined_electra-large",
+    "lemma": "combined_nocharlm",
+    "depparse": "combined_charlm",
+}
+
 app = FastAPI(
     title="Interslavic parser",
     version="0.1.0",
@@ -37,21 +52,24 @@ app = FastAPI(
 _pipelines: dict[str, stanza.Pipeline] = {}
 
 
+def build_pipeline(lang: str) -> stanza.Pipeline:
+    """The pipeline for a language; also used to freeze test fixtures (to_conllu)."""
+    if lang == "en":
+        return stanza.Pipeline(lang=lang, processors=ENGLISH, package=None, download_method=None, verbose=False)
+    # download_method=None: fail loudly rather than download at request time.
+    return stanza.Pipeline(lang=lang, processors=PROCESSORS, download_method=None, verbose=False)
+
+
 def pipeline(lang: str) -> stanza.Pipeline:
     if lang not in _pipelines:
         try:
-            _pipelines[lang] = stanza.Pipeline(
-                lang=lang,
-                processors=PROCESSORS,
-                download_method=None,  # fail loudly rather than download at request time
-                verbose=False,
-            )
+            _pipelines[lang] = build_pipeline(lang)
         except Exception as exc:  # noqa: BLE001 - surface the real cause to the caller
             raise HTTPException(
                 status_code=503,
                 detail=(
                     f"could not load the {lang} model: {exc}. "
-                    f"Run: python -m stanza.download {lang}"
+                    f"Run: npm run parser:setup"
                 ),
             ) from exc
     return _pipelines[lang]
@@ -59,6 +77,12 @@ def pipeline(lang: str) -> stanza.Pipeline:
 
 class ParseRequest(BaseModel):
     text: str = Field(min_length=1, max_length=20_000)
+    lang: Lang
+
+
+class ParseManyRequest(BaseModel):
+    """Several texts parsed in one batch - the transformer tagger is much faster that way."""
+    texts: list[str] = Field(min_length=1, max_length=200)
     lang: Lang
 
 
@@ -81,6 +105,11 @@ class Sentence(BaseModel):
 
 class ParseResponse(BaseModel):
     sentences: list[Sentence]
+
+
+class ParseManyResponse(BaseModel):
+    """One list of sentences per text, in the order sent."""
+    results: list[list[Sentence]]
 
 
 def parse_feats(raw: str | None) -> dict[str, str]:
@@ -123,16 +152,12 @@ def with_terminator(text: str) -> tuple[str, bool]:
     return stripped + ".", True
 
 
-@app.post("/parse", response_model=ParseResponse)
-def parse(req: ParseRequest) -> ParseResponse:
-    text, added_terminator = with_terminator(req.text)
-    doc = pipeline(req.lang)(text)
-
+def sentences_of(doc, lang: str, added_terminator: bool) -> list[Sentence]:
     sentences: list[Sentence] = []
     for i, sent in enumerate(doc.sentences):
         # Only the last sentence carries the "." we appended.
         synthetic = added_terminator and i == len(doc.sentences) - 1
-        check_words(sent.words, req.lang)
+        check_words(sent.words, lang)
         tokens: list[Token] = []
         for word in sent.words:
             tokens.append(
@@ -158,9 +183,27 @@ def parse(req: ParseRequest) -> ParseResponse:
         sentences.append(
             Sentence(
                 text=sent.text[:-1] if synthetic and sent.text.endswith(".") else sent.text,
-                lang=req.lang,
+                lang=lang,
                 tokens=tokens,
             )
         )
+    return sentences
 
-    return ParseResponse(sentences=sentences)
+
+@app.post("/parse", response_model=ParseResponse)
+def parse(req: ParseRequest) -> ParseResponse:
+    text, added_terminator = with_terminator(req.text)
+    return ParseResponse(sentences=sentences_of(pipeline(req.lang)(text), req.lang, added_terminator))
+
+
+@app.post("/parse-many", response_model=ParseManyResponse)
+def parse_many(req: ParseManyRequest) -> ParseManyResponse:
+    if sum(len(t) for t in req.texts) > 20_000:
+        raise HTTPException(status_code=413, detail="at most 20000 characters at a time")
+    if any(not t.strip() for t in req.texts):
+        raise HTTPException(status_code=422, detail="every text must contain something")
+    prepared = [with_terminator(t) for t in req.texts]
+    docs = pipeline(req.lang).process_many([text for text, _ in prepared])
+    return ParseManyResponse(
+        results=[sentences_of(doc, req.lang, added) for doc, (_, added) in zip(docs, prepared)]
+    )

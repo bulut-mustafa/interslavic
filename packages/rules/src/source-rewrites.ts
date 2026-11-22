@@ -148,11 +148,19 @@ export function rewriteExceptives(sentence: ParsedSentence): SourceRewrite {
 
   for (const negative of sentence.tokens) {
     if (negative.feats['PronType'] !== 'Neg' || negative.upos !== 'PRON') continue;
-    const exceptions = sentence.tokens.filter((t) => t.head === negative.id && t.deprel === 'conj');
+    // Two parses of the same phrase: "but" a conjunction with the exception a
+    // conjunct of "nobody", or "but" a preposition with the exception an obl
+    // of the verb (the transformer tagger reads it that way).
+    const isBut = (t: UdToken) => t.lemma.toLowerCase() === 'but';
+    const asConj = sentence.tokens.filter((t) => t.head === negative.id && t.deprel === 'conj');
+    const asObl = sentence.tokens.filter((t) =>
+      t.head === negative.head && t.deprel === 'obl' && t.id > negative.id &&
+      sentence.tokens.some((c) => c.head === t.id && c.deprel === 'case' && isBut(c)));
+    const exceptions = asConj.length > 0 ? asConj : asObl;
     if (exceptions.length !== 1) continue;
     const exception = exceptions[0]!;
     const but = sentence.tokens.find(
-      (t) => t.head === exception.id && t.deprel === 'cc' && t.lemma.toLowerCase() === 'but',
+      (t) => t.head === exception.id && (t.deprel === 'cc' || t.deprel === 'case') && isBut(t),
     );
     if (!but) continue;
 

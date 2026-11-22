@@ -108,4 +108,28 @@ describe('translateLines', () => {
     expect(out[0]).toEqual({ text: 'bad', flagged: true, reasons: ['could not translate this line'] });
     expect(out[1]!.text).toBe('Hlapec davaje děvě knigu.');
   });
+
+  it('parses all lines in one batch when it can', async () => {
+    let single = 0;
+    const out = await translateLines(['Hello.', '♪', 'Hello.'], {
+      parse: async () => { single++; return []; },
+      parseMany: async (texts) => texts.map(() => [fixture('en/boy-gives-girl-book.conllu')]),
+      translate: (s) => translate(s, lex, { orthography: 'standard' }),
+    });
+    expect(single).toBe(0);
+    expect(out.map((r) => r.text)).toEqual(['Hlapec davaje děvě knigu.', '♪', 'Hlapec davaje děvě knigu.']);
+  });
+
+  it('retries line by line when the batch fails, and loses only the bad line', async () => {
+    const out = await translateLines(['bad', 'Hello.'], {
+      parseMany: async () => { throw new ParserError('parser returned HTTP 500'); },
+      parse: async (line) => {
+        if (line === 'bad') throw new ParserError('parser returned HTTP 500');
+        return [fixture('en/boy-gives-girl-book.conllu')];
+      },
+      translate: (s) => translate(s, lex, { orthography: 'standard' }),
+    });
+    expect(out[0]!.flagged).toBe(true);
+    expect(out[1]!.text).toBe('Hlapec davaje děvě knigu.');
+  });
 });

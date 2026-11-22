@@ -15,7 +15,6 @@ from __future__ import annotations
 import functools
 import sys
 
-from .app import PROCESSORS
 
 
 def format_feats(feats: dict[str, str]) -> str:
@@ -25,10 +24,10 @@ def format_feats(feats: dict[str, str]) -> str:
 
 
 @functools.cache
-def _pipeline(lang: str):  # noqa: ANN202 - stanza is imported lazily
-    import stanza
+def _pipeline(lang: str):  # noqa: ANN202 - the service's own pipeline, so fixtures match production
+    from .app import build_pipeline
 
-    return stanza.Pipeline(lang=lang, processors=PROCESSORS, download_method=None, verbose=False)
+    return build_pipeline(lang)
 
 
 def to_conllu(text: str, lang: str) -> str:
