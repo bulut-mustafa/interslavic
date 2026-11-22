@@ -22,14 +22,15 @@ export FEEDBACK_FILE
   done
 ) &
 
-# Load the language models while the engine gets its dictionary index (the
-# models took about 22s on Cloud Run; building the index took about 33s, but
-# the image build now saves it and the engine loads it in a couple of seconds),
-# so the two overlap instead of adding up. The
-# engine opens the public port only after its index is built, and a host such
-# as Cloud Run holds the first visitor's request until then, so a cold start
-# is a wait rather than a "translator is not answering" error.
-/opt/venv/bin/python - <<'EOF' &
+# Wait for the parser and load the language models BEFORE the engine opens its
+# port. Cloud Run gives a container full (boosted) CPU only until the port
+# opens; afterwards an idle container is throttled, and a parser that was still
+# starting then needed 3 to 7 minutes (logs, 2026-11-22). The engine opens the
+# public port only when this is done, and Cloud Run holds the first visitor's
+# request until then, so a cold start is a wait rather than a "translator is
+# not answering" error. `timeout` keeps this under the 240 s startup probe, and
+# `|| echo` means a stuck parser never stops the container.
+timeout 120 /opt/venv/bin/python - <<'EOF' || echo "parser warm-up did not finish; the engine starts anyway" >&2
 import json, time, urllib.request
 for _ in range(180):
     try:

@@ -33,7 +33,18 @@ the **pages** itself from Firebase's CDN - every page prerendered to HTML, plus
 `sitemap.xml`, `robots.txt` and a real `404.html` - so a lesson opens at once
 even while Cloud Run is asleep. Only `/api/**` is passed on to the Cloud Run
 service (the translator and tester reports). Firebase gives up on a request
-after 60 seconds; a cold start of the API measured about 40 seconds.
+after 60 seconds, so a cold start longer than that shows the visitor an error.
+**Cold starts (2026-11-22 logs):** the 2026-10 figure of about 40 seconds no longer
+holds. The English tagger is bigger, and since the parser was started in the
+background it got a throttled CPU after the port opened: 3 to 7 minutes before it
+answered. `deploy/start.sh` now waits for the parser, and loads the models, before
+the engine opens its port (the container then has full startup CPU). Time the first
+request after a deploy and record the result here.
+**Keep-warm:** Cloud Scheduler job `interslavic-keep-warm` calls `/api/health` every 10
+minutes so the instance does not scale to zero. It cannot stop Cloud Run from
+replacing the instance (logs show a new one every 1 to 3 days) or a deploy from
+starting one. On 2026-11-16 the parser was killed for memory (status 137) at 4 GiB;
+the service is now 2 CPU and 6 GiB.
 
 The routing lives in `deploy/hosting.py` (`CONFIG`): the `/api/**` rewrite, a
 301 from `/learn` to `/learn/introduction`, no trailing slashes, and
@@ -59,12 +70,10 @@ gcloud run deploy interslavic --source . --region europe-west1
 
 The build takes about 10–15 minutes and keeps every setting above.
 
-**Startup CPU boost** (not yet switched on): Google gives a starting container
+**Startup CPU boost** (switched on): Google gives a starting container
 extra CPU until it is ready, and reports up to about 30% shorter starts for
 Node.js. It costs next to nothing and only touches cold starts. To try it, add
-`--cpu-boost` to the command above once, then compare the time of the first
-request after a quiet spell with the 40 seconds measured before. It stays on
-for later deploys. (Minimum instances would remove cold starts altogether but
+`--cpu-boost` to the command above once. It stays on for later deploys. (Minimum instances would remove cold starts altogether but
 are billed all the time, so they are not used.)
 
 **The word index is saved at build time.** The image build runs
