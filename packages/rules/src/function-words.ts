@@ -112,7 +112,3 @@ export function functionWordFor(
     null
   );
 }
-
-export function allFunctionWords(): FunctionWord[] {
-  return [...index().values()].flat();
-}

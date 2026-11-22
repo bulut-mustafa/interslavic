@@ -1,4 +1,4 @@
-import type { Case, ParsedSentence, UdToken } from '../../../types/index.ts';
+import type { ParsedSentence, UdToken } from '../../../types/index.ts';
 import { resolveAspect, type AspectOutcome } from '../resolvers/aspect.ts';
 import { codeBelongsToPreposition } from '../../../rules/src/prepositions.ts';
 import type { Entry, Lexicon } from '../../../lexicon/src/reader.ts';
@@ -23,8 +23,6 @@ export function planVerbGovernment(
   //                                            would suggest from English)
   //   vladati  (+5) "rule"   -> instrumental
   //   izběgati (+2) "avoid"  -> genitive
-  // Until now `resolveCase` accepted a verbGoverns argument that nothing ever
-  // supplied, so every direct object fell through to the default accusative.
   //
   // Must run before Phase A assigns case, for the same reason the preposition
   // pre-pass does: lexical government outranks the deprel default.

@@ -105,7 +105,6 @@ const page = createKv(() => indexedDB);
 export const kvGet = page.get;
 export const kvPut = page.put;
 export const kvDel = page.del;
-export const kvKeys = page.keys;
 export const kvClear = page.clear;
 
 /** Asks the browser not to clear what is saved when it is short of room. Quietly does nothing where that is not offered. */

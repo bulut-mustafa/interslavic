@@ -1,21 +1,18 @@
 import { decide, type Case, type Decision, type ParsedSentence, type UdToken } from '../../../types/index.ts';
 import { casesGovernedBy } from '../../../rules/src/prepositions.ts';
-import { normalizeGloss, rank, type Entry } from '../../../lexicon/src/reader.ts';
-import { resolveAspect, type AspectOutcome } from '../resolvers/aspect.ts';
+import { rank, type Entry } from '../../../lexicon/src/reader.ts';
+import { resolveAspect } from '../resolvers/aspect.ts';
 import { resolveCase } from '../resolvers/case.ts';
-import { compared } from '../../../morph/src/comparison.ts';
-import { realize } from '../../../morph/src/realize.ts';
 import { verbalNoun } from '../../../morph/src/participles.ts';
-import { auxiliaryRole, conditionalAuxiliary, futureAuxiliary } from '../../../rules/src/auxiliaries.ts';
+import { conditionalAuxiliary, futureAuxiliary } from '../../../rules/src/auxiliaries.ts';
 import { functionWordFor } from '../../../rules/src/function-words.ts';
 import { properNounXpos } from '../../../rules/src/proper-nouns.ts';
 import { isPastTransgressive, isPastTransgressiveAux, isTransgressive, isTransgressiveMark } from '../../../rules/src/transgressive.ts';
 import { NON_DIRECTIONAL, isAroundAPlace, isHabitual } from '../../../rules/src/motion.ts';
 import { parseXpos } from '../../../lexicon/src/steen/parse-xpos.ts';
 import { parseAddition } from '../../../lexicon/src/steen/parse-addition.ts';
-import { modalFor } from '../../../rules/src/modals.ts';
 import { negativeCounterparts } from '../../../rules/src/negation.ts';
-import { governmentFor, numeralValue } from '../../../rules/src/numerals.ts';
+import { numeralValue } from '../../../rules/src/numerals.ts';
 import { isOneAnaphor, antecedentOf } from '../../../rules/src/anaphora.ts';
 import { isExpletiveSubject } from '../../../rules/src/expletives.ts';
 import {
@@ -32,7 +29,7 @@ import {
   prepCaseFor,
   RELATIVE_PRONOUN,
 } from '../../../rules/src/pronouns.ts';
-import { baseDeprel, phraseOf, pronounLemmaFor, subjectNumber, subjectOfClause, subjectPerson } from '../tree.ts';
+import { baseDeprel, pronounLemmaFor, subjectNumber, subjectOfClause, subjectPerson } from '../tree.ts';
 import { CASE_BEARING, findPlannedPrep, isArticle } from '../plans.ts';
 import { toStandard } from '../../../morph/src/orthography.ts';
 import type { PlanNode } from '../result.ts';

@@ -12,11 +12,6 @@ import { splitLemmas } from './steen/split-lemmas.ts';
 export const SLAVIC_COLUMNS = ['ru', 'be', 'uk', 'pl', 'cs', 'sk', 'sl', 'hr', 'sr', 'mk', 'bg'] as const;
 export type SlavicColumn = (typeof SLAVIC_COLUMNS)[number];
 
-export const LANGUAGE_NAMES: Record<SlavicColumn, string> = {
-  ru: 'Russian', be: 'Belarusian', uk: 'Ukrainian', pl: 'Polish', cs: 'Czech', sk: 'Slovak',
-  sl: 'Slovenian', hr: 'Croatian', sr: 'Serbian', mk: 'Macedonian', bg: 'Bulgarian',
-};
-
 export interface Cognate {
   /** The dictionary's words for it, in the language's own spelling, most usual first. */
   words: string[];

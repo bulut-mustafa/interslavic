@@ -11,6 +11,7 @@
  */
 
 :root {
+  --ring: 0 0 0 3px rgba(31, 107, 107, 0.25);
   --ink: #16202f;
   --ink-soft: #4a5768;
   --ink-faint: #8794a6;
@@ -321,8 +322,6 @@ textarea {
   font-family: var(--sans);
   font-size: var(--text-sm);
   font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
   color: var(--ink-faint);
 }
 
@@ -791,8 +790,6 @@ textarea::placeholder {
   margin: 0 0 var(--space-1);
   font-size: var(--text-sm);
   font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
   color: var(--ink-faint);
 }
 
@@ -1039,8 +1036,6 @@ textarea::placeholder {
   margin: 0 0 var(--space-1);
   font-size: var(--text-sm);
   font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
   color: var(--ink-faint);
 }
 
@@ -1517,14 +1512,6 @@ textarea::placeholder {
 /* ---------- reading Interslavic ---------- */
 
 /* The text keeps its own line breaks and spacing: it is the user's, shown back. */
-.read-text {
-  font-family: var(--serif);
-  font-size: var(--text-output);
-  line-height: 1.6;
-  margin: 0;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-}
 
 /* Not found: the same plum the translator uses for a flagged word. A wavy line
    says "look here" without saying "wrong" - the dictionary can lack a word. */
@@ -1547,19 +1534,6 @@ textarea::placeholder {
 
 .output-word.is-name.is-active {
   text-decoration: none;
-}
-
-.read-summary {
-  margin: 0;
-  color: var(--ink-soft);
-  font-size: var(--text-sm);
-}
-
-.read-example {
-  position: absolute;
-  top: var(--space-2);
-  right: var(--space-2);
-  margin-left: 0;
 }
 
 .read-card {
@@ -1715,8 +1689,7 @@ textarea::placeholder {
   font-size: var(--text-sm);
 }
 
-.worksheet-picker label,
-.worksheet-key-toggle {
+.worksheet-picker label{
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -1880,221 +1853,12 @@ textarea::placeholder {
   margin: 0;
 }
 
-.subtitles-input {
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: var(--space-3);
-}
-
-.subtitles-file,
-.subtitles-paste {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  font-size: var(--text-sm);
-}
-
-.subtitles-paste textarea {
-  font: inherit;
-  padding: var(--space-2);
-  border: 1px solid var(--rule);
-  border-radius: var(--radius);
-  background: var(--paper-raised);
-  resize: vertical;
-}
-
-.subtitles-options,
-.subtitles-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-3);
-}
-
-.subtitles-options label {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-size: var(--text-sm);
-}
-
-.subtitles-options .text-button,
-.subtitles-actions .text-button {
-  margin-left: 0;
-}
-
 .error-line {
   color: var(--guess);
   font-size: var(--text-sm);
 }
 
-.subtitles-progress,
-.subtitles-more {
-  color: var(--ink-soft);
-  font-size: var(--text-sm);
-}
-
-.subtitles-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: var(--text-sm);
-}
-
-.subtitles-table th,
-.subtitles-table td {
-  text-align: left;
-  vertical-align: top;
-  padding: var(--space-1) var(--space-2);
-  border-bottom: 1px solid var(--rule);
-}
-
-.subtitles-table tr.is-flagged td:first-child {
-  box-shadow: inset 3px 0 0 var(--guess);
-}
-
-@media (max-width: 44rem) {
-  .subtitles-input {
-    grid-template-columns: 1fr;
-  }
-}
-
 /* ---------- practice ---------- */
-
-.practice {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.practice h1,
-.practice h2,
-.practice p {
-  margin: 0;
-}
-
-.practice-pick {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: var(--space-3) var(--space-4);
-}
-
-.practice-pick label,
-.practice-homonym {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  font-size: var(--text-sm);
-}
-
-.practice-custom {
-  display: flex;
-  align-items: flex-end;
-  gap: var(--space-2);
-}
-
-.practice-custom .text-button,
-.practice-tools .text-button {
-  margin-left: 0;
-}
-
-.practice-card {
-  background: var(--paper-raised);
-  border: 1px solid var(--rule);
-  border-radius: var(--radius);
-  padding: var(--space-4);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.practice-word {
-  font-family: var(--serif);
-  font-size: var(--text-2xl);
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--space-3);
-}
-
-.practice-gloss {
-  font-family: var(--sans);
-  font-size: var(--text-sm);
-  color: var(--ink-faint);
-}
-
-.practice-question label {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.practice-ask {
-  font-size: var(--text-lg);
-}
-
-.practice-input {
-  display: flex;
-  gap: var(--space-2);
-  max-width: 28rem;
-}
-
-.practice-input input {
-  flex: 1;
-  font: inherit;
-  font-family: var(--serif);
-  padding: var(--space-2);
-  border: 1px solid var(--rule);
-  border-radius: var(--radius);
-}
-
-.practice-input .text-button {
-  margin-left: 0;
-}
-
-.practice-result {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-2);
-}
-
-.practice-also,
-.practice-cyr,
-.practice-score {
-  color: var(--ink-soft);
-  font-size: var(--text-sm);
-}
-
-.practice-weak ul {
-  margin: var(--space-1) 0 0;
-  padding-left: var(--space-4);
-  color: var(--ink-soft);
-}
-
-.practice-tools {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
-.practice-table {
-  border-collapse: collapse;
-  font-size: var(--text-sm);
-}
-
-.practice-table th,
-.practice-table td {
-  text-align: left;
-  padding: var(--space-1) var(--space-3);
-  border-bottom: 1px solid var(--rule);
-}
-
-.practice-table caption {
-  text-align: left;
-  padding-bottom: var(--space-1);
-  color: var(--ink-soft);
-}
 
 /* ---------- reading aloud ---------- */
 
@@ -2133,24 +1897,6 @@ textarea::placeholder {
   gap: var(--space-2);
   color: var(--ink-soft);
   font-size: var(--text-sm);
-}
-
-.transcribe-input {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: var(--space-3) var(--space-4);
-}
-
-.transcribe-input label {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  font-size: var(--text-sm);
-}
-
-.transcribe-input .text-button {
-  margin-left: 0;
 }
 
 .transcribe-progress {
@@ -2203,13 +1949,6 @@ textarea::placeholder {
   margin: 0;
 }
 
-.player-files {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-  gap: var(--space-3);
-}
-
-.player-files label,
 .player-speed {
   display: flex;
   flex-direction: column;
@@ -2295,7 +2034,7 @@ textarea::placeholder {
 .studio {
   --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   --tint: rgba(31, 107, 107, 0.08);
-  --lift: 0 0 0 1px rgba(31, 107, 107, 0.35), 0 6px 20px rgba(31, 107, 107, 0.12);
+  --lift: 0 0 0 1px rgba(31, 107, 107, 0.35);
 
   color: var(--ink);
   min-height: 100vh;
@@ -2371,10 +2110,8 @@ textarea::placeholder {
   gap: var(--space-2);
   margin: 0 0 var(--space-1);
   padding: 0 var(--space-2);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
   color: var(--ink-faint);
 }
 
@@ -2391,7 +2128,7 @@ textarea::placeholder {
   gap: var(--space-3);
   padding: 0.5rem var(--space-2);
   border-left: 0;
-  border-radius: 14px;
+  border-radius: 12px;
   color: var(--ink-soft);
   text-decoration: none;
   font-size: var(--text-sm);
@@ -2509,7 +2246,7 @@ textarea::placeholder {
 
 .studio-chip.is-online i {
   background: var(--teal);
-  box-shadow: 0 0 0 3px rgba(31, 107, 107, 0.18);
+  box-shadow: var(--ring);
 }
 
 .studio-chip.is-offline i {
@@ -2525,25 +2262,6 @@ textarea::placeholder {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-}
-
-.studio-what {
-  margin: 0;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--space-1) var(--space-3);
-  padding: var(--space-2) var(--space-3);
-  background: var(--tint);
-  border-radius: 10px;
-  font-size: var(--text-sm);
-  color: var(--ink);
-}
-
-.studio-what b {
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--teal);
 }
 
 .studio-credits {
@@ -2596,7 +2314,7 @@ textarea::placeholder {
   padding: var(--space-3);
   background: var(--paper-raised);
   border: 1px solid var(--rule);
-  border-radius: 14px;
+  border-radius: 12px;
   color: var(--ink-soft);
   text-decoration: none;
   font-size: var(--text-sm);
@@ -2607,7 +2325,6 @@ textarea::placeholder {
   .studio-card:hover {
     border-color: var(--teal);
     box-shadow: var(--lift);
-    transform: translateY(-2px);
   }
 }
 
@@ -2629,10 +2346,6 @@ textarea::placeholder {
   font-style: normal;
   font-size: 0.72rem;
   color: var(--amber);
-}
-
-.studio-runs.is-device {
-  color: var(--teal);
 }
 
 /* ---------- the tools, inside the Studio ---------- */
@@ -2691,7 +2404,7 @@ textarea::placeholder {
 .studio textarea:focus-visible {
   outline: none;
   border-color: var(--teal);
-  box-shadow: 0 0 0 3px rgba(31, 107, 107, 0.18);
+  box-shadow: var(--ring);
 }
 
 .studio input[type='file'] {
@@ -2744,7 +2457,6 @@ textarea::placeholder {
 
 .studio .translator,
 .studio .entry,
-.studio .practice-card,
 .studio .player-line,
 .studio .worksheet-picker,
 .studio .transcribe-notes,
@@ -2834,8 +2546,7 @@ textarea::placeholder {
 
   .studio-rail,
   .studio-bar,
-  .studio-credits,
-  .studio-what {
+  .studio-credits{
     display: none !important;
   }
 
@@ -2863,7 +2574,7 @@ textarea::placeholder {
   padding: var(--space-3) var(--space-4);
   background: var(--paper-raised);
   border: 1.5px dashed #b6c2d0;
-  border-radius: 14px;
+  border-radius: 12px;
   color: var(--ink-soft);
   cursor: pointer;
   transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
@@ -2878,12 +2589,12 @@ textarea::placeholder {
 }
 
 .dropzone.is-over {
-  box-shadow: 0 0 0 4px rgba(31, 107, 107, 0.12);
+  box-shadow: var(--ring);
 }
 
 .dropzone:focus-within {
   border-color: var(--teal);
-  box-shadow: 0 0 0 3px rgba(31, 107, 107, 0.18);
+  box-shadow: var(--ring);
 }
 
 .dropzone.has-file {
@@ -2949,56 +2660,6 @@ textarea::placeholder {
   margin: 0;
 }
 
-.photo-input {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: var(--space-3) var(--space-4);
-}
-
-.photo-input label,
-.photo-text label {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  font-size: var(--text-sm);
-}
-
-.photo-input .text-button {
-  margin-left: 0;
-}
-
-.photo-preview {
-  max-width: 100%;
-  max-height: 22rem;
-  object-fit: contain;
-  align-self: flex-start;
-  border: 1px solid var(--rule);
-  border-radius: var(--radius);
-}
-
-.photo-text,
-.photo-result {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.photo-text textarea {
-  font: inherit;
-  padding: var(--space-2);
-  border: 1px solid var(--rule);
-  border-radius: var(--radius);
-  background: var(--paper-raised);
-}
-
-.photo-isv {
-  font-family: var(--serif);
-  font-size: var(--text-output);
-  line-height: 1.5;
-  white-space: pre-wrap;
-}
-
 /* ---------- the photo and video editors ---------- */
 
 .editor-page {
@@ -3026,31 +2687,12 @@ textarea::placeholder {
   min-width: 0;
 }
 
-.editor-toolbar,
-.editor-options {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.editor-toolbar .text-button,
 .insp-actions .text-button {
   margin-left: 0;
 }
 
 .editor-gap {
   flex: 1;
-}
-
-.editor-options .insp-row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.editor-options .insp-row select {
-  grid-column: auto;
 }
 
 .layer-canvas {
@@ -3070,7 +2712,7 @@ textarea::placeholder {
 
 .layer-canvas:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(31, 107, 107, 0.25);
+  box-shadow: var(--ring);
 }
 
 .editor-side {
@@ -3088,7 +2730,7 @@ textarea::placeholder {
   padding: var(--space-3);
   background: var(--paper-raised);
   border: 1px solid var(--rule);
-  border-radius: 14px;
+  border-radius: 12px;
   font-size: var(--text-sm);
 }
 
@@ -3133,15 +2775,13 @@ textarea::placeholder {
 }
 
 .insp-presets,
-.insp-buttons,
 .insp-actions {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-1);
 }
 
-.insp-preset,
-.insp-chip {
+.insp-preset{
   padding: 0.25rem 0.7rem;
   border: 1px solid var(--rule);
   border-radius: 999px;
@@ -3153,17 +2793,10 @@ textarea::placeholder {
 }
 
 @media (hover: hover) {
-  .insp-preset:hover,
-  .insp-chip:hover {
+  .insp-preset:hover{
     border-color: var(--teal);
     color: var(--teal);
   }
-}
-
-.insp-chip[aria-pressed='true'] {
-  background: var(--teal);
-  border-color: var(--teal);
-  color: #fff;
 }
 
 .insp-toggle label {
@@ -3193,13 +2826,6 @@ textarea::placeholder {
 /* ---------- the video editor ---------- */
 
 /* The element the frames are read from: present and playing, but not shown. */
-.editor-video-source {
-  position: absolute;
-  width: 2px;
-  height: 2px;
-  opacity: 0;
-  pointer-events: none;
-}
 
 .transport {
   display: flex;
@@ -3237,75 +2863,6 @@ textarea::placeholder {
   touch-action: none;
   user-select: none;
   cursor: pointer;
-}
-
-.timeline-track {
-  display: flex;
-  height: 3rem;
-}
-
-.timeline-clip {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
-  min-width: 0;
-  padding: 0 var(--space-2);
-  border: 1px solid rgba(31, 107, 107, 0.4);
-  border-radius: 8px;
-  background: rgba(31, 107, 107, 0.16);
-  color: var(--ink);
-  font: inherit;
-  font-size: 0.8rem;
-  overflow: hidden;
-  cursor: pointer;
-}
-
-.timeline-clip small {
-  color: var(--ink-soft);
-}
-
-.timeline-clip.is-selected {
-  background: rgba(31, 107, 107, 0.32);
-  border-color: var(--teal);
-  box-shadow: 0 0 0 2px rgba(31, 107, 107, 0.25);
-}
-
-.timeline-texts {
-  position: relative;
-  min-height: 1.7rem;
-}
-
-.timeline-text {
-  position: absolute;
-  top: 0;
-  height: 1.5rem;
-  padding: 0 var(--space-2);
-  border: 1px solid #c8a227;
-  border-radius: 6px;
-  background: #fbe9a6;
-  color: #3d3200;
-  font: inherit;
-  font-size: 0.72rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  cursor: pointer;
-}
-
-.timeline-text.is-selected {
-  box-shadow: 0 0 0 2px rgba(200, 162, 39, 0.5);
-  background: #f7dc7a;
-}
-
-.timeline-playhead {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  margin-left: -1px;
-  background: var(--plum);
-  pointer-events: none;
 }
 
 .insp-title {
@@ -3381,9 +2938,6 @@ textarea::placeholder {
 /* ---------- more room once a file is open ---------- */
 
 /* The explainer in the Studio's bar of tips gives way to the work. */
-.studio-canvas:has(.tool-pane:not([hidden]) .editor) .studio-what {
-  display: none;
-}
 
 .open-another {
   position: relative;
@@ -3445,7 +2999,7 @@ textarea::placeholder {
   width: 100%;
   padding: 4px;
   border: 1px solid var(--rule);
-  border-radius: 10px;
+  border-radius: 8px;
   background: #fff;
   font: inherit;
   text-align: left;
@@ -3456,13 +3010,13 @@ textarea::placeholder {
 @media (hover: hover) {
   .upload-item:hover {
     border-color: var(--teal);
-    box-shadow: 0 0 0 2px rgba(31, 107, 107, 0.15);
+    box-shadow: var(--ring);
   }
 }
 
 .uploads-list li.is-open .upload-item {
   border-color: var(--teal);
-  box-shadow: 0 0 0 2px rgba(31, 107, 107, 0.3);
+  box-shadow: var(--ring);
 }
 
 .upload-item img,
@@ -3483,10 +3037,8 @@ textarea::placeholder {
 }
 
 .upload-kind {
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
   color: var(--teal);
 }
 
@@ -3542,7 +3094,6 @@ textarea::placeholder {
 .replace-banner p {
   margin: 0 0 var(--space-2);
 }
-
 
 /* ---------- the rail: folds to its icons; Uploads opens a sheet beside it ---------- */
 
@@ -3906,7 +3457,7 @@ textarea::placeholder {
   height: 2.2rem;
   padding: 0 0.5rem;
   border: 1px solid var(--rule);
-  border-radius: 10px;
+  border-radius: 8px;
   background: #fff;
   font: inherit;
 }
@@ -3915,7 +3466,7 @@ textarea::placeholder {
   display: inline-flex;
   align-items: center;
   border: 1px solid var(--rule);
-  border-radius: 10px;
+  border-radius: 8px;
   background: #fff;
   overflow: hidden;
 }
@@ -4071,7 +3622,7 @@ textarea::placeholder {
   padding: var(--space-2) var(--space-3) calc(var(--space-2) + env(safe-area-inset-bottom));
   background: var(--paper-raised);
   border: 1px solid var(--rule);
-  border-radius: 14px;
+  border-radius: 12px;
   box-shadow: 0 -6px 18px rgba(22, 32, 47, 0.06);
 }
 
@@ -4113,7 +3664,7 @@ textarea::placeholder {
   box-sizing: border-box;
   width: 4.6rem;
   height: 4.6rem;
-  border-radius: 10px;
+  border-radius: 8px;
 }
 
 .page-tile {
@@ -4137,7 +3688,7 @@ textarea::placeholder {
 
 .page-list li.is-current .page-tile {
   border-color: var(--teal);
-  box-shadow: 0 0 0 2px rgba(31, 107, 107, 0.25);
+  box-shadow: var(--ring);
 }
 
 @media (hover: hover) {
@@ -4292,7 +3843,7 @@ textarea::placeholder {
   height: 2.2rem;
   padding: 0 0.5rem;
   border: 1px solid var(--rule);
-  border-radius: 10px;
+  border-radius: 8px;
   background: #fff;
   font: inherit;
 }
@@ -4310,7 +3861,7 @@ textarea::placeholder {
   width: 100%;
   padding: 0.5rem 0.7rem;
   border: 1px solid var(--rule);
-  border-radius: 10px;
+  border-radius: 8px;
   background: #fff;
   color: var(--ink);
   font: inherit;
@@ -4370,7 +3921,7 @@ textarea::placeholder {
   height: 2.2rem;
   padding: 0 0.5rem;
   border: 1px solid var(--rule);
-  border-radius: 10px;
+  border-radius: 8px;
   background: #fff;
   font: inherit;
 }
@@ -4386,7 +3937,7 @@ textarea::placeholder {
   display: flex;
   flex-direction: column;
   border: 1px solid var(--rule);
-  border-radius: 14px;
+  border-radius: 12px;
   background: var(--paper-raised);
   overflow: hidden;
 }
@@ -4451,7 +4002,7 @@ textarea::placeholder {
   outline: none;
   border-color: var(--teal);
   background: #fff;
-  box-shadow: 0 0 0 3px rgba(31, 107, 107, 0.15);
+  box-shadow: var(--ring);
 }
 
 .sub-why {
@@ -4648,7 +4199,7 @@ textarea::placeholder {
 .worksheet-picks .worksheet-picker {
   display: block;
   padding: var(--space-2) var(--space-3) var(--space-3);
-  border-radius: 14px;
+  border-radius: 12px;
 }
 
 .worksheet-chips {
@@ -4726,11 +4277,6 @@ textarea::placeholder {
 
 /* ---------- video: what a clip shows, along the clip ---------- */
 
-.timeline-clip {
-  position: relative;
-  overflow: hidden;
-}
-
 .clip-frames {
   position: absolute;
   inset: 0;
@@ -4743,15 +4289,6 @@ textarea::placeholder {
   height: 100%;
   object-fit: cover;
   pointer-events: none;
-}
-
-.timeline-clip .clip-label {
-  position: relative;
-  z-index: 1;
-  padding: 0 4px;
-  border-radius: 4px;
-  background: rgba(22, 32, 47, 0.72);
-  color: #fff;
 }
 
 /* the developer readout behind ?perf=1 */
@@ -4803,7 +4340,7 @@ textarea::placeholder {
 .ws-field:focus {
   outline: none;
   border-color: var(--teal);
-  box-shadow: 0 0 0 3px rgba(31, 107, 107, 0.15);
+  box-shadow: var(--ring);
 }
 
 .ws-item-edit {
@@ -4870,7 +4407,7 @@ textarea::placeholder {
 
 .ws-section-edit .ws-h3 {
   font-size: 1.05rem;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .ws-section-edit .ws-instruction {
@@ -4925,7 +4462,6 @@ textarea::placeholder {
   color: var(--ink-faint);
   font-variant-numeric: tabular-nums;
 }
-
 
 /* ---------- Studio: head lines up with the top bar; tooltips on the folded rail; icon-only editor bar ---------- */
 
@@ -5118,7 +4654,6 @@ textarea::placeholder {
   white-space: nowrap;
 }
 
-
 /* ======================================================================
    Phones and touchscreens. Every rule here is scoped to a coarse pointer or
    a narrow width, so a desktop with a mouse looks exactly as before.
@@ -5224,7 +4759,6 @@ textarea::placeholder {
   .prevnext-link:active,
   .page-tile:active,
   .insp-preset:active,
-  .insp-chip:active,
   .insp-tool:active,
   .topic-chip:active,
   .canvas-toolbar button:active:not(:disabled),

@@ -1,10 +1,10 @@
-import type { Case, Decision, ParsedSentence, UdToken } from '../../../types/index.ts';
+import type { Decision, ParsedSentence, UdToken } from '../../../types/index.ts';
 import type { Entry, Lexicon } from '../../../lexicon/src/reader.ts';
 import type { AspectOutcome } from '../resolvers/aspect.ts';
 import type { PrepPlan } from '../resolvers/preposition.ts';
 import type { AuxiliaryRole } from '../../../rules/src/auxiliaries.ts';
 import type { ModalPlan } from '../../../rules/src/modals.ts';
-import type { PlanNode, Translation } from '../result.ts';
+import type { Translation } from '../result.ts';
 import type { SourceAdapter } from '../source/adapters.ts';
 import type { VerbGovernment } from '../plans.ts';
 

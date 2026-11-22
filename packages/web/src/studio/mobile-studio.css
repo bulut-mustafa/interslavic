@@ -334,9 +334,7 @@
   .studio .transcribe-cues li {
     grid-template-columns: 1fr;
   }
-  .studio .transcribe-input {
-    flex-wrap: wrap;
-  }
+  
   .studio .voice-picker select {
     max-width: 100%;
   }

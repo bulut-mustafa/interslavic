@@ -640,8 +640,6 @@ html.ph-kb-open .pv.is-typing .pv-bottom {
   margin: 4px 0 0;
   font-size: 0.8rem;
   font-weight: 600;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
   color: var(--ink-soft);
 }
 .pv-slider {
@@ -731,7 +729,7 @@ html.ph-kb-open .pv.is-typing .pv-bottom {
   min-width: 44px;
   min-height: 44px;
   border: 1px solid var(--rule);
-  border-radius: 10px;
+  border-radius: 8px;
   background: #fff;
   color: var(--ink);
   font: inherit;
@@ -748,7 +746,7 @@ html.ph-kb-open .pv.is-typing .pv-bottom {
   height: 44px;
   padding: 2px;
   border: 1px solid var(--rule);
-  border-radius: 10px;
+  border-radius: 8px;
   background: #fff;
 }
 .pv-row,
@@ -910,7 +908,7 @@ html.ph-kb-open .pv.is-typing .pv-bottom {
   padding: 0 12px;
   align-items: center;
   border: 1px solid var(--rule);
-  border-radius: 10px;
+  border-radius: 8px;
   background: #fff;
   color: var(--ink);
   font: inherit;

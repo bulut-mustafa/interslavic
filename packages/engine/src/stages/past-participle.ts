@@ -9,7 +9,7 @@ import type { StageContext } from './context.ts';
  * compound auxiliary is added for the 1st and 2nd person only.
  */
 export function pastParticipleStage(ctx: StageContext): void {
-  const { sentence, adapter, plan, insertedCopulas, pastAuxiliaries, conditionalVerbs } = ctx;
+  const { sentence, plan, pastAuxiliaries, conditionalVerbs } = ctx;
 
   // The library's FINITE past is the IMPERFECT (znaše), which the grammar calls
   // optional and literary. The standard past is the l-participle, which agrees

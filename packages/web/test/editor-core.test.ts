@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { DEFAULT_STYLE, PRESETS, applyPreset, drawText, fontString, layoutText, wrapLines } from '../src/editor/text-style.ts';
 import { boundsOf, clampPosition, duplicateLayer, hitTest, newLayer, removeLayer, reorder, updateLayer, updateStyle, visibleAt } from '../src/editor/layers.ts';
 import * as H from '../src/editor/history.ts';

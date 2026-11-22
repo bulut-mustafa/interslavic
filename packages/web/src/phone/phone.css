@@ -6,8 +6,6 @@
   --ph-space-2: 8px;
   --ph-space-3: 12px;
   --ph-space-4: 16px;
-  --ph-space-5: 24px;
-  --ph-space-6: 32px;
   --ph-gutter: 16px;
   --ph-row: 48px;
   --ph-radius: 16px;
@@ -211,7 +209,7 @@ html.ph-locked input[type='range'] {
   width: 2.8rem;
   height: 2.8rem;
   margin-bottom: 4px;
-  border-radius: 14px;
+  border-radius: 12px;
   background: rgba(31, 107, 107, 0.12);
 }
 .ph-card-badge .ph-card-icon {

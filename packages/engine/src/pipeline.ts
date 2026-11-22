@@ -1,22 +1,14 @@
 import {
-  decide,
   type Case,
-  type Decision,
   type ParsedSentence,
   type UdToken,
 } from '../../types/index.ts';
-import type { GlossedFeature, GlossedWord, PlanNode, Translation } from './result.ts';
+import type { Translation } from './result.ts';
 import {
   baseDeprel,
-  phraseOf,
-  pronounLemmaFor,
-  subjectNumber,
   subjectOfClause,
-  subjectPerson,
-  conjunctsOf,
   sentencePunctuation,
 } from './tree.ts';
-import { glossFeature, matchedGloss, prepositionReason, unknownWords } from './gloss.ts';
 import { renderStage } from './stages/render.ts';
 import { realiseStage } from './stages/realise.ts';
 import { numeralGovernmentStage } from './stages/numeral-government.ts';
@@ -29,22 +21,13 @@ import {
   capitalised,
   glossedAsProperNoun,
   Lexicon,
-  normalizeGloss,
-  normalizeRussian,
   rank,
   type Entry,
-  type Gloss,
 } from '../../lexicon/src/reader.ts';
-import { realize } from '../../morph/src/realize.ts';
-import { compared, type Degree } from '../../morph/src/comparison.ts';
-import { pastPassiveParticiple } from '../../morph/src/participles.ts';
-import { render, toStandard, type Orthography } from '../../morph/src/orthography.ts';
+import { type Orthography } from '../../morph/src/orthography.ts';
 import type { FullFormIndex } from '../../lexicon/src/full-forms.ts';
-import { resolveAspect, type AspectOutcome } from './resolvers/aspect.ts';
-import { AGREEING_DEPRELS, resolveCase } from './resolvers/case.ts';
+import { type AspectOutcome } from './resolvers/aspect.ts';
 import { adapterFor } from './source/adapters.ts';
-import { planPreposition, type PrepPlan } from './resolvers/preposition.ts';
-import { CASE_BEARING, findPlannedPrep, isArticle, type VerbGovernment } from './plans.ts';
 import { contextWordsOf } from './gloss.ts';
 import { lexemeStage } from './stages/lexeme.ts';
 import { planPhrasalVerbs } from './stages/phrasal-verbs.ts';
@@ -52,34 +35,7 @@ import { planPrepositions } from './stages/prepositions.ts';
 import { planAuxiliaries } from './stages/auxiliaries.ts';
 import { planNegation } from './stages/negation.ts';
 import { planVerbGovernment } from './stages/verb-government.ts';
-import { governmentFor, numeralValue } from '../../rules/src/numerals.ts';
-import { isExpletiveSubject } from '../../rules/src/expletives.ts';
-import { splitMultiword } from '../../lexicon/src/steen/split-lemmas.ts';
-import { antecedentOf, isOneAnaphor } from '../../rules/src/anaphora.ts';
-import {
-  auxiliaryRole,
-  conditionalAuxiliary,
-  futureAuxiliary,
-  type AuxiliaryRole,
-} from '../../rules/src/auxiliaries.ts';
-import { modalFor, type ModalPlan } from '../../rules/src/modals.ts';
-import {
-  hasCliticForm,
-  isReflexivePronoun,
-  REFLEXIVE_POSSESSIVE,
-  REFLEXIVE_PRONOUN,
-} from '../../rules/src/reflexives.ts';
-import {
-  COMPLEMENTIZER,
-  personalPronounGender,
-  personalPronounLemma,
-  personalPronounNumber,
-  prepCaseFor,
-  RELATIVE_PRONOUN,
-} from '../../rules/src/pronouns.ts';
-import { functionWordFor } from '../../rules/src/function-words.ts';
-import { casesGovernedBy, codeBelongsToPreposition } from '../../rules/src/prepositions.ts';
-import { negativeCounterparts } from '../../rules/src/negation.ts';
+import { casesGovernedBy } from '../../rules/src/prepositions.ts';
 import { rewriteSource } from '../../rules/src/source-rewrites.ts';
 
 /**
@@ -96,15 +52,7 @@ import { rewriteSource } from '../../rules/src/source-rewrites.ts';
  *     adjacency to a preposition (not yet exercised).
  */
 
-
-
-
 export type { GlossedFeature, GlossedWord, RuleCitation, Translation } from './result.ts';
-
-
-
-
-
 
 /**
  * Grammatical person, taken from the SUBJECT rather than from the verb or its
@@ -144,10 +92,6 @@ function isPassiveClause(verb: UdToken, sentence: ParsedSentence): boolean {
     (t) => t.head === verb.id && (t.deprel === 'nsubj:pass' || t.deprel === 'aux:pass'),
   );
 }
-
-
-
-
 
 export interface TranslateOptions {
   orthography?: Orthography;
@@ -289,12 +233,7 @@ export function translate(
   const { phrasalVerbs, phrasalParticles } = planPhrasalVerbs(sentence, lex);
 
   // ---- Phase 0: plan prepositional phrases -------------------------------
-  const { prepPlans, governedCase, deletedPreps } = planPrepositions(
-    sentence,
-    lex,
-    phrasalVerbs,
-    phrasalParticles,
-  );
+  const { prepPlans, governedCase, deletedPreps } = planPrepositions(sentence, phrasalParticles);
 
   // ---- Phase 0b: auxiliaries ---------------------------------------------
   const {
@@ -637,31 +576,24 @@ export function translate(
   };
 
   // ---- Phase B1: numeral government -------------------------------------
-  // Extracted to stages/numeral-government.ts.
   numeralGovernmentStage(ctx);
 
 
   // ---- Phase B: agreement propagation -----------------------------------
-  // Extracted to stages/agreement.ts.
   agreementStage(ctx);
 
 
-  // Extracted to stages/predicate-agreement.ts.
   predicateAgreementStage(ctx);
 
-  // Extracted to stages/copula.ts.
   copulaStage(ctx);
 
-  // Extracted to stages/past-participle.ts.
   pastParticipleStage(ctx);
 
   // ---- Phase C: realise -------------------------------------------------
-  // Extracted to stages/realise.ts.
   const { words, surfaces } = realiseStage({
     sentence,
     lex,
     opts,
-    orth,
     plan,
     dropped,
     punctuation,
@@ -672,19 +604,15 @@ export function translate(
     insertedCopulas,
     pastAuxiliaries,
     futureForms,
-    imperatives,
-    optativeVerbs,
     optativeMarkers,
     finitePurposeMarks,
     purposeClauses,
     needsReflexiveClitic,
-    phrasalParticles,
-    phrasalVerbs,
     negatedVerbs,
   });
 
   // ---- Phase D: linearise and render -------------------------------------
-  // Extracted to stages/render.ts - the first step of splitting this function.
+  // Extracted to stages/render.ts.
   return renderStage({
     sentence,
     surfaces,

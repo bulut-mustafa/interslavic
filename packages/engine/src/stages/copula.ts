@@ -8,7 +8,7 @@ import type { StageContext } from './context.ts';
  * does.
  */
 export function copulaStage(ctx: StageContext): void {
-  const { sentence, adapter, plan, insertedCopulas, pastAuxiliaries, conditionalVerbs } = ctx;
+  const { sentence, adapter, plan, insertedCopulas } = ctx;
 
   if (adapter.omitsPresentCopula) {
     for (const node of plan) {

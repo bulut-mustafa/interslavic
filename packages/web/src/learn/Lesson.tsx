@@ -158,7 +158,7 @@ function LearnNav({ current }: { current: string | null }) {
               onClick={() => setOpen(false)}
             >
               {l.title}
-              {isDone(l.slug) && <span className="learn-nav-done" aria-label="done"> ✓</span>}
+              {isDone(l.slug) && <span className="learn-nav-done" aria-label="done"> <Icon name="check" size="0.9rem" /></span>}
             </Link>
           ))}
         </div>

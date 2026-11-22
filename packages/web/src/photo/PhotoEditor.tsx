@@ -23,7 +23,7 @@ import { AdjustPanel, type AdjustPatch } from './AdjustPanel.tsx';
 import { CropTool } from './CropTool.tsx';
 import { decodePicture, downscaleSize, PictureError, sourceSizeOf } from './decode.ts';
 import { docEdited, emptyDoc, isImage, isText, outputSize, type PageDoc, type PhotoLayer } from './doc.ts';
-import { exportPage, exportPdf, exportZip, fileNameFor, type ExportRequest, type ExportResult } from './export.ts';
+import { exportPage, exportPdf, exportZip, type ExportRequest, type ExportResult } from './export.ts';
 import { ExportDialog, type ExportPageInfo } from './ExportDialog.tsx';
 import { autoEnhance } from './auto-enhance.ts';
 import { canvasProber, matchFont } from './font-match.ts';

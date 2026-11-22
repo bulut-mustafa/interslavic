@@ -112,9 +112,9 @@ export default function Studio({ path }: { path: string }) {
         <div className="studio-rail-head">
           <Tip label={folded ? 'Studio home' : undefined} side="right">
           <Link href="/studio" className="studio-brand" aria-label="Studio home">
-            <span className="studio-mark" aria-hidden="true">◢</span>
+            <span className="studio-mark" aria-hidden="true">S</span>
             <span className="studio-brand-name">
-              STUDIO
+              Studio
               <small>Medžuslovjansky</small>
             </span>
           </Link>
@@ -141,7 +141,7 @@ export default function Studio({ path }: { path: string }) {
 
         <div className="studio-rail-foot">
           <Link href="/" className="studio-back">
-            ← Translator
+            <LineIcon name="arrowLeft" /> Translator
           </Link>
           <Link href="/learn" className="studio-back">
             Lessons
@@ -160,14 +160,14 @@ export default function Studio({ path }: { path: string }) {
       <div className="studio-main">
         <header className="studio-bar">
           <Link href="/" className="studio-bar-back">
-            ← Translator
+            <LineIcon name="arrowLeft" /> Translator
           </Link>
           <p className="studio-crumb">
-            <Link href="/studio">STUDIO</Link>
+            <Link href="/studio">Studio</Link>
             {tool && (
               <>
                 <span aria-hidden="true"> / </span>
-                <span>{tool.label.toUpperCase()}</span>
+                <span>{tool.label}</span>
               </>
             )}
           </p>
@@ -230,7 +230,7 @@ function Home() {
                 <Icon d={t.icon} />
                 <strong>{t.label}</strong>
                 <span>{t.summary}</span>
-                <em className={`studio-runs is-${t.runs}`}>{t.runs === 'device' ? 'RUNS ON YOUR DEVICE' : 'USES THE ENGINE'}</em>
+                {t.runs !== 'device' && <em className="studio-runs">Uses the engine</em>}
               </Link>
             ))}
           </div>

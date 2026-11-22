@@ -93,7 +93,7 @@
   height: 28px;
   padding: 0 4px;
   box-sizing: border-box;
-  border-radius: 14px;
+  border-radius: 12px;
   background: var(--teal);
   color: #fff;
   font-weight: 600;
@@ -410,6 +410,6 @@ html.ph-kb-open .wse-bar {
   border-radius: 8px;
   background: none;
   color: #fff;
-  font-weight: 700;
+  font-weight: 600;
   text-decoration: underline;
 }

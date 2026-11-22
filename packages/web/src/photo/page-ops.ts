@@ -62,9 +62,6 @@ export function applyAdjustPatch(b: BaseEdit, patch: AdjustPatch): BaseEdit {
 /** The renderer's `presets` callback: the colour edit a named look stands for, null for an unknown name. */
 export const presetsFor = (id: string, amount: number): FxAdjust | null => (PRESETS.some((p) => p.id === id) ? (presetAdjust(id, amount) as FxAdjust) : null);
 
-/** Text layers only, as `TextLayer`s. */
-export const textOnly = (layers: readonly PhotoLayer[]): TextLayer[] => layers.filter(isText);
-
 /** Changes the chosen TEXT layers (other kinds with those ids are left alone). */
 export const mapText = (all: PhotoLayer[], ids: readonly string[], f: (l: TextLayer) => TextLayer): PhotoLayer[] => all.map((l) => (ids.includes(l.id) && isText(l) ? f(l) : l));
 

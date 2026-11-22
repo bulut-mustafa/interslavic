@@ -1,6 +1,5 @@
 import { decide, type UdToken } from '../../../types/index.ts';
 import type { PlanNode } from '../result.ts';
-import { subjectPerson } from '../tree.ts';
 import type { StageContext } from './context.ts';
 
 /**
@@ -9,7 +8,7 @@ import type { StageContext } from './context.ts';
  * must not then be overwritten by a head it does not have.
  */
 export function predicateAgreementStage(ctx: StageContext): void {
-  const { sentence, adapter, plan, insertedCopulas, pastAuxiliaries, conditionalVerbs } = ctx;
+  const { sentence, adapter, plan } = ctx;
 
   // "Water is cold" makes the ADJECTIVE the root, with the subject hanging off
   // it, so a predicate adjective has to agree with its subject rather than with

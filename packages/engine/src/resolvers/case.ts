@@ -254,8 +254,8 @@ const CASE_CASCADE: CaseRule[] = [
   byDeprel,
 ];
 
-export function resolveCase(ctx: CaseContext, cascade = CASE_CASCADE): Decision<Case> {
-  for (const rule of cascade) {
+export function resolveCase(ctx: CaseContext): Decision<Case> {
+  for (const rule of CASE_CASCADE) {
     const d = rule(ctx);
     if (d) return d;
   }

@@ -1,7 +1,6 @@
 import type { ParsedSentence } from '../../../types/index.ts';
-import type { Entry, Lexicon } from '../../../lexicon/src/reader.ts';
+import type { Lexicon } from '../../../lexicon/src/reader.ts';
 import type { FullFormIndex } from '../../../lexicon/src/full-forms.ts';
-import type { Orthography } from '../../../morph/src/orthography.ts';
 import type { PrepPlan } from '../resolvers/preposition.ts';
 import type { GlossedWord, PlanNode, Translation } from '../result.ts';
 import type { InsertedForm } from './context.ts';
@@ -24,7 +23,6 @@ export interface RealiseInput {
   sentence: ParsedSentence;
   lex: Lexicon;
   opts: { validator?: FullFormIndex };
-  orth: Orthography;
   plan: PlanNode[];
   dropped: Translation['dropped'];
   punctuation: string;
@@ -36,15 +34,10 @@ export interface RealiseInput {
   insertedCopulas: Map<number, InsertedForm>;
   pastAuxiliaries: Map<number, InsertedForm>;
   futureForms: Map<number, InsertedForm>;
-  imperatives: Map<number, Agreement>;
-  /** The optative has no person of its own - see the verbs page. */
-  optativeVerbs: Map<number, { number: string }>;
   optativeMarkers: Map<number, number>;
   finitePurposeMarks: Map<number, Agreement>;
   purposeClauses: Map<number, Agreement>;
   needsReflexiveClitic: Set<number>;
-  phrasalParticles: Set<number>;
-  phrasalVerbs: Map<number, Entry>;
   negatedVerbs: Set<number>;
 }
 

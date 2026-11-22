@@ -112,7 +112,7 @@ export function UploadsSheet({ onClose }: { onClose: () => void }) {
                     <img src={i.thumb} alt="" />
                   ) : (
                     <span className="upload-placeholder" aria-hidden="true">
-                      {i.kind === 'audio' ? '♪' : '▶'}
+                      <Icon name={i.kind === 'audio' ? 'volumeOn' : 'play'} />
                     </span>
                   )}
                   <span className="upload-kind">{i.kind === 'video' ? 'Video' : i.kind === 'audio' ? 'Sound' : 'Photo'}</span>

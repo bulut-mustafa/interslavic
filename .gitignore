@@ -25,3 +25,15 @@ packages/rules/data/preposition-government.json
 
 # macOS
 .DS_Store
+
+# end-to-end test output
+e2e/report/
+e2e/results/
+e2e/fixtures/*.mp4
+e2e/fixtures/*.wav
+e2e/fixtures/*.png
+e2e/fixtures/*.jpg
+
+# graphify output
+graphify-out/
+e2e/results-photo/

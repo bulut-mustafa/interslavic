@@ -10,14 +10,11 @@
 .ph-screen > * {
   flex: none;
 }
-.ph-screen-grow {
-  flex: 1 0 auto;
-}
 
 .ph-card-box {
   background: #fff;
   border: 1px solid var(--rule);
-  border-radius: 18px;
+  border-radius: 16px;
   padding: var(--space-3);
 }
 .ph-card-box h2,
@@ -62,7 +59,7 @@
   min-height: 54px;
   padding: 0 var(--space-4);
   border: 0;
-  border-radius: 18px;
+  border-radius: 16px;
   background: var(--teal);
   color: #fff;
   font: inherit;
@@ -70,7 +67,7 @@
   font-weight: 600;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
-  box-shadow: 0 6px 18px rgba(31, 107, 107, 0.28);
+  box-shadow: 0 4px 12px rgba(22, 32, 47, 0.16);
   transition: transform 0.2s ease, opacity 0.2s ease;
 }
 .ph-primary:active {
@@ -132,9 +129,9 @@
 .ph-field {
   width: 100%;
   min-height: 48px;
-  padding: 12px 14px;
+  padding: 12px 12px;
   border: 1px solid var(--rule);
-  border-radius: 14px;
+  border-radius: 12px;
   background: #fff;
   color: var(--ink);
   font: inherit;
@@ -294,7 +291,7 @@ button.ph-row:active {
 .ph-sheet-stack textarea {
   width: 100%;
   min-height: 48px;
-  padding: 10px 12px;
+  padding: 8px 12px;
   border: 1px solid var(--rule);
   border-radius: 12px;
   background: #fff;
@@ -397,7 +394,7 @@ button.ph-row:active {
 }
 .pt-input .pt-text {
   border: 0;
-  padding: 10px 10px 4px;
+  padding: 8px 8px 4px;
   font-size: 18px;
   min-height: 9rem;
   background: transparent;
@@ -525,8 +522,6 @@ button.ph-row:active {
 .ph-section-title {
   margin: var(--space-2) 0;
   font-size: 0.8rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
   color: var(--ink-faint);
 }
 .ph-lesson-card {
@@ -890,7 +885,7 @@ button.ph-row:active {
   padding: 4px 4px 4px var(--space-3);
   background: #fff;
   border: 1px solid var(--rule);
-  border-radius: 14px;
+  border-radius: 12px;
 }
 .ph-note-row > span {
   flex: 1;
@@ -945,18 +940,7 @@ button.ph-row:active {
   font-size: 0.95rem;
   overflow-x: auto;
 }
-.ph-ws-section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  padding-bottom: var(--space-3);
-  border-bottom: 1px solid var(--rule);
-}
-.ph-ws-item {
-  padding: var(--space-2);
-  background: var(--paper-raised);
-  border-radius: 14px;
-}
+
 .ph-sheet-stack .ws-field {
   width: 100%;
   min-height: 48px;
@@ -1022,7 +1006,7 @@ button.ph-row:active {
 }
 .ph-watch-controls .ph-chip {
   min-width: 48px;
-  padding: 0 10px;
+  padding: 0 8px;
 }
 
 /* Recording */
@@ -1049,7 +1033,7 @@ button.ph-row:active {
   font: inherit;
   font-size: 1.05rem;
   font-weight: 600;
-  box-shadow: 0 10px 28px rgba(31, 107, 107, 0.35);
+  box-shadow: 0 8px 24px rgba(22, 32, 47, 0.2);
   touch-action: manipulation;
   transition: transform 0.2s ease;
 }

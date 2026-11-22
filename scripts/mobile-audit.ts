@@ -48,11 +48,9 @@ for (const f of files) {
   });
   if (f.endsWith('index.html') && !/viewport-fit=cover/.test(src)) add('viewport-fit', 'error', f, 1, 'viewport meta lacks viewport-fit=cover');
   if (!isCss && /onPointerDown|onPointerMove/.test(src)) {
-    const base = f.replace(/\.tsx?$/, '');
     const dir = f.slice(0, f.lastIndexOf('/'));
     const cssText = files.filter((c) => c.endsWith('.css') && (c.startsWith(dir) || c.endsWith('styles.css'))).map((c) => readFileSync(c, 'utf8')).join('\n');
     if (!/touch-action/.test(src) && !/touch-action/.test(cssText)) add('pointer-without-touch-action', 'error', f, 1, 'uses pointer drags but no touch-action anywhere nearby');
-    void base;
   }
 }
 

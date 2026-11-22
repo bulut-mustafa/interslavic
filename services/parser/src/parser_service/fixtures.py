@@ -12,14 +12,12 @@ The provenance comment is ignored when comparing, since it is metadata.
 """
 
 from __future__ import annotations
-from .app import with_terminator
-
 import pathlib
 import sys
 
 import stanza
 
-from .app import PROCESSORS
+from .app import PROCESSORS, with_terminator
 from .lemmas import check_words
 from .to_conllu import format_feats
 
@@ -121,7 +119,7 @@ def main() -> None:
                 sys.stdout.write(f"    committed: {o}\n    stanza:    {n}\n")
         if write:
             path.write_text(fresh, encoding="utf-8")
-            sys.stdout.write(f"    -> rewritten\n")
+            sys.stdout.write("    -> rewritten\n")
 
     sys.stdout.write(
         f"\n{len(paths)} fixtures, {len(mismatched)} differ"

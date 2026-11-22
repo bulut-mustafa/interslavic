@@ -1,29 +1,16 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { track } from '../analytics.ts';
-import { DropZone } from '../components/DropZone.tsx';
-import { ReplaceBanner } from '../components/ReplaceBanner.tsx';
 import { useToolActive } from '../studio/active.tsx';
 import { useLibrary, useReportVideoTarget, useVideoLibraryOpen, type LibraryItem, type OpenMode } from '../studio/library.tsx';
-import { Icon } from '../components/Icon.tsx';
-import { Tip } from '../components/Tip.tsx';
-import { useVoices, VoicePicker } from '../speech/Listen.tsx';
-import { speak as speakAloud, stop as stopSpeaking, supported as canSpeak } from '../speech/voices.ts';
+import { useVoices } from '../speech/Listen.tsx';
+import { speak as speakAloud, stop as stopSpeaking } from '../speech/voices.ts';
 import { VoiceOver } from './voiceover.ts';
 import { downloadBlob } from '../download.ts';
-import { Inspector } from '../editor/Inspector.tsx';
-import { MediaInspector } from '../editor/MediaInspector.tsx';
-import { EffectsPanel } from '../editor/EffectsPanel.tsx';
-import { KeyframePanel } from '../editor/KeyframePanel.tsx';
-import { SpeedAudioPanel } from '../editor/SpeedAudioPanel.tsx';
-import { TransitionPicker } from '../editor/TransitionPicker.tsx';
-import { TransformBox } from '../editor/TransformBox.tsx';
-import { boxOfMedia, patchOfBox } from '../editor/transform-math.ts';
-import { LayerCanvas, type SceneHandle } from '../editor/LayerCanvas.tsx';
-import { SelectionOverlay, type View } from '../editor/SelectionOverlay.tsx';
+import { type SceneHandle } from '../editor/LayerCanvas.tsx';
+import { type View } from '../editor/SelectionOverlay.tsx';
 import { askToKeep } from '../studio/idb.ts';
 import * as H from '../editor/history.ts';
-import { duplicateLayer, newId, newLayer, stepOrder, updateStyle, type StepKind, type TextLayer } from '../editor/layers.ts';
-import { applyPreset } from '../editor/text-style.ts';
+import { duplicateLayer, newId, newLayer, stepOrder, type StepKind } from '../editor/layers.ts';
 import { parseSrt } from '../subtitles/srt.ts';
 import { translateTexts, type Script, type SourceLang } from '../subtitles/translate.ts';
 import { defaultTextStyle, layersFromCues } from './cue-layers.ts';
@@ -31,8 +18,7 @@ import type { ChangeMode, FrameStrip, ProjectChange, Selection, Transport } from
 import { exportVideo } from './export.ts';
 import { grabStrip } from './frames.ts';
 import { MODELS, type WhisperModel } from '../transcribe/models.ts';
-import { Elapsed } from '../transcribe/Elapsed.tsx';
-import { stageFraction, stageText, transcribeFile, type Deps, type Stage } from '../transcribe/run.ts';
+import { transcribeFile, type Deps, type Stage } from '../transcribe/run.ts';
 import {
   editLength, emptyProject, isAudio, isMedia, isText, sourceOf, trackOf,
   type AudioLayer, type Layer, type MediaLayer, type Source, type VideoProject as Project,
@@ -41,16 +27,14 @@ import { extractAudioLayer } from './audio.ts';
 import { freezeFrame, freezeSourceTime, insertFreeze } from './freeze.ts';
 import { autoKey, resolve } from './keyframes.ts';
 import { createSourceFiles, kindOfFile, probeSource } from './sources.ts';
-import { maxDuration } from './transitions.ts';
 import { defaultVideoStore, type VideoStore } from './store.ts';
-import { Timeline } from './Timeline.tsx';
 import { topTrack } from './timeline-math.ts';
 import { createTransport } from './transport.ts';
 import { createLiveClock } from './live-clock.ts';
 import { perfBump } from './perf.ts';
 import './editor.css';
 import './mobile-video.css';
-import { MIN_CLIP, length as clipLength, locate, removeClip, speedOf, splitAt, startOf, total, trim, type Clip } from './timeline.ts';
+import { MIN_CLIP, length as clipLength, removeClip, speedOf, splitAt, startOf, total, type Clip } from './timeline.ts';
 
 
 /** The longest side of the working frame: bigger videos are shown, and exported, at this size. */
@@ -843,9 +827,7 @@ export function useVideoEditor({ store = defaultVideoStore, makeTranscriber, dec
     sel,
     setSel,
     time,
-    setTime,
     playing,
-    setPlaying,
     muted,
     setMuted,
     volume,
@@ -853,13 +835,7 @@ export function useVideoEditor({ store = defaultVideoStore, makeTranscriber, dec
     voiceOver,
     setVoiceOver,
     voice,
-    voiceRef,
-    volumeRef,
-    mutedRef,
-    ducked,
     transportRef,
-    applyVolume,
-    voiceOverOn,
     lang,
     setLang,
     script,
@@ -869,13 +845,10 @@ export function useVideoEditor({ store = defaultVideoStore, makeTranscriber, dec
     error,
     setError,
     busy,
-    setBusy,
     exporting,
-    setExporting,
     typing,
     setTyping,
     strips,
-    setStrips,
     zoom,
     setZoom,
     snapping,
@@ -887,32 +860,19 @@ export function useVideoEditor({ store = defaultVideoStore, makeTranscriber, dec
     capModel,
     setCapModel,
     captioning,
-    setCaptioning,
     restoring,
-    setRestoring,
     restoreFailed,
-    setRestoreFailed,
     kept,
-    setKept,
     transport,
-    setTransport,
     joint,
     setJoint,
-    lib,
     active,
     incoming,
     setIncoming,
     scene,
     wrap,
     abort,
-    dragBase,
-    lastTick,
     capAbort,
-    writes,
-    grabbed,
-    stripCtl,
-    touched,
-    lastCommit,
     project,
     sources,
     clips,
@@ -932,7 +892,6 @@ export function useVideoEditor({ store = defaultVideoStore, makeTranscriber, dec
     textLayers,
     jointIndex,
     nowOf,
-    keyed,
     patchKeyed,
     shownText,
     onFrame,
@@ -950,12 +909,10 @@ export function useVideoEditor({ store = defaultVideoStore, makeTranscriber, dec
     orderSelected,
     clearAll,
     first,
-    firstVideoSrc,
     nothingToClear,
     freeze,
     extractSound,
     selSourceKind,
-    atPlayhead,
     canFreeze,
     addText,
     importSubtitles,
@@ -964,10 +921,7 @@ export function useVideoEditor({ store = defaultVideoStore, makeTranscriber, dec
     save,
     busyOut,
     liveClock,
-    onKeys,
-    keysRef,
     files,
-    reader,
   };
 }
 

@@ -145,7 +145,7 @@ export function PhonePreview({ ed }: { ed: VideoEditorState }) {
           onSelect={(id) => ed.setSel(id ? { kind: 'layer', id } : null)}
           onDrag={(id, x, y) => ed.change({ layers: ed.patchKeyed(ed.projectRef.current.layers, id, { x, y }) }, 'preview')}
           onDragEnd={() => ed.change({}, 'end')}
-          label="The video frame."
+          label="The video frame"
         />
         <div ref={surface} className="pv-gesture" aria-hidden="true" data-testid="preview-surface" />
         {mediaLayer && !typing && <PhoneBox ed={ed} layer={mediaLayer} frameEl={frameEl} />}

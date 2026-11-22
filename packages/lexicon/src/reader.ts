@@ -392,11 +392,6 @@ export class Lexicon {
     return [];
   }
 
-  /** All entries whose Russian gloss matches `word`. */
-  lookupRussian(word: string): Entry[] {
-    return this.lookupSource(word, 'ru');
-  }
-
   /** All entries whose gloss in this Slavic source language matches `word`. */
   lookupSource(word: string, lang: SlavicSource): Entry[] {
     return this.bySource.get(lang)?.get(normalizeSource(word, lang)) ?? [];

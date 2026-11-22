@@ -1,4 +1,5 @@
 import { Link } from '../router.tsx';
+import { Icon as LineIcon } from '../components/Icon.tsx';
 import { useLibrary } from '../studio/library.tsx';
 import { GROUPS, TOOLS, toolPath } from '../studio/tools.tsx';
 
@@ -67,7 +68,7 @@ export function StudioHome() {
           </label>
           {lib.items.map((i) => (
             <button key={i.id} type="button" className="ph-upload" aria-label={`Open ${i.file.name}`} onClick={() => lib.open(i)}>
-              {i.kind === 'image' ? <img src={i.url} alt="" /> : i.thumb ? <img src={i.thumb} alt="" /> : <span aria-hidden="true">{i.kind === 'audio' ? '♪' : '▶'}</span>}
+              {i.kind === 'image' ? <img src={i.url} alt="" /> : i.thumb ? <img src={i.thumb} alt="" /> : <LineIcon name={i.kind === 'audio' ? 'volumeOn' : 'play'} />}
             </button>
           ))}
         </div>

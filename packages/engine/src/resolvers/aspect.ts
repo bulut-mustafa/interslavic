@@ -467,9 +467,9 @@ export interface AspectOutcome {
   declined: string[];
 }
 
-export function resolveAspect(ctx: AspectContext, chain = ASPECT_CHAIN): AspectOutcome {
+export function resolveAspect(ctx: AspectContext): AspectOutcome {
   const declined: string[] = [];
-  for (const s of chain) {
+  for (const s of ASPECT_CHAIN) {
     const d = s.decide(ctx);
     if (d) return { decision: d, declined };
     declined.push(s.id);

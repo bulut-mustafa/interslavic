@@ -1,7 +1,5 @@
-import { decide, type Decision, type ParsedSentence, type UdToken } from '../../../types/index.ts';
-import type { Entry, Lexicon } from '../../../lexicon/src/reader.ts';
+import { type Decision, type ParsedSentence } from '../../../types/index.ts';
 import { planPreposition, type PrepPlan } from '../resolvers/preposition.ts';
-import { prepCaseFor } from '../../../rules/src/pronouns.ts';
 import { conjunctsOf } from '../tree.ts';
 
 export interface PrepositionPlan {
@@ -21,8 +19,6 @@ export interface PrepositionPlan {
  */
 export function planPrepositions(
   sentence: ParsedSentence,
-  lex: Lexicon,
-  phrasalVerbs: Map<number, Entry>,
   phrasalParticles: Set<number>,
 ): PrepositionPlan {
   // Must run before noun case resolution, because a preposition's government

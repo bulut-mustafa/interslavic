@@ -1,4 +1,5 @@
 import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent } from 'react';
+import { Icon } from '../../components/Icon.tsx';
 import type { LiveClock } from '../../video/live-clock.ts';
 import type { ChangeMode, FrameStrip, ProjectChange, Selection } from '../../video/contracts.ts';
 import { makeTileCache } from '../../video/frames.ts';
@@ -355,7 +356,7 @@ export function PhoneTimeline(props: PhoneTimelineProps) {
         <div ref={contentB} className="pv-tl-content" style={contentStyle}>
           {project.clips.slice(1).map((c, i) => (
             <button key={c.id} type="button" className={`pv-joint${c.transitionIn ? ' has-transition' : ''}`} style={{ left: px(startOf(project.clips, i + 1)), top: g.mainTop + MAIN_H / 2 - 22 }} aria-label={`Transition between clip ${i + 1} and clip ${i + 2}`} disabled={props.disabled} onClick={() => props.onTransition(c.id)}>
-              <span aria-hidden="true">{c.transitionIn ? '✕' : '+'}</span>
+              <Icon name={c.transitionIn ? 'close' : 'plus'} size="1rem" />
             </button>
           ))}
           {project.clips.length > 0 && (

@@ -23,9 +23,12 @@
     "audit:mobile": "node --experimental-strip-types scripts/mobile-audit.ts",
     "perf:boot": "node --experimental-strip-types --expose-gc scripts/perf/boot.ts",
     "perf:api": "python3 scripts/perf/api.py",
-    "dev": "npm run parser & npm run server & npm run web"
+    "dev": "npm run parser & npm run server & npm run web",
+    "e2e": "playwright test",
+    "e2e:ios": "playwright test --project=iphone-14 --project=iphone-se"
   },
   "devDependencies": {
+    "@playwright/test": "^1.49.1",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/react": "^16.3.3",
     "@types/node": "^22.10.2",

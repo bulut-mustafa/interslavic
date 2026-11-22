@@ -1,15 +1,12 @@
-import { decide, type ParsedSentence, type UdToken } from '../../../types/index.ts';
-import { realize } from '../../../morph/src/realize.ts';
+import { type ParsedSentence, type UdToken } from '../../../types/index.ts';
 import {
   auxiliaryRole,
-  conditionalAuxiliary,
-  futureAuxiliary,
   type AuxiliaryRole,
 } from '../../../rules/src/auxiliaries.ts';
 import { modalFor, type ModalPlan } from '../../../rules/src/modals.ts';
 import { personalPronounNumber } from '../../../rules/src/pronouns.ts';
 import type { SourceAdapter } from '../source/adapters.ts';
-import { baseDeprel, pronounLemmaFor, subjectNumber, subjectOfClause, subjectPerson } from '../tree.ts';
+import { baseDeprel, pronounLemmaFor, subjectOfClause } from '../tree.ts';
 
 interface FormPersonNumber {
   form: string;

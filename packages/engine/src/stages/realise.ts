@@ -1,11 +1,10 @@
 import { adapterFor } from '../source/adapters.ts';
-import { decide, type Decision } from '../../../types/index.ts';
+import { decide } from '../../../types/index.ts';
 import { realize } from '../../../morph/src/realize.ts';
 import { compared, type Degree } from '../../../morph/src/comparison.ts';
 import { pastPassiveParticiple, pastActiveParticiple, presentActiveParticiple } from '../../../morph/src/participles.ts';
-import { conditionalAuxiliary, futureAuxiliary } from '../../../rules/src/auxiliaries.ts';
-import { isOneAnaphor, antecedentOf } from '../../../rules/src/anaphora.ts';
-import { isExpletiveSubject } from '../../../rules/src/expletives.ts';
+import { conditionalAuxiliary } from '../../../rules/src/auxiliaries.ts';
+import { isOneAnaphor } from '../../../rules/src/anaphora.ts';
 import { splitMultiword } from '../../../lexicon/src/steen/split-lemmas.ts';
 import { REFLEXIVE_PRONOUN } from '../../../rules/src/reflexives.ts';
 import { phraseOf, subjectOfClause } from '../tree.ts';
@@ -40,13 +39,12 @@ function keepNameCapital(token: UdToken, sentence: ParsedSentence, surface: stri
 
 export function realiseStage(input: RealiseInput): RealiseOutput {
   const {
-    sentence, lex, opts, orth, plan, dropped, punctuation,
+    sentence, lex, opts, plan, dropped, punctuation,
     prepPlans, insertedPrepositions, pendingPrepositions, prepositionTargets,
-    insertedCopulas, pastAuxiliaries, futureForms, imperatives, optativeVerbs,
+    insertedCopulas, pastAuxiliaries, futureForms,
     optativeMarkers, finitePurposeMarks, purposeClauses, needsReflexiveClitic,
-    phrasalParticles, phrasalVerbs, negatedVerbs,
+    negatedVerbs,
   } = input;
-  void punctuation;
 
   /**
    * A yes/no question keeps declarative word order. The syntax page gives

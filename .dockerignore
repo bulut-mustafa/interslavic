@@ -12,3 +12,6 @@ packages/lexicon/data/built
 
 # generated from the dictionary at build time
 packages/rules/data/preposition-government.json
+e2e
+docs
+graphify-out
