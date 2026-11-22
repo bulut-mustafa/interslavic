@@ -16,6 +16,7 @@ export function planVerbGovernment(
   rankedFor: (t: UdToken, aspect: AspectOutcome | null) => Entry[],
   needsVerbFeatures: (t: UdToken) => boolean,
   lex: Lexicon,
+  phrasalVerbs: Map<number, Entry>,
 ): Map<number, VerbGovernment> {
   // 45 dictionary entries state the case their complement takes, in the same
   // numeric code the prepositions use:
@@ -30,7 +31,8 @@ export function planVerbGovernment(
 
   for (const token of sentence.tokens) {
     if (!needsVerbFeatures(token)) continue;
-    const entry = rankedFor(token, resolveAspect({ token, sentence, lex }))[0];
+    // The lexeme stage writes a phrasal verb's own entry first, so its code governs.
+    const entry = phrasalVerbs.get(token.id) ?? rankedFor(token, resolveAspect({ token, sentence, lex }))[0];
     const governs = entry?.addition.governs;
     if (!entry || !governs) continue;
 

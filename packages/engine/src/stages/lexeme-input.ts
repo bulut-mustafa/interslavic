@@ -48,8 +48,7 @@ export interface LexemeInput {
   futureAuxToken: Map<number, number>;
   conditionalVerbs: Set<number>;
   purposeClauses: Map<number, PersonNumber>;
-  finitePurposeMarks: Map<number, PersonNumber>;
-  finitePurposeCarriers: Set<number>;
+  finitePurposeCarriers: Map<number, PersonNumber>;
   imperatives: Map<number, PersonNumber>;
   optativeVerbs: Map<number, { number: string }>;
   modalPlans: Map<number, ModalPlan>;

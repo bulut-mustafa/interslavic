@@ -41,3 +41,37 @@ describe('a number in digits', () => {
     expect(t.unknown.filter((u) => /^\d/.test(u))).toEqual([]);
   });
 });
+
+describe('a completive cue in the present', () => {
+  // aspect.ts's own rule: a perfective present reads as a future, so an
+  // English present is imperfective. "finally" ran first and overrode it.
+  it('does not make the present perfective', () => {
+    expect(result('en/i-finally-understand-you.conllu').text).toBe('Ja konečno razuměju vas.');
+  });
+  it('still makes a past perfective', () => {
+    expect(result('en/she-already-read-the-book.conllu').text).toBe('Ona už pročitala knigu.');
+  });
+});
+
+describe('the copula a Russian source omits', () => {
+  // Same rule subjectNumber applies to a finite verb: two subjects joined by "and" are plural.
+  it('is plural for subjects joined by "and"', () => {
+    expect(result('ru/moj-brat-i-moja-sestra-vrachi.conllu').text).toBe('Moj brat i moja sestra sut lěkari.');
+  });
+});
+
+describe('two purpose clauses', () => {
+  // Each takes its own subject's person and number; the second used to copy the first's.
+  it('agree each with their own subject', () => {
+    expect(result('en/two-purpose-clauses.conllu').text).toBe(
+      'Ona rabotaje, da byhmo my mogli odpočivati, i ja uču se, da by ona byla ščestliva.',
+    );
+  });
+});
+
+describe('negative concord', () => {
+  // Only the indefinites switch to ni- (syntax page); "něžny" is not one.
+  it('leaves an adjective that merely starts with ně- alone', () => {
+    expect(result('en/he-is-not-tender.conllu').text).toBe('On ne jest něžny.');
+  });
+});

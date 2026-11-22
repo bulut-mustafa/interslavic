@@ -114,10 +114,10 @@ export const STAGES: readonly StageSpec[] = [
   {
     phase: '0d',
     name: 'planVerbGovernment',
-    // Shares `rankedFor` with the lexeme stage on purpose: both must agree on
-    // WHICH verb was chosen, or the case comes from a different lexeme than
-    // the one that gets written.
-    reads: ['sentence', 'rankedFor', 'needsVerbFeatures'],
+    // Shares `rankedFor` and `phrasalVerbs` with the lexeme stage on purpose:
+    // both must agree on WHICH verb was chosen, or the case comes from a
+    // different lexeme than the one that gets written.
+    reads: ['sentence', 'rankedFor', 'needsVerbFeatures', 'phrasalVerbs'],
     writes: ['verbGovernedCase'],
   },
   {
@@ -142,7 +142,6 @@ export const STAGES: readonly StageSpec[] = [
       'futureAuxToken',
       'conditionalVerbs',
       'purposeClauses',
-      'finitePurposeMarks',
       'finitePurposeCarriers',
       'imperatives',
       'optativeVerbs',
@@ -157,7 +156,9 @@ export const STAGES: readonly StageSpec[] = [
       'needsVerbFeatures',
       'rankedFor',
     ],
-    writes: ['plan', 'byTokenId'],
+    // planAuxiliaries creates futureForms and conditionalVerbs empty; this
+    // stage is what fills them, so a reader must come after it.
+    writes: ['plan', 'byTokenId', 'futureForms', 'conditionalVerbs'],
   },
   {
     phase: 'B1',

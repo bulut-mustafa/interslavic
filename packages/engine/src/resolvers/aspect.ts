@@ -84,7 +84,8 @@ const adverbialCue: AspectStrategy = {
       if (IMPERFECTIVE_CUES.includes(lem)) {
         return decide<Aspect>('Imp', 'aspect.adverbial.imp', 'high', `habitual/durative cue "${d.form}"`);
       }
-      if (PERFECTIVE_CUES.includes(lem)) {
+      // Never in the present: a perfective present reads as a future (tenseCue).
+      if (PERFECTIVE_CUES.includes(lem) && effectiveTense(token, sentence) !== 'Pres') {
         return decide<Aspect>('Perf', 'aspect.adverbial.perf', 'high', `completive cue "${d.form}"`);
       }
     }

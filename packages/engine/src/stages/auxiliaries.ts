@@ -52,8 +52,8 @@ export interface AuxiliaryPlan {
   purposeClauses: Map<number, PersonNumber>;
   /** Mark token id -> person and number, where the purpose clause is finite. */
   finitePurposeMarks: Map<number, PersonNumber>;
-  /** The verbs those finite purpose marks belong to. */
-  finitePurposeCarriers: Set<number>;
+  /** The verbs those finite purpose marks belong to -> that clause's person and number. */
+  finitePurposeCarriers: Map<number, PersonNumber>;
   /** Verb id -> the person and number of its imperative. */
   imperatives: Map<number, PersonNumber>;
   /** Optative marker token id -> the verb it marks ("let him read"). */
@@ -136,7 +136,7 @@ export function planAuxiliaries(
    */
   const finitePurposeMarks = new Map<number, { person: string; number: string }>();
   /** The token that carries the conditional in a finite final clause. */
-  const finitePurposeCarriers = new Set<number>();
+  const finitePurposeCarriers = new Map<number, PersonNumber>();
   /**
    * The optative: "When such a form is needed, the optative particle nehaj is
    * used: Nehaj umre! 'Let him die!' / Nehaj žive dolgo! 'May he live long!'"
@@ -460,7 +460,7 @@ export function planAuxiliaries(
       }
       finitePurposeMarks.set(mark.id, agreement);
       const copula = sentence.tokens.find((t) => t.head === token.id && t.deprel === 'cop');
-      finitePurposeCarriers.add(copula?.id ?? token.id);
+      finitePurposeCarriers.set(copula?.id ?? token.id, agreement);
     }
   }
 
@@ -504,7 +504,7 @@ export function planAuxiliaries(
       // "da by děti mogli učiti se", the verb staying an infinitive.
       const copula = sentence.tokens.find((t) => t.head === token.id && t.deprel === 'cop');
       const modal = sentence.tokens.find((t) => t.head === token.id && t.deprel === 'aux' && modalPlans.has(t.id));
-      finitePurposeCarriers.add(modal?.id ?? copula?.id ?? token.id);
+      finitePurposeCarriers.set(modal?.id ?? copula?.id ?? token.id, agreement);
 
       /**
        * "will" is replaced by the conditional, and a fixed "that" rides along

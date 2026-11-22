@@ -69,7 +69,7 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
     phrasalVerbs, phrasalParticles,
     prepPlans, governedCase, deletedPreps,
     droppedAux, auxFeatsForHead, auxRoleForHead, futureForms, futureAuxToken,
-    conditionalVerbs, purposeClauses, finitePurposeMarks, finitePurposeCarriers,
+    conditionalVerbs, purposeClauses, finitePurposeCarriers,
     imperatives, optativeVerbs, modalPlans, modalOfHead, analyticSuperlatives,
     negationParticles, verbGovernedCase,
     contextWords,
@@ -459,7 +459,9 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
      */
     let negativeEntry: Entry | undefined;
     const rankedFirst = ranked[0];
-    if (sentence.lang === 'en' && rankedFirst && inNegatedClause(token)) {
+    // English "any"-words are pronouns, determiners and adverbs; "tender" is
+    // not an indefinite, though its Interslavic "něžny" starts like one.
+    if (sentence.lang === 'en' && rankedFirst && ['PRON', 'DET', 'ADV'].includes(token.upos) && inNegatedClause(token)) {
       for (const counterpart of negativeCounterparts(rankedFirst.lemma, toStandard)) {
         const hits = lex.lookupLemma(counterpart);
         negativeEntry = hits.find((e) => e.pos.upos === rankedFirst.pos.upos) ?? hits[0];
@@ -1160,8 +1162,8 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
         continue;
       }
 
-      if (finitePurposeCarriers.has(token.id)) {
-        const agreement = [...finitePurposeMarks.values()][0] ?? { person: '3', number: 'Sing' };
+      const agreement = finitePurposeCarriers.get(token.id);
+      if (agreement) {
         conditionalVerbs.add(token.id);
         feats.set('VerbForm', decide('Fin', 'verbform.finite', 'certain', 'finite verb'));
         feats.set(

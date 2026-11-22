@@ -1,5 +1,5 @@
 import { realize } from '../../../morph/src/realize.ts';
-import { phraseOf, subjectPerson } from '../tree.ts';
+import { isCoordinatedByAnd, phraseOf, subjectPerson } from '../tree.ts';
 import type { StageContext } from './context.ts';
 
 /**
@@ -58,7 +58,10 @@ export function copulaStage(ctx: StageContext): void {
       if (!subject && sentence.tokens.some((t) => t.head === node.token.id && t.deprel === 'case') &&
           !sentence.tokens.some((t) => t.head === node.token.id && !['case', 'punct'].includes(t.deprel))) continue;
       const person = subject ? subjectPerson(node.token, sentence) : '3';
-      const number = subject?.feats.get('Number')?.value ?? 'Sing';
+      // "Иван и Мария студенты": two subjects joined by "and" are plural, as in subjectNumber.
+      const number = subject && isCoordinatedByAnd(subject.token, sentence)
+        ? 'Plur'
+        : subject?.feats.get('Number')?.value ?? 'Sing';
       const cop = realize({
         lemma: 'byti',
         xpos: 'v.intr. ipf.',

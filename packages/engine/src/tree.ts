@@ -74,7 +74,7 @@ function pronounLemmaFor(
  * sporili se" (van Steenbergen's North Wind and the Sun), where reading the
  * first conjunct alone gave the singular "osparjal".
  */
-const isCoordinatedByAnd = (subject: UdToken, sentence: ParsedSentence): boolean => {
+export const isCoordinatedByAnd = (subject: UdToken, sentence: ParsedSentence): boolean => {
   const and = adapterFor(sentence).andWords;
   return sentence.tokens.some(
     (c) =>
