@@ -101,7 +101,8 @@ export const STAGES: readonly StageSpec[] = [
     name: 'planNegation',
     // `ne` precedes the MODAL where there is one ("ne mogu čitati"), so the
     // modal plans have to exist before the negation can be placed.
-    reads: ['sentence', 'modalOfHead'],
+    // A "not" a dictionary phrase absorbed ("not good" -> nedobry) is not negated again.
+    reads: ['sentence', 'modalOfHead', 'phrasalParticles'],
     writes: ['negationParticles', 'negatedVerbs', 'negatedClauses'],
   },
   {

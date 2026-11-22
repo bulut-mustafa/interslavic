@@ -223,7 +223,7 @@ export function translate(
   } = planAuxiliaries(sentence, adapter, personOf);
 
   // ---- Phase 0c: negation -------------------------------------------------
-  const { negationParticles, negatedVerbs, negatedClauses } = planNegation(sentence, modalOfHead);
+  const { negationParticles, negatedVerbs, negatedClauses } = planNegation(sentence, modalOfHead, phrasalParticles);
 
   /**
    * `aux:pass` is the passive "be", and like an ordinary copula it has to

@@ -106,3 +106,19 @@ describe('a note in parentheses in a dictionary headword', () => {
     expect(result('en/tomorrow-we-will-attack-again.conllu').text).toBe('Zautra my budemo naskakati opet.');
   });
 });
+
+describe('English "no" before a noun', () => {
+  // "nikoj, nijedin and nikaky „not a single, none”" (pronouns page), with ne on
+  // the verb: "Ja uže nikogda ne budu čitati nijednu knigu!" (syntax page).
+  it('is nijedin, not a second ne', () => {
+    expect(result('en/there-are-no-heroes-in-war.conllu').text).toBe('Ne sut nijedni heroji v vojně.');
+  });
+});
+
+describe('a "not" that a dictionary phrase takes in', () => {
+  // "not good" is the dictionary's own nedobry ("bad, not good"); the
+  // negation stage added a second ne: "ale ne nedobro".
+  it('is not negated a second time', () => {
+    expect(result('en/not-good-enough.conllu').text).toBe('Ono jest dobro, ale nedobro dostatočno.');
+  });
+});

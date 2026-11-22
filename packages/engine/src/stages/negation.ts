@@ -19,6 +19,7 @@ export interface NegationPlan {
 export function planNegation(
   sentence: ParsedSentence,
   modalOfHead: Map<number, number>,
+  phrasalParticles: Set<number>,
 ): NegationPlan {
   // Interslavic requires `ne` immediately before the verb, AND requires it even
   // when a negative word is already present - negative concord:
@@ -46,6 +47,9 @@ export function planNegation(
         token.upos === 'PART' && (token.feats['Polarity'] === 'Neg' || token.lemma === 'not');
       const isNegativeWord = token.feats['PronType'] === 'Neg';
       if (!isParticle && !isNegativeWord) continue;
+      // A dictionary phrase that took the "not" in carries the negation itself:
+      // "not good" is `nedobry`, and a second `ne` gave "ne nedobro".
+      if (phrasalParticles.has(token.id)) continue;
 
       // Negate the copula when the predicate has one, else the head itself.
       let head = sentence.tokens.find((t) => t.id === token.head);

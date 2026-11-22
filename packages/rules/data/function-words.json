@@ -449,6 +449,16 @@
       "why": "the Ukrainian 'and' (sense 1, a synonym of і/й); the dictionary lists 'та' under i, a and ale alike and ranked `a` ('and, but') first, so 'Том та Мері' was 'Tom a Meri'",
       "evidence": "wiktionary-uk: 'та ... Conjunction: and, also, even; synonyms: і, й' (sense 2 'but' is listed second). steenbergen-conjunctions: 'a „and, but” ... i „and”'",
       "source": "steenbergen-conjunctions"
+    },
+    {
+      "en": "no",
+      "upos": [
+        "DET"
+      ],
+      "isv": "nijedin",
+      "why": "the negative determiner before a noun ('no heroes', 'no time'); with ne on the verb, since Interslavic negates every negatable word. It came out as a second 'ne': 'Ne sut ne heroji'",
+      "evidence": "steenbergen-pronouns: 'nikoj, nijedin and nikaky „not a single, none”'; steenbergen-syntax: 'Ja uže nikogda ne budu čitati nijednu knigu!' (lit. 'I will never not read no book anymore')",
+      "source": "steenbergen-pronouns"
     }
   ]
 }
