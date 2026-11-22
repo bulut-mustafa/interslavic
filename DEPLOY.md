@@ -38,8 +38,10 @@ after 60 seconds, so a cold start longer than that shows the visitor an error.
 holds. The English tagger is bigger, and since the parser was started in the
 background it got a throttled CPU after the port opened: 3 to 7 minutes before it
 answered. `deploy/start.sh` now waits for the parser, and loads the models, before
-the engine opens its port (the container then has full startup CPU). Time the first
-request after a deploy and record the result here.
+the engine opens its port (the container then has full startup CPU). Measured on
+revision 00031 (2026-11-22): instance start to port open 56 s (parser ready after 21 s),
+and the first English request 2 s, down from 3 to 7 minutes and 16 s. That is close to
+Firebase's 60 s limit, so a cold start is a long wait but no longer an error.
 **Keep-warm:** Cloud Scheduler job `interslavic-keep-warm` calls `/api/health` every 10
 minutes so the instance does not scale to zero. It cannot stop Cloud Run from
 replacing the instance (logs show a new one every 1 to 3 days) or a deploy from
