@@ -54,37 +54,6 @@ import { rewriteSource } from '../../rules/src/source-rewrites.ts';
 
 export type { GlossedFeature, GlossedWord, RuleCitation, Translation } from './result.ts';
 
-/**
- * Grammatical person, taken from the SUBJECT rather than from the verb or its
- * auxiliary.
- *
- * English auxiliaries are an unreliable source and Stanza demonstrably errs on
- * them: in "Where did father buy that book?" it tags `did` as Person=2, which
- * produced "Kde otec jesi kupil..." - a 2nd-person auxiliary for a 3rd-person
- * subject. A nominal subject is 3rd person by definition, so the subject is
- * both simpler and safer.
- */
-
-
-/**
- * Grammatical number for a verb, taken from its SUBJECT - the same argument as
- * `subjectPerson`, and for two concrete reasons:
- *
- *  - a subject pronoun's number is a property of the Interslavic lemma, not of
- *    the English word: "you" is unmarked, but `vy` is plural, so "You see me"
- *    needs `vidite` and not `vidiš`;
- *  - a plural NOMINAL subject often leaves the English verb unmarked, so
- *    reading the verb's own features made "The women read books" singular.
- */
-
-
-/**
- * The base of a UD relation, without its subtype: `nummod:gov` -> `nummod`.
- * Russian uses subtypes where English does not, and an exact comparison made
- * the numeral phase skip Russian entirely - "два брата" kept the Russian
- * paucal genitive and the numeral never agreed in gender ("dvě brata").
- */
-
 /** A passive clause, where the patient is the subject rather than an object. */
 function isPassiveClause(verb: UdToken, sentence: ParsedSentence): boolean {
   if (verb.feats['Voice'] === 'Pass') return true;
@@ -151,12 +120,6 @@ export function translate(
   const adapter = adapterFor(sentence);
   const dropped: Translation['dropped'] = [...absorbed];
   const unknown: string[] = [];
-
-  /**
-   * The subject of the clause a token sits in, found by walking up to a verb
-   * that has one. Needed for `svoj`, which depends on whether the possessor
-   * IS the subject.
-   */
 
   /**
    * True when this token sits in a clause whose verb is negated, found by
@@ -273,20 +236,6 @@ export function translate(
     t.upos === 'VERB' || isCopula(t) || modalPlans.has(t.id);
 
   /**
-   * Rank this token's dictionary candidates. Factored out so Phase 0d and
-   * Phase A cannot drift: both must agree on WHICH verb was chosen, or a
-   * government code would be read off a lexeme we did not actually use.
-   */
-  /**
-   * The lemma to look up, with a fused reflexive clitic removed. Stanza
-   * lemmatises "читается" as `читаться`, which is no dictionary headword, so
-   * the word came through untranslated; the base verb is, and Interslavic
-   * writes the clitic as a separate `se`.
-   *
-   * Only applied when stripping actually finds a verb, so a lemma that merely
-   * ends in those letters is left alone.
-   */
-  /**
    * An English "-ly" adverb the dictionary does not list, reached through its
    * adjective: "Adverbs can be derived from adjectives by using the ending -o
    * (-e after a soft consonant). In other words, they are identical to the
@@ -305,6 +254,15 @@ export function translate(
     return null;
   };
 
+  /**
+   * The lemma to look up, with a fused reflexive clitic removed. Stanza
+   * lemmatises "читается" as `читаться`, which is no dictionary headword, so
+   * the word came through untranslated; the base verb is, and Interslavic
+   * writes the clitic as a separate `se`.
+   *
+   * Only applied when stripping actually finds a verb, so a lemma that merely
+   * ends in those letters is left alone.
+   */
   const lookupLemmaOf = (token: UdToken): string => {
     /**
      * A plural noun whose OWN form the dictionary glosses is looked up by that
@@ -517,9 +475,15 @@ export function translate(
     return [...ranked.filter(governs), ...ranked.filter((e) => !governs(e))];
   };
 
-  const rankedFor = (token: UdToken, aspect: AspectOutcome | null): Entry[] =>
-    byGovernedCase(token, rank(candidatesFor(token), {
-      upos: rankAs(token, candidatesFor(token)),
+  /**
+   * Rank this token's dictionary candidates. Factored out so Phase 0d and
+   * Phase A cannot drift: both must agree on WHICH verb was chosen, or a
+   * government code would be read off a lexeme we did not actually use.
+   */
+  const rankedFor = (token: UdToken, aspect: AspectOutcome | null): Entry[] => {
+    const candidates = candidatesFor(token);
+    return byGovernedCase(token, rank(candidates, {
+      upos: rankAs(token, candidates),
       gloss: lookupLemmaOf(token),
       lang: sentence.lang,
       sourceIsSingleWord: !/\s/.test(token.form.trim()),
@@ -551,6 +515,7 @@ export function translate(
         : {}),
       ...(aspect ? { aspect: aspect.decision.value } : {}),
     }));
+  };
 
   // ---- Phase 0d: verb government ----------------------------------------
   const verbGovernedCase = planVerbGovernment(sentence, rankedFor, needsVerbFeatures, lex, phrasalVerbs);

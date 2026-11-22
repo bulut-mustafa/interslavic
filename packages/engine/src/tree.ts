@@ -52,6 +52,12 @@ export function phraseOf(rootId: number, sentence: ParsedSentence): Set<number> 
   return out;
 }
 
+/**
+ * The base of a UD relation, without its subtype: `nummod:gov` -> `nummod`.
+ * Russian uses subtypes where English does not, and an exact comparison made
+ * the numeral phase skip Russian entirely - "два брата" kept the Russian
+ * paucal genitive and the numeral never agreed in gender ("dvě brata").
+ */
 export function baseDeprel(deprel: string): string {
   return deprel.split(':')[0] ?? deprel;
 }
@@ -111,6 +117,16 @@ export function isImpersonalSlavicPast(verb: UdToken, sentence: ParsedSentence):
   return !sentence.tokens.some((t) => (t.head === clause || t.head === verb.id) && t.deprel.startsWith('nsubj'));
 }
 
+/**
+ * Grammatical number for a verb, taken from its SUBJECT - the same argument as
+ * `subjectPerson`, and for two concrete reasons:
+ *
+ *  - a subject pronoun's number is a property of the Interslavic lemma, not of
+ *    the English word: "you" is unmarked, but `vy` is plural, so "You see me"
+ *    needs `vidite` and not `vidiš`;
+ *  - a plural NOMINAL subject often leaves the English verb unmarked, so
+ *    reading the verb's own features made "The women read books" singular.
+ */
 export function subjectNumber(verb: UdToken, sentence: ParsedSentence, fallback?: string): string {
   const own = ownRussianAgreement(verb, sentence, 'Number');
   if (own) return own;
@@ -128,6 +144,16 @@ export function subjectNumber(verb: UdToken, sentence: ParsedSentence, fallback?
   return fallback ?? verb.feats['Number'] ?? 'Sing';
 }
 
+/**
+ * Grammatical person, taken from the SUBJECT rather than from the verb or its
+ * auxiliary.
+ *
+ * English auxiliaries are an unreliable source and Stanza demonstrably errs on
+ * them: in "Where did father buy that book?" it tags `did` as Person=2, which
+ * produced "Kde otec jesi kupil..." - a 2nd-person auxiliary for a 3rd-person
+ * subject. A nominal subject is 3rd person by definition, so the subject is
+ * both simpler and safer.
+ */
 export function subjectPerson(verb: UdToken, sentence: ParsedSentence): string {
   const own = ownRussianAgreement(verb, sentence, 'Person');
   if (own) return own;

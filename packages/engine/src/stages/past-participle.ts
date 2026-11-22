@@ -39,7 +39,6 @@ export function pastParticipleStage(ctx: StageContext): void {
     const gender =
       subject?.feats.get('Gender')?.value ??
       subject?.token.feats['Gender'] ??
-      (!subject && sentence.lang !== 'en' ? node.token.feats['Gender'] : undefined) ??
       // A pronoun of the first or second person has no gender, but the Slavic
       // verb states the speaker's: "Скільки пива ти купила?" is feminine, as the
       // verbs page writes "jesm byl(a)"; the masculine default gave "kupil".

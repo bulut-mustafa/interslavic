@@ -202,7 +202,7 @@ export function realiseStage(input: RealiseInput): RealiseOutput {
    * the word before it is not one. English only: a Slavic source writes these
    * commas itself, and they are carried over. Only a real clause (a verb or a
    * copula) opened by a conjunction or by "when"/"where", which UD tags
-   * `advmod`; a purpose infinitive has its own comma (commaBeforeFinalClause).
+   * `advmod`; a purpose infinitive has its own comma.
    */
   const adverbialOpeners = new Set<number>();
   const adverbialClosers = new Set<number>();
@@ -259,14 +259,6 @@ export function realiseStage(input: RealiseInput): RealiseOutput {
     if (lastWord) lastWord.surface += mark;
   };
   const appendComma = (): void => appendPunctuation(',');
-
-  /**
-   * A final clause is set off by a comma. No page states the rule outright,
-   * but all four of the syntax page's own examples write one:
-   *   "Turisti posětet Niderlandiju, že by fotografovali tulipany."
-   *   "Ona prinosi jabloka, da by děti byli zdrave."
-   */
-  const commaBeforeFinalClause = appendComma;
 
   /**
    * The source's own commas, carried over like its final punctuation rather
@@ -444,7 +436,11 @@ export function realiseStage(input: RealiseInput): RealiseOutput {
 
     const purposeAt = purposeClauses.get(token.id);
     if (purposeAt) {
-      commaBeforeFinalClause();
+      // A final clause is set off by a comma. No page states the rule
+      // outright, but all four of the syntax page's own examples write one:
+      // "Turisti posětet Niderlandiju, že by fotografovali tulipany."
+      // "Ona prinosi jabloka, da by děti byli zdrave."
+      appendComma();
       const particle = conditionalAuxiliary(purposeAt.person, purposeAt.number);
       for (const [form, lemma, why] of [
         ['že', 'že', 'a final clause is introduced by "že" or "da"'],
@@ -482,7 +478,7 @@ export function realiseStage(input: RealiseInput): RealiseOutput {
 
     const finiteMark = finitePurposeMarks.get(token.id);
     if (finiteMark) {
-      commaBeforeFinalClause();
+      appendComma();
       const particle = conditionalAuxiliary(finiteMark.person, finiteMark.number);
       for (const [form, lemma, why] of [
         ['da', 'da', 'a final clause is introduced by "že" or "da"'],
