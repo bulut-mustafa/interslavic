@@ -31,10 +31,25 @@ node --experimental-strip-types packages/eval/scripts/score-gold.ts         # me
 node --experimental-strip-types packages/eval/scripts/score-tatoeba.ts held # real-world sentences
 ```
 
-`score-tatoeba.ts` scores Tatoeba sentences that carry an attested Interslavic
-translation, which nobody chose to suit the rules. Tune on `tune` (add `--misses` to
-see them); report on `held`, which no fix may look at. The references vary freely
-("je"/"jest"), so word F1 is the measure, and exact match is only a floor.
+`score-tatoeba.ts` scores 1,023 English and 189 Russian Tatoeba sentences against
+every attested Interslavic translation they have (1,945 references). Nobody chose these
+sentences to suit the rules.
+- **Tune and held:** look at `tune` (add `--misses`); report `held`, which no fix may
+  look at.
+- **The main number is chrF**, computed exactly as sacrebleu 2.4.3's default
+  (`scripts/metrics.ts`). It agreed with sacrebleu on every sentence of the sample.
+  Exact match and word F1 stay beside it. A change counts only if it does not lower them.
+- **Did a change help?** Save a run before it (`--save before.jsonl`), then run
+  `--compare before.jsonl` after it. That is a paired bootstrap (Koehn 2004) and prints
+  the difference with a 95% interval. "no significant change" means the interval
+  crosses 0. On English the interval is about ±0.2 chrF; on Russian it is about ±0.5,
+  because the sample is small. `data/tatoeba/baseline-{tune,held}.jsonl` hold the runs
+  of 2026-11-22.
+- **What the score measures:** two people wrote 94% of the references, so it is
+  agreement with their style. No human ceiling can be computed: only one sentence has
+  translations by two different people.
+- **Rebuilding the sample:** `python3 -I packages/eval/scripts/build-tatoeba.py
+  <folder of Tatoeba exports>`. Then re-freeze the parses with `to_conllu`.
 
 It found two real defects the full-form validator could not: a Cyrillic rule that took a
 documented fallback we were not entitled to, and plurale tantum nouns that never

@@ -303,3 +303,39 @@ forms, and the curated entry picks the declinable one.
   auxiliary is not better.
 - "you" stays `vy`, where most Tatoeba references write `ty`. That is the adapter's
   documented choice.
+
+## 2026-11-22 · A real-world measure that can show progress
+
+The 150 + 150 sample above was too small to read: one held-out sentence was 1.3%. It
+had one reference per sentence, and it used word F1 only.
+
+**VERIFIED.**
+- **The sample** is now 1,023 English and 189 Russian sentences with all 1,945
+  references, Cyrillic ones included (read through `fromCyrillic`/`toStandard`).
+- **The 300 old pairs kept their split.** New ones are split by a hash of their id.
+- **chrF matches sacrebleu 2.4.3:** on all 1,212 sentences, every per-order statistic
+  and both corpus scores agree.
+- **The cross-check found one bug in my first version:** sacrebleu counts no hypothesis
+  n-grams for an order that the reference is too short for. Fixed, and unit-tested.
+- **The bootstrap** gives exactly 0 ± 0 for a run against itself.
+
+**Found about the data.**
+- **Two people wrote 94% of the references** (1,286 and 846 of 2,265 sentences).
+- **Most "multiple references" are one author's variants:** a Latin and a Cyrillic copy,
+  or "byl"/"byla". Only one test sentence has translations by two different people, so
+  a human ceiling cannot be measured here.
+- **Register:** 33 sentences use `vy` where every reference uses `ty`. The pronouns page
+  makes `vy` the universal form, so these count as register, not error.
+
+**Baseline** (`data/tatoeba/baseline-*.jsonl`):
+
+| | sentences | chrF | exact | word F1 |
+|---|---|---|---|---|
+| en tune | 497 | 65.4 | 28.6% | .677 |
+| en held | 526 | 64.6 | 26.2% | .667 |
+| ru tune | 97 | 72.9 | 37.1% | .770 |
+| ru held | 92 | 80.6 | 48.9% | .820 |
+
+**The first pass, re-measured** (old engine against current, same parses): en held chrF
+−0.02 [−0.19, 0.14], ru held −0.19 [−0.65, 0.00]. No significant change, which agrees
+with the earlier reading: it fixed failures, not everyday quality.

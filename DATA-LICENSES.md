@@ -57,9 +57,9 @@ that licence and their source links.
 Sentences from [Tatoeba](https://tatoeba.org) in the test fixtures, lessons and
 phrasebook, each with its sentence ID,
 [CC BY 2.0 FR](https://creativecommons.org/licenses/by/2.0/fr/). The real-world
-score sample (`packages/eval/data/tatoeba/pairs.json`) is 150 English and 150
-Russian sentences with their linked Interslavic translations; each pair's `id`
-is `<source sentence ID>-<Interslavic sentence ID>`.
+score sample (`packages/eval/data/tatoeba/pairs.json`) is 1,023 English and 189
+Russian sentences, each with every linked Interslavic translation and its
+author's Tatoeba username; each entry's `id` is the source sentence ID.
 
 ## Ukrainian texts
 
