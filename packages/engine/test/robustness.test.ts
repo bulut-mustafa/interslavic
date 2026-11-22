@@ -75,3 +75,34 @@ describe('negative concord', () => {
     expect(result('en/he-is-not-tender.conllu').text).toBe('On ne jest něžny.');
   });
 });
+
+describe('a Russian first person plural under a conjunction', () => {
+  // Steenbergen's Babel text keeps the main-clause verbs imperative ("budujmo",
+  // "izdělajmo") and the subordinate one not ("da byhmo ne razprostranili se").
+  it('is a future, not "let us", and keeps its reflexive', () => {
+    const text = result('ru/babel-4.conllu').text;
+    expect(text).toContain('sbudujmo sobě grad');
+    expect(text).toContain('prědže než razsějemo se po');
+  });
+});
+
+describe('a numeral counting nothing', () => {
+  // "0. nula, 1. jedin (jedna, jedno), 2. dva (dvě), 3. tri" (numerals page).
+  it('takes the citation form dva, not the dictionary\'s "(dvě)"', () => {
+    expect(result('en/one-two-three.conllu').text).toBe('Jedin, dva, tri.');
+  });
+});
+
+describe('a verb whose only candidates are nouns', () => {
+  it('is kept and flagged, not written as the noun', () => {
+    const t = result('en/i-miss-the-army.conllu');
+    expect(t.text).toBe('Ja miss armiju.');
+    expect(t.words.find((w) => w.sourceForm === 'miss')?.validation).toBe('untranslated');
+  });
+});
+
+describe('a note in parentheses in a dictionary headword', () => {
+  it('is not written out', () => {
+    expect(result('en/tomorrow-we-will-attack-again.conllu').text).toBe('Zautra my budemo naskakati opet.');
+  });
+});

@@ -13,7 +13,8 @@ import type { Entry } from '../../../lexicon/src/reader.ts';
 function headwordGender(entry: Entry): string | undefined {
   const genders = new Set(
     paradigm(entry.lemma, entry.pos.xpos)
-      .filter((t) => t.form === entry.lemma && t.feats?.['Case'] === 'Nom' && t.feats?.['Number'] === 'Sing')
+      // A cardinal's forms carry no Number: "dva" is Case=Nom|Gender=Masc.
+      .filter((t) => t.form === entry.lemma && t.feats?.['Case'] === 'Nom' && (t.feats?.['Number'] ?? 'Sing') === 'Sing')
       .map((t) => t.feats?.['Gender'])
       .filter((g): g is string => g !== undefined),
   );
@@ -135,6 +136,12 @@ export function agreementStage(ctx: StageContext): void {
     if (own) {
       node.feats.set('Gender', decide(own, 'gender.headword', 'high',
         `"${node.entry!.lemma}" is itself the ${own === 'Neut' ? 'neuter' : own === 'Fem' ? 'feminine' : 'masculine'} form`));
+    } else if (node.token.upos === 'NUM' && node.entry &&
+        paradigm(node.entry.lemma, node.entry.pos.xpos).some((t) => t.form === node.entry!.lemma && t.feats?.['Gender'] === 'Masc')) {
+      // "dva" is masculine and neuter, so the headword alone does not decide;
+      // the dictionary's "(dvě)" then won as a principal part: "Jedin, dvě, tri".
+      node.feats.set('Gender', decide('Masc', 'numeral.citation', 'high',
+        'counted nothing, so the citation form: "1. jedin, 2. dva (dvě), 3. tri" (numerals page)'));
     }
   }
 

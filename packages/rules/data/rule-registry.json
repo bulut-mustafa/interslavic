@@ -327,6 +327,12 @@
       "quote": "To be more explicit about the meaning „each other”, you can add the formula jedin drugogo: „Oni bijut se jedin drugogo”.",
       "why": "the reciprocal is the fixed masculine formula jedin + drugy, drugy in the case its position takes"
     },
+    "numeral.citation": {
+      "tier": "normative",
+      "source": "http://steen.free.fr/interslavic/numerals.html",
+      "quote": "0. nula, 1. jedin (jedna, jedno), 2. dva (dvě), 3. tri, 4. četyri, 5. pet",
+      "why": "a cardinal with no noun to agree with (counting) takes its citation form, the masculine dva"
+    },
     "gender.headword": {
       "tier": "dictionary",
       "source": "packages/lexicon/data/raw/words.tsv",

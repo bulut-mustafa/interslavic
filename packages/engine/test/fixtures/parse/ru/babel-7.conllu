@@ -4,7 +4,7 @@
 1	сойдем	сойти	VERB	_	Aspect=Perf|Mood=Ind|Number=Plur|Person=2|Tense=Fut|VerbForm=Fin|Voice=Act	0	root	_	_
 2	же	же	PART	_	_	1	advmod	_	_
 3	и	и	CCONJ	_	_	4	cc	_	_
-4	смешаем	смесать	VERB	_	Aspect=Imp|Mood=Ind|Number=Plur|Person=1|Tense=Pres|VerbForm=Fin|Voice=Act	1	conj	_	_
+4	смешаем	смешать	VERB	_	Aspect=Imp|Mood=Ind|Number=Plur|Person=1|Tense=Pres|VerbForm=Fin|Voice=Act	1	conj	_	_
 5	там	там	ADV	_	Degree=Pos|PronType=Dem	4	advmod	_	_
 6	язык	язык	NOUN	_	Animacy=Inan|Case=Acc|Gender=Masc|Number=Sing	4	obj	_	_
 7	их	они	PRON	_	Case=Gen|Number=Plur|Person=3|PronType=Prs	6	nmod	_	_

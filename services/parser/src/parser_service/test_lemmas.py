@@ -49,12 +49,19 @@ def main() -> None:
     # A bare clitic must not crash the request (simplemma raises on "").
     for upos in ("VERB", "NOUN"):
         check_lemma("ся", "ся", upos, "", "uk")
-    # Only Ukrainian is touched.
-    if check_lemma("мию", "мияти", "VERB", "", "ru") != "мияти":
-        failures.append("a Russian lemma was changed")
+    # Russian: only an invented verb lemma is replaced, by the listed infinitive.
+    for form, lemma, upos, want in [
+        ("лжёт", "листить", "VERB", "лгать"),
+        ("шёл", "ийти", "VERB", "идти"),
+        ("читаю", "читать", "VERB", "читать"),  # a real lemma is kept
+        ("стекло", "стечь", "VERB", "стечь"),  # a real verb is kept, homograph or not
+        ("мою", "мой", "DET", "мой"),  # only verbs are checked
+    ]:
+        if check_lemma(form, lemma, upos, "", "ru") != want:
+            failures.append(f"ru {form}: {lemma} -> {check_lemma(form, lemma, upos, '', 'ru')}, expected {want}")
     for f in failures:
         print("FAIL", f)
-    print(f"{len(CASES) + 1 - len(failures)} / {len(CASES) + 1} passed")
+    print(f"{len(CASES) + 6 - len(failures)} / {len(CASES) + 6} passed")
     raise SystemExit(1 if failures else 0)
 
 

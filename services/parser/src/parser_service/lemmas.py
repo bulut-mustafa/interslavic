@@ -6,7 +6,8 @@ words it has not seen it invents lemmas that are not Ukrainian words: "мию" -
 "мияти", "вірю" -> "вірти", "Відчини" -> "відчити", "правах" -> "правох",
 "дзеркалі" -> "дзеркаль". The engine looks every lemma up in the dictionary's
 Ukrainian column, so each of these came through untranslated. Russian's model
-(SynTagRus) does not do this, which is why Russian never needed the check.
+(SynTagRus) does it far less, and only verbs are checked there
+(`_russian_verb`).
 
 The check uses simplemma's Ukrainian form-to-lemma tables (MIT code; data under
 ODbL and CC BY 4.0, see DATA-LICENSES.md). Stanza's lemma is kept whenever it is
@@ -108,8 +109,27 @@ def participle_verb(lemma: str) -> str | None:
     return None
 
 
+# A Russian infinitive ends in -ть, -ти or -чь, a reflexive one adds -ся.
+_RU_INFINITIVE = re.compile(r"(ть|ти|чь)(ся)?$")
+
+
+def _russian_verb(form: str, lemma: str) -> str:
+    """
+    Russian's model also invents verb lemmas, less often: "лжёт" -> "листить",
+    "шёл" -> "ийти", "льёт" -> "листить" (Tatoeba sample, 2026-11-22). Only an
+    invented one - not in simplemma's Russian tables - is replaced, and only by
+    the infinitive the tables list for the form.
+    """
+    if simplemma.is_known(lemma.lower(), lang="ru"):
+        return lemma
+    listed = simplemma.lemmatize(form.lower(), lang="ru")
+    return listed if _RU_INFINITIVE.search(listed) and simplemma.is_known(listed, lang="ru") else lemma
+
+
 def check_lemma(form: str, lemma: str, upos: str, feats: str, lang: str) -> str:
     """The lemma to use: Stanza's, unless it is not a real lemma of its kind."""
+    if lang == "ru" and upos in ("VERB", "AUX") and lemma:
+        return _russian_verb(form, lemma)
     if lang == "uk" and upos in ("DET", "PRON") and form.lower() in _TOJ and "PronType=Dem" in (feats or ""):
         return "той"
     if lang != "uk" or upos not in _CHECKED or not lemma:
@@ -143,7 +163,7 @@ def check_lemma(form: str, lemma: str, upos: str, feats: str, lang: str) -> str:
 
 def check_words(words, lang: str) -> None:
     """Apply `check_lemma` to Stanza words in place."""
-    if lang != "uk":
+    if lang not in ("uk", "ru"):
         return
     for w in words:
         w.lemma = check_lemma(w.text, w.lemma or w.text, w.upos or "X", w.feats or "", lang)

@@ -303,7 +303,9 @@ export class Lexicon {
         lx.entries.push({
           variantIndex,
           id: f[cId!] ?? '',
-          lemma,
+          // "naskakati (na)", "vråta (sport)": a note in the cell, not part of
+          // the word - it was written out as "naskakati (na)".
+          lemma: lemma.replace(/\s*\([^)]*\)/g, '').trim(),
           pos,
           addition,
           /**

@@ -457,6 +457,18 @@ export function translate(
   const candidatesFor = (token: UdToken): Entry[] => {
     const word = lookupLemmaOf(token);
     const all = lex.lookup(word, sentence.lang);
+    /**
+     * A verb with no verb among its candidates is not translated by a noun:
+     * "I miss the army" gave "Ja gospodiceju armiju" ("miss" the title) and
+     * "Tom caved" gave "Tom jama", both counted as found. Kept and flagged
+     * instead - visible wrongness beats invisible wrongness (docs/design.md).
+     * Russian and Ukrainian are matched by their own verb columns, so this
+     * only ever bites on a gloss the two parts of speech share.
+     */
+    // An adjective stays: a participle is one ("forbidden" -> vozbranjeny).
+    if (token.upos === 'VERB' && !all.some((e) => e.pos.upos === 'VERB')) {
+      return all.filter((e) => e.pos.upos !== 'NOUN' && e.pos.upos !== 'PROPN');
+    }
     return sentence.lang !== 'en' && token.upos === 'PROPN' && capitalised(word)
       ? all.filter((e) => glossedAsProperNoun(e, word, sentence.lang))
       : all;

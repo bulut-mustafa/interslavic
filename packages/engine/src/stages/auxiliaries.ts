@@ -581,6 +581,10 @@ export function planAuxiliaries(
       if (token.feats['VerbForm'] !== 'Fin' || imperatives.has(token.id)) continue;
       const firstPlural = (token.feats['Person'] === '1' && token.feats['Number'] === 'Plur') || /(ем|ём|им)$/i.test(token.form);
       if (!firstPlural || sentence.tokens.some((c) => c.head === token.id && c.deprel.startsWith('nsubj'))) continue;
+      // Only a main clause: under a conjunction it is a future. The same
+      // verse keeps "прежде нежели рассеемся" out of the imperative, "da
+      // byhmo ne razprostranili se" (http://steen.free.fr/interslavic/babel_text.html).
+      if (sentence.tokens.some((c) => c.head === token.id && c.deprel === 'mark')) continue;
       imperatives.set(token.id, { person: '1', number: 'Plur' });
     }
   }

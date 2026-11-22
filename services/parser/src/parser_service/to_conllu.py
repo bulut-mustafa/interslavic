@@ -12,6 +12,7 @@ Usage:
 
 from __future__ import annotations
 
+import functools
 import sys
 
 from .app import PROCESSORS
@@ -23,13 +24,18 @@ def format_feats(feats: dict[str, str]) -> str:
     return "|".join(f"{k}={feats[k]}" for k in sorted(feats))
 
 
-def to_conllu(text: str, lang: str) -> str:
+@functools.cache
+def _pipeline(lang: str):  # noqa: ANN202 - stanza is imported lazily
     import stanza
 
+    return stanza.Pipeline(lang=lang, processors=PROCESSORS, download_method=None, verbose=False)
+
+
+def to_conllu(text: str, lang: str) -> str:
     from .app import with_terminator
     from .lemmas import check_words
 
-    nlp = stanza.Pipeline(lang=lang, processors=PROCESSORS, download_method=None, verbose=False)
+    nlp = _pipeline(lang)
     # Same terminator fix the service applies - see `with_terminator`. Without
     # it, Russian text with no final punctuation has its last vowel split off
     # as a separate token, and fixtures generated here would bake that in.

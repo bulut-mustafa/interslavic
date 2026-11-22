@@ -22,7 +22,7 @@
 19	,	,	PUNCT	_	_	22	punct	_	_
 20	прежде	прежде	ADV	_	Degree=Pos|ExtPos=ADV	22	mark	_	_
 21	нежели	нежели	SCONJ	_	_	20	fixed	_	_
-22	рассеемся	рассеваться	VERB	_	Aspect=Perf|Mood=Ind|Number=Plur|Person=1|Tense=Fut|VerbForm=Fin|Voice=Mid	16	advcl	_	_
+22	рассеемся	рассеяться	VERB	_	Aspect=Perf|Mood=Ind|Number=Plur|Person=1|Tense=Fut|VerbForm=Fin|Voice=Mid	16	advcl	_	_
 23	по	по	ADP	_	_	24	case	_	_
 24	лицу	лицо	NOUN	_	Animacy=Inan|Case=Dat|Gender=Neut|Number=Sing	22	obl	_	_
 25	всей	весь	DET	_	Case=Gen|Gender=Fem|Number=Sing|PronType=Tot	26	det	_	_

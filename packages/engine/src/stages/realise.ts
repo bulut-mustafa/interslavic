@@ -830,7 +830,7 @@ export function realiseStage(input: RealiseInput): RealiseOutput {
      * "читается" and "строится" carry it inside the word, so without this the
      * middle and passive voices came out as plain actives.
      *
-     * Skipped when the sentence already has a reflexive pronoun of its own, so
+     * Skipped when the verb already has a reflexive pronoun of its own, so
      * "Она моет себя" does not get a second one.
      */
     if (
@@ -839,7 +839,8 @@ export function realiseStage(input: RealiseInput): RealiseOutput {
       // carries the clitic and realisation keeps it, so adding one gave
       // "Ja boju se se psa".
       !splitMultiword(entry.lemma, 'VERB').reflexive &&
-      !plan.some((n) => n.token.feats['Reflex'] === 'Yes' && n.token.upos === 'PRON')
+      // The verb's own: "себе" in another clause is no reason to drop this one.
+      !plan.some((n) => n.token.head === token.id && n.token.feats['Reflex'] === 'Yes' && n.token.upos === 'PRON')
     ) {
       const clitic = realize({
         lemma: REFLEXIVE_PRONOUN,

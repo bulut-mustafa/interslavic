@@ -1,0 +1,1806 @@
+{
+ "en": [
+  {
+   "id": "12401893-13934202",
+   "source": "That's what Tom told me, but Mary said John wasn't going to be there with Alice on Monday.",
+   "isv": "To jest to, čto Tom pověděl mi, ale Marija pověděla, že John ne bude tam s Alisoj v ponedělku.",
+   "split": "tune"
+  },
+  {
+   "id": "13698981-13731467",
+   "source": "The square root of 4 is 2.",
+   "isv": "Kvadratny korenj cifry 4 je 2.",
+   "split": "held"
+  },
+  {
+   "id": "12237449-13469204",
+   "source": "Peace is possible.",
+   "isv": "Mir jest možny.",
+   "split": "tune"
+  },
+  {
+   "id": "12831750-13131039",
+   "source": "Americans are naive.",
+   "isv": "Amerikanci sut naivni.",
+   "split": "held"
+  },
+  {
+   "id": "13839566-13843560",
+   "source": "There's a loud noise on this street.",
+   "isv": "V tom ulici je glasny šum.",
+   "split": "tune"
+  },
+  {
+   "id": "9670106-13061951",
+   "source": "Tom was eating an apple, and Mary was eating a banana.",
+   "isv": "Tom jedl jabloko, a Marija jedla banan.",
+   "split": "held"
+  },
+  {
+   "id": "13852158-13853769",
+   "source": "This wood isn't hard.",
+   "isv": "To drěvo ne je tvrdo.",
+   "split": "tune"
+  },
+  {
+   "id": "2111474-14111193",
+   "source": "That helped.",
+   "isv": "To je pomoglo.",
+   "split": "held"
+  },
+  {
+   "id": "13466256-13480667",
+   "source": "Do you see the bats?",
+   "isv": "Ty vidiš netopyrev?",
+   "split": "tune"
+  },
+  {
+   "id": "13526072-13560492",
+   "source": "He looks like my friend.",
+   "isv": "On izgledaje kako moja družka.",
+   "split": "held"
+  },
+  {
+   "id": "13013030-13484771",
+   "source": "I was biased.",
+   "isv": "Ja byla prědsudna.",
+   "split": "tune"
+  },
+  {
+   "id": "13824028-13830276",
+   "source": "I'll be coming later.",
+   "isv": "Budu nastavati pozdněje.",
+   "split": "held"
+  },
+  {
+   "id": "413731-13188185",
+   "source": "One, two, three, four, five, six, seven, eight, nine, ten.",
+   "isv": "Jedin, dva, tri, četyri, pet, šest, sedm, osm, devet, deset.",
+   "split": "tune"
+  },
+  {
+   "id": "288654-14111683",
+   "source": "He is eight.",
+   "isv": "On imaje osm lět.",
+   "split": "held"
+  },
+  {
+   "id": "13521064-13525328",
+   "source": "Is that an ostrich?",
+   "isv": "To je straus?",
+   "split": "tune"
+  },
+  {
+   "id": "13737541-13838232",
+   "source": "I love our cats.",
+   "isv": "Ja ljubim naših kotov.",
+   "split": "held"
+  },
+  {
+   "id": "4665156-14109508",
+   "source": "Tomorrow we will attack again.",
+   "isv": "Zautra budemo napasti ponovno.",
+   "split": "tune"
+  },
+  {
+   "id": "13044130-13164249",
+   "source": "This is proof.",
+   "isv": "To jest dokaz.",
+   "split": "held"
+  },
+  {
+   "id": "2111166-14111122",
+   "source": "Tom helped.",
+   "isv": "Tom je pomogl.",
+   "split": "tune"
+  },
+  {
+   "id": "12289196-13523146",
+   "source": "The most precious good is liberty.",
+   "isv": "Najdragocěnny tovar je svoboda.",
+   "split": "held"
+  },
+  {
+   "id": "13310333-13911622",
+   "source": "The world is in danger.",
+   "isv": "Svět je v grozě.",
+   "split": "tune"
+  },
+  {
+   "id": "13820386-13831696",
+   "source": "\"I will follow the law,\" she said.",
+   "isv": "\"Ja budu slěditi pravo,\" ona govorila.",
+   "split": "held"
+  },
+  {
+   "id": "13338693-14103436",
+   "source": "We're late for the tram.",
+   "isv": "My spazdnjajemo se na tramvaj.",
+   "split": "tune"
+  },
+  {
+   "id": "13352189-13518738",
+   "source": "All the boys love Julia.",
+   "isv": "Vsi hlapci ljubet Juliju.",
+   "split": "held"
+  },
+  {
+   "id": "12473994-14110353",
+   "source": "Do you need that book?",
+   "isv": "Trěba li tobě tamta kniga?",
+   "split": "tune"
+  },
+  {
+   "id": "13517042-13525473",
+   "source": "You'll go home and stay home.",
+   "isv": "Ty budeš idti domu i ostati domu.",
+   "split": "held"
+  },
+  {
+   "id": "13518060-13525369",
+   "source": "Tom can control the weather.",
+   "isv": "Tom može vladati pogodoju.",
+   "split": "tune"
+  },
+  {
+   "id": "13520299-13525339",
+   "source": "He'll support him.",
+   "isv": "On bude poddrživati jego.",
+   "split": "held"
+  },
+  {
+   "id": "42149-14121628",
+   "source": "What a shame!",
+   "isv": "Kaky žalj!",
+   "split": "tune"
+  },
+  {
+   "id": "12667189-13164248",
+   "source": "Success is freedom.",
+   "isv": "Uspěh jest svoboda.",
+   "split": "held"
+  },
+  {
+   "id": "13823690-13830722",
+   "source": "I'm not going to read that book.",
+   "isv": "Ja ne budu čitati tu knigu.",
+   "split": "tune"
+  },
+  {
+   "id": "12840723-13037141",
+   "source": "India is a colorful country.",
+   "isv": "Indija jest mnogobarvna krajina.",
+   "split": "held"
+  },
+  {
+   "id": "13450971-13451167",
+   "source": "God is Change.",
+   "isv": "Bog jest Izměna.",
+   "split": "tune"
+  },
+  {
+   "id": "13436330-13910967",
+   "source": "Do they need money?",
+   "isv": "Oni potrěbujut pěnezy?",
+   "split": "held"
+  },
+  {
+   "id": "13712956-13715717",
+   "source": "People are people.",
+   "isv": "Ljudi sut ljudi.",
+   "split": "tune"
+  },
+  {
+   "id": "2891530-14104090",
+   "source": "It would be pointless.",
+   "isv": "To by bylo bezsmyslno.",
+   "split": "held"
+  },
+  {
+   "id": "9047709-13084640",
+   "source": "Tom is a werewolf.",
+   "isv": "Tom jest volkolak.",
+   "split": "tune"
+  },
+  {
+   "id": "2870947-14123324",
+   "source": "Something bit Mary.",
+   "isv": "Něčto je ukusilo Meri.",
+   "split": "held"
+  },
+  {
+   "id": "12262614-13523053",
+   "source": "Do you live near the ocean?",
+   "isv": "Vy živete blizko okeana?",
+   "split": "tune"
+  },
+  {
+   "id": "13495977-13512018",
+   "source": "I'll have a look in that room.",
+   "isv": "Ja budu pozrěti v toj komnatě.",
+   "split": "held"
+  },
+  {
+   "id": "906328-14010398",
+   "source": "Run!",
+   "isv": "Běžite!",
+   "split": "tune"
+  },
+  {
+   "id": "13461714-13988332",
+   "source": "His hair is blue.",
+   "isv": "Jego vlasy sut modre.",
+   "split": "held"
+  },
+  {
+   "id": "12091533-14103006",
+   "source": "Give me your pistol.",
+   "isv": "Daj mně svoj pistolet.",
+   "split": "tune"
+  },
+  {
+   "id": "13159736-13164255",
+   "source": "Persistence overcomes everything.",
+   "isv": "Neustuplivost odolěvaje vse.",
+   "split": "held"
+  },
+  {
+   "id": "2245642-14111157",
+   "source": "I can help.",
+   "isv": "Ja mogu pomogti.",
+   "split": "tune"
+  },
+  {
+   "id": "13466066-13466971",
+   "source": "What's the doctor eating?",
+   "isv": "Čego je doktor?",
+   "split": "held"
+  },
+  {
+   "id": "13467698-13480647",
+   "source": "All she needs is time.",
+   "isv": "Ona potrěbuje jedino čas.",
+   "split": "tune"
+  },
+  {
+   "id": "7776979-13037145",
+   "source": "We aren't in China.",
+   "isv": "My ne jesmo v Kitaju.",
+   "split": "held"
+  },
+  {
+   "id": "12785444-13994080",
+   "source": "I'm looking for a car.",
+   "isv": "Ja iščem avto.",
+   "split": "tune"
+  },
+  {
+   "id": "13415765-13500197",
+   "source": "She's a bad singer.",
+   "isv": "Ona je nedobra pěvica.",
+   "split": "held"
+  },
+  {
+   "id": "9672980-13084639",
+   "source": "We live in different universes.",
+   "isv": "My živemo v raznyh vsemirah.",
+   "split": "tune"
+  },
+  {
+   "id": "351742-13188184",
+   "source": "Ten, eleven, twelve, thirteen, fourteen, fifteen, sixteen, seventeen, eighteen, nineteen, twenty.",
+   "isv": "Deset, jedinnadset, dvanadset, trinadset, četyrinadset, petnadset, šestnadset, sedmnadset, osmnadset, devetnadset, dvadeset.",
+   "split": "held"
+  },
+  {
+   "id": "13845569-13858287",
+   "source": "He's studying botany.",
+   "isv": "On izuča botaniku.",
+   "split": "tune"
+  },
+  {
+   "id": "9352641-13085400",
+   "source": "This house is small but beautiful.",
+   "isv": "Sej dom jest maly a krasivy.",
+   "split": "held"
+  },
+  {
+   "id": "872030-14015078",
+   "source": "I became a woman.",
+   "isv": "Ja jesm stala žena.",
+   "split": "tune"
+  },
+  {
+   "id": "10329010-14110323",
+   "source": "Whoops!",
+   "isv": "Ups!",
+   "split": "held"
+  },
+  {
+   "id": "13120177-13131481",
+   "source": "They only wanted a just peace.",
+   "isv": "Oni hotěli jedino spravědlivy mir.",
+   "split": "tune"
+  },
+  {
+   "id": "3129812-14124019",
+   "source": "It's all happening so fast.",
+   "isv": "Vsečto děje se tako brzo.",
+   "split": "held"
+  },
+  {
+   "id": "8385641-14102989",
+   "source": "Tom fired.",
+   "isv": "Tom je izstrělil.",
+   "split": "tune"
+  },
+  {
+   "id": "9583922-14110330",
+   "source": "Continue!",
+   "isv": "Prodolžaj!",
+   "split": "held"
+  },
+  {
+   "id": "13048660-13485204",
+   "source": "Say \"excuse me\"!",
+   "isv": "Govori \"izvini\"!",
+   "split": "tune"
+  },
+  {
+   "id": "9407105-13346846",
+   "source": "Epstein didn't kill himself.",
+   "isv": "Epstein ne samoubil.",
+   "split": "held"
+  },
+  {
+   "id": "13022676-13065487",
+   "source": "It's OK!",
+   "isv": "To jest v poredku!",
+   "split": "tune"
+  },
+  {
+   "id": "13100087-13118930",
+   "source": "Now Kosovo is an independent country.",
+   "isv": "Nyně Kosovo jest nezaležna država.",
+   "split": "held"
+  },
+  {
+   "id": "13150953-13824396",
+   "source": "It was a political satire.",
+   "isv": "To byla politična satira.",
+   "split": "tune"
+  },
+  {
+   "id": "12878324-13161095",
+   "source": "Did they lose it?",
+   "isv": "Oni izgubili li jego?",
+   "split": "held"
+  },
+  {
+   "id": "13907954-14116106",
+   "source": "I only drink beer.",
+   "isv": "Ja piju izključno pivo.",
+   "split": "tune"
+  },
+  {
+   "id": "13495907-13512021",
+   "source": "Trust the experts.",
+   "isv": "Dověri se ekspertam.",
+   "split": "held"
+  },
+  {
+   "id": "329663-14102707",
+   "source": "When did the Japanese start eating polished rice?",
+   "isv": "Kogdy Japonci sut počeli jesti polirany ryž?",
+   "split": "tune"
+  },
+  {
+   "id": "13517734-13525470",
+   "source": "Who do you trust more: me or him?",
+   "isv": "Komu ty veče věriš: mně ili jemu?",
+   "split": "held"
+  },
+  {
+   "id": "12975178-13038174",
+   "source": "Life is hard!",
+   "isv": "Žitje jest težko!",
+   "split": "tune"
+  },
+  {
+   "id": "13848187-13855720",
+   "source": "I'm going to tell your parents everything.",
+   "isv": "Ja budu kazati vse tvojemu roditeljam.",
+   "split": "held"
+  },
+  {
+   "id": "10828575-14103058",
+   "source": "I slept with a pistol under my pillow.",
+   "isv": "Ja jesm spala s pistoletom pod svojeju podglavniceju.",
+   "split": "tune"
+  },
+  {
+   "id": "13099011-13118931",
+   "source": "\"Who are you?\" \"I'm myself.\"",
+   "isv": "\"Kto ty jesi?\" \"Ja jesm ja.\"",
+   "split": "held"
+  },
+  {
+   "id": "13472522-13480414",
+   "source": "Tom isn't a simple person.",
+   "isv": "Tom ne jest prosta osoba.",
+   "split": "tune"
+  },
+  {
+   "id": "13471334-13512052",
+   "source": "The AI's having a stroke.",
+   "isv": "Umětna inteligencija imaje mozgovy udar.",
+   "split": "held"
+  },
+  {
+   "id": "13576462-14043343",
+   "source": "Science is the art of seeking the truth.",
+   "isv": "Nauka jest umětnost izkanja pravdy.",
+   "split": "tune"
+  },
+  {
+   "id": "13708082-14055824",
+   "source": "I'm a secular Jew.",
+   "isv": "Ja jesm světska jevrejka.",
+   "split": "held"
+  },
+  {
+   "id": "13623700-13994135",
+   "source": "His name is Jesús.",
+   "isv": "Jego ime jest Jesús.",
+   "split": "tune"
+  },
+  {
+   "id": "12581573-13164232",
+   "source": "Tom, wake up!",
+   "isv": "Tome, probudi se!",
+   "split": "held"
+  },
+  {
+   "id": "13415138-13820258",
+   "source": "My teacher comes from Ukraine.",
+   "isv": "Moj učitelj jest iz Ukrajiny.",
+   "split": "tune"
+  },
+  {
+   "id": "12185188-13490194",
+   "source": "We work.",
+   "isv": "My rabotaje.",
+   "split": "held"
+  },
+  {
+   "id": "12193858-13925166",
+   "source": "Many wasps are pollinators.",
+   "isv": "Mnoge osy opyljajut rastliny.",
+   "split": "tune"
+  },
+  {
+   "id": "13164194-13264304",
+   "source": "Porn addiction doesn't exist.",
+   "isv": "Zavisnost od pornografije ne egzistuje.",
+   "split": "held"
+  },
+  {
+   "id": "10008996-13798087",
+   "source": "I'm nonbinary.",
+   "isv": "Ja jesm nebinarny.",
+   "split": "tune"
+  },
+  {
+   "id": "12250404-14103161",
+   "source": "How long has Discord existed?",
+   "isv": "Kako dolgo jestvuje Discord?",
+   "split": "held"
+  },
+  {
+   "id": "8741978-13800030",
+   "source": "Learn Hungarian.",
+   "isv": "Uči se madjarsky.",
+   "split": "tune"
+  },
+  {
+   "id": "35029-14102583",
+   "source": "Where is Paris?",
+   "isv": "Kde jest Pariž?",
+   "split": "held"
+  },
+  {
+   "id": "12808260-13161097",
+   "source": "France isn't Paris.",
+   "isv": "Francija ne jest Pariž.",
+   "split": "tune"
+  },
+  {
+   "id": "6697336-13476924",
+   "source": "Tom is a baker.",
+   "isv": "Tom jest pekar.",
+   "split": "held"
+  },
+  {
+   "id": "13228193-13500198",
+   "source": "You're a pig!",
+   "isv": "Ty jesi svinja!",
+   "split": "tune"
+  },
+  {
+   "id": "13201175-13475754",
+   "source": "This is my bus.",
+   "isv": "To jest moj avtobus.",
+   "split": "held"
+  },
+  {
+   "id": "13787127-13802124",
+   "source": "Where is my water?",
+   "isv": "Kde je moja voda?",
+   "split": "tune"
+  },
+  {
+   "id": "12803955-13994078",
+   "source": "Traditionally speaking, a Jew is either the child of a Jewish woman or a convert.",
+   "isv": "Tradicijno, Jevrej jest ili děte jevrejskoj matere, ili člověk, ktory obratil se.",
+   "split": "held"
+  },
+  {
+   "id": "10784860-13960820",
+   "source": "Dad drinks coffee every morning.",
+   "isv": "Tata pije kavu každo utro.",
+   "split": "tune"
+  },
+  {
+   "id": "3403473-12990581",
+   "source": "Tom was untrustworthy.",
+   "isv": "Tom byl nenadežny.",
+   "split": "held"
+  },
+  {
+   "id": "2654850-13912932",
+   "source": "This apple is redder.",
+   "isv": "To jabloko je črvenějše.",
+   "split": "tune"
+  },
+  {
+   "id": "12193126-13131220",
+   "source": "Your bike is beautiful. Is it new?",
+   "isv": "Tvoj velosiped jest krasivy. On jest li novy?",
+   "split": "held"
+  },
+  {
+   "id": "10707353-13069495",
+   "source": "Tom is a neo-Nazi.",
+   "isv": "Tom jest neonacist.",
+   "split": "tune"
+  },
+  {
+   "id": "18255-14104044",
+   "source": "We would die without air.",
+   "isv": "My byhmo umrli bez vozduha.",
+   "split": "held"
+  },
+  {
+   "id": "2244894-14121144",
+   "source": "Am I invited?",
+   "isv": "Jesm li ja pozvany?",
+   "split": "tune"
+  },
+  {
+   "id": "11114312-13798601",
+   "source": "I'm a woman from Iran.",
+   "isv": "Ja jesm žena od Irana.",
+   "split": "held"
+  },
+  {
+   "id": "13415751-13427078",
+   "source": "Humanity's knowledge grows with every moment.",
+   "isv": "Znanje ljudstva narastaje s každym momentom.",
+   "split": "tune"
+  },
+  {
+   "id": "13832488-14116152",
+   "source": "As a patriot, no.",
+   "isv": "Kako patriot, ne.",
+   "split": "held"
+  },
+  {
+   "id": "13847138-13856474",
+   "source": "John is eating your banana.",
+   "isv": "Džon je tvoj banan.",
+   "split": "tune"
+  },
+  {
+   "id": "13426630-13484803",
+   "source": "That's a ruler.",
+   "isv": "To jest linijka.",
+   "split": "held"
+  },
+  {
+   "id": "2649143-14113458",
+   "source": "Is it a weapon?",
+   "isv": "Jest li to oružje?",
+   "split": "tune"
+  },
+  {
+   "id": "13467697-13480648",
+   "source": "All he needs is time.",
+   "isv": "On potrěbuje jedino čas.",
+   "split": "held"
+  },
+  {
+   "id": "13472753-13480312",
+   "source": "Tom's cat was dead.",
+   "isv": "Kot Toma byl mrtvy.",
+   "split": "tune"
+  },
+  {
+   "id": "9535993-14103210",
+   "source": "Our city has trams.",
+   "isv": "V našem gradu jest tramvaje.",
+   "split": "held"
+  },
+  {
+   "id": "10366363-14103951",
+   "source": "I would fish.",
+   "isv": "Ja byh lovila rybu.",
+   "split": "tune"
+  },
+  {
+   "id": "8969692-13037146",
+   "source": "Life's good!",
+   "isv": "Žitje jest dobro!",
+   "split": "held"
+  },
+  {
+   "id": "13472703-13480349",
+   "source": "A hippopotamus killed Tom.",
+   "isv": "Hipopotam ubil Toma.",
+   "split": "tune"
+  },
+  {
+   "id": "13350138-13351841",
+   "source": "Want a waffle?",
+   "isv": "Hočeš vaflju?",
+   "split": "held"
+  },
+  {
+   "id": "13039370-13049936",
+   "source": "Is she pretty?",
+   "isv": "Ona jest li krasna?",
+   "split": "tune"
+  },
+  {
+   "id": "11470705-13835324",
+   "source": "Conversion therapy is torture.",
+   "isv": "Terapija konversije je mučenje.",
+   "split": "held"
+  },
+  {
+   "id": "13504525-13511618",
+   "source": "A translation is not an endorsement.",
+   "isv": "Prěvod ne jest poddrživanje.",
+   "split": "tune"
+  },
+  {
+   "id": "6833082-14103914",
+   "source": "Where's the food?",
+   "isv": "Kde jest jeda?",
+   "split": "held"
+  },
+  {
+   "id": "10686598-14059995",
+   "source": "Tom is a faggot.",
+   "isv": "Tom jest pederast.",
+   "split": "tune"
+  },
+  {
+   "id": "2260603-13518749",
+   "source": "Does your wife work?",
+   "isv": "Tvoja žena rabotaje?",
+   "split": "held"
+  },
+  {
+   "id": "13474936-13480302",
+   "source": "I'm quoting from memory.",
+   "isv": "Ja cituju po pameti.",
+   "split": "tune"
+  },
+  {
+   "id": "11874902-14110385",
+   "source": "I don't understand Polish.",
+   "isv": "Ja ne razuměju poljsky.",
+   "split": "held"
+  },
+  {
+   "id": "23865-14102998",
+   "source": "Fire burns.",
+   "isv": "Ogonj gori.",
+   "split": "tune"
+  },
+  {
+   "id": "11787422-14103011",
+   "source": "Tom got a pistol.",
+   "isv": "Tom imaje pistolet.",
+   "split": "held"
+  },
+  {
+   "id": "9414828-14117428",
+   "source": "We must win this war.",
+   "isv": "My jesmo dolžni poběditi v tutoj vojně.",
+   "split": "tune"
+  },
+  {
+   "id": "13049023-13050143",
+   "source": "I'm not God.",
+   "isv": "Ja ne jesm Bog.",
+   "split": "held"
+  },
+  {
+   "id": "13472710-13480329",
+   "source": "Tom was taking a shit.",
+   "isv": "Tom sral.",
+   "split": "tune"
+  },
+  {
+   "id": "12196603-14110374",
+   "source": "It's not a game!",
+   "isv": "To ne jest igra!",
+   "split": "held"
+  },
+  {
+   "id": "1813164-14113771",
+   "source": "I miss the army.",
+   "isv": "Mně nedostavaje vojsko",
+   "split": "tune"
+  },
+  {
+   "id": "9778301-13973315",
+   "source": "Tom has landed on Mars.",
+   "isv": "Tom prizemjil se na Marsu.",
+   "split": "held"
+  },
+  {
+   "id": "8518481-13523035",
+   "source": "Children are people, too.",
+   "isv": "Děti tož sut ljudi.",
+   "split": "tune"
+  },
+  {
+   "id": "13522790-13525414",
+   "source": "I'm the only one who's working today!",
+   "isv": "Ja jesm jedina osoba ktora rabotaje dnes!",
+   "split": "held"
+  },
+  {
+   "id": "13708670-13728227",
+   "source": "Tom survived the war.",
+   "isv": "Tom prěžil vojnu.",
+   "split": "tune"
+  },
+  {
+   "id": "6034367-14103865",
+   "source": "Mosquitoes are insects.",
+   "isv": "Komari sut šestinožky.",
+   "split": "held"
+  },
+  {
+   "id": "12859300-13125276",
+   "source": "In Russia I was German, and in Germany, I'm Russian.",
+   "isv": "V Rosiji ja byla Němka, a v Němciji ja jesm Ruska.",
+   "split": "tune"
+  },
+  {
+   "id": "13043391-13994127",
+   "source": "I'm not a Maoist.",
+   "isv": "Ja ne jesm maoist.",
+   "split": "held"
+  },
+  {
+   "id": "13818792-13831935",
+   "source": "It was completely unnecessary.",
+   "isv": "To bylo cělkom nepotrěbno.",
+   "split": "tune"
+  },
+  {
+   "id": "2252579-14113203",
+   "source": "The soldiers laughed.",
+   "isv": "Vojaki sut smějali se.",
+   "split": "held"
+  },
+  {
+   "id": "13139457-13164241",
+   "source": "Tom caved.",
+   "isv": "Tom ustupil.",
+   "split": "tune"
+  },
+  {
+   "id": "12319704-13478856",
+   "source": "It's in Australia.",
+   "isv": "To jest v Avstraliji.",
+   "split": "held"
+  },
+  {
+   "id": "7822320-13523137",
+   "source": "His health has declined.",
+   "isv": "Jego zdravje pogoršilo se.",
+   "split": "tune"
+  },
+  {
+   "id": "13505673-13511527",
+   "source": "His younger brother has a lot of toys.",
+   "isv": "Jego mladši brat imaje mnogo igraček.",
+   "split": "held"
+  },
+  {
+   "id": "13818225-13832184",
+   "source": "I usually have breakfast around eleven.",
+   "isv": "Obyčajno zautrakam okolo jedinnadset.",
+   "split": "tune"
+  },
+  {
+   "id": "10496760-13131042",
+   "source": "Americans are uneducated.",
+   "isv": "Amerikanci sut neobrazovani.",
+   "split": "held"
+  },
+  {
+   "id": "2952539-14117089",
+   "source": "I used to have a house in Boston.",
+   "isv": "Raněje ja jesm imala dom v Bostonu.",
+   "split": "tune"
+  },
+  {
+   "id": "13474889-13988333",
+   "source": "Her hair is blue.",
+   "isv": "Jej vlasy sut modre.",
+   "split": "held"
+  },
+  {
+   "id": "12262027-13924292",
+   "source": "Is this a poem? My French isn't good enough to tell.",
+   "isv": "To jest poema? Ne znaju, bo moj francuzsky ne jest dosyta dobry.",
+   "split": "tune"
+  },
+  {
+   "id": "3162074-14112251",
+   "source": "Let's help Tom.",
+   "isv": "Pomožimo Tomu.",
+   "split": "held"
+  },
+  {
+   "id": "8880489-14099287",
+   "source": "Paper burns.",
+   "isv": "Papir gori.",
+   "split": "tune"
+  },
+  {
+   "id": "13845570-13858285",
+   "source": "She's studying botany.",
+   "isv": "Ona izuča botaniku.",
+   "split": "held"
+  }
+ ],
+ "ru": [
+  {
+   "id": "13996808-14004614",
+   "source": "Это автономный трамвай.",
+   "isv": "Tuto je avtonomny tramvaj.",
+   "split": "tune"
+  },
+  {
+   "id": "13478800-13478855",
+   "source": "Он в Австралии.",
+   "isv": "On jest v Avstraliji.",
+   "split": "held"
+  },
+  {
+   "id": "13985172-14002936",
+   "source": "Как спят киты?",
+   "isv": "Kako spet kyti?",
+   "split": "tune"
+  },
+  {
+   "id": "10201720-12992623",
+   "source": "Том ест ежевику.",
+   "isv": "Tom je ježiny.",
+   "split": "held"
+  },
+  {
+   "id": "3534673-14002899",
+   "source": "Я счастлива.",
+   "isv": "Ja jesm ščestna.",
+   "split": "tune"
+  },
+  {
+   "id": "14004255-14004590",
+   "source": "Я самый молодой на работе.",
+   "isv": "Ja jesm najmlady na rabotě.",
+   "split": "held"
+  },
+  {
+   "id": "13024944-13069495",
+   "source": "Том - неонацист.",
+   "isv": "Tom jest neonacist.",
+   "split": "tune"
+  },
+  {
+   "id": "13039601-13042023",
+   "source": "Ты написал роман.",
+   "isv": "Ty jesi napisal roman.",
+   "split": "held"
+  },
+  {
+   "id": "10017437-13041208",
+   "source": "Война есть война.",
+   "isv": "Vojna jest vojna.",
+   "split": "tune"
+  },
+  {
+   "id": "13325244-13484795",
+   "source": "Этот дом очень большой, как и мой.",
+   "isv": "Toj dom jest mnogo veliky, kak i moj.",
+   "split": "held"
+  },
+  {
+   "id": "13604493-14002867",
+   "source": "Он популярный певец.",
+   "isv": "On jest popularny pěvec.",
+   "split": "tune"
+  },
+  {
+   "id": "13998674-14002921",
+   "source": "Я бедная студентка.",
+   "isv": "Ja jesm bědna studentka.",
+   "split": "held"
+  },
+  {
+   "id": "10773029-13038181",
+   "source": "Всюду жизнь.",
+   "isv": "Žitje jest vsekde.",
+   "split": "tune"
+  },
+  {
+   "id": "14005341-14005350",
+   "source": "Бог не христианин.",
+   "isv": "Bog ne jest hristijanin.",
+   "split": "held"
+  },
+  {
+   "id": "13511847-13526723",
+   "source": "Уран - странная планета.",
+   "isv": "Uran je stranna planeta.",
+   "split": "tune"
+  },
+  {
+   "id": "2608585-13063074",
+   "source": "Это рыба.",
+   "isv": "To jest ryba.",
+   "split": "held"
+  },
+  {
+   "id": "13463232-13463570",
+   "source": "Он революционер.",
+   "isv": "On jest revolucioner.",
+   "split": "tune"
+  },
+  {
+   "id": "13039604-13042025",
+   "source": "Вы написали роман.",
+   "isv": "Vy jeste napisali roman.",
+   "split": "held"
+  },
+  {
+   "id": "5399760-13354005",
+   "source": "Сегодня Том очень занят.",
+   "isv": "Dnes Tom je velmi zajety.",
+   "split": "tune"
+  },
+  {
+   "id": "10166119-13161096",
+   "source": "Я куплю яйцо.",
+   "isv": "Ja kupuju jajtse.",
+   "split": "held"
+  },
+  {
+   "id": "13039600-13042027",
+   "source": "Она написала роман.",
+   "isv": "Ona napisala roman.",
+   "split": "tune"
+  },
+  {
+   "id": "12671366-13161089",
+   "source": "Я купил почти всё по списку.",
+   "isv": "Ja jesm kupil omal vse v spisu.",
+   "split": "held"
+  },
+  {
+   "id": "14004535-14004579",
+   "source": "За последние десять лет этот город не очень изменился.",
+   "isv": "Za poslědnjih deset lět tutoj grad malo je izměnil se.",
+   "split": "tune"
+  },
+  {
+   "id": "13986142-14002932",
+   "source": "Ты выплюнул яблоко.",
+   "isv": "Ty je izpljunul jabloko.",
+   "split": "held"
+  },
+  {
+   "id": "13209426-13484811",
+   "source": "Я на Луне.",
+   "isv": "Ja jesm na luně.",
+   "split": "tune"
+  },
+  {
+   "id": "13706965-13728227",
+   "source": "Том пережил войну.",
+   "isv": "Tom prěžil vojnu.",
+   "split": "held"
+  },
+  {
+   "id": "12471743-13012587",
+   "source": "Это наша мама.",
+   "isv": "Ona jest naša mama.",
+   "split": "tune"
+  },
+  {
+   "id": "8596618-13161092",
+   "source": "Я съел свой лимон.",
+   "isv": "Ja jesm sjedl svoj limon.",
+   "split": "held"
+  },
+  {
+   "id": "1501885-13351947",
+   "source": "Я лучше останусь одна, чем буду всю жизнь несчастлива с ним.",
+   "isv": "Ja skorěje ostanu jednoj, než budu ves život neščestliva s njim.",
+   "split": "tune"
+  },
+  {
+   "id": "12866195-13072267",
+   "source": "Я не видел кота.",
+   "isv": "Ja ne jesm viděl kota.",
+   "split": "held"
+  },
+  {
+   "id": "13353507-13354146",
+   "source": "Позволь мне кое-что прояснить.",
+   "isv": "Dozvoli mene něčto izjasniti.",
+   "split": "tune"
+  },
+  {
+   "id": "7883102-14002864",
+   "source": "Они никогда не поймут.",
+   "isv": "Oni nikogdy ne budut razuměti.",
+   "split": "held"
+  },
+  {
+   "id": "13475092-13480253",
+   "source": "Это полный фарс.",
+   "isv": "To jest kompletna farsa.",
+   "split": "tune"
+  },
+  {
+   "id": "13484815-13484808",
+   "source": "Демократия – фасад капитализма.",
+   "isv": "Demokracija jest fasada kapitalizma.",
+   "split": "held"
+  },
+  {
+   "id": "13997043-14004626",
+   "source": "Кот Тома чёрный?",
+   "isv": "Črny li jest kot Toma?",
+   "split": "tune"
+  },
+  {
+   "id": "12927427-13065486",
+   "source": "Я ведьма.",
+   "isv": "Ja jesm vědma.",
+   "split": "held"
+  },
+  {
+   "id": "13350712-13351823",
+   "source": "Она уже забыла.",
+   "isv": "Ona už je zabyla.",
+   "split": "tune"
+  },
+  {
+   "id": "13915524-13915525",
+   "source": "Они защитники города.",
+   "isv": "Oni sut zaščitniki grada.",
+   "split": "held"
+  },
+  {
+   "id": "12424858-14004076",
+   "source": "Том лидер.",
+   "isv": "Tom jest lider.",
+   "split": "tune"
+  },
+  {
+   "id": "12291673-13469204",
+   "source": "Мир возможен.",
+   "isv": "Mir jest možny.",
+   "split": "held"
+  },
+  {
+   "id": "7717145-13153274",
+   "source": "Испания, Швеция и Япония — парламентские монархии.",
+   "isv": "Španija, Švejcarija i Japonija sut parlamentarne monarhije.",
+   "split": "tune"
+  },
+  {
+   "id": "4654119-13359447",
+   "source": "Я всё ещё очень тебя люблю.",
+   "isv": "Ja vse ješče strašno tebe ljubju.",
+   "split": "held"
+  },
+  {
+   "id": "13798548-13798601",
+   "source": "Я женщина из Ирана.",
+   "isv": "Ja jesm žena od Irana.",
+   "split": "tune"
+  },
+  {
+   "id": "13224273-13478856",
+   "source": "Это в Австралии.",
+   "isv": "To jest v Avstraliji.",
+   "split": "held"
+  },
+  {
+   "id": "5898576-13357371",
+   "source": "Она гладила своё платье.",
+   "isv": "Ona je gladila svoju suknju.",
+   "split": "tune"
+  },
+  {
+   "id": "14123317-14123328",
+   "source": "Преступность никогда не исчезнет.",
+   "isv": "Prěstupnost nikogdy ne bude izčeznuti.",
+   "split": "held"
+  },
+  {
+   "id": "10649618-13357378",
+   "source": "Мы хотя бы попытались.",
+   "isv": "My prinajmenje jesmo poprobovali.",
+   "split": "tune"
+  },
+  {
+   "id": "13996877-14004612",
+   "source": "Его книга меня вдохновила.",
+   "isv": "Jego kniga mene je nadohnula.",
+   "split": "held"
+  },
+  {
+   "id": "13350421-13351827",
+   "source": "Открой все магазины.",
+   "isv": "Otvori vse magaziny.",
+   "split": "tune"
+  },
+  {
+   "id": "13039599-13042028",
+   "source": "Я написала роман.",
+   "isv": "Ja jesm napisala roman.",
+   "split": "held"
+  },
+  {
+   "id": "5618398-13037146",
+   "source": "Жизнь хороша!",
+   "isv": "Žitje jest dobro!",
+   "split": "tune"
+  },
+  {
+   "id": "11065182-13077089",
+   "source": "На войне не бывает героев.",
+   "isv": "V vojně nema herojev.",
+   "split": "held"
+  },
+  {
+   "id": "11824720-13085656",
+   "source": "Все мы боги.",
+   "isv": "Vsi my jesmo bogi.",
+   "split": "tune"
+  },
+  {
+   "id": "8265416-13161098",
+   "source": "Она тебя простила?",
+   "isv": "Ona prostila li tebe?",
+   "split": "held"
+  },
+  {
+   "id": "12981726-13063919",
+   "source": "Она с ней.",
+   "isv": "Ona jest s njeju.",
+   "split": "tune"
+  },
+  {
+   "id": "13906078-14002917",
+   "source": "Спокойствие.",
+   "isv": "Spokojstvo.",
+   "split": "held"
+  },
+  {
+   "id": "13996896-14004624",
+   "source": "Этот стол не грязный?",
+   "isv": "Nečisty li jest tutoj stol?",
+   "split": "tune"
+  },
+  {
+   "id": "13526640-13527289",
+   "source": "США — странная планета.",
+   "isv": "SŠA sut stranna planeta.",
+   "split": "held"
+  },
+  {
+   "id": "14043310-14043343",
+   "source": "Наука — это искусство поиска истины.",
+   "isv": "Nauka jest umětnost izkanja pravdy.",
+   "split": "tune"
+  },
+  {
+   "id": "13039598-13042029",
+   "source": "Я написал роман.",
+   "isv": "Ja jesm napisal roman.",
+   "split": "held"
+  },
+  {
+   "id": "3596639-13357375",
+   "source": "Я хотел бы, чтобы он писал почаще.",
+   "isv": "Ja byh hotěl, že by on je pisal čestěje.",
+   "split": "tune"
+  },
+  {
+   "id": "8730574-14119899",
+   "source": "У него проблемы со спиной.",
+   "isv": "On imaje problemy s hrebtom.",
+   "split": "held"
+  },
+  {
+   "id": "12131856-14002888",
+   "source": "Воздух был горячий.",
+   "isv": "Vozduh je byl goreči.",
+   "split": "tune"
+  },
+  {
+   "id": "5982790-14103438",
+   "source": "Мы опоздали на трамвай.",
+   "isv": "My jesmo spozdnili se na tramvaj.",
+   "split": "held"
+  },
+  {
+   "id": "13483819-13485154",
+   "source": "Уран большой.",
+   "isv": "Uran jest veliky.",
+   "split": "tune"
+  },
+  {
+   "id": "2754462-13042022",
+   "source": "Жизнь продолжается.",
+   "isv": "Žitje prodolžaje.",
+   "split": "held"
+  },
+  {
+   "id": "13351963-13351968",
+   "source": "Поговорим о том, как тоталитарная система пожирает саму себя.",
+   "isv": "Pogovorimo, kako totalitarna sistema požiraje samo sebe.",
+   "split": "tune"
+  },
+  {
+   "id": "8250285-13715717",
+   "source": "Люди есть люди.",
+   "isv": "Ljudi sut ljudi.",
+   "split": "held"
+  },
+  {
+   "id": "13136550-13139264",
+   "source": "Деньги — ничто.",
+   "isv": "Pěnezy ne sut ničto.",
+   "split": "tune"
+  },
+  {
+   "id": "4809410-13357380",
+   "source": "Я думал, что ты любишь её.",
+   "isv": "Ja jesm dumal, že ty ljubiš ju.",
+   "split": "held"
+  },
+  {
+   "id": "13837358-13837181",
+   "source": "Мухи летают.",
+   "isv": "Muhy lětajut.",
+   "split": "tune"
+  },
+  {
+   "id": "3898774-14002851",
+   "source": "Почему вы не дома?",
+   "isv": "Začto vy ne jeste doma?",
+   "split": "held"
+  },
+  {
+   "id": "13996735-14004607",
+   "source": "Я шёл в ресторан.",
+   "isv": "Ja jesm šel v restoran.",
+   "split": "tune"
+  },
+  {
+   "id": "12636932-13357392",
+   "source": "Экзамен близко.",
+   "isv": "Ekzamen je blizko.",
+   "split": "held"
+  },
+  {
+   "id": "13435511-13484803",
+   "source": "Это линейка.",
+   "isv": "To jest linijka.",
+   "split": "tune"
+  },
+  {
+   "id": "13997385-14002926",
+   "source": "Тут есть нож.",
+   "isv": "Tut jest nož.",
+   "split": "held"
+  },
+  {
+   "id": "2506853-13523174",
+   "source": "Я могу это исправить.",
+   "isv": "Ja mogu popraviti to.",
+   "split": "tune"
+  },
+  {
+   "id": "10180696-14002896",
+   "source": "Россия будет свободной!",
+   "isv": "Rosija bude svobodnoj!",
+   "split": "held"
+  },
+  {
+   "id": "13353850-13354127",
+   "source": "Позвони мне перед приходом, пожалуйста.",
+   "isv": "Zatelefonuj mene prěd prihodom, prošu.",
+   "split": "tune"
+  },
+  {
+   "id": "13351863-13351903",
+   "source": "Мир как будто бы парализован.",
+   "isv": "Svět kako by paralizovany.",
+   "split": "held"
+  },
+  {
+   "id": "13351852-13351858",
+   "source": "Снег падает с крыш.",
+   "isv": "Sněg padaje so strěh.",
+   "split": "tune"
+  },
+  {
+   "id": "2885071-14002881",
+   "source": "Она была арестована полицией.",
+   "isv": "Ona byla areštovana policijeju.",
+   "split": "held"
+  },
+  {
+   "id": "6149382-13037145",
+   "source": "Мы не в Китае.",
+   "isv": "My ne jesmo v Kitaju.",
+   "split": "tune"
+  },
+  {
+   "id": "14031903-14032039",
+   "source": "Все ненавидят полицию.",
+   "isv": "Vsi nenavidet policiju.",
+   "split": "held"
+  },
+  {
+   "id": "12409954-13084639",
+   "source": "Мы живём в разных вселенных.",
+   "isv": "My živemo v raznyh vsemirah.",
+   "split": "tune"
+  },
+  {
+   "id": "13353669-13354135",
+   "source": "В каком университете они учились?",
+   "isv": "V kakom universitetu one sut učili se?",
+   "split": "held"
+  },
+  {
+   "id": "13350017-13354121",
+   "source": "Покашляйте.",
+   "isv": "Kašljajte",
+   "split": "tune"
+  },
+  {
+   "id": "8860856-13484786",
+   "source": "Мэри очень любит животных.",
+   "isv": "Marija mnogo ljubi životiny.",
+   "split": "held"
+  },
+  {
+   "id": "657706-13408259",
+   "source": "Я ем яблоко.",
+   "isv": "Ja jem jabloko.",
+   "split": "tune"
+  },
+  {
+   "id": "11808269-13581269",
+   "source": "Ёж - животное.",
+   "isv": "Jež je životina.",
+   "split": "held"
+  },
+  {
+   "id": "14113153-14067374",
+   "source": "Свободу Израилю!",
+   "isv": "Svobodu Izraelu!",
+   "split": "tune"
+  },
+  {
+   "id": "2783172-14002847",
+   "source": "Где хлеб?",
+   "isv": "Kde je hlěb?",
+   "split": "held"
+  },
+  {
+   "id": "13719761-13719678",
+   "source": "Мы звёздная пыль.",
+   "isv": "My jesmo zvězdny prah.",
+   "split": "tune"
+  },
+  {
+   "id": "13353851-13354126",
+   "source": "Позвоните мне перед приходом, пожалуйста.",
+   "isv": "Zatelefonujte mene prěd prihodom, prošu.",
+   "split": "held"
+  },
+  {
+   "id": "13997801-14002913",
+   "source": "Спой.",
+   "isv": "Spěvaj.",
+   "split": "tune"
+  },
+  {
+   "id": "12336363-13038177",
+   "source": "Жизнь - это музыка.",
+   "isv": "Žitje jest muzika.",
+   "split": "held"
+  },
+  {
+   "id": "5601806-13425651",
+   "source": "Бог везде.",
+   "isv": "Bog jest vesde.",
+   "split": "tune"
+  },
+  {
+   "id": "13558525-14123240",
+   "source": "Ты полон сюрпризов.",
+   "isv": "Ty jesi polny surprizov.",
+   "split": "held"
+  },
+  {
+   "id": "14006473-14006014",
+   "source": "Бог не иудей.",
+   "isv": "Bog ne jest Jevrej.",
+   "split": "tune"
+  },
+  {
+   "id": "2501677-14100016",
+   "source": "Это спорно.",
+   "isv": "To jest sporno",
+   "split": "held"
+  },
+  {
+   "id": "13353589-13354140",
+   "source": "Он приложил руку ко лбу.",
+   "isv": "On je priložil ruku k čelu.",
+   "split": "tune"
+  },
+  {
+   "id": "5977650-13357399",
+   "source": "Мы близко.",
+   "isv": "My jesmo blizko.",
+   "split": "held"
+  },
+  {
+   "id": "14003378-14004070",
+   "source": "Мы богаче их.",
+   "isv": "My jesmo bogatši než oni.",
+   "split": "tune"
+  },
+  {
+   "id": "13213579-13469735",
+   "source": "Мир никогда не был вариантом.",
+   "isv": "Mir nikogda ne byl opcija.",
+   "split": "held"
+  },
+  {
+   "id": "4021844-14002856",
+   "source": "Я никогда его не понимал.",
+   "isv": "Ja nikogdy jego ne jesm razuměl.",
+   "split": "tune"
+  },
+  {
+   "id": "14006495-14006489",
+   "source": "Бог не мусульманин.",
+   "isv": "Bog ne jest musliman.",
+   "split": "held"
+  },
+  {
+   "id": "12866196-13072269",
+   "source": "Я не видел кошку.",
+   "isv": "Ja ne jesm viděl kotku.",
+   "split": "tune"
+  },
+  {
+   "id": "6708743-13179674",
+   "source": "Мэри не мужчина.",
+   "isv": "Marija ne jest muž.",
+   "split": "held"
+  },
+  {
+   "id": "13350527-13351796",
+   "source": "Вы выглядите одинокими.",
+   "isv": "Vy izgledajete samotnymi.",
+   "split": "tune"
+  },
+  {
+   "id": "14002109-14004073",
+   "source": "Он живёт в хижине посреди леса.",
+   "isv": "On žive v halupě posrěd lěsa.",
+   "split": "held"
+  },
+  {
+   "id": "6929193-14002875",
+   "source": "Давай соберём игрушки.",
+   "isv": "Davaj budemo sobrati igračky.",
+   "split": "tune"
+  },
+  {
+   "id": "11991657-13161097",
+   "source": "Франция не Париж.",
+   "isv": "Francija ne jest Pariž.",
+   "split": "held"
+  },
+  {
+   "id": "11032959-14002879",
+   "source": "Мы пошли в ресторан.",
+   "isv": "My jesmo pošli v restoran.",
+   "split": "tune"
+  },
+  {
+   "id": "13996740-14004603",
+   "source": "Красивой смерти не бывает.",
+   "isv": "Krasnoj smrti ne byvaje.",
+   "split": "held"
+  },
+  {
+   "id": "13039602-13042024",
+   "source": "Ты написала роман.",
+   "isv": "Ty jesi napisala roman.",
+   "split": "tune"
+  },
+  {
+   "id": "13353656-13354139",
+   "source": "Мы просто сходим на рынок.",
+   "isv": "My prosto budemo idti na trg.",
+   "split": "held"
+  },
+  {
+   "id": "13836637-13836626",
+   "source": "Не всем нужна машина.",
+   "isv": "Ne vsi potrěbujut avto.",
+   "split": "tune"
+  },
+  {
+   "id": "6708794-14002877",
+   "source": "Принцесса живёт в замке.",
+   "isv": "Princesa žive v zamku.",
+   "split": "held"
+  },
+  {
+   "id": "13036969-13042043",
+   "source": "Не завтра, а сегодня!",
+   "isv": "Ne zautra, a dnes!",
+   "split": "tune"
+  },
+  {
+   "id": "14103712-14103740",
+   "source": "Мы купили диван в магазине мебели.",
+   "isv": "My jesmo kupili divan v magazinu mebeljev.",
+   "split": "held"
+  },
+  {
+   "id": "13484210-13484780",
+   "source": "Он продал машину.",
+   "isv": "On prodal avto.",
+   "split": "tune"
+  },
+  {
+   "id": "13039168-13038179",
+   "source": "Жизнь — это надежда.",
+   "isv": "Žitje jest naděja.",
+   "split": "held"
+  },
+  {
+   "id": "13788285-13802124",
+   "source": "Где моя вода?",
+   "isv": "Kde je moja voda?",
+   "split": "tune"
+  },
+  {
+   "id": "5462897-13357370",
+   "source": "Снимай пальто и чувствуй себя как дома.",
+   "isv": "Snimaj paljto i čuj se kak doma.",
+   "split": "held"
+  },
+  {
+   "id": "13698931-13731467",
+   "source": "Квадратный корень из 4 равен 2.",
+   "isv": "Kvadratny korenj cifry 4 je 2.",
+   "split": "tune"
+  },
+  {
+   "id": "13959866-13959863",
+   "source": "Я ненавижу мужчин.",
+   "isv": "Ja nenavidim mužev.",
+   "split": "held"
+  },
+  {
+   "id": "8299511-13357395",
+   "source": "Зима близко.",
+   "isv": "Zima je blizko.",
+   "split": "tune"
+  },
+  {
+   "id": "13463580-13480653",
+   "source": "Я не умею считать.",
+   "isv": "Ja ne uměju sčityvati.",
+   "split": "held"
+  },
+  {
+   "id": "6998753-13577522",
+   "source": "Я мать.",
+   "isv": "Ja jesm mati.",
+   "split": "tune"
+  },
+  {
+   "id": "13998670-14002923",
+   "source": "Я бедная ученица.",
+   "isv": "Ja jesm bědna učenica.",
+   "split": "held"
+  },
+  {
+   "id": "14003579-14004067",
+   "source": "Меня там больше не увидят.",
+   "isv": "Mene tam večši ne budut uviděti.",
+   "split": "tune"
+  },
+  {
+   "id": "13050616-13050143",
+   "source": "Я не Бог.",
+   "isv": "Ja ne jesm Bog.",
+   "split": "held"
+  },
+  {
+   "id": "13996749-14002929",
+   "source": "Где мы будем?",
+   "isv": "Kde my budemo?",
+   "split": "tune"
+  },
+  {
+   "id": "13708197-13719971",
+   "source": "Он убил её собаку.",
+   "isv": "On ubil jej psa.",
+   "split": "held"
+  },
+  {
+   "id": "3055703-14121158",
+   "source": "Меня пригласили?",
+   "isv": "Pozvali li mene?",
+   "split": "tune"
+  },
+  {
+   "id": "5508721-13068355",
+   "source": "Ты не дурак.",
+   "isv": "Ty ne jesi glupy.",
+   "split": "held"
+  },
+  {
+   "id": "13523022-13525261",
+   "source": "Кто ходит с тобой в школу?",
+   "isv": "Kto hodi s toboju v školu?",
+   "split": "tune"
+  },
+  {
+   "id": "5671178-13069233",
+   "source": "Том сказал, что он не христианин.",
+   "isv": "Tom skazal že on ne jest hristijan.",
+   "split": "held"
+  },
+  {
+   "id": "14004528-14004582",
+   "source": "Вы говорите на нескольких языках?",
+   "isv": "Vy govorite na několikyh jezykah?",
+   "split": "tune"
+  },
+  {
+   "id": "13834370-13835472",
+   "source": "Пароль — «пароль».",
+   "isv": "Parola je \"parola\".",
+   "split": "held"
+  },
+  {
+   "id": "13997800-14002915",
+   "source": "Спойте.",
+   "isv": "Spěvajte.",
+   "split": "tune"
+  },
+  {
+   "id": "13465657-13466987",
+   "source": "Знак \"+\" означает \"плюс\".",
+   "isv": "Znak '+' znači \"plus\".",
+   "split": "held"
+  },
+  {
+   "id": "4691539-14014648",
+   "source": "Это был Том?",
+   "isv": "To byl Tom?",
+   "split": "tune"
+  },
+  {
+   "id": "4748980-14002873",
+   "source": "Не все люди одинаковы.",
+   "isv": "Ne vsi ljudi sut jednaki.",
+   "split": "held"
+  },
+  {
+   "id": "14113154-14012380",
+   "source": "Кто лжёт?",
+   "isv": "Kto lže?",
+   "split": "tune"
+  },
+  {
+   "id": "13350513-13351785",
+   "source": "Вы выглядите одинокой.",
+   "isv": "Vy izgledajete samotnoju.",
+   "split": "held"
+  },
+  {
+   "id": "10624811-13293011",
+   "source": "Я Бог.",
+   "isv": "Ja jesm Bog.",
+   "split": "tune"
+  },
+  {
+   "id": "14003532-14004064",
+   "source": "Мы были ещё совсем молоды.",
+   "isv": "My jesmo byli ješče sovsim mladi.",
+   "split": "held"
+  },
+  {
+   "id": "12315603-13755918",
+   "source": "Туризм - терроризм.",
+   "isv": "Turizm je terorizm.",
+   "split": "tune"
+  },
+  {
+   "id": "11158067-13357394",
+   "source": "Будущее близко.",
+   "isv": "Budučnost je blizko.",
+   "split": "held"
+  }
+ ]
+}
