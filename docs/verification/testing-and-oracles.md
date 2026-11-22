@@ -339,3 +339,45 @@ had one reference per sentence, and it used word F1 only.
 **The first pass, re-measured** (old engine against current, same parses): en held chrF
 −0.02 [−0.19, 0.14], ru held −0.19 [−0.65, 0.00]. No significant change, which agrees
 with the earlier reading: it fixed failures, not everyday quality.
+
+## 2026-11-22 · Word choice: what the tune half says, and what changed
+
+**Method.** An audit script used the lexicon's `analyzeText` to turn every human
+reference back into lemmas. Then, for each content word we wrote, it asked: is our lemma
+in the reference? If not, was the reference's lemma among our candidates? On the en tune
+half: 573 right, 164 where the reference's word was a candidate, 121 with no candidate.
+
+**What the 164 are.**
+- Most are not errors:
+  - spelling variants of one entry (hotěti/htěti, iměti/imati, kogda/kogdy);
+  - valid synonyms where our word is the more widely understood one (mlady vs juny,
+    vojin vs vojak);
+  - aspect.
+- Tested and REJECTED:
+  - Weighting the dictionary's intelligibility column more strongly: 8 weights, none
+    significant, and most lowered exact match.
+  - Removing the English "no object, so not transitive" penalty: +0.22 [−0.10, 0.56],
+    not significant.
+- **Aspect after modals ("mogu pomogti"), in negated pasts and in imperatives:**
+  - The grammar pages are silent; their few examples use perfectives ("ne mogl
+    najdti", "Nikto ne prijehal").
+  - A corpus count (Steenbergen's texts, about 57,700 words, and the Interslavic
+    Wikipedia dump of 2026-11-01, 1,525 pages) finds both aspects, with counts of 0-15
+    per construction: too few for a rule.
+  - Steenbergen writes `budu` + imperfective in 53 of 54 futures, as we do. Unchanged.
+- **jedati vs jesti:** the attested form is jedati ("Ovca jedaje vse", Maly princ;
+  about 20 jedati forms on Wikipedia against 1 jesti). Unchanged.
+
+**CORRECTED.**
+- English "no" before a noun is `nijedin`, not a second `ne`. Source: the pronouns
+  page and the syntax page's "nijednu knigu".
+- A "not" that a whole dictionary phrase absorbed ("not good" → nedobry) is no
+  longer negated again.
+- There were 6 doubled negations in the 1,212 sentences. Tune: exactly the 3 intended
+  sentences changed, with chrF −0.00 [−0.02, 0.03], because the references paraphrase
+  them.
+
+**Conclusion.** The ranker's choices among the dictionary's own words are mostly
+defensible, so the gap to the references is largely style. The larger remaining errors
+are in the other 121 words: idioms ("Shut up"), parser misreads ("Fire burns", "The
+cat's sleeping") and dictionary gaps.
