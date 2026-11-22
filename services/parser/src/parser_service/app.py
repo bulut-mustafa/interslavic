@@ -82,7 +82,7 @@ class ParseRequest(BaseModel):
 
 class ParseManyRequest(BaseModel):
     """Several texts parsed in one batch - the transformer tagger is much faster that way."""
-    texts: list[str] = Field(min_length=1, max_length=200)
+    texts: list[str] = Field(min_length=1, max_length=1000)  # the web route caps text at 2000 characters
     lang: Lang
 
 
