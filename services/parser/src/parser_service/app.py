@@ -129,7 +129,9 @@ def parse(req: ParseRequest) -> ParseResponse:
     doc = pipeline(req.lang)(text)
 
     sentences: list[Sentence] = []
-    for sent in doc.sentences:
+    for i, sent in enumerate(doc.sentences):
+        # Only the last sentence carries the "." we appended.
+        synthetic = added_terminator and i == len(doc.sentences) - 1
         check_words(sent.words, req.lang)
         tokens: list[Token] = []
         for word in sent.words:
@@ -148,14 +150,14 @@ def parse(req: ParseRequest) -> ParseResponse:
                     deprel=word.deprel or "dep",
                 )
             )
-        if added_terminator and tokens and tokens[-1].upos == "PUNCT":
+        if synthetic and tokens and tokens[-1].form == ".":
             # Drop the terminator we added, so the caller gets its own sentence
             # back. Anything depending on it (the engine carries sentence-final
             # punctuation over to the output) then behaves as before.
             tokens.pop()
         sentences.append(
             Sentence(
-                text=sent.text[:-1] if added_terminator else sent.text,
+                text=sent.text[:-1] if synthetic and sent.text.endswith(".") else sent.text,
                 lang=req.lang,
                 tokens=tokens,
             )

@@ -125,7 +125,7 @@ function index(): Map<string, PrepCandidate[]> {
         Number(a.direction) - Number(b.direction) ||
         b.freq - a.freq ||
         a.prep.length - b.prep.length ||
-        a.prep.localeCompare(b.prep),
+        a.prep.localeCompare(b.prep, 'en'),
     );
   }
   cache = m;

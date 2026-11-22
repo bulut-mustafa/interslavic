@@ -46,6 +46,9 @@ def main() -> None:
         got = check_lemma(form, lemma, upos, feats, "uk")
         if got != want:
             failures.append(f"{form}: {lemma} -> {got}, expected {want}")
+    # A bare clitic must not crash the request (simplemma raises on "").
+    for upos in ("VERB", "NOUN"):
+        check_lemma("ся", "ся", upos, "", "uk")
     # Only Ukrainian is touched.
     if check_lemma("мию", "мияти", "VERB", "", "ru") != "мияти":
         failures.append("a Russian lemma was changed")

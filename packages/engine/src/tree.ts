@@ -152,8 +152,13 @@ export function subjectPerson(verb: UdToken, sentence: ParsedSentence): string {
  * appending "." turned "Do you know the answer?" into a statement.
  */
 export function sentencePunctuation(sentence: ParsedSentence): string {
-  const last = [...sentence.tokens].reverse().find((t) => t.upos === 'PUNCT');
-  return last && /[.!?…]+$/.test(last.form) ? last.form : '';
+  // The final run of punctuation, so a closing quote or bracket after the
+  // mark ("He asked "why?"") does not hide it.
+  for (const t of [...sentence.tokens].reverse()) {
+    if (t.upos !== 'PUNCT') return '';
+    if (/[.!?…]+$/.test(t.form)) return t.form;
+  }
+  return '';
 }
 
 /**

@@ -675,7 +675,7 @@ export function compareEntries(a: Entry, b: Entry, ctx: RankContext = {}): numbe
   const fb = effectiveFrequency(b, ctx);
   if (fa !== fb) return fb - fa;
   if (a.lemma.length !== b.lemma.length) return a.lemma.length - b.lemma.length;
-  return a.lemma.localeCompare(b.lemma);
+  return a.lemma.localeCompare(b.lemma, 'en'); // fixed locale: same choice on every machine
 }
 
 export function rank(entries: Entry[], ctx: RankContext = {}): Entry[] {

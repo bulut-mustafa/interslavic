@@ -54,20 +54,27 @@ const asWritten = (surface: string, sentence: string, first: boolean): string =>
     ? sentence.slice(0, surface.length)
     : surface;
 
+type Line = Translation & { breakAfter?: true };
+
+/** Both scripts from one request: the server parses once and renders twice. */
 async function fetchTranslation(
   text: string,
   lang: Lang,
   orthography: Orthography,
-): Promise<Translation[]> {
+): Promise<{ main: Line[]; alt: Line[] }> {
   const res = await fetch(`${API}/api/translate`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ text, lang, orthography }),
+    body: JSON.stringify({ text, lang, orthography, alternate: alternateOf(orthography) }),
   });
-  const body = (await res.json()) as { sentences?: Translation[]; error?: string };
+  const body = (await res.json()) as { sentences?: Line[]; alternate?: Line[]; error?: string };
   if (!res.ok) throw new Error(body.error ?? `request failed (${res.status})`);
-  return body.sentences ?? [];
+  return { main: body.sentences ?? [], alt: body.alternate ?? [] };
 }
+
+/** The whole translation as text, with the input's line breaks kept. */
+const joined = (sentences: Line[]): string =>
+  sentences.map((s, i) => s.text + (i === sentences.length - 1 ? '' : s.breakAfter ? '\n' : ' ')).join('');
 
 /** A lesson's "Try it" link opens the translator with its sentence: /?lang=en&text=... */
 function fromAddress(): { text: string; lang: Lang; script: Orthography } {
@@ -83,8 +90,8 @@ export default function Translator() {
   const [text, setText] = useState(() => fromAddress().text);
   const [lang, setLang] = useState<Lang>(() => fromAddress().lang);
   const [orth, setOrth] = useState<Orthography>(() => fromAddress().script);
-  const [primary, setPrimary] = useState<Translation[]>([]);
-  const [alternate, setAlternate] = useState<Translation[]>([]);
+  const [primary, setPrimary] = useState<Line[]>([]);
+  const [alternate, setAlternate] = useState<Line[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [activeWord, setActiveWord] = useState<string | null>(null);
@@ -102,10 +109,7 @@ export default function Translator() {
     }
     setBusy(true);
     try {
-      const [main, alt] = await Promise.all([
-        fetchTranslation(text, lang, orth),
-        fetchTranslation(text, lang, alternateOf(orth)),
-      ]);
+      const { main, alt } = await fetchTranslation(text, lang, orth);
       if (id !== requestId.current) return; // a newer request won
       setPrimary(main);
       setAlternate(alt);
@@ -334,7 +338,7 @@ export default function Translator() {
 
                 {alternate.length > 0 && (
                   <p className="alt-script" aria-label="The same text in the other script">
-                    {alternate.map((s) => s.text).join(' ')}
+                    {joined(alternate)}
                   </p>
                 )}
 
@@ -367,8 +371,8 @@ export default function Translator() {
                       label="Copy link"
                       event="copy-link"
                     />
-                    <Listen text={primary.map((s) => s.text).join(' ')} where="translator" />
-                    <CopyButton text={primary.map((s) => s.text).join(' ')} />
+                    <Listen text={joined(primary)} where="translator" />
+                    <CopyButton text={joined(primary)} />
                   </div>
                 </div>
               </>
@@ -382,7 +386,7 @@ export default function Translator() {
       {reporting && primary.length > 0 && (
         <ReportForm
           source={text}
-          output={primary.map((s) => s.text).join(' ')}
+          output={joined(primary)}
           lang={lang}
           orthography={orth}
           onClose={() => setReporting(false)}

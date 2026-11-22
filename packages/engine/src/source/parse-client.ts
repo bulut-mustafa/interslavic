@@ -22,6 +22,11 @@ export class ParserUnavailable extends Error {
   }
 }
 
+/** The parser answered, but with an error. */
+export class ParserError extends Error {
+  override name = 'ParserError';
+}
+
 interface WireToken {
   id: number;
   form: string;
@@ -66,10 +71,12 @@ export async function parseText(
 
   if (!res.ok) {
     const detail = await res.text().catch(() => '');
-    throw new Error(`parser returned HTTP ${res.status}: ${detail.slice(0, 400)}`);
+    throw new ParserError(`parser returned HTTP ${res.status}: ${detail.slice(0, 400)}`);
   }
 
-  const body = (await res.json()) as WireResponse;
+  const body = (await res.json().catch((e: unknown) => {
+    throw new ParserError(`parser sent a body that is not JSON: ${String(e)}`);
+  })) as WireResponse;
   return body.sentences.map(
     (s): ParsedSentence => ({
       text: s.text,

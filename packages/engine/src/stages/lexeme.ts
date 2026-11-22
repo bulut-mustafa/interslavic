@@ -629,7 +629,7 @@ export function lexemeStage(input: LexemeInput): PlanNode[] {
     }
 
     if (!entry) {
-      unknown.push(token.form);
+      if (!/^\d[\d\s.,:]*$/.test(token.form)) unknown.push(token.form); // digits need no entry
       notes.push('not in the dictionary - source word kept');
       plan.push({ token, entry: null, ranked, aspect, feats, notes });
       continue;

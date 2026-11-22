@@ -567,6 +567,8 @@ export function realiseStage(input: RealiseInput): RealiseOutput {
         (token.upos === 'NOUN' && !firstWord && /^\p{Lu}\p{Ll}/u.test(token.form));
       const latinName = toLatin && looksLikeName ? toLatin(token.form) : null;
       if (latinName) notes.push(`a name, written in Latin by the Interslavic letter tables (${token.form})`);
+      // A number in digits is written the same in every language.
+      const digits = /^\d[\d\s.,:]*$/.test(token.form);
       const surface = latinName ?? token.form;
       surfaces.push(surface);
       words.push({
@@ -575,8 +577,8 @@ export function realiseStage(input: RealiseInput): RealiseOutput {
         sourceForm: token.form,
         pos: token.upos,
         features,
-        notes,
-        validation: 'untranslated',
+        notes: digits ? ['a number in digits, written as in the source'] : notes,
+        validation: digits ? 'validated' : 'untranslated',
       });
       continue;
     }

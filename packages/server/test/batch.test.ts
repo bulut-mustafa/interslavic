@@ -5,6 +5,7 @@ import { Lexicon } from '../../lexicon/src/reader.ts';
 import { buildFullFormIndex } from '../../lexicon/src/full-forms.ts';
 import { parseConllu } from '../../engine/src/conllu.ts';
 import { translate, type Translation } from '../../engine/src/pipeline.ts';
+import { ParserError, ParserUnavailable } from '../../engine/src/source/parse-client.ts';
 import { BATCH_LIMITS, checkBatch, reasonsFor, translateLines } from '../src/batch.ts';
 
 const ROOT_DIR = path.resolve(import.meta.dirname, '../../..');
@@ -90,9 +91,21 @@ describe('translateLines', () => {
     expect(out[0]!.text).toBe(`${t(a)} ${t(b)}`);
   });
 
-  it('passes a parser failure up instead of returning a partial answer', async () => {
+  it('passes a dead parser up instead of returning a partial answer', async () => {
     await expect(
-      translateLines(['Hello.'], { parse: async () => { throw new Error('parser service down'); }, translate: () => { throw new Error('x'); } }),
-    ).rejects.toThrow('parser service down');
+      translateLines(['Hello.'], { parse: async () => { throw new ParserUnavailable('http://x', 'down'); }, translate: () => { throw new Error('x'); } }),
+    ).rejects.toThrow('could not reach the parser');
+  });
+
+  it('flags a line that fails on its own and keeps the others', async () => {
+    const out = await translateLines(['bad', 'Hello.'], {
+      parse: async (line) => {
+        if (line === 'bad') throw new ParserError('parser returned HTTP 500');
+        return [fixture('en/boy-gives-girl-book.conllu')];
+      },
+      translate: (s) => translate(s, lex, { orthography: 'standard' }),
+    });
+    expect(out[0]).toEqual({ text: 'bad', flagged: true, reasons: ['could not translate this line'] });
+    expect(out[1]!.text).toBe('Hlapec davaje děvě knigu.');
   });
 });

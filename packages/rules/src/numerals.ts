@@ -71,8 +71,11 @@ export function isIndefiniteCardinal(isvLemma: string): boolean {
 
 /** The integer a numeral token denotes, or null if we cannot tell. */
 export function numeralValue(lemma: string, form: string, lang: string): number | null {
-  const digits = form.replace(/[\s.,]/g, '');
-  if (/^\d+$/.test(digits)) return Number(digits);
+  if (/^\d+$/.test(form)) return Number(form);
+  // "1,000" and "10 000" group thousands; "1.5" or "3,5" is a fraction, whose
+  // value would govern wrongly ("1.5" read as 15 took a genitive plural).
+  if (/^\d{1,3}([\s.,]\d{3})+$/.test(form)) return Number(form.replace(/[\s.,]/g, ''));
+  if (/\d/.test(form)) return null;
 
   // Ukrainian writes its apostrophe three ways: п'ять, пʼять, п’ять.
   const key = lemma.trim().toLowerCase().replace(/[ʼ’‘`]/g, "'");

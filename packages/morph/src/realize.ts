@@ -168,7 +168,7 @@ export function selectForm(
   // form, then alphabetical order, so output never depends on library ordering.
   if (hits.length > 1) {
     hits = [...hits].sort((a, b) =>
-      a.form.length !== b.form.length ? b.form.length - a.form.length : a.form.localeCompare(b.form),
+      a.form.length !== b.form.length ? b.form.length - a.form.length : a.form.localeCompare(b.form, 'en'),
     );
   }
 

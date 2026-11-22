@@ -69,12 +69,15 @@ const DATA = path.resolve(import.meta.dirname, '../data/function-words.json');
 
 let cache: Map<string, FunctionWord[]> | null = null;
 
+// The parser writes "её" as "ее", so ё is folded on both sides.
+const keyOf = (lang: string, lemma: string) => `${lang}|${lemma.trim().toLowerCase().replace(/ё/g, 'е')}`;
+
 function index(): Map<string, FunctionWord[]> {
   if (cache) return cache;
   const raw = JSON.parse(fs.readFileSync(DATA, 'utf8')) as { words: FunctionWord[] };
   const m = new Map<string, FunctionWord[]>();
   for (const w of raw.words) {
-    const key = `${w.lang ?? 'en'}|${w.en.trim().toLowerCase()}`;
+    const key = keyOf(w.lang ?? 'en', w.en);
     let bucket = m.get(key);
     if (!bucket) m.set(key, (bucket = []));
     bucket.push(w);
@@ -94,7 +97,7 @@ export function functionWordFor(
   deprel?: string,
 ): FunctionWord | null {
   const candidates = index()
-    .get(`${lang}|${lemma.trim().toLowerCase()}`)
+    .get(keyOf(lang, lemma))
     ?.filter((w) => w.upos.includes(upos))
     .filter((w) => !(w.unlessHeadIs && headUpos && w.unlessHeadIs.includes(headUpos)))
     .filter((w) => w.whenRelation === undefined || w.whenRelation === deprel) ?? [];

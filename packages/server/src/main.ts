@@ -10,11 +10,13 @@ import { buildCognateIndex, type CognateIndex } from '../../lexicon/src/cognates
 import { translate, type Translation } from '../../engine/src/pipeline.ts';
 import {
   DEFAULT_PARSER_URL,
+  ParserError,
+  ParserUnavailable,
   parseText,
   parserHealthy,
 } from '../../engine/src/source/parse-client.ts';
 import type { Orthography } from '../../morph/src/orthography.ts';
-import { ENABLED_LANGS, isSourceLang, type SourceLang } from '../../types/index.ts';
+import { ENABLED_LANGS, isSourceLang, type ParsedSentence, type SourceLang } from '../../types/index.ts';
 
 /**
  * The languages this server translates from: the public list, plus any named
@@ -119,6 +121,25 @@ interface TranslateBody {
   text?: unknown;
   lang?: unknown;
   orthography?: unknown;
+  /** A second script to render from the same parse. */
+  alternate?: unknown;
+}
+
+/**
+ * A failed translation, in words a visitor can act on. Bad JSON is the
+ * caller's fault (400); a dead or failing parser is ours and temporary (503);
+ * anything else is an engine bug (500), logged with its stack.
+ */
+function fail(res: http.ServerResponse, err: unknown): void {
+  if (err instanceof SyntaxError) {
+    json(res, 400, { error: 'the request is not valid JSON' });
+  } else if (err instanceof ParserUnavailable || err instanceof ParserError) {
+    process.stderr.write(`${err.message}\n`);
+    json(res, 503, { error: 'the parser is not answering; please try again in a moment' });
+  } else {
+    process.stderr.write(`${err instanceof Error ? err.stack : String(err)}\n`);
+    json(res, 500, { error: 'the translator failed on this text; please report it' });
+  }
 }
 
 const server = http.createServer((req, res) => {
@@ -172,18 +193,29 @@ const server = http.createServer((req, res) => {
           return;
         }
 
+        const alternate: Orthography | null = ORTHOGRAPHIES.has(body.alternate as Orthography)
+          ? (body.alternate as Orthography)
+          : null;
+
         const { lex, validator } = boot();
-        const parsed = await parseText(text, lang, { url: PARSER_URL });
-        const sentences: Translation[] = parsed.map((s) =>
-          translate(s, lex, { orthography, validator }),
-        );
-        json(res, 200, { sentences });
+        // Each input line is parsed on its own: the parser reads a single
+        // newline as a space and would join two lines into one sentence.
+        const parsed: ParsedSentence[] = [];
+        const breaks = new Set<number>();
+        for (const line of text.split(/\r?\n/)) {
+          if (!line.trim()) continue;
+          parsed.push(...(await parseText(line, lang, { url: PARSER_URL })));
+          breaks.add(parsed.length - 1);
+        }
+        // Orthography is applied after the analysis, so one parse serves both scripts.
+        const render = (o: Orthography) =>
+          parsed.map((s, i): Translation & { breakAfter?: true } => {
+            const t = translate(s, lex, { orthography: o, validator });
+            return breaks.has(i) ? { ...t, breakAfter: true } : t;
+          });
+        json(res, 200, { sentences: render(orthography), ...(alternate ? { alternate: render(alternate) } : {}) });
       } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-        // A missing parser is the common case and deserves a clear instruction
-        // rather than a generic 500.
-        const isParser = message.includes('parser service');
-        json(res, isParser ? 503 : 400, { error: message });
+        fail(res, err);
       }
     })();
     return;
@@ -235,8 +267,7 @@ const server = http.createServer((req, res) => {
         });
         json(res, 200, { results });
       } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-        json(res, message.includes('parser service') ? 503 : 400, { error: message });
+        fail(res, err);
       } finally {
         batchBusy = false;
       }

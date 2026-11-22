@@ -40,6 +40,8 @@ _TOJ = {"той", "те", "теє", "та", "тая", "ті", "тії", "тог�
 
 def _is_lemma(word: str) -> bool:
     """A word simplemma knows and that is its own lemma ("римлян" is a form)."""
+    if not word:  # simplemma raises on an empty string, e.g. the stem of a bare "ся"
+        return False
     if simplemma.is_known(word, lang="uk") and simplemma.lemmatize(word, lang="uk").lower() == word.lower():
         return True
     # A reflexive verb is often listed by its stem ("митися" under "мити").
@@ -55,7 +57,7 @@ def _fits(upos: str, lemma: str) -> bool:
 
 def _candidates(form: str, upos: str, feats: str) -> list[str]:
     word = form.lower()
-    reflexive = upos in ("VERB", "AUX") and word.endswith(_REFLEXIVE)
+    reflexive = upos in ("VERB", "AUX") and word.endswith(_REFLEXIVE) and len(word) > 2
     stem = word[:-2] if reflexive else word
     suffix = "ся" if reflexive else ""
     found = [simplemma.lemmatize(stem, lang="uk") + suffix]

@@ -8,17 +8,19 @@ export const WIDTHS = [320, 360, 390, 430] as const;
  * The translator API with the REAL response shape (fixtures/translate-*.json were taken from the live site for
  * "Good morning, my friend", lang en). Requests are logged; `fail` makes the network fail, `status` makes it answer an error.
  */
-export async function mockTranslate(page: Page, opts: { fail?: boolean; status?: number; delayMs?: number } = {}): Promise<{ calls: { text: string; lang: string; orthography: string }[] }> {
-  const log = { calls: [] as { text: string; lang: string; orthography: string }[] };
+export async function mockTranslate(page: Page, opts: { fail?: boolean; status?: number; delayMs?: number } = {}): Promise<{ calls: { text: string; lang: string; orthography: string; alternate?: string }[] }> {
+  const log = { calls: [] as { text: string; lang: string; orthography: string; alternate?: string }[] };
   const std = readFileSync(fixture('translate-standard.json'), 'utf8');
   const cyr = readFileSync(fixture('translate-cyrillic.json'), 'utf8');
   await page.route('**/api/translate', async (route) => {
-    const body = route.request().postDataJSON() as { text: string; lang: string; orthography: string };
+    const body = route.request().postDataJSON() as { text: string; lang: string; orthography: string; alternate?: string };
     log.calls.push(body);
     if (opts.delayMs) await new Promise((r) => setTimeout(r, opts.delayMs));
     if (opts.fail) return route.abort('failed');
     if (opts.status) return route.fulfill({ status: opts.status, json: { error: 'boom' } });
-    await route.fulfill({ status: 200, contentType: 'application/json', body: body.orthography === 'cyrillic' ? cyr : std });
+    // One request carries both scripts: `orthography` and `alternate`.
+    const of = (o?: string) => (JSON.parse(o === 'cyrillic' ? cyr : std) as { sentences: unknown[] }).sentences;
+    await route.fulfill({ status: 200, json: { sentences: of(body.orthography), ...(body.alternate ? { alternate: of(body.alternate) } : {}) } });
   });
   return log;
 }

@@ -267,7 +267,7 @@ export function fullFormIndexFrom(data: FullFormData): FullFormIndex {
           if (distance <= maxDistance && k !== target) found.push({ form: k, distance });
         }
       }
-      found.sort((a, b) => a.distance - b.distance || a.form.localeCompare(b.form));
+      found.sort((a, b) => a.distance - b.distance || a.form.localeCompare(b.form, 'en'));
       return found.slice(0, limit);
     },
   };

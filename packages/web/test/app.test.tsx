@@ -109,7 +109,7 @@ beforeEach(() => {
     vi.fn(async () => ({
       ok: true,
       status: 200,
-      json: async () => ({ sentences: [sentence()] }),
+      json: async () => ({ sentences: [sentence()], alternate: [sentence()] }),
     })),
   );
 });

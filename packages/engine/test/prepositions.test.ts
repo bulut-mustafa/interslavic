@@ -149,6 +149,10 @@ describe('numeral government', () => {
     expect(numeralValue('пять', 'пять', 'ru')).toBe(5);
     expect(numeralValue('x', '5', 'en')).toBe(5);
     expect(numeralValue('x', '1 000', 'en')).toBe(1000);
+    expect(numeralValue('x', '1,000', 'en')).toBe(1000);
+    // A fraction has no integer value to govern by: "1.5" is not 15.
+    expect(numeralValue('x', '1.5', 'en')).toBeNull();
+    expect(numeralValue('x', '3,5', 'ru')).toBeNull();
     expect(numeralValue('frobnitz', 'frobnitz', 'en')).toBeNull();
   });
 

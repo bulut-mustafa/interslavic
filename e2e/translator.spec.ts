@@ -40,8 +40,8 @@ test.describe('translator on a phone', () => {
     const card = page.getByRole('article', { name: 'Translation 1' });
     await expect(card.locator('.output-word')).toHaveText(['Dobro', 'utro,', 'moj', 'prijatelj']);
     await expect(card.getByLabel('The same text in the other script')).toContainText('Добро утро');
-    // standard + cyrillic requests, with what the user chose
-    expect(api.calls.map((c) => c.orthography).sort()).toEqual(['cyrillic', 'standard']);
+    // one request carries both scripts, the chosen one first
+    expect(api.calls.map((c) => [c.orthography, c.alternate])).toEqual([['standard', 'cyrillic']]);
     expect(api.calls[0]).toMatchObject({ text: TEXT, lang: 'en' });
     await expect(page.getByText(/words found in the lexicon/)).toBeVisible();
     await expect(page.getByText(/^4 of 4 words found|of 4 words found/)).toBeVisible();
@@ -187,7 +187,7 @@ test.describe('translator on a phone', () => {
     const card = page.getByRole('article', { name: 'Translation 1' });
     await expect(card.locator('.output-word').first()).toHaveText('Добро');
     await expect(card.getByLabel('The same text in the other script')).toContainText('Dobro utro');
-    expect(api.calls.map((c) => c.orthography).sort()).toEqual(['cyrillic', 'standard']);
+    expect(api.calls.map((c) => [c.orthography, c.alternate])).toEqual([['cyrillic', 'standard']]);
   });
 
   test('the chip row scrolls inside itself, every chip is a 40px+ target, the page does not scroll sideways', async ({ page }) => {

@@ -1,5 +1,6 @@
 import type { ParsedSentence } from '../../types/index.ts';
 import type { Translation } from '../../engine/src/pipeline.ts';
+import { ParserUnavailable } from '../../engine/src/source/parse-client.ts';
 
 /**
  * Many short lines in, one translation per line out, with each line kept apart.
@@ -63,7 +64,16 @@ export async function translateLines(lines: string[], deps: BatchDeps): Promise<
       out.push({ text: line, flagged: false, reasons: [] });
       continue;
     }
-    const sentences = (await deps.parse(line)).map((s) => deps.translate(s));
+    let sentences: Translation[];
+    try {
+      sentences = (await deps.parse(line)).map((s) => deps.translate(s));
+    } catch (err) {
+      // A dead parser fails every line alike, so it fails the request; any
+      // other error is this line's own and must not cost the other lines.
+      if (err instanceof ParserUnavailable) throw err;
+      out.push({ text: line, flagged: true, reasons: ['could not translate this line'] });
+      continue;
+    }
     const reasons = sentences.flatMap(reasonsFor);
     out.push({
       text: sentences.map((s) => s.text).join(' '),
