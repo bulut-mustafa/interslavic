@@ -381,3 +381,40 @@ half: 573 right, 164 where the reference's word was a candidate, 121 with no can
 defensible, so the gap to the references is largely style. The larger remaining errors
 are in the other 121 words: idioms ("Shut up"), parser misreads ("Fire burns", "The
 cat's sleeping") and dictionary gaps.
+
+## 2026-11-22 · Parser trial: Stanza `default_accurate`
+
+**Setup.** Stanza 1.15's accurate packages (English POS and parsing on ELECTRA-large,
+Russian on RuBERT; Ukrainian's accurate package is the default one) re-parsed the
+1,212 sample sentences through the repo's own `to_conllu`, so the terminator handling
+and the lemma repairs were unchanged.
+- **Control:** the default package, run in the same scratch environment, reproduced
+  all 1,212 frozen parses exactly.
+- **Scoring:** `score-tatoeba.ts --parses <dir>`, against the current engine on the
+  default parses.
+
+**Results.**
+
+| | chrF change, 95% interval | sentences better / worse |
+|---|---|---|
+| en held | +0.34 [0.09, 0.61], significant | 21 / 3 |
+| en tune | +0.53 [−0.15, 1.23] | 16 / 9 |
+| ru held | +0.54 [−0.04, 1.32] | 4 / 1 |
+| ru tune | −0.21 [−1.93, 1.18] | 4 / 3 |
+
+- **English gains:** short sentences the default model misreads, e.g. "Fire burns"
+  ("Požarne opekliny" → "Ogonj gori"), "Women like cats", "The cat's sleeping",
+  "Tom's gay".
+- **Russian losses:** the engine's Russian rules expect the default model's trees.
+  "Том лидер" lost its inserted copula ("Tom lider") and "шёл" came through in
+  Cyrillic.
+
+**Cost (English, on a laptop CPU).**
+- Load: 2.9 s → 8.5 s.
+- Per sentence: 69 ms → 676 ms (about 10×).
+- Peak memory: 662 MB → 1,890 MB.
+- The model also needs the `transformers` library and about 1.3 GB of ELECTRA
+  weights in the image.
+- Production peaks at about 2.1 GB of 4 GiB, so it would reach about 3.3 GB.
+
+Not adopted yet: the cost is the user's decision.

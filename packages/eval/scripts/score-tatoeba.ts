@@ -6,6 +6,8 @@
  *     --misses          list every sentence that is not an exact match
  *     --save <file>     write this run's outputs (one JSON line per sentence)
  *     --compare <file>  paired bootstrap of this run against a saved one
+ *     --parses <dir>    read the CoNLL-U from <dir>/<lang>/<id>.conllu instead,
+ *                       to score another parser on the same sentences
  *
  * Tune on `tune`; report `held`, which no fix may look at. chrF (sacrebleu's
  * default) is the main number; exact match and word F1 stay beside it. All
@@ -29,6 +31,7 @@ const split = args.find((a) => a === 'tune' || a === 'held') ?? 'held';
 const option = (name: string) => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] : undefined; };
 const savePath = option('--save');
 const comparePath = option('--compare');
+const parses = option('--parses') ?? DATA;
 
 const lex = Lexicon.fromTsv(path.join(ROOT, 'packages/lexicon/data/raw/words.tsv'));
 const pairs = JSON.parse(fs.readFileSync(path.join(DATA, 'pairs.json'), 'utf8')) as Record<
@@ -53,7 +56,7 @@ for (const [lang, all] of Object.entries(pairs)) {
   const before: ChrfStats[] = [];
   const misses: string[] = [];
   for (const p of chosen) {
-    const conllu = fs.readFileSync(path.join(DATA, lang, `${p.id}.conllu`), 'utf8');
+    const conllu = fs.readFileSync(path.join(parses, lang, `${p.id}.conllu`), 'utf8');
     const out = conllu.split(/\n\s*\n/).filter((b) => b.trim()).map((b) =>
       translate(parseConllu(b), lex, { orthography: 'standard' }));
     const got = out.map((t) => t.text).join(' ');
