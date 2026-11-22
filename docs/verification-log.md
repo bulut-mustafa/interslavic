@@ -8,7 +8,7 @@ inadequate answer to "is this correct?".
 `VERIFIED` = checked empirically in this repo · `CORRECTED` = was wrong, now fixed ·
 `UNVERIFIED` = sourced from research only, **not** independently confirmed.
 
-The log runs from 2026-10-17 to 2026-10-30. It is split by topic; inside each file the
+The log runs from 2026-10-17 to 2026-11-22. It is split by topic; inside each file the
 entries are in the order they were written, and the date is in each heading. Entries are
 history: they are not rewritten when things change. Where a list was only true on its
 date, the entry says so and points to what replaced it.

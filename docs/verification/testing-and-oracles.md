@@ -237,3 +237,69 @@ now has 317 mutations, 0 stale. 431 tests pass, and typecheck is clean.
 Known and left alone: an unknown Russian name stays in Cyrillic. The orthography page
 defines Latin<->Cyrillic only for Interslavic's own letters, and gives no mapping for
 Russian-only letters (я, ю, щ, ь, ъ, э, ё, й), so a transliteration would be invented.
+
+## 2026-11-22 · Pipeline audit and a real-world score
+
+A full pass over parser, server, engine and web, looking for places where the code
+disagreed with itself or lost data. Branch `translator-quality`.
+
+**CORRECTED - plumbing.**
+- With no final mark, the parser undid its appended "." on every sentence, so
+  "Что ты делаешь? Я читаю" lost its "?" (`app.py`, `to_conllu.py`).
+- `/api/translate` sent all lines as one string, and Stanza reads one newline as
+  a space: two typed lines became one sentence. Each line is now parsed on its own
+  and marked `breakAfter`.
+- The web made two requests, so two parses, for the two scripts. Now it makes one.
+- A bare "ся" crashed the Ukrainian lemma check. One bad subtitle line failed the
+  whole batch.
+- Parser and engine failures came back as 400 with developer text. They are now
+  503 and 500, worded for a visitor.
+
+**CORRECTED - the engine against its own rules** (one fixture test each in
+`packages/engine/test/robustness.test.ts`):
+- A completive cue made an English present perfective ("srazuměju").
+- A Russian zero copula ignored subjects joined by "and" ("jest lěkari").
+- A second purpose clause copied the first one's agreement.
+- "not tender" switched to ni- ("nižny").
+- "её" (lemmatised "ее") never reached the curated `jejin`.
+- Digits counted as untranslated, and "1.5" governed as 15.
+- A final mark behind a closing quote was lost.
+- Verb government ignored a chosen phrasal verb.
+- Ties were broken by the machine's locale.
+
+**Measured.** `packages/eval/scripts/score-tatoeba.ts` scores 150 English and 150
+Russian Tatoeba sentences against their attested Interslavic. The parses are frozen,
+and the sample is split into a tune half and a held-out half. Baseline (old parser
+and engine) → this pass:
+
+| | tune exact | tune word F1 | held exact | held word F1 |
+|---|---|---|---|---|
+| en | 12 → 13 | .602 → .604 | 19 → 19 | .603 → .603 |
+| ru | 24 → 26 | .738 → .749 | 30 → 29 | .796 → .792 |
+
+The one held-out loss is "jej psa" → "jejinogo psa". The pronouns page gives both
+forms, and the curated entry picks the declinable one.
+
+**CORRECTED - found by the tune half.**
+- Russian verbs with an invented lemma (лжёт → "листить", шёл → "ийти") now take
+  simplemma's infinitive. Re-parsing all 700 fixtures changed exactly three lemmas,
+  all three corrections.
+- A Russian 1pl under a conjunction is a future, not "let us". Steenbergen's Babel
+  text gives "da byhmo ne razprostranili se".
+- A reflexive pronoun elsewhere in the sentence no longer removes a verb's own `se`.
+- A headword note ("naskakati (na)") is no longer written out.
+- A verb whose only candidates are nouns is now kept and flagged ("gospodiceju" for
+  "miss").
+- Counting takes the citation "dva" (numerals page), not "(dvě)".
+
+**Seen and left, with the reason.**
+- "look for": verb + preposition pairs stay out of the phrasal-verb rule, which
+  explains why.
+- "Tom" as an object stays undeclined. English gives no person/place tag, so
+  telling them apart needs name recognition.
+- Stanza misparses "Fire burns" and "Испания, Швеция и Япония — монархии".
+- "Tom caved" and "I miss the army" are dictionary gaps; no word is invented.
+- Unknown verbs keep no `jesm`/`se`, because a kept source word with an Interslavic
+  auxiliary is not better.
+- "you" stays `vy`, where most Tatoeba references write `ty`. That is the adapter's
+  documented choice.

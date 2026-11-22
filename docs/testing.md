@@ -28,7 +28,13 @@ engine behind interslavic-dictionary.com, is used as an oracle for every form we
 node --experimental-strip-types packages/eval/scripts/diff-orthography.ts   # all 4 scripts, every form
 node --experimental-strip-types packages/eval/scripts/diff-paradigms.ts     # case/number slots
 node --experimental-strip-types packages/eval/scripts/score-gold.ts         # meaning, per construction
+node --experimental-strip-types packages/eval/scripts/score-tatoeba.ts held # real-world sentences
 ```
+
+`score-tatoeba.ts` scores Tatoeba sentences that carry an attested Interslavic
+translation, which nobody chose to suit the rules. Tune on `tune` (add `--misses` to
+see them); report on `held`, which no fix may look at. The references vary freely
+("je"/"jest"), so word F1 is the measure, and exact match is only a floor.
 
 It found two real defects the full-form validator could not: a Cyrillic rule that took a
 documented fallback we were not entitled to, and plurale tantum nouns that never
