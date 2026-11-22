@@ -37,7 +37,8 @@
 .pv.has-sheet .pv-bottom {
   display: none;
 }
-.pv.is-typing .pv-bottom {
+/* The timeline and strip give way only when a keyboard really is up (viewportLock sets ph-kb-open): with none reported they stay, so the editor does not jump and nothing needed is hidden. */
+html.ph-kb-open .pv.is-typing .pv-bottom {
   display: none;
 }
 .pv-center {
@@ -983,6 +984,9 @@
 }
 
 /* ---- keyboard bar ---- */
+.pv-top-done {
+  margin-left: auto;
+}
 .pv-kb-done {
   padding: 0 16px;
   font-weight: 600;
@@ -1005,4 +1009,31 @@
   .pv-chip:hover {
     background: var(--paper);
   }
+}
+
+/* ---- Translate sheet ---- */
+.pv-translate {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.pv-translate .pv-chips {
+  margin: 0;
+}
+.pv-translate-row {
+  display: flex;
+  gap: 8px;
+}
+.pv-translate-go {
+  flex: 1;
+  min-height: 52px;
+  font-weight: 600;
+}
+.pv-translate .pv-note {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+}
+.pv-translate .pv-note.is-error {
+  color: #9a2b1f;
 }

@@ -706,20 +706,20 @@ export function useVideoEditor({ store = defaultVideoStore, makeTranscriber, dec
     }
   };
 
-  const translate = async (ids: string[]) => {
+  const translate = async (ids: string[], from?: SourceLang) => {
     const targets = textLayers.filter((l) => ids.includes(l.id) && l.text.trim() !== '');
     if (targets.length === 0) return;
     setBusy(true);
     setError(null);
     setStatus('Translating…');
     try {
-      const out = await translateTexts(targets.map((l) => l.text), { lang, script });
+      const out = await translateTexts(targets.map((l) => l.text), { lang: from ?? lang, script });
       let next = projectRef.current.layers;
       targets.forEach((l, i) => (next = patchLayer(next, l.id, { text: out[i]!.text, original: l.original ?? l.text })));
       commit({ layers: next });
       const doubtful = out.filter((r) => r.flagged).length;
       setStatus(`Translated ${targets.length} ${targets.length === 1 ? 'text' : 'texts'} into Interslavic.${doubtful ? ` ${doubtful} may be wrong - read ${doubtful === 1 ? 'it' : 'them'} before you save.` : ''}`);
-      track('video-translate', { lang, script, texts: targets.length });
+      track('video-translate', { lang: from ?? lang, script, texts: targets.length });
     } catch (e) {
       setStatus(null);
       setError(e instanceof Error ? e.message : String(e));

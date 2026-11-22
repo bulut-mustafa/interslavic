@@ -1,6 +1,7 @@
 import { DEFAULT_STYLE, type Rect } from '../editor/text-style.ts';
 import { newLayer, type TextLayer } from '../editor/layers.ts';
 import type { OcrLine } from './ocr.ts';
+import { isReadableLine } from './readable.ts';
 
 /** 0 (black) to 1 (white), from an "rgb(r, g, b)" string. */
 export function luminance(rgb: string): number {
@@ -17,7 +18,7 @@ const SIZE_OF_BOX = 0.78;
  * One text layer for each line the reader found, sitting exactly where the line
  * was, as large as the line was, in a colour that shows on what is behind it -
  * and an erase patch that covers the original lettering. Lines the reader is
- * unsure of, or that hold no letters, are left alone and counted.
+ * unsure of, that hold no letters, or that are only what the reader makes of texture (see readable.ts), are left alone and counted.
  */
 export interface FitOptions {
   /** The lettering's own colour inside a box, given the background colour; null if it cannot tell. */
@@ -37,7 +38,7 @@ export function layersFromLines(
   for (const line of lines) {
     const w = line.bbox.x1 - line.bbox.x0;
     const h = line.bbox.y1 - line.bbox.y0;
-    if (!/\p{L}{2,}|\p{N}/u.test(line.text) || line.confidence < minConfidence || w < 4 || h < 4) {
+    if (!/\p{L}{2,}|\p{N}/u.test(line.text) || !isReadableLine(line, minConfidence) || w < 4 || h < 4) {
       if (line.text.trim() !== '') skipped++;
       continue;
     }

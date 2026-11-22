@@ -3,6 +3,7 @@ import type { Matched } from './font-match.ts';
 import { newLayer, type TextLayer } from '../editor/layers.ts';
 import { luminance } from './find-text.ts';
 import type { OcrBox, OcrLine } from './ocr.ts';
+import { isReadableLine } from './readable.ts';
 
 /**
  * Text in a picture that can be picked out letter by letter, the way text is on
@@ -73,7 +74,7 @@ function wordsOfLine(line: OcrLine): { text: string; confidence: number; bbox: O
 export function glyphsFrom(lines: OcrLine[], minConfidence = 40): Glyph[] {
   const out: Glyph[] = [];
   lines.forEach((line, li) => {
-    if (line.confidence < minConfidence) return;
+    if (!isReadableLine(line, minConfidence)) return;
     let prev: OcrBox | null = null;
     [...wordsOfLine(line)]
       .sort((a, b) => a.bbox.x0 - b.bbox.x0)

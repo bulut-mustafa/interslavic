@@ -24,7 +24,7 @@ export interface ToolDef {
   disabled?: boolean;
 }
 
-export const ACTIONS: ReadonlySet<ToolId> = new Set<ToolId>(['split', 'delete', 'duplicate', 'translate', 'type']);
+export const ACTIONS: ReadonlySet<ToolId> = new Set<ToolId>(['split', 'delete', 'duplicate', 'type']);
 
 export const isAction = (id: ToolId): boolean => ACTIONS.has(id);
 

@@ -28,13 +28,16 @@ import { pinchLayer, planMove, softRotation } from './gesture-actions.ts';
 import { ICONS } from './icons.ts';
 import { emptyTextToRemove, holdInPlace, typingPadding } from './typing.ts';
 import { remove } from '../../photo/layer-ops.ts';
-import { AddSheet, ColourSheet, LayersSheet, MoreSheet, PagesSheet, PositionSheet, TextSheet } from './sheets.tsx';
+import { AddSheet, ColourSheet, LayersSheet, MoreSheet, PagesSheet, PositionSheet, TextSheet, TranslateSheet } from './sheets.tsx';
+import { guessLang } from '../translate-lang.ts';
+import type { SourceLang } from '../../subtitles/translate.ts';
 import type { PhoneCtx } from './types.ts';
+import type { TextLayer } from '../../editor/layers.ts';
 import './phone-photo.css';
 
 const CutoutDialog = lazy(() => import('../../photo/CutoutDialog.tsx'));
 
-export type SheetId = 'add' | 'adjust' | 'text' | 'layers' | 'font' | 'size' | 'colour' | 'effects' | 'position' | 'frame' | 'imgadjust' | 'more' | 'pages' | 'export' | 'cutout' | 'crop';
+export type SheetId = 'add' | 'adjust' | 'text' | 'layers' | 'font' | 'size' | 'colour' | 'effects' | 'position' | 'frame' | 'imgadjust' | 'more' | 'translate' | 'pages' | 'export' | 'cutout' | 'crop';
 
 const TITLES: Record<SheetId, string> = {
   add: 'Add',
@@ -49,6 +52,7 @@ const TITLES: Record<SheetId, string> = {
   frame: 'Frame',
   imgadjust: 'Adjust picture',
   more: 'More',
+  translate: 'Translate to Interslavic',
   pages: 'Pages',
   export: 'Download',
   cutout: 'Remove background',
@@ -80,6 +84,7 @@ const ITEM: Record<string, StripItem> = {
   colour: { id: 'colour', label: 'Colour', icon: pi(ICONS.colour) },
   effects: { id: 'effects', label: 'Effects', icon: pi(ICONS.effects) },
   position: { id: 'position', label: 'Position', icon: pi(ICONS.position) },
+  translate: { id: 'translate', label: 'Translate', icon: ic('translate') },
   more: { id: 'more', label: 'More', icon: pi(ICONS.more) },
   frame: { id: 'frame', label: 'Frame', icon: pi(ICONS.frame) },
   imgadjust: { id: 'imgadjust', label: 'Adjust', icon: pi(ICONS.adjust) },
@@ -87,16 +92,19 @@ const ITEM: Record<string, StripItem> = {
 
 const IDS: Record<StripMode, string[]> = {
   idle: ['add', 'background', 'crop', 'adjust', 'text', 'layers'],
-  text: ['edit', 'font', 'size', 'colour', 'effects', 'position', 'layers', 'more'],
+  text: ['edit', 'translate', 'font', 'size', 'colour', 'effects', 'position', 'layers', 'more'],
   image: ['imgadjust', 'effects', 'frame', 'position', 'layers', 'more'],
   shape: ['colour', 'effects', 'position', 'layers', 'more'],
   object: ['effects', 'position', 'layers', 'more'],
   multi: ['position', 'layers', 'more'],
 };
 
+/** The ids of a mode's tools; a mixed selection that holds some text also gets Translate. */
+export const stripIdsOf = (mode: StripMode, c: Partial<Pick<PhoneCtx, 'textSel'>>): string[] => (mode === 'multi' && (c.textSel?.length ?? 0) > 0 ? ['translate', ...IDS.multi] : IDS[mode]);
+
 /** The strip's items for a mode, some disabled (nothing to move in live text that is not a layer yet, say). */
-export function stripItems(mode: StripMode, c: Pick<PhoneCtx, 'isVirtual' | 'cutting' | 'exporting'>): StripItem[] {
-  return IDS[mode].map((id) => {
+export function stripItems(mode: StripMode, c: Pick<PhoneCtx, 'isVirtual' | 'cutting' | 'exporting'> & Partial<Pick<PhoneCtx, 'textSel'>>): StripItem[] {
+  return stripIdsOf(mode, c).map((id) => {
     const it = ITEM[id]!;
     if (c.isVirtual && (id === 'position')) return { ...it, disabled: true };
     return it;
@@ -105,6 +113,8 @@ export function stripItems(mode: StripMode, c: Pick<PhoneCtx, 'isVirtual' | 'cut
 
 /** Sheets that stay open whatever is selected; a tool of one selection closes when the selection changes to one without it. */
 const ALWAYS = new Set<SheetId>(['add', 'layers', 'pages', 'export', 'cutout', 'crop', 'more', 'adjust', 'text']);
+
+const isTextLayer = (l: import('../../photo/doc.ts').PhotoLayer): l is TextLayer => !isImage(l) && !isShape(l);
 
 const insideRect = (p: { x: number; y: number }, b: { x0: number; y0: number; x1: number; y1: number }, pad: number): boolean => p.x >= b.x0 - pad && p.x <= b.x1 + pad && p.y >= b.y0 - pad && p.y <= b.y1 + pad;
 
@@ -127,6 +137,8 @@ type Session =
 export default function PhonePageView({ ctx: c }: { ctx: PhoneCtx }) {
   const [root, setRoot] = useState<HTMLDivElement | null>(null);
   const [sheet, setSheet] = useState<SheetId | null>(null);
+  /** The language the person picked in the Translate sheet for the texts selected now (null: guess it); forgotten when the selection changes. */
+  const [pickedLang, setPickedLang] = useState<{ key: string; lang: SourceLang } | null>(null);
   const [lastSheet, setLastSheet] = useState<SheetId>('add');
   const [host, setHost] = useState<HTMLDivElement | null>(null);
   const [zoom, setZoom] = useState(1);
@@ -171,7 +183,7 @@ export default function PhonePageView({ ctx: c }: { ctx: PhoneCtx }) {
   const mode = stripModeOf(c);
   const items = stripItems(mode, c);
   const derived: SheetId | null = c.shell.exportNode ? 'export' : c.cutting ? 'cutout' : c.crop ? 'crop' : c.shell.pagesOpen ? 'pages' : sheet;
-  const stripIds = new Set(IDS[mode]);
+  const stripIds = new Set(stripIdsOf(mode, c));
   useEffect(() => {
     if (sheet && !ALWAYS.has(sheet) && !stripIds.has(sheet)) setSheet(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -180,6 +192,27 @@ export default function PhonePageView({ ctx: c }: { ctx: PhoneCtx }) {
     if (derived) setLastSheet(derived);
   }, [derived]);
   const shown: SheetId = derived ?? lastSheet;
+
+  const translatable = c.textActive.filter((l) => l.text.trim() !== '');
+  const selKey = c.activeIds.join(',');
+  const fromLang: SourceLang = pickedLang && pickedLang.key === selKey ? pickedLang.lang : guessLang(translatable.map((l) => l.text), c.lang);
+  const runTranslate = () => void c.translate({ lang: fromLang });
+  /** Back to the original words: text found in the picture is removed (the picture's own words show again), text typed by hand gets its words back. */
+  const typedBack = c.textActive.filter((l) => !l.erase && l.original !== undefined);
+  const restoreTranslated =
+    c.restoreOriginal || typedBack.length > 0
+      ? () => {
+          const gone = new Set(c.textActive.filter((l) => l.erase && l.original !== undefined).map((l) => l.id));
+          const back = new Set(typedBack.map((l) => l.id));
+          c.edit((d) => ({
+            ...d,
+            layers: d.layers.filter((l) => !gone.has(l.id)).map((l) => (back.has(l.id) && isTextLayer(l) ? { ...l, text: l.original ?? l.text, original: undefined } : l)),
+          }));
+          if (gone.size > 0) c.clear();
+          c.dismissMessages();
+        }
+      : null;
+  const textLayersOnPage = c.layers.filter(isTextLayer);
 
   const closeSheet = () => {
     if (c.shell.exportNode) c.shell.onExportClose();
@@ -432,6 +465,14 @@ export default function PhonePageView({ ctx: c }: { ctx: PhoneCtx }) {
             script={c.script}
             onScript={c.setScript}
             onAddText={c.addText}
+            onTranslateAll={
+              c.sel.length === 0 && textLayersOnPage.length > 0
+                ? () => {
+                    c.setSelectedIds(textLayersOnPage.map((l) => l.id));
+                    setSheet('translate');
+                  }
+                : undefined
+            }
             hint={
               c.geometryHint && (
                 <p className="pp-note" data-testid="geometry-hint">
@@ -453,6 +494,21 @@ export default function PhonePageView({ ctx: c }: { ctx: PhoneCtx }) {
               )
             }
             done={done}
+          />
+        );
+      case 'translate':
+        return (
+          <TranslateSheet
+            count={translatable.length}
+            lang={fromLang}
+            onLang={(lang) => setPickedLang({ key: selKey, lang })}
+            script={c.script}
+            onScript={c.setScript}
+            busy={c.busy}
+            onTranslate={runTranslate}
+            onRestore={restoreTranslated}
+            status={c.status}
+            error={c.error}
           />
         );
       case 'layers':
@@ -495,7 +551,7 @@ export default function PhonePageView({ ctx: c }: { ctx: PhoneCtx }) {
         const text = c.textActive.length > 0;
         const real = c.sel.length > 0 && !c.isVirtual;
         const list = [
-          text && { id: 'translate', label: 'Translate to Interslavic', icon: ic('translate'), onClick: () => void c.translate(), disabled: c.busy },
+          text && { id: 'translate', label: 'Translate to Interslavic', icon: ic('translate'), onClick: () => setSheet('translate'), disabled: c.busy },
           text && { id: 'edit', label: 'Edit the text', icon: ic('edit'), onClick: c.startTyping },
           real && { id: 'duplicate', label: 'Duplicate', icon: ic('copy'), onClick: c.duplicateSel },
           real && { id: 'copy', label: 'Copy', icon: ic('clipboard'), onClick: c.copyLayers },
@@ -522,7 +578,7 @@ export default function PhonePageView({ ctx: c }: { ctx: PhoneCtx }) {
     }
   })();
 
-  const detents: Detent[] = shown === 'export' || shown === 'cutout' ? ['full'] : shown === 'crop' ? ['half'] : ['half', 'full'];
+  const detents: Detent[] = shown === 'export' || shown === 'cutout' ? ['full'] : shown === 'crop' || shown === 'translate' ? ['half'] : ['half', 'full'];
   const header =
     shown === 'crop' ? (
       <div className="pp-head-actions">
@@ -651,7 +707,7 @@ export default function PhonePageView({ ctx: c }: { ctx: PhoneCtx }) {
           </FloatingBar>
         )}
 
-        {message && (
+        {message && !(sheetOpen && shown === 'translate') && (
           <p className={isError ? 'pp-toast is-error' : 'pp-toast'} role={isError ? 'alert' : 'status'}>
             <span>{message}</span>
             <button type="button" className="pp-icon-btn" aria-label="Dismiss" onClick={c.dismissMessages}>
@@ -693,6 +749,9 @@ export default function PhonePageView({ ctx: c }: { ctx: PhoneCtx }) {
               {id === 'font' ? 'Font' : id === 'size' ? 'Size' : 'Colour'}
             </button>
           ))}
+          <button type="button" className="pp-kb-btn is-translate" aria-label="Translate to Interslavic" disabled={c.busy || translatable.length === 0} onPointerDown={(e) => e.preventDefault()} onMouseDown={(e) => e.preventDefault()} onClick={runTranslate}>
+            <Icon name="translate" size="1.1rem" /> Translate
+          </button>
           <span className="pp-kb-gap" />
           <button type="button" className="pp-kb-btn is-primary" onPointerDown={(e) => e.preventDefault()} onMouseDown={(e) => e.preventDefault()} onClick={stopTyping}>
             Done

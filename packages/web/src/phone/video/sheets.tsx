@@ -19,6 +19,7 @@ import { PRESETS as ANIM_PRESETS, PRESET_LABELS, type AnimPreset, type Anims } f
 import { maxDuration } from '../../video/transitions.ts';
 import { length as clipLength, locate, speedOf, trim } from '../../video/timeline.ts';
 import { LANGS, clock, patchLayer, type VideoEditorState } from '../../video/useVideoEditor.ts';
+import { plainTranslateError } from '../translate-lang.ts';
 import { PATHS, PIcon, Chips, PickButton, Row, Section, Slider, Switch } from './atoms.tsx';
 import { RATIOS, frameForRatio, ratioLabel } from './tools.ts';
 import type { Track } from '../../video/keyframes.ts';
@@ -478,3 +479,29 @@ export function RatioSheet({ ed }: { ed: Ed }) {
   );
 }
 
+
+/** Translate the selected text: its language, the script, the button, the result's message and the way back to the original words. */
+export function TranslateSheet({ ed, lang, onLang }: { ed: Ed; lang: SourceLang; onLang: (l: SourceLang) => void }) {
+  const { textLayer, busy, script, setScript, translate, commit, layers, status, error } = ed;
+  if (!textLayer) return <p className="pv-hint">Select a text on the timeline first.</p>;
+  const translatable = textLayer.text.trim() !== '';
+  return (
+    <div className="pv-translate" data-testid="translate-sheet">
+      <Chips label="Language of the text" value={lang} options={LANGS.map((l) => ({ id: l.value, label: l.label, disabled: busy }))} onChange={onLang} />
+      <Chips label="Interslavic script" value={script} options={[{ id: 'standard' as Script, label: 'Latin', disabled: busy }, { id: 'cyrillic' as Script, label: 'Cyrillic', disabled: busy }]} onChange={setScript} />
+      <div className="pv-translate-row">
+        <button type="button" className="pv-button is-primary pv-translate-go" disabled={busy || !translatable} onClick={() => void translate([textLayer.id], lang)}>
+          <Icon name="translate" size="1.3rem" /> {busy ? 'Translating…' : 'Translate'}
+        </button>
+        {textLayer.original !== undefined && (
+          <button type="button" className="pv-button" disabled={busy} onClick={() => { commit({ layers: patchLayer(layers, textLayer.id, { text: textLayer.original, original: undefined }) }); ed.setStatus(null); }}>
+            <Icon name="undo" size="1.1rem" /> Restore original
+          </button>
+        )}
+      </div>
+      {busy && <p className="pv-note" role="status">Asking the translator…</p>}
+      {!busy && error && <p className="pv-note is-error" role="alert">{plainTranslateError(error)}</p>}
+      {!busy && !error && status && /^Translated/.test(status) && <p className="pv-note" role="status">{status}</p>}
+    </div>
+  );
+}

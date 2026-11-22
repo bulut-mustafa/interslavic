@@ -313,10 +313,17 @@
 /* On the keyboard bar. */
 .pp-kb-btn {
   flex: none;
-  min-width: 56px;
-  padding: 0 16px;
+  min-width: 48px;
+  padding: 0 10px;
   font: inherit;
   font-size: 0.95rem;
+}
+.pp-kb-btn.is-translate {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--teal);
+  font-weight: 600;
 }
 .pp-kb-btn.is-primary {
   color: var(--teal);
@@ -789,4 +796,54 @@
     transition: none !important;
     animation: none !important;
   }
+}
+
+/* ---- Translate sheet ---- */
+.pp-translate {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.pp-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.pp-chip.is-on {
+  border-color: var(--teal);
+  background: rgba(31, 107, 107, 0.1);
+  color: var(--teal);
+  font-weight: 600;
+}
+.pp-translate-row {
+  display: flex;
+  gap: 8px;
+}
+.pp-translate-row .pp-big-button {
+  flex: 1;
+}
+.pp-big-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 52px;
+  border: 0;
+  border-radius: 26px;
+  background: var(--teal);
+  color: #fff;
+  font: inherit;
+  font-size: 1.05rem;
+  font-weight: 600;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.pp-big-button:disabled {
+  opacity: 0.55;
+}
+.pp-restore {
+  align-self: stretch;
+  min-height: 52px;
+  border-radius: 26px;
+  gap: 6px;
 }

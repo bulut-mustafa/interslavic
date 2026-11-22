@@ -8,12 +8,14 @@ import { defaultVideoStore, type VideoStore } from '../../video/store.ts';
 import { sourceOf } from '../../video/project.ts';
 import { BottomSheet } from '../BottomSheet.tsx';
 import { KeyboardBar } from '../KeyboardBar.tsx';
+import { guessLang } from '../translate-lang.ts';
+import type { SourceLang } from '../../subtitles/translate.ts';
 import { ToolStrip, type StripItem } from '../ToolStrip.tsx';
 import { TopBar } from '../TopBar.tsx';
 import { PATHS, PIcon, PickButton } from './atoms.tsx';
 import { PhonePreview } from './PhonePreview.tsx';
 import { PhoneTimeline } from './PhoneTimeline.tsx';
-import { AnimateSheet, AudioSheet, CaptionsSheet, EditSheet, EffectsSheet, OpacitySheet, OverlaySheet, RatioSheet, SoundSheet, TextSheet, TextStyleSheet, TransitionSheet, UploadsPane, VoiceSheet } from './sheets.tsx';
+import { AnimateSheet, AudioSheet, CaptionsSheet, EditSheet, EffectsSheet, OpacitySheet, OverlaySheet, TranslateSheet, RatioSheet, SoundSheet, TextSheet, TextStyleSheet, TransitionSheet, UploadsPane, VoiceSheet } from './sheets.tsx';
 import { PHONE_ZOOM } from './scrub-math.ts';
 import { diamondOn, isAction, ratioLabel, toggleDiamond, toolsFor, type ToolId } from './tools.ts';
 import './phone-video.css';
@@ -25,7 +27,7 @@ const Strip = memo(ToolStrip);
 
 const TITLES: Partial<Record<SheetTool, string>> = {
   edit: 'Edit', audio: 'Audio', text: 'Text', overlay: 'Overlay', effects: 'Effects', transitions: 'Transitions', ratio: 'Ratio', captions: 'Captions', voice: 'Read aloud',
-  speed: 'Speed', volume: 'Volume', animate: 'Animate', style: 'Text style', opacity: 'Opacity', uploads: 'Your uploads',
+  speed: 'Speed', volume: 'Volume', animate: 'Animate', style: 'Text style', opacity: 'Opacity', translate: 'Translate to Interslavic', uploads: 'Your uploads',
 };
 
 function iconOf(id: ToolId): ReactNode {
@@ -64,6 +66,8 @@ export default function PhoneVideo({ store = defaultVideoStore, makeTranscriber,
   const [tool, setTool] = useState<SheetTool | null>(null);
   const [zoom, setZoom] = useState(PHONE_ZOOM);
   const [rootEl, setRootEl] = useState<HTMLDivElement | null>(null);
+  /** The language picked in the Translate sheet for one text; otherwise it is guessed from the text and the editor's language. */
+  const [pickedLang, setPickedLang] = useState<{ id: string; lang: SourceLang } | null>(null);
   const pendingTool = useRef<SheetTool | null>(null);
   /** The sheet keeps showing the tool it had while it slides away. */
   const lastTool = useRef<SheetTool>('edit');
@@ -80,17 +84,26 @@ export default function PhoneVideo({ store = defaultVideoStore, makeTranscriber,
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selKey]);
 
+  // Stopping typing on a text that was emptied removes it: an empty text is invisible, so nobody could hit it to edit it again.
+  const wasTyping = useRef(false);
+  const emptied = !!textLayer && textLayer.text.trim() === '';
+  useEffect(() => {
+    if (wasTyping.current && !ed.typing && emptied) ed.removeSelected();
+    wasTyping.current = ed.typing;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ed.typing]);
+
   const { mode, strip } = useMemo(() => {
     const r = toolsFor(project, sel);
     const items: StripItem[] = r.items.map((t) => ({ id: t.id, label: t.label, disabled: t.disabled || busyOut, icon: iconOf(t.id) }));
     return { mode: r.mode, strip: items };
   }, [project, sel, busyOut]);
 
+  const fromLang: SourceLang = textLayer ? (pickedLang?.id === textLayer.id ? pickedLang.lang : guessLang([textLayer.text], ed.lang)) : ed.lang;
   const act = (id: ToolId) => {
     if (id === 'split') ed.split();
     else if (id === 'delete') ed.removeSelected();
     else if (id === 'duplicate') ed.duplicateSelected();
-    else if (id === 'translate' && textLayer) void ed.translate([textLayer.id]);
     else if (id === 'type') {
       setTool(null);
       ed.setTyping(true);
@@ -164,6 +177,7 @@ export default function PhoneVideo({ store = defaultVideoStore, makeTranscriber,
       case 'animate': return <AnimateSheet ed={ed} />;
       case 'style': return <TextStyleSheet ed={ed} />;
       case 'opacity': return <OpacitySheet ed={ed} />;
+      case 'translate': return <TranslateSheet ed={ed} lang={fromLang} onLang={(lang) => textLayer && setPickedLang({ id: textLayer.id, lang })} />;
       default: return null;
     }
   })();
@@ -180,6 +194,13 @@ export default function PhoneVideo({ store = defaultVideoStore, makeTranscriber,
         backHref="/studio"
         backLabel="Back to Studio"
         right={
+          ed.typing ? (
+            // Always reachable, whatever the keyboard does: the strip is out of the way while typing, and the bar that rides on the keyboard
+            // only exists when the browser reports one, so this is the way back that cannot be hidden.
+            <button type="button" className="pv-export pv-top-done" onPointerDown={keep} onMouseDown={keep} onClick={() => ed.setTyping(false)}>
+              Done
+            </button>
+          ) : (
           <>
             <button type="button" className="pv-chip-btn" aria-label={`Picture ratio ${ratioLabel(project.frame)}`} disabled={busyOut} onClick={() => setTool((t) => (t === 'ratio' ? null : 'ratio'))}>
               <PIcon d={PATHS.ratio} size={18} /> {ratioLabel(project.frame)}
@@ -188,6 +209,7 @@ export default function PhoneVideo({ store = defaultVideoStore, makeTranscriber,
               Export
             </button>
           </>
+          )
         }
       />
 
@@ -271,12 +293,12 @@ export default function PhoneVideo({ store = defaultVideoStore, makeTranscriber,
 
       <KeyboardBar label="Text tools">
         <button type="button" className="pv-kb-done" onPointerDown={keep} onMouseDown={keep} onClick={() => ed.setTyping(false)}>Done</button>
+            <button type="button" aria-label="Translate this text to Interslavic" disabled={ed.busy || !textLayer} onPointerDown={keep} onMouseDown={keep} onClick={() => void ed.translate([textLayer!.id], fromLang)}><Icon name="translate" size="1.2rem" /> Translate</button>
         {style && (
           <>
             <button type="button" aria-label="Smaller text" onPointerDown={keep} onMouseDown={keep} onClick={() => setStyle({ size: Math.max(8, Math.round(style.size * 0.9)) })}><Icon name="minus" size="1.2rem" /></button>
             <button type="button" aria-label="Larger text" onPointerDown={keep} onMouseDown={keep} onClick={() => setStyle({ size: Math.round(style.size * 1.1) })}><Icon name="plus" size="1.2rem" /></button>
             <button type="button" aria-label="Bold" aria-pressed={style.bold} onPointerDown={keep} onMouseDown={keep} onClick={() => setStyle({ bold: !style.bold })}><Icon name="bold" size="1.2rem" /></button>
-            <button type="button" aria-label="Translate this text to Interslavic" disabled={ed.busy} onPointerDown={keep} onMouseDown={keep} onClick={() => void ed.translate([textLayer!.id])}><Icon name="translate" size="1.2rem" /></button>
           </>
         )}
       </KeyboardBar>

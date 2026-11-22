@@ -191,6 +191,28 @@ describe('phone Video editor', () => {
     expect(document.querySelector('.pv-bar-text')).toBeTruthy(); // a coloured bar above the main track
   });
 
+  it('while typing, a Done in the top bar is always there; it ends typing and keeps the text picked for editing again', async () => {
+    await open();
+    await click(/^Text$/, strip());
+    await click(/Add text/);
+    await waitFor(() => expect(screen.getByLabelText('Type on the picture')).toBeTruthy());
+    const done = within(document.querySelector('.ph-topbar') as HTMLElement).getByRole('button', { name: 'Done' });
+    fireEvent.click(done);
+    await waitFor(() => expect(screen.queryByLabelText('Type on the picture')).toBeNull());
+    expect(stripNames()).toEqual(['Edit', 'Style', 'Animate', 'Translate', 'Duplicate', 'Delete']); // still picked: Edit and Translate are one tap away
+    expect(document.querySelector('.pv-bar-text')).toBeTruthy();
+  });
+
+  it('typing nothing and pressing Done removes the empty text (it would be invisible and could not be picked again)', async () => {
+    await open();
+    await click(/^Text$/, strip());
+    await click(/Add text/);
+    const box = (await waitFor(() => screen.getByLabelText('Type on the picture'))) as HTMLTextAreaElement;
+    fireEvent.change(box, { target: { value: '' } });
+    fireEvent.click(within(document.querySelector('.ph-topbar') as HTMLElement).getByRole('button', { name: 'Done' }));
+    await waitFor(() => expect(document.querySelector('.pv-bar-text')).toBeNull());
+  });
+
   it('the text Style sheet has Font / Style / Effects / Animation tabs, and Done closes it', async () => {
     await open();
     await click(/^Text$/, strip());
@@ -208,7 +230,7 @@ describe('phone Video editor', () => {
       fireEvent.click(screen.getByRole('tab', { name: 'Animation' }));
     });
     expect(screen.getByRole('radiogroup', { name: 'In animation' })).toBeTruthy();
-    await click('Done');
+    await click('Done', within(screen.getByRole('dialog'))); // the sheet's own Done (typing may still show the top-bar one)
     await waitFor(() => expect(screen.queryAllByRole('dialog')).toHaveLength(0));
   });
 
@@ -360,6 +382,62 @@ describe('phone Video editor', () => {
     await click(/^Voice$/, strip());
     expect(screen.getByRole('dialog', { name: 'Read aloud' })).toBeTruthy();
     expect(screen.getByText(/no voice|Each text is spoken/)).toBeTruthy();
+  });
+});
+
+describe('phone Video editor: Translate', () => {
+  const fetched: { lines: string[]; lang: string; orthography: string }[] = [];
+  beforeEach(() => {
+    fetched.length = 0;
+    vi.stubGlobal('fetch', async (_u: string, init: { body: string }) => {
+      const b = JSON.parse(init.body);
+      fetched.push(b);
+      if (b.lines[0] === 'offline') throw new TypeError('Load failed');
+      return new Response(JSON.stringify({ results: b.lines.map((t: string) => ({ text: `ISV ${t}`, flagged: false, reasons: [] })) }), { status: 200 });
+    });
+  });
+  afterEach(() => vi.unstubAllGlobals());
+
+  async function withText(words: string) {
+    await open();
+    await click(/^Text$/, strip());
+    await click(/Add text/);
+    const box = (await screen.findByLabelText('Type on the picture')) as HTMLTextAreaElement;
+    await act(async () => {
+      fireEvent.change(box, { target: { value: words } });
+    });
+    await click('Translate', strip());
+  }
+  const sheet = () => within(screen.getByRole('dialog', { name: 'Translate to Interslavic' }));
+
+  it('the strip Translate opens a sheet (it no longer fires at once) and translates with the chosen language', async () => {
+    await withText('Hello there');
+    expect(fetched).toHaveLength(0);
+    expect(sheet().getByRole('radio', { name: 'English' }).getAttribute('aria-checked')).toBe('true');
+    await act(async () => {
+      fireEvent.click(sheet().getByRole('radio', { name: 'Russian' }));
+    });
+    await click('Translate', sheet());
+    await waitFor(() => expect(fetched).toHaveLength(1));
+    expect(fetched[0]).toMatchObject({ lines: ['Hello there'], lang: 'ru', orthography: 'standard' });
+    await waitFor(() => expect(sheet().getByRole('button', { name: 'Restore original' })).toBeTruthy());
+  });
+
+  it('Restore original brings the typed words back', async () => {
+    await withText('Hello there');
+    await click('Translate', sheet());
+    await waitFor(() => expect(sheet().getByRole('button', { name: 'Restore original' })).toBeTruthy());
+    await click('Restore original', sheet());
+    await waitFor(() => expect(sheet().queryByRole('button', { name: 'Restore original' })).toBeNull());
+    await click('Translate', sheet());
+    await waitFor(() => expect(fetched).toHaveLength(2));
+    expect(fetched[1]!.lines).toEqual(['Hello there']); // the text was back to the original before this second run
+  });
+
+  it('says in plain words when the translator cannot be reached', async () => {
+    await withText('offline');
+    await click('Translate', sheet());
+    await waitFor(() => expect(sheet().getByRole('alert').textContent).toMatch(/Could not reach the translator/));
   });
 });
 

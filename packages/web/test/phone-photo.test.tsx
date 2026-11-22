@@ -131,7 +131,7 @@ describe('phone photo editor: the strip follows the selection', () => {
     await tap('Add');
     await tap('Text');
     expect(strip().dataset.mode).toBe('text');
-    expect(stripLabels()).toEqual(['Edit', 'Font', 'Size', 'Colour', 'Effects', 'Position', 'Layers', 'More']);
+    expect(stripLabels()).toEqual(['Edit', 'Translate', 'Font', 'Size', 'Colour', 'Effects', 'Position', 'Layers', 'More']);
     expect(layers().filter(isText)).toHaveLength(1);
     await act(async () => touch.tap(2, 2)); // empty space beside the picture
     expect(strip().dataset.mode).toBe('idle');

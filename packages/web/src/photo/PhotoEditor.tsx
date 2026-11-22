@@ -583,7 +583,8 @@ const PagePane = forwardRef<
     if (pic) void detect(pic, l);
   };
 
-  const translate = async () => {
+  const translate = async (opts?: { lang?: OcrLang }) => {
+    const from = opts?.lang ?? lang;
     const targets = textActive.filter((l) => l.text.trim() !== '');
     if (targets.length === 0 || !pic) return;
     const snap = { virtual, ids: activeIds };
@@ -591,7 +592,8 @@ const PagePane = forwardRef<
     setError(null);
     setStatus('Translating…');
     try {
-      const out = await translateTexts(targets.map((l) => l.text), { lang, script });
+      // The phone's Translate sheet can run again with another language or script: it starts from the words as they were, not from the last translation.
+      const out = await translateTexts(targets.map((l) => (opts && l.original !== undefined ? l.original : l.text)), { lang: from, script });
       mutate((all, ids) => {
         let next = all;
         targets.forEach((l, i) => {
@@ -608,7 +610,7 @@ const PagePane = forwardRef<
       }, snap);
       const doubtful = out.filter((r) => r.flagged).length;
       setStatus(`Translated ${targets.length} ${targets.length === 1 ? 'line' : 'lines'} into Interslavic.${doubtful ? ` ${doubtful} may be wrong - read ${doubtful === 1 ? 'it' : 'them'} before you save.` : ''}`);
-      track('photo-translate', { lang, script, texts: targets.length });
+      track('photo-translate', { lang: from, script, texts: targets.length });
     } catch (e) {
       setStatus(null);
       setError(e instanceof Error ? e.message : String(e));

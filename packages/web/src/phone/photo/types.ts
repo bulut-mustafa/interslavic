@@ -109,7 +109,8 @@ export interface PhoneCtx {
     onEffects: (patch: Partial<TextStyle>) => void;
     onType: (text: string) => void;
   };
-  translate: () => Promise<void>;
+  /** Translates the selected text into Interslavic; `lang` overrides the page's text language for this call only (no re-reading of the picture). */
+  translate: (opts?: { lang?: OcrLang }) => Promise<void>;
   copyText: () => Promise<void>;
   busy: boolean;
   restoreOriginal: (() => void) | null;

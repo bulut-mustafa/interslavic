@@ -12,6 +12,7 @@ import type { ShapeKind } from '../../photo/doc.ts';
 import type { OcrLang } from '../../photo/ocr.ts';
 import type { Script } from '../../subtitles/translate.ts';
 import { ICONS } from './icons.ts';
+import { plainTranslateError } from '../translate-lang.ts';
 
 /** The phone's tool sheets: small panels built from the same pieces and the same actions as the desktop's side panels. */
 
@@ -266,6 +267,8 @@ export function TextSheet(props: {
   script: Script;
   onScript: (s: Script) => void;
   onAddText: () => void;
+  /** Offered when nothing is selected and the page has text: selects all of it and opens Translate. */
+  onTranslateAll?: () => void;
   hint: ReactNode;
   error: ReactNode;
   done: () => void;
@@ -285,6 +288,13 @@ export function TextSheet(props: {
             props.done();
           }}
         />
+        {props.onTranslateAll && (
+          <Tile
+            label="Translate all text"
+            icon={<Icon name="translate" size="1.6rem" />}
+            onClick={props.onTranslateAll}
+          />
+        )}
         <Tile
           label="Add a text box"
           icon={<Icon name="addText" size="1.6rem" />}
@@ -496,6 +506,74 @@ export function PagesSheet(props: {
           </label>
         </li>
       </ol>
+    </div>
+  );
+}
+
+// ---- Translate ----
+
+/**
+ * Translate the selected text into Interslavic: the language the words are in, the script, one big button, the result's own
+ * message (including how many lines may be wrong) and a way back to the original words. It holds no state of its own: the page
+ * view gives it the language and runs the page's `translate`.
+ */
+export function TranslateSheet(props: {
+  /** How many selected texts there are to translate (empty ones do not count). */
+  count: number;
+  lang: OcrLang;
+  onLang: (l: OcrLang) => void;
+  script: Script;
+  onScript: (s: Script) => void;
+  busy: boolean;
+  onTranslate: () => void;
+  /** Null when none of the selected texts has been translated (or came from the picture). */
+  onRestore: (() => void) | null;
+  status: string | null;
+  error: string | null;
+}) {
+  return (
+    <div className="pp-translate" data-testid="translate-sheet">
+      {props.count === 0 && <p className="pp-hint">Select some text on the picture first.</p>}
+      <div className="pp-chips" role="radiogroup" aria-label="Language of the text">
+        {LANGS.map((l) => (
+          <button key={l.value} type="button" role="radio" aria-checked={props.lang === l.value} className={`pp-chip${props.lang === l.value ? ' is-on' : ''}`} disabled={props.busy} onClick={() => props.onLang(l.value)}>
+            {l.label}
+          </button>
+        ))}
+      </div>
+      <div className="pp-chips" role="radiogroup" aria-label="Interslavic script">
+        {(
+          [
+            ['standard', 'Latin'],
+            ['cyrillic', 'Cyrillic'],
+          ] as const
+        ).map(([value, label]) => (
+          <button key={value} type="button" role="radio" aria-checked={props.script === value} className={`pp-chip${props.script === value ? ' is-on' : ''}`} disabled={props.busy} onClick={() => props.onScript(value)}>
+            {label}
+          </button>
+        ))}
+      </div>
+      <div className="pp-translate-row">
+        <button type="button" className="pp-big-button" disabled={props.busy || props.count === 0} onClick={props.onTranslate}>
+          <Icon name="translate" size="1.3rem" /> {props.busy ? 'Translating…' : 'Translate'}
+        </button>
+        {props.onRestore && (
+          <button type="button" className="pp-chip pp-restore" disabled={props.busy} onClick={props.onRestore}>
+            <Icon name="undo" size="1.1rem" /> Restore original
+          </button>
+        )}
+      </div>
+      {props.busy && <p className="pp-note" role="status">Asking the translator…</p>}
+      {!props.busy && props.error && (
+        <p className="pp-note is-error" role="alert">
+          {plainTranslateError(props.error)}
+        </p>
+      )}
+      {!props.busy && !props.error && props.status && /^Translated/.test(props.status) && (
+        <p className="pp-note" role="status">
+          {props.status}
+        </p>
+      )}
     </div>
   );
 }
