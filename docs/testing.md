@@ -31,25 +31,39 @@ node --experimental-strip-types packages/eval/scripts/score-gold.ts         # me
 node --experimental-strip-types packages/eval/scripts/score-tatoeba.ts held # real-world sentences
 ```
 
-`score-tatoeba.ts` scores 1,023 English and 189 Russian Tatoeba sentences against
-every attested Interslavic translation they have (1,945 references). Nobody chose these
-sentences to suit the rules.
+`score-tatoeba.ts` scores four sets of Tatoeba sentences against every attested
+Interslavic translation they have. Nobody chose these sentences to suit the rules.
+- **en** (1,023) and **ru** (189) are linked to Interslavic directly. **ru_en** (885) and
+  **uk** (354) are Russian and Ukrainian sentences linked to an English sentence that has
+  Interslavic references (Tatoeba links only 17 Ukrainian sentences to Interslavic
+  directly). Their references were written from the English sentence, so read ru_en and
+  uk as comparisons between languages and between changes, not as absolute scores.
 - **Tune and held:** look at `tune` (add `--misses`); report `held`, which no fix may
-  look at.
+  look at. `all` is both halves together. A sibling takes its English anchor's half.
+- **Other options:** `--matched` (only sentences present in en, ru_en and uk, so the
+  languages are scored on the same content), `--only en,ru`, `--parses <dir>` (score
+  parses from another folder).
 - **The main number is chrF**, computed exactly as sacrebleu 2.4.3's default
-  (`scripts/metrics.ts`). It agreed with sacrebleu on every sentence of the sample.
-  Exact match and word F1 stay beside it. A change counts only if it does not lower them.
+  (`scripts/metrics.ts`) on text that is lowercased, stripped of punctuation and
+  converted from Cyrillic to Latin. Re-checked on 2026-11-23: sacrebleu gives the same
+  score to one decimal on all twelve (set x half) rows. Exact match and word F1 stay
+  beside it. A change counts only if it does not lower them.
 - **Did a change help?** Save a run before it (`--save before.jsonl`), then run
   `--compare before.jsonl` after it. That is a paired bootstrap (Koehn 2004) and prints
   the difference with a 95% interval. "no significant change" means the interval
   crosses 0. On English the interval is about ±0.2 chrF; on Russian it is about ±0.5,
-  because the sample is small. `data/tatoeba/baseline-{tune,held}.jsonl` hold the runs
-  of 2026-11-22.
+  because the sample is small. `data/tatoeba/baseline-2026-11-23-{tune,held}.jsonl` hold
+  the current runs (all four sets, production parser). The older `baseline-tune/held`
+  and `baseline-siblings-*` files used parses made before the English tagger changed
+  and are kept only for history.
 - **What the score measures:** two people wrote 94% of the references, so it is
   agreement with their style. No human ceiling can be computed: only one sentence has
   translations by two different people.
 - **Rebuilding the sample:** `python3 -I packages/eval/scripts/build-tatoeba.py
-  <folder of Tatoeba exports>`. Then re-freeze the parses with `to_conllu`.
+  <folder of Tatoeba exports>` (and `--siblings <folder>` for ru_en and uk). Then
+  freeze the parses with `freeze-tatoeba-parses.py`. **To re-measure with the live
+  parser**, run it with `--into <dir>` (one language at a time; English alone needs
+  about 3.4 GB) and score with `--parses <dir>`.
 
 It found two real defects the full-form validator could not: a Cyrillic rule that took a
 documented fallback we were not entitled to, and plurale tantum nouns that never

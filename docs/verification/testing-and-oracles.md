@@ -4,6 +4,8 @@ How the tests themselves were tested: the second engine used as an oracle, defec
 
 Part of the [verification log](../verification-log.md). Entries are in the order they were written; the date of each is in its heading.
 
+> **Scores in older entries are snapshots.** The current ones, measured again from scratch with the production parser, are in the last entry: *2026-11-23 · Every score re-measured from scratch*.
+
 ---
 
 ## A second engine to check against (2026-10-18)
@@ -520,3 +522,59 @@ dictionary's ru/uk column (a gap, not a lemma error); "полей" (verb) is tag
   points. The English score is limited by reference variety and by one-off vocabulary.
   A bulk English gloss pivot (kaikki.org / Wiktionary) is the only broad option; its licence
   is unconfirmed, so it needs the user's decision before any use.
+
+## 2026-11-23 · Every score re-measured from scratch
+
+**Why.** The numbers in this log came from different days, parsers and sets, and the
+English test parses had been made before the English tagger changed. Nothing below is
+taken from an earlier entry.
+
+**What was run (2026-11-23, branch `en-uk-accuracy`).**
+- `npm run typecheck`: clean. `npx vitest run`: 178 files, **2,872 tests, all pass**.
+  `npm run parser:test`: 33 / 33. `npm run fixtures:check` (live parser): 140 files differ,
+  all in the XPOS column except the hand-written Russian `synthetic-byt-aux-participle`.
+- **All 2,451 test sentences were parsed again with the live pipeline** (English with the
+  ELECTRA tagger, the lemma repair on), one language at a time, free memory never under 68%.
+  Against the saved parses: en differed in **83 of 1,023 (8.1%)** (51 POS tags, 16 lemmas,
+  30 trees: the saved ones predate the new tagger); ru, ru_en and uk differed in **0**.
+- Scored with `score-tatoeba.ts --parses <fresh>`; the same outputs were scored again with
+  **sacrebleu 2.4.3** in a scratch venv: identical to one decimal in all 12 rows.
+- Not run: the browser tests (`npm run e2e`); they do not measure translation.
+
+**Real-world score** (chrF, Tatoeba; en and ru are direct pairs, ru_en and uk are siblings
+of English sentences, so their references were written from the English):
+
+| | sentences | tune | held | all | 95% interval, all | exact, all | word F1, all | untranslated, all |
+|---|---|---|---|---|---|---|---|---|
+| **English** | 1,023 | 65.7 | 64.8 | **65.2** | [63.6, 67.0] | 28.1% | .678 | 7.2% |
+| **Russian** (direct) | 189 | 73.4 | 80.9 | **77.2** | [73.6, 80.7] | 42.9% | .798 | 2.7% |
+| **Russian** (siblings) | 885 | 61.3 | 62.6 | **62.1** | [60.3, 63.9] | 23.6% | .654 | 4.5% |
+| **Ukrainian** (siblings) | 354 | 66.1 | 59.7 | **62.5** | [59.2, 65.9] | 29.9% | .657 | 3.2% |
+
+**Strict chrF** (sacrebleu default: case and punctuation kept, Cyrillic references
+converted to Latin), all sentences: en 64.0, ru 75.9, ru_en 60.1, uk 61.8.
+
+**Same sentences in all three languages** (`--matched`; tune / held):
+
+| | tune | held |
+|---|---|---|
+| English (90 / 102 sentences) | 64.4 | 68.4 |
+| Russian siblings (149 / 184) | 62.4 | 66.3 |
+| Ukrainian siblings (133 / 189) | 65.1 | 59.2 |
+
+**Gold set** (Steenbergen's own sentences, exact match): English 20 / 42, Russian 11 / 16,
+Ukrainian 12 / 16; 43 / 74 in all.
+
+**How to read these.**
+- The three languages score within a few points of each other on the same content. The
+  Russian direct set is small, so its interval is wide (±3.5); its held half (80.9) and tune
+  half (73.4) differ by 7.5 for the same engine.
+- Ukrainian held (59.7) is below its tune half (66.1); with 155 and 199 sentences the
+  difference is within the noise.
+- The test set is Tatoeba as of the 2026-11-22 export. Two people wrote 94% of the
+  references, so a score is agreement with their style; no human ceiling is known.
+- Saved runs for later comparison: `data/tatoeba/baseline-2026-11-23-{tune,held}.jsonl`.
+
+**Earlier figures this replaces.** English held 64.6 and tune 65.4 (parses before the
+tagger change; now 64.8 and 65.7). Russian held 80.6 and tune 72.9 (now 80.9 and 73.4, the
+lemma repair). The sibling baselines of the same day were taken before the lemma repair.

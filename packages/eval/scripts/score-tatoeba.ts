@@ -2,7 +2,7 @@
  * Real-world score: Tatoeba sentences with attested Interslavic translations,
  * never chosen by whoever wrote the rules.
  *
- *   node --experimental-strip-types packages/eval/scripts/score-tatoeba.ts [tune|held] [options]
+ *   node --experimental-strip-types packages/eval/scripts/score-tatoeba.ts [tune|held|all] [options]
  *     --misses          list every sentence that is not an exact match
  *     --save <file>     write this run's outputs (one JSON line per sentence)
  *     --compare <file>  paired bootstrap of this run against a saved one
@@ -30,7 +30,7 @@ import { chrfStats, corpusChrf, exact, pairedBootstrap, tyRegister, wordF1, type
 const ROOT = path.resolve(import.meta.dirname, '../../..');
 const DATA = path.join(ROOT, 'packages/eval/data/tatoeba');
 const args = process.argv.slice(2);
-const split = args.find((a) => a === 'tune' || a === 'held') ?? 'held';
+const split = args.find((a) => a === 'tune' || a === 'held' || a === 'all') ?? 'held';
 const option = (name: string) => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] : undefined; };
 const savePath = option('--save');
 const comparePath = option('--compare');
@@ -65,7 +65,7 @@ const savedKeys = new Set([...saved.keys()].map((k) => k.split('/')[0]));
 for (const [lang, all] of Object.entries(pairs)) {
   if (only && !only.includes(lang)) continue;
   if (comparePath && !savedKeys.has(lang)) continue;
-  const chosen = all.filter((p) => p.split === split &&
+  const chosen = all.filter((p) => (split === 'all' || p.split === split) &&
     (!args.includes('--matched') || matchedAnchors.has(anchorOf(lang, p) ?? '')));
   let hits = 0, f1 = 0, nWords = 0, untranslated = 0, guesses = 0, register = 0;
   const stats: ChrfStats[] = [];
