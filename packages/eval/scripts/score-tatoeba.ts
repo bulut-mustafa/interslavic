@@ -8,6 +8,9 @@
  *     --compare <file>  paired bootstrap of this run against a saved one
  *     --parses <dir>    read the CoNLL-U from <dir>/<lang>/<id>.conllu instead,
  *                       to score another parser on the same sentences
+ *     --matched         only sentences that exist in en, ru_en and uk (same English
+ *                       anchor), so the three languages are scored on the same content
+ *     --only a,b        only these keys of pairs.json (en, ru, ru_en, uk)
  *
  * Tune on `tune`; report `held`, which no fix may look at. chrF (sacrebleu's
  * default) is the main number; exact match and word F1 stay beside it. All
@@ -36,7 +39,7 @@ const parses = option('--parses') ?? DATA;
 const lex = Lexicon.fromTsv(path.join(ROOT, 'packages/lexicon/data/raw/words.tsv'));
 const pairs = JSON.parse(fs.readFileSync(path.join(DATA, 'pairs.json'), 'utf8')) as Record<
   string,
-  { id: string; source: string; refs: string[]; by: string[]; split: string }[]
+  { id: string; source: string; refs: string[]; by: string[]; split: string; anchor?: string | null }[]
 >;
 const saved = new Map<string, string>(
   comparePath
@@ -49,8 +52,21 @@ const saved = new Map<string, string>(
 const pct = (n: number, d: number) => `${((100 * n) / d).toFixed(1)}%`;
 const saveLines: string[] = [];
 
+// ru_en and uk are siblings of an English sentence (build-tatoeba.py --siblings).
+const anchorOf = (lang: string, p: { id: string; anchor?: string | null }) => (lang === 'en' ? p.id : p.anchor ?? null);
+const matchedAnchors = new Set(
+  (pairs.en ?? []).map((p) => p.id).filter((id) =>
+    ['ru_en', 'uk'].every((k) => (pairs[k] ?? []).some((q) => q.anchor === id))),
+);
+const only = option('--only')?.split(',');
+// Against a saved run, score only the keys that run has.
+const savedKeys = new Set([...saved.keys()].map((k) => k.split('/')[0]));
+
 for (const [lang, all] of Object.entries(pairs)) {
-  const chosen = all.filter((p) => p.split === split);
+  if (only && !only.includes(lang)) continue;
+  if (comparePath && !savedKeys.has(lang)) continue;
+  const chosen = all.filter((p) => p.split === split &&
+    (!args.includes('--matched') || matchedAnchors.has(anchorOf(lang, p) ?? '')));
   let hits = 0, f1 = 0, nWords = 0, untranslated = 0, guesses = 0, register = 0;
   const stats: ChrfStats[] = [];
   const before: ChrfStats[] = [];
