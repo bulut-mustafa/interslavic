@@ -37,6 +37,9 @@ CASES = [
     ("зустрілися", "зустрітися", "VERB", "Tense=Past", "зустрітися"),
     ("живу", "жити", "VERB", "", "жити"),
     ("може", "могти", "VERB", "", "могти"),
+    # A lemma the dictionary lacks is replaced by one it has (lemmas.dictionary_repair).
+    ("п'яна", "п’янути", "VERB", "", "п'яний"),
+    ("полийте", "полийти", "VERB", "", "полити"),
 ]
 
 
@@ -50,18 +53,24 @@ def main() -> None:
     for upos in ("VERB", "NOUN"):
         check_lemma("ся", "ся", upos, "", "uk")
     # Russian: only an invented verb lemma is replaced, by the listed infinitive.
-    for form, lemma, upos, want in [
-        ("лжёт", "листить", "VERB", "лгать"),
-        ("шёл", "ийти", "VERB", "идти"),
-        ("читаю", "читать", "VERB", "читать"),  # a real lemma is kept
-        ("стекло", "стечь", "VERB", "стечь"),  # a real verb is kept, homograph or not
-        ("мою", "мой", "DET", "мой"),  # only verbs are checked
+    for form, lemma, upos, feats, want in [
+        ("цветы", "цветы", "NOUN", "", "цветок"),  # the dictionary lacks "цветы"
+        ("осы", "осы", "NOUN", "", "оса"),
+        ("ребёнку", "рекенок", "NOUN", "", "ребенок"),
+        ("Удали", "удать", "VERB", "Mood=Imp", "удалить"),  # an imperative
+        ("Опусти", "опусти", "VERB", "Mood=Imp", "опустить"),
+        ("лжёт", "листить", "VERB", "", "лгать"),
+        ("шёл", "ийти", "VERB", "", "идти"),
+        ("читаю", "читать", "VERB", "", "читать"),  # a real lemma is kept
+        ("стекло", "стечь", "VERB", "", "стечь"),  # a real verb is kept, homograph or not
+        ("мою", "мой", "DET", "", "мой"),  # only verbs are checked
+        ("цветок", "цветок", "NOUN", "", "цветок"),  # a lemma the dictionary has is never changed
     ]:
-        if check_lemma(form, lemma, upos, "", "ru") != want:
-            failures.append(f"ru {form}: {lemma} -> {check_lemma(form, lemma, upos, '', 'ru')}, expected {want}")
+        if check_lemma(form, lemma, upos, feats, "ru") != want:
+            failures.append(f"ru {form}: {lemma} -> {check_lemma(form, lemma, upos, feats, 'ru')}, expected {want}")
     for f in failures:
         print("FAIL", f)
-    print(f"{len(CASES) + 6 - len(failures)} / {len(CASES) + 6} passed")
+    print(f"{len(CASES) + 11 - len(failures)} / {len(CASES) + 11} passed")
     raise SystemExit(1 if failures else 0)
 
 

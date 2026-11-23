@@ -4,5 +4,5 @@
 1	Пожалуйста	пожалуйста	ADV	_	Degree=Pos	3	parataxis	_	_
 2	,	,	PUNCT	_	_	1	punct	_	_
 3	полейте	полететь	VERB	_	Aspect=Perf|Mood=Imp|Number=Plur|Person=2|VerbForm=Fin|Voice=Act	0	root	_	_
-4	цветы	цветы	NOUN	_	Animacy=Inan|Case=Acc|Gender=Masc|Number=Plur	3	obj	_	_
+4	цветы	цветок	NOUN	_	Animacy=Inan|Case=Acc|Gender=Masc|Number=Plur	3	obj	_	_
 5	.	.	PUNCT	_	_	3	punct	_	_

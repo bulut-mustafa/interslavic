@@ -9,6 +9,6 @@
 6	наделаем	наделать	VERB	_	Aspect=Imp|Mood=Ind|Number=Plur|Person=1|Tense=Pres|VerbForm=Fin|Voice=Act	2	parataxis	_	_
 7	кирпичей	кирпич	NOUN	_	Animacy=Inan|Case=Gen|Gender=Masc|Number=Plur	6	obj	_	_
 8	и	и	CCONJ	_	_	9	cc	_	_
-9	обожжем	обождать	VERB	_	Aspect=Perf|Mood=Ind|Number=Plur|Person=1|Tense=Pres|VerbForm=Fin|Voice=Act	6	conj	_	_
+9	обожжем	обжечь	VERB	_	Aspect=Perf|Mood=Ind|Number=Plur|Person=1|Tense=Pres|VerbForm=Fin|Voice=Act	6	conj	_	_
 10	огнем	огонь	NOUN	_	Animacy=Inan|Case=Ins|Gender=Masc|Number=Sing	9	iobj	_	_
 11	.	.	PUNCT	_	_	2	punct	_	_

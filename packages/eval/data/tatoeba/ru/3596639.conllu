@@ -8,5 +8,5 @@
 5	чтобы	чтобы	SCONJ	_	Mood=Cnd	7	mark	_	_
 6	он	он	PRON	_	Case=Nom|Gender=Masc|Number=Sing|Person=3|PronType=Prs	7	nsubj	_	_
 7	писал	писать	VERB	_	Aspect=Imp|Gender=Masc|Mood=Ind|Number=Sing|Tense=Past|VerbForm=Fin|Voice=Act	2	ccomp	_	_
-8	почаще	почасто	ADV	_	Degree=Cmp	7	advmod	_	_
+8	почаще	часто	ADV	_	Degree=Cmp	7	advmod	_	_
 9	.	.	PUNCT	_	_	2	punct	_	_

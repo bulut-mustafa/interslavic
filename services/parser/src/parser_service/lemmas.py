@@ -17,6 +17,8 @@ in the parse - part of speech, features, tree - is touched.
 
 from __future__ import annotations
 
+import csv
+import pathlib
 import re
 
 import simplemma
@@ -126,8 +128,100 @@ def _russian_verb(form: str, lemma: str) -> str:
     return listed if _RU_INFINITIVE.search(listed) and simplemma.is_known(listed, lang="ru") else lemma
 
 
+# The Interslavic dictionary's Russian and Ukrainian columns say which source
+# words the engine can translate. A lemma that is in them is never changed; one
+# that is not may be replaced, but only by a candidate that IS in them, so no
+# word can be invented. Read from the repo's own copy (the Docker image fetches
+# it at build time); without the file the check is off.
+_WORDS = pathlib.Path(__file__).resolve().parents[4] / "packages/lexicon/data/raw/words.tsv"
+_COLUMN = {"ru": "ru", "uk": "uk"}
+_DICTIONARY: dict[str, frozenset[str]] = {}
+
+
+def _norm(word: str) -> str:
+    return word.lower().replace("ё", "е").replace("\u2019", "'")
+
+
+def _dictionary(lang: str) -> frozenset[str]:
+    if lang not in _DICTIONARY:
+        found: set[str] = set()
+        if _WORDS.exists():
+            with _WORDS.open(encoding="utf-8", newline="") as f:
+                rows = csv.reader(f, delimiter="\t")
+                column = next(rows).index(_COLUMN[lang])
+                for row in rows:
+                    for part in re.split(r"[;,]", row[column]) if len(row) > column else ():
+                        word = _norm(re.sub(r"\(.*?\)", "", part).strip())
+                        if word:
+                            found.add(word)
+        _DICTIONARY[lang] = frozenset(found)
+    return _DICTIONARY[lang]
+
+
+# A Russian imperative: -и/-ь/-й (singular), -ите/-ьте/-йте (plural), a reflexive
+# one adding -сь/-ся. The infinitive is the stem plus one of these endings.
+_RU_IMPERATIVE = re.compile(r"^(?P<stem>.+?)(ите|ьте|йте|и|ь|й)(?P<refl>с[яь])?$")
+_RU_INFINITIVE_ENDINGS = ("ить", "ать", "ять", "еть", "ыть", "уть", "ть")
+
+
+def _repair_candidates(word: str, lemma: str, upos: str, feats: str, lang: str) -> list[str]:
+    found = [simplemma.lemmatize(word, lang=lang), simplemma.lemmatize(lemma.lower(), lang=lang)]
+    if lang == "ru" and upos == "VERB" and "Mood=Imp" in feats:
+        match = _RU_IMPERATIVE.match(word)
+        if match:
+            suffix = "ся" if match.group("refl") else ""
+            found += [match.group("stem") + e + suffix for e in _RU_INFINITIVE_ENDINGS]
+    return found
+
+
+_INFINITIVE_END = re.compile(r"(ть|ти|чь|чи)(ся|сь)?$")
+_ADJECTIVE_END = re.compile(r"(ый|ий|ой|ій)$")
+
+
+def _fits_kind(upos: str, candidate: str) -> bool:
+    """Is the candidate the right kind of word: a verb is an infinitive, an adjective ends -ый/-ий/-ой, a noun is neither."""
+    if upos == "VERB":
+        return bool(_INFINITIVE_END.search(candidate))
+    if upos == "ADJ":
+        return bool(_ADJECTIVE_END.search(candidate))
+    if upos == "NOUN":
+        return not _INFINITIVE_END.search(candidate)
+    return True
+
+
+def dictionary_repair(form: str, lemma: str, upos: str, feats: str, lang: str) -> str:
+    """A lemma the dictionary lacks, replaced by a candidate it has (see above).
+
+    Left alone: a name (capital lemma), a participle (the engine builds it from
+    the verb), and a reflexive verb (the candidate must be reflexive too). A
+    candidate of the wrong kind is taken only where the model's lemma is no real
+    word at all and the candidate is simplemma's own listing for this exact form
+    ("Привет": "пригать" -> "привет", although the model called it a verb).
+    """
+    known = _dictionary(lang)
+    if not known or not lemma or upos not in ("NOUN", "VERB", "ADJ", "ADV") or _norm(lemma) in known:
+        return lemma
+    if lemma[:1].isupper() or "VerbForm=Part" in (feats or ""):
+        return lemma
+    word = form.lower()
+    listed = simplemma.lemmatize(word, lang=lang)
+    invented = not simplemma.is_known(lemma.lower(), lang=lang)
+    for candidate in _repair_candidates(word, lemma, upos, feats or "", lang):
+        if not candidate or _norm(candidate) not in known:
+            continue
+        if lemma.endswith(("ся", "сь")) and not candidate.endswith(("ся", "сь")):
+            continue
+        if _fits_kind(upos, candidate) or (invented and candidate == listed):
+            return candidate
+    return lemma
+
+
 def check_lemma(form: str, lemma: str, upos: str, feats: str, lang: str) -> str:
     """The lemma to use: Stanza's, unless it is not a real lemma of its kind."""
+    return dictionary_repair(form, _check_lemma(form, lemma, upos, feats, lang), upos, feats, lang)
+
+
+def _check_lemma(form: str, lemma: str, upos: str, feats: str, lang: str) -> str:
     if lang == "ru" and upos in ("VERB", "AUX") and lemma:
         return _russian_verb(form, lemma)
     if lang == "uk" and upos in ("DET", "PRON") and form.lower() in _TOJ and "PronType=Dem" in (feats or ""):
