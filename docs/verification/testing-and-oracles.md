@@ -435,3 +435,43 @@ deploy if the peak grows.
 load two at once, and never run it over the whole Tatoeba set in one call. A trial that did
 both (int8 quantisation) filled memory and restarted the machine on 2026-11-23. It was not
 repeated; run such trials on a small sample with a memory watchdog.
+
+## 2026-11-23 · Russian and Ukrainian siblings: the three languages on the same content
+
+**Why.** Only 17 Tatoeba sentences link Ukrainian to Interslavic directly, so Ukrainian
+had 16 gold sentences and no real-world score. Tatoeba does link English to Ukrainian and
+to Russian, and our 1,023 English sentences already have Interslavic references.
+`build-tatoeba.py --siblings` adds the Russian (`ru_en`, 885) and Ukrainian (`uk`, 354)
+sentences linked to those English sentences. `en` and `ru` are untouched (their baselines
+reproduce to ±0.01). A sibling takes its English anchor's tune/held half.
+
+**Limit.** The references were written from the English sentence, so a sibling can differ
+in wording ("Я гладкий" is "smooth", the reference says "fat"). Use the numbers to compare
+languages and changes, not as absolute scores.
+
+**Baseline** (chrF; `score-tatoeba.ts <half> --matched` keeps only anchors present in all
+three languages; saved: `baseline-siblings-*.jsonl`):
+
+| | tune | held |
+|---|---|---|
+| en, matched (90 / 102 sentences) | 63.5 | 68.4 |
+| ru_en, matched (149 / 184) | 62.0 | 65.9 |
+| uk, matched (133 / 189) | 65.0 | 58.9 |
+| ru_en, all (389 / 496) | 61.0 | 62.3 |
+| uk, all (155 / 199) | 66.0 | 59.4 |
+
+**Reading.**
+- On the same content the three languages are within a few points of each other. The
+  "Russian 80" in the older table is the 92-sentence held half of the *direct* Russian
+  pairs (the same engine scores 72.9 on the tune half). It is not a level English can be
+  compared to.
+- Ukrainian works. No sign of a broken model. The held half is lower than the tune half,
+  as for other small samples (n = 155 to 199); the interval is about ±3.
+- **Defects the Ukrainian and Russian siblings show (tune, read by hand):** Stanza lemma
+  errors that leave words in Cyrillic: plurals (цветы, осы, костров; Ukrainian квіти→квіт),
+  imperatives (опусти, удали, готовься, полей, полий), an invented lemma (ребёнку →
+  "рекенок", п'яна → "п’янути"). Also the negative "ни/ані" and the "-нибудь/-небудь"
+  endings. These are not dictionary gaps: the repairs in
+  `services/parser/src/parser_service/lemmas.py` cover Ukrainian (partly) and Russian
+  verbs only. An automatic count with simplemma was too noisy to quote (its tables list
+  "есть" under "быть", "Том" under "тот").
