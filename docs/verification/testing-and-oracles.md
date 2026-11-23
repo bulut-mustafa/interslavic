@@ -475,3 +475,48 @@ three languages; saved: `baseline-siblings-*.jsonl`):
   `services/parser/src/parser_service/lemmas.py` cover Ukrainian (partly) and Russian
   verbs only. An automatic count with simplemma was too noisy to quote (its tables list
   "есть" under "быть", "Том" under "тот").
+
+## 2026-11-23 · Lemma repair against the dictionary (Russian and Ukrainian)
+
+**Change.** `lemmas.dictionary_repair`: a lemma that is not in the dictionary's ru/uk
+column may be replaced, but only by a candidate that is in it (simplemma's listing for the
+word or the lemma, or the infinitive of a Russian imperative). A lemma the dictionary has
+is never changed, so no word is invented. Left alone: names (capital lemma), participles,
+reflexive verbs (the candidate must be reflexive), and a candidate of the wrong kind
+unless the model's lemma is no real word and the candidate is simplemma's own listing for
+that exact form. A dry run over all frozen parses showed five bad changes before these
+guards ("Машу" → "махать", "прав" → "право", "зламався" losing its reflexive,
+"Сполучених" undoing the participle handling); they are now excluded.
+
+**Result** (chrF, change against the saved baseline, 95% interval):
+
+| | tune | held |
+|---|---|---|
+| ru_en | +0.29 [0.01, 0.66] better | +0.32 [0.10, 0.63] better |
+| ru (direct) | +0.52 [0.00, 1.49] | +0.39 [0.00, 1.10] |
+| uk | +0.10 [−0.08, 0.39] | +0.34 [0.00, 1.01] |
+
+Untranslated words fall in all three (ru_en 5.7 → 4.9% tune, 4.7 → 4.2% held; uk 3.8 → 3.2%
+tune). 39 frozen parses were updated by the same function; `fixtures:check` against the live
+parser shows no real difference besides the hand-written Russian fixture.
+
+**Not fixed, and why.** "костёр", "готовиться", "соседка", "квітка" are missing from the
+dictionary's ru/uk column (a gap, not a lemma error); "полей" (verb) is tagged as the noun
+"поле", which the dictionary has, so the check never fires.
+
+## 2026-11-23 · English: where the remaining loss is (tune half)
+
+- **Untranslated words are a long tail.** 159 of 2,015 words (7.9%), but most are names,
+  which are correctly kept, and a list of letters. The real gaps are about 25 words, each
+  seen once (tolerate, sickness, campfire, wizard, eternity, stardust, ...). Filling every
+  one would change chrF by well under 1 point.
+- **Words not in the reference** (624 tokens in non-exact sentences): 66% a different word
+  or function word, 27% the same dictionary word in another form, 7% not a dictionary word.
+- **The form differences are mostly valid variants or reference quirks**: `jest`/`je` (27),
+  `vy`/`ty` (8), `toj`/`to` (6), `-aju`/`-am` verb endings. Some references are not
+  grammatical ("vojně" for "win this war"). A few real errors are scattered (verb + case
+  after "engage in", the speaker's gender in "I became a woman").
+- **Conclusion.** No single rule or data change is left that would move English by several
+  points. The English score is limited by reference variety and by one-off vocabulary.
+  A bulk English gloss pivot (kaikki.org / Wiktionary) is the only broad option; its licence
+  is unconfirmed, so it needs the user's decision before any use.
