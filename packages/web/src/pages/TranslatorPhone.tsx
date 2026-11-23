@@ -8,7 +8,7 @@ import { permalink } from '../permalink.ts';
 import { BottomSheet } from '../phone/BottomSheet.tsx';
 import { KeyboardBar } from '../phone/KeyboardBar.tsx';
 import { useMenuItems, type MenuItem } from '../phone/menu.tsx';
-import { Chip, ChipRow, PhoneIconButton, StickyBar } from '../phone/parts.tsx';
+import { LangBar, PhoneIconButton, StickyBar } from '../phone/parts.tsx';
 import { useKeyboardInset } from '../phone/useKeyboardInset.ts';
 import { Listen, VoicePicker } from '../speech/Listen.tsx';
 import { WordDetail } from './WordDetail.tsx';
@@ -100,7 +100,7 @@ function ShareIcon({ text, url }: { text: string; url: string }) {
 
 /**
  * The translator on a phone (docs/mobile-design.md): one column, a big input
- * card, language and script as a scrolling chip row, a sticky Translate button
+ * card, language and script as one row of dropdowns (from, arrow, Interslavic), a sticky Translate button
  * above the tab bar (and above the keyboard), result cards with copy and share,
  * and a tapped word opening its card as a bottom sheet. History-like actions
  * (copy link, report) live in the top-bar menu. No hover anywhere.
@@ -188,26 +188,18 @@ export function TranslatorPhone(p: TranslatorPhoneProps) {
             />
           )}
           {p.text && <PhoneIconButton icon="close" label="Clear text" onClick={() => p.setText('')} />}
+          <PhoneIconButton icon="sliders" label="Options" onClick={() => setSheet('options')} />
         </div>
       </section>
 
-      <ChipRow label="Language and script">
-        {p.langs.map((l) => (
-          <Chip key={l.value} selected={p.lang === l.value} onClick={() => p.setLang(l.value as never)}>
-            {l.label}
-          </Chip>
-        ))}
-        <span className="ph-chip-sep" aria-hidden="true" />
-        {p.orths.map((o) => (
-          <Chip key={o.value} selected={p.orth === o.value} onClick={() => p.setOrth(o.value)} label={`${o.label} script`}>
-            {o.label}
-          </Chip>
-        ))}
-        <span className="ph-chip-sep" aria-hidden="true" />
-        <Chip onClick={() => setSheet('options')}>
-          <Icon name="sliders" size="1rem" /> Options
-        </Chip>
-      </ChipRow>
+      <LangBar
+        lang={p.lang}
+        langs={p.langs}
+        onLang={(v) => p.setLang(v as never)}
+        orth={p.orth}
+        orths={p.orths}
+        onOrth={p.setOrth}
+      />
 
       <div ref={results} className="pt-results" aria-live="polite">
         {p.error ? (

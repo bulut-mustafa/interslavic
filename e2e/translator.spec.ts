@@ -163,47 +163,51 @@ test.describe('translator on a phone', () => {
     await expect(page.locator('.ph-sheet[data-open="true"]'), 'the menu opened over the word sheet: two sheets stacked').toHaveCount(1);
   });
 
-  test('language chips: switching language re-translates by itself and sends the new language', async ({ page }) => {
+  test('language dropdown: switching language re-translates by itself and sends the new language', async ({ page }) => {
     const api = await mockTranslate(page);
     await page.goto('/');
     await translate(page);
     api.calls.length = 0;
-    await page.getByRole('group', { name: 'Language and script' }).getByRole('button', { name: 'Russian', exact: true }).click();
-    await expect(page.getByRole('button', { name: 'Russian', exact: true })).toHaveAttribute('aria-pressed', 'true');
-    await expect(page.getByRole('button', { name: 'English', exact: true })).toHaveAttribute('aria-pressed', 'false');
+    const from = page.getByRole('group', { name: 'Language and script' }).getByLabel('Translate from');
+    await expect(from).toHaveValue('en');
+    await from.selectOption({ label: 'Russian' });
+    await expect(from).toHaveValue('ru');
     await expect.poll(() => api.calls.length).toBeGreaterThan(0);
     expect(api.calls.every((c) => c.lang === 'ru')).toBe(true);
     await expect(input(page)).toHaveAttribute('placeholder', 'Введите предложение…'.replace(/…/, '…'));
   });
 
-  test('script chips: Cyrillic is the main output and Latin the quiet second line', async ({ page }) => {
+  test('script dropdown: Cyrillic is the main output and Latin the quiet second line', async ({ page }) => {
     const api = await mockTranslate(page);
     await page.goto('/');
     await translate(page);
     api.calls.length = 0;
-    await page.getByRole('button', { name: 'Cyrillic script' }).click();
-    await expect(page.getByRole('button', { name: 'Cyrillic script' })).toHaveAttribute('aria-pressed', 'true');
-    await expect(page.getByRole('button', { name: 'Latin script' })).toHaveAttribute('aria-pressed', 'false');
+    const script = page.getByRole('group', { name: 'Language and script' }).getByLabel('Script');
+    await expect(script).toHaveValue('standard');
+    await script.selectOption({ label: 'Cyrillic' });
+    await expect(script).toHaveValue('cyrillic');
     const card = page.getByRole('article', { name: 'Translation 1' });
     await expect(card.locator('.output-word').first()).toHaveText('Добро');
     await expect(card.getByLabel('The same text in the other script')).toContainText('Dobro utro');
     expect(api.calls.map((c) => [c.orthography, c.alternate])).toEqual([['cyrillic', 'standard']]);
   });
 
-  test('the chip row scrolls inside itself, every chip is a 40px+ target, the page does not scroll sideways', async ({ page }) => {
+  test('the language bar reads English → Interslavic, every box is a 44px target, nothing scrolls sideways', async ({ page }) => {
     await page.goto('/');
-    const row = page.getByRole('group', { name: 'Language and script' });
-    await expectTappable(row, 40);
-    const sw = await row.evaluate((el) => ({ sw: el.scrollWidth, cw: el.clientWidth }));
-    if (page.viewportSize()!.width <= 400) expect(sw.sw, 'row wider than screen scrolls inside').toBeGreaterThan(sw.cw);
-    await row.evaluate((el) => el.scrollTo(9999, 0));
+    const bar = page.getByRole('group', { name: 'Language and script' });
+    await expect(bar).toContainText('English');
+    await expect(bar).toContainText('Interslavic');
+    await expect(bar).toContainText('Latin script');
+    await expectTappable(bar, 44);
+    const sw = await bar.evaluate((el) => ({ sw: el.scrollWidth, cw: el.clientWidth }));
+    expect(sw.sw, 'the bar fits the screen: it does not need to scroll').toBeLessThanOrEqual(sw.cw + 1);
     await expectShellStill(page);
     await expect(page.getByRole('button', { name: 'Options' })).toBeInViewport();
   });
 
-  test('Options chip opens the voice and colour key sheet', async ({ page }) => {
+  test('the Options button (in the input card) opens the voice and colour key sheet', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('group', { name: 'Language and script' }).getByRole('button', { name: 'Options' }).click();
+    await page.getByRole('button', { name: 'Options' }).click();
     const dlg = page.getByRole('dialog', { name: 'Options' });
     await expect(dlg).toBeVisible();
     await expect(dlg.getByText('How much to trust a line')).toBeVisible();

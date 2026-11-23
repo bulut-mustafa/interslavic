@@ -56,7 +56,7 @@ afterEach(() => {
 });
 
 describe('Translator on a phone', () => {
-  it('has a big input, a chip row and a sticky Translate button that asks for the translation', async () => {
+  it('has a big input, a language bar and a sticky Translate button that asks for the translation', async () => {
     phone();
     go('/');
     render(<App />);
@@ -65,8 +65,12 @@ describe('Translator on a phone', () => {
     const button = screen.getByRole('button', { name: 'Translate' }) as HTMLButtonElement;
     expect(button.disabled).toBe(true);
     expect(button.closest('.ph-sticky')).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Russian' }).getAttribute('aria-pressed')).toBe('false');
-    expect(screen.getByRole('button', { name: 'Cyrillic script' })).toBeTruthy();
+    // The language bar: English from-dropdown, an arrow, Interslavic with its script dropdown.
+    expect((screen.getByLabelText('Translate from') as HTMLSelectElement).value).toBe('en');
+    expect((screen.getByLabelText('Script') as HTMLSelectElement).value).toBe('standard');
+    expect(screen.getByRole('group', { name: 'Language and script' }).textContent).toContain('Interslavic');
+    expect([...(screen.getByLabelText('Translate from') as HTMLSelectElement).options].map((o) => o.text)).toEqual(['English', 'Russian', 'Ukrainian']);
+    expect([...(screen.getByLabelText('Script') as HTMLSelectElement).options].map((o) => o.text)).toEqual(['Latin', 'Etymological', 'Simplified', 'Cyrillic']);
     fireEvent.change(box, { target: { value: 'The woman read a book.' } });
     await new Promise((r) => setTimeout(r, 600));
     expect(fetch).not.toHaveBeenCalled(); // typing alone does not translate on a phone

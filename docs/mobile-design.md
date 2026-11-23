@@ -34,7 +34,7 @@ choice and says so; those are the things to tune on your phone.
 
 **Whole app.** Slim top bar (name + menu). Bottom tab bar: Translate, Learn, Phrasebook, Studio. Footer/credits move into the menu.
 
-**Translator.** One column: big input card, language/script as a chip row, a sticky Translate button above the tab bar, result cards, tapping a word opens its card as a bottom sheet (no hover).
+**Translator.** One column: big input card, a language bar (a source-language dropdown, an arrow, "Interslavic" with its script as a second dropdown; each box is a native picker over a two-line label, 52px tall, so the whole box is the tap target; on screens under 360px the word "script" is dropped so nothing is cut off), a sticky Translate button above the tab bar (Paste, Clear and Options are the icon buttons in the input card), result cards, tapping a word opens its card as a bottom sheet (no hover).
 
 **Learn / Phrasebook.** Single column cards, lesson navigation as a bottom "previous / next" bar, phrasebook search sticky at top, Anki/export in the menu.
 
