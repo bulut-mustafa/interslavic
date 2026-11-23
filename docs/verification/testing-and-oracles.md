@@ -615,3 +615,57 @@ distinguishable.
   Its correctness was not audited, only its overlap with the references.
 - The samples are small (margins about ±5), and the human-to-human figure comes from
   mostly one author's variants, so it likely understates how far apart two strangers' translations are.
+
+## 2026-11-23 · Ukrainian: is the parser the limit? (broad check)
+
+**Question.** Ukrainian scores 62.5 chrF (siblings). Is that a Ukrainian-specific weakness, and
+would a better or bigger parser fix it?
+
+**1. It is not lower than the other languages on a fair comparison.**
+- Ukrainian siblings 62.5, Russian siblings 62.1, English 65.2 (all sentences). The high
+  figure in the table is the Russian *direct* set (77.2): its references were written from
+  the Russian sentence. The 6 Ukrainian sentences that were translated directly into
+  Interslavic score 77.8 (too few to rely on, but the same picture).
+- The error profile is the same in the three languages: 40 to 43% of our words are not in
+  the reference (uk 146 of 369, ru_en 486 of 1,119, en 615 of 1,434), and the split into a
+  different word / the same word in another form / not a dictionary word is 61/28/11% (uk),
+  65/26/9% (ru_en), 65/28/7% (en). Ukrainian has the lowest share of untranslated words (3.2%).
+- The uk tune half (66.1) is above the held half (59.7) by 6.3, 95% interval [+0.2, +13.3]:
+  mostly noise.
+
+**2. Parser trials (uk, 354 sentences, chrF change against the baseline, tune / held).**
+The control (default `iu` package, same code path) reproduced the saved parses in 354 of 354.
+
+| Parser | tune | held |
+|---|---|---|
+| Stanza, all ParlaMint packages | −2.21 [−3.90, −0.61] | −2.98 [−4.72, −1.19] |
+| Stanza, IU with ParlaMint lemmatiser | −0.25 [−0.79, 0.03] | −0.73 [−1.45, −0.16] |
+| Stanza, ParlaMint tagger + lemmatiser, IU parser | −4.73 [−7.04, −2.68] | −5.46 [−7.28, −3.64] |
+| UDPipe 2, `ukrainian-iu-ud-2.17-251125` (LINDAT service) | −1.76 [−3.37, −0.12] | −0.17 [−1.36, 1.04] |
+| UDPipe 2, `ukrainian-parlamint-ud-2.17-251125` | −1.97 [−3.72, −0.22] | −0.57 [−1.85, 0.64] |
+
+None beats the current default. The engine was tuned on Stanza trees, so a drop-in swap of
+a parser that labels things differently is also at a disadvantage (the same reason the
+accurate Russian models were rejected). Scripts: `packages/eval/scripts/ukrainian-parser-trial/`.
+Published numbers (Stanza 1.5.1, UD 2.12): Ukrainian IU UPOS 97.52, lemma 96.72, LAS 85.87;
+Russian SynTagRus 98.06, 97.65, 90.90; English EWT 96.20, 96.63, 86.77. Stanza has only
+`iu` and `parlamint` (each with and without charlm) for Ukrainian; no transformer package.
+
+**3. What exists in the community** (read from the primary pages, 2026-11-23).
+- The Interslavic FAQ calls a Hugging Face Space (`Salavat/Interslavic-Translator-NLLB200`) "a
+  prototype ... functional but still requires further development". It runs a fine-tuned
+  NLLB-200 distilled 600M model (`salavat/nllb-200-distilled-600M-finetuned-isv_v2`, June 2023).
+  Its card gives BLEU 9.1 on an unnamed evaluation set after one epoch, training data "unknown",
+  corpus taken from the Interslavic grammar pages, no licence. The Space is paused. The same
+  author published `gemma-3-isv-gpt-v5-GGUF` (27B parameters, Aug 2025). Not run here: the
+  weights are unvetted third-party files.
+- Venues: Discord (about 6,000 members), a Facebook group (over 18,000), r/interslavic. No
+  public page was found that discusses Ukrainian translation quality.
+- Ukrainian resources: VESUM / `dict_uk` (over 416,000 lemmas, 6.5 million forms; the source of
+  ParlaMint's morphology), `pymorphy3-dicts-uk`, UD Ukrainian-IU (122,701 tokens, CC BY-NC-SA 4.0)
+  and UD Ukrainian-ParlaMint (109,165 tokens, CC BY-SA 4.0, manual annotation, UD 2.15).
+
+**Conclusion.** The parser is not what limits Ukrainian. The remaining differences are the
+same kinds as in English and Russian: word choice, idioms and reference variety, plus the fact
+that the Ukrainian references were written from the English sentences. A different treebank or a
+bigger parser does not help here.
