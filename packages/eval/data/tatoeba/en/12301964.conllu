@@ -9,6 +9,6 @@
 6	?	?	PUNCT	.	_	5	punct	_	_
 7	"	"	PUNCT	''	_	5	punct	_	_
 8	"	"	PUNCT	``	_	9	punct	_	_
-9	Bosnian	bosnian	PROPN	NNP	Number=Sing	2	appos	_	_
+9	Bosnian	bosnian	ADJ	JJ	Degree=Pos	2	appos	_	_
 10	.	.	PUNCT	.	_	9	punct	_	_
-11	"	"	PUNCT	''	_	2	punct	_	_
+11	"	"	PUNCT	''	_	9	punct	_	_

@@ -10,7 +10,7 @@
 7	it	it	PRON	PRP	Case=Nom|Gender=Neut|Number=Sing|Person=3|PronType=Prs	8	nsubj	_	_
 8	means	mean	VERB	VBZ	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	6	acl:relcl	_	_
 9	,	,	PUNCT	,	_	5	punct	_	_
-10	look	look	VERB	VB	Mood=Imp|Person=2|VerbForm=Fin	0	root	_	_
+10	look	look	VERB	VB	Mood=Imp|VerbForm=Fin	0	root	_	_
 11	it	it	PRON	PRP	Case=Acc|Gender=Neut|Number=Sing|Person=3|PronType=Prs	10	obj	_	_
 12	up	up	ADP	RP	_	10	compound:prt	_	_
 13	in	in	ADP	IN	_	15	case	_	_

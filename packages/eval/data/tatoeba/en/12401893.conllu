@@ -3,7 +3,7 @@
 # lang = en
 1	That	that	PRON	DT	Number=Sing|PronType=Dem	3	nsubj	_	_
 2	's	be	AUX	VBZ	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	3	cop	_	_
-3	what	what	PRON	WP	PronType=Rel	0	root	_	_
+3	what	what	PRON	WP	Case=Acc|PronType=Rel	0	root	_	_
 4	Tom	Tom	PROPN	NNP	Number=Sing	5	nsubj	_	_
 5	told	tell	VERB	VBD	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	3	acl:relcl	_	_
 6	me	I	PRON	PRP	Case=Acc|Number=Sing|Person=1|PronType=Prs	5	iobj	_	_

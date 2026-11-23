@@ -3,5 +3,5 @@
 # lang = en
 1	Forty	forty	NUM	CD	NumForm=Word|NumType=Card	2	nummod	_	_
 2	years	year	NOUN	NNS	Number=Plur	3	nsubj	_	_
-3	passed	pass	VERB	VBD	Tense=Past|VerbForm=Part|Voice=Pass	0	root	_	_
+3	passed	pass	VERB	VBD	Mood=Ind|Number=Plur|Person=3|Tense=Past|VerbForm=Fin	0	root	_	_
 4	.	.	PUNCT	.	_	3	punct	_	_

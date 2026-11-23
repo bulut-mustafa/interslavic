@@ -3,5 +3,5 @@
 # lang = en
 1	She	she	PRON	PRP	Case=Nom|Gender=Fem|Number=Sing|Person=3|PronType=Prs	3	nsubj	_	_
 2	is	be	AUX	VBZ	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	3	cop	_	_
-3	Slovak	Slovak	PROPN	NNP	Number=Sing	0	root	_	_
+3	Slovak	slovak	ADJ	JJ	Degree=Pos	0	root	_	_
 4	.	.	PUNCT	.	_	3	punct	_	_
