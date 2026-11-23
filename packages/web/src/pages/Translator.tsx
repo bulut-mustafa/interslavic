@@ -97,10 +97,13 @@ export default function Translator() {
   const [activeWord, setActiveWord] = useState<string | null>(null);
   const [reporting, setReporting] = useState(false);
   const requestId = useRef(0);
+  /** The last request sent, so the pause timer does not repeat what a tap on Translate just asked. */
+  const lastSent = useRef('');
   const phone = useIsPhone();
 
   const run = useCallback(async () => {
     const id = ++requestId.current;
+    lastSent.current = `${text}|${lang}|${orth}`;
     if (!text.trim()) {
       setPrimary([]);
       setAlternate([]);
@@ -117,6 +120,7 @@ export default function Translator() {
       track('translate', { lang, script: orth });
     } catch (err) {
       if (id !== requestId.current) return;
+      lastSent.current = '';
       setError(err instanceof Error ? err.message : String(err));
       setPrimary([]);
       setAlternate([]);
@@ -125,25 +129,15 @@ export default function Translator() {
     }
   }, [text, lang, orth]);
 
-  // Debounced so typing does not fire a parse per keystroke. On a phone the
-  // Translate button asks instead (typing with a keyboard up should not move the
-  // page under the thumb); a text that arrives with the address, or a changed
-  // language or script, still translates by itself.
-  const opened = useRef(false);
-  const lastSettings = useRef(`${lang}|${orth}`);
+  // Debounced so typing does not fire a parse per keystroke; a phone waits a little
+  // longer (like Google Translate) and skips a single stray character.
   useEffect(() => {
-    if (!phone) {
-      const t = setTimeout(() => void run(), 450);
-      return () => clearTimeout(t);
-    }
-    const settings = `${lang}|${orth}`;
-    const changed = settings !== lastSettings.current;
-    lastSettings.current = settings;
-    const first = !opened.current;
-    opened.current = true;
-    if ((first || changed) && text.trim()) void run();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [run, phone]);
+    if (phone && text.trim().length === 1) return;
+    const t = setTimeout(() => {
+      if (lastSent.current !== `${text}|${lang}|${orth}`) void run();
+    }, phone ? 700 : 450);
+    return () => clearTimeout(t);
+  }, [run, phone, text, lang, orth]);
 
   const words = useMemo(() => primary.flatMap((s) => s.words), [primary]);
 

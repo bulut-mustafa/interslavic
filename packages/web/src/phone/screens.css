@@ -478,7 +478,9 @@ button.ph-row:active {
   border: 0;
   padding: 8px 8px 4px;
   font-size: 18px;
-  min-height: 9rem;
+  min-height: 3.2rem;
+  max-height: 40dvh;
+  overflow-y: auto;
   background: transparent;
 }
 .pt-input .pt-text:focus {
@@ -1164,4 +1166,39 @@ button.ph-row:active {
   .ph-rec-big {
     transition: none;
   }
+}
+
+/* ---------- saved translations ---------- */
+.pt-saved-list {
+  list-style: none;
+  margin: 0 0 var(--space-3);
+  padding: 0;
+}
+.pt-saved-list li {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  border-bottom: 1px solid var(--rule, rgba(0, 0, 0, 0.1));
+}
+.pt-saved-open {
+  flex: 1;
+  min-width: 0;
+  min-height: 52px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 4px;
+  border: 0;
+  background: none;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+}
+.pt-saved-src {
+  color: var(--ink-soft);
+  font-size: 14px;
+}
+.pt-saved-out {
+  font-size: 17px;
+  overflow-wrap: anywhere;
 }

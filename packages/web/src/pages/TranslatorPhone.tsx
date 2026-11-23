@@ -5,11 +5,13 @@ import { track } from '../analytics.ts';
 import { Icon } from '../components/Icon.tsx';
 import { ReportForm } from '../components/ReportForm.tsx';
 import { permalink } from '../permalink.ts';
+import { navigate } from '../router.tsx';
+import { addSaved, isSaved, loadSaved, removeSaved, type Saved } from '../saved/store.ts';
+import { putHandoff } from '../subtitles/handoff.ts';
+import { formatSrt } from '../subtitles/srt.ts';
 import { BottomSheet } from '../phone/BottomSheet.tsx';
-import { KeyboardBar } from '../phone/KeyboardBar.tsx';
 import { useMenuItems, type MenuItem } from '../phone/menu.tsx';
-import { LangBar, PhoneIconButton, StickyBar } from '../phone/parts.tsx';
-import { useKeyboardInset } from '../phone/useKeyboardInset.ts';
+import { LangBar, PhoneIconButton } from '../phone/parts.tsx';
 import { Listen, VoicePicker } from '../speech/Listen.tsx';
 import { WordDetail } from './WordDetail.tsx';
 
@@ -43,7 +45,16 @@ export interface TranslatorPhoneProps {
   legend: { key: string; color: string; label: string }[];
 }
 
-type Sheet = 'word' | 'options' | 'report' | null;
+type Sheet = 'word' | 'options' | 'report' | 'saved' | null;
+
+/** One cue per saved sentence, three seconds each: the Subtitles page then translates them like any file. */
+const srtOf = (items: Saved[]): string =>
+  formatSrt(
+    items.map((s, i) => {
+      const at = (n: number) => `00:${String(Math.floor(n / 60)).padStart(2, '0')}:${String(n % 60).padStart(2, '0')},000`;
+      return { index: i + 1, timing: `${at(i * 3)} --> ${at(i * 3 + 3)}`, lines: s.text.split('\n') };
+    }),
+  );
 
 const copyText = async (t: string): Promise<boolean> => {
   try {
@@ -100,15 +111,14 @@ function ShareIcon({ text, url }: { text: string; url: string }) {
 
 /**
  * The translator on a phone (docs/mobile-design.md): one column, a big input
- * card, language and script as one row of dropdowns (from, arrow, Interslavic), a sticky Translate button
- * above the tab bar (and above the keyboard), result cards with copy and share,
+ * card, language and script as one row of dropdowns (from, arrow, Interslavic), a box that grows as you type, translation after a pause (Google Translate style), result cards with copy and share,
  * and a tapped word opening its card as a bottom sheet. History-like actions
  * (copy link, report) live in the top-bar menu. No hover anywhere.
  */
 export function TranslatorPhone(p: TranslatorPhoneProps) {
   const [sheet, setSheet] = useState<Sheet>(null);
-  const kb = useKeyboardInset();
-  const results = useRef<HTMLDivElement>(null);
+  const box = useRef<HTMLTextAreaElement>(null);
+  const [saved, setSaved] = useState<Saved[]>(loadSaved);
   const canPaste = typeof navigator !== 'undefined' && typeof navigator.clipboard?.readText === 'function';
   const link = permalink('/', { lang: p.lang, script: p.orth, text: p.text });
   const joined = p.primary.map((s) => s.text).join(' ');
@@ -142,21 +152,28 @@ export function TranslatorPhone(p: TranslatorPhoneProps) {
   }, [p.text, hasResult, link]);
   useMenuItems('translator', menu);
 
-  // A finished translation is the point: bring it into view.
+  // The box starts at one or two lines and grows with the text; CSS caps it and it scrolls inside.
   useEffect(() => {
-    if (hasResult && typeof results.current?.scrollIntoView === 'function') results.current.scrollIntoView({ block: 'start', behavior: 'smooth' });
-  }, [p.primary, hasResult]);
+    const el = box.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${el.scrollHeight}px`;
+  }, [p.text]);
 
-  const translate = () => {
-    (document.activeElement as HTMLElement | null)?.blur?.();
-    p.run();
+  const current = { text: p.text, lang: p.lang as Saved['lang'], script: p.orth };
+  const isKept = hasResult && isSaved(saved, current);
+  const toggleSaved = () => {
+    if (isKept) setSaved(removeSaved(saved.find((s) => s.text === p.text.trim() && s.lang === p.lang && s.script === p.orth)!.id));
+    else setSaved(addSaved({ ...current, out: joined }));
+    track(isKept ? 'unsave-translation' : 'save-translation');
   };
-  const canTranslate = p.text.trim() !== '' && !p.busy;
-  const button = (
-    <button type="button" className="ph-primary" disabled={!canTranslate} onClick={translate} aria-busy={p.busy}>
-      {p.busy ? 'Translating…' : 'Translate'}
-    </button>
-  );
+  const sendToSubtitles = () => {
+    const same = saved.filter((s) => s.lang === p.lang);
+    putHandoff({ srt: srtOf(same), lang: p.lang as Saved['lang'], name: 'saved-translations.srt' });
+    track('saved-to-subtitles');
+    navigate('/studio/subtitles');
+  };
+  const sameLang = saved.filter((s) => s.lang === p.lang).length;
 
   const open = (key: string) => {
     p.setActiveWord(key);
@@ -173,7 +190,8 @@ export function TranslatorPhone(p: TranslatorPhoneProps) {
           value={p.text}
           onChange={(e) => p.setText(e.target.value)}
           spellCheck={false}
-          rows={5}
+          rows={1}
+          ref={box}
           placeholder={p.placeholder}
           aria-label="Text to translate"
         />
@@ -188,7 +206,9 @@ export function TranslatorPhone(p: TranslatorPhoneProps) {
             />
           )}
           {p.text && <PhoneIconButton icon="close" label="Clear text" onClick={() => p.setText('')} />}
+          <PhoneIconButton icon="bookmark" label={`Saved translations (${saved.length})`} onClick={() => setSheet('saved')} />
           <PhoneIconButton icon="sliders" label="Options" onClick={() => setSheet('options')} />
+          <PhoneIconButton icon="translate" label={p.busy ? 'Translating…' : 'Translate'} disabled={!p.text.trim() || p.busy} onClick={() => { (document.activeElement as HTMLElement | null)?.blur?.(); p.run(); }} />
         </div>
       </section>
 
@@ -201,7 +221,7 @@ export function TranslatorPhone(p: TranslatorPhoneProps) {
         onOrth={p.setOrth}
       />
 
-      <div ref={results} className="pt-results" aria-live="polite">
+      <div className="pt-results" aria-live="polite">
         {p.error ? (
           <section className="ph-card-box pt-error">
             <h2>The translator is not answering</h2>
@@ -212,7 +232,7 @@ export function TranslatorPhone(p: TranslatorPhoneProps) {
           </section>
         ) : !hasResult ? (
           <section className="ph-card-box pt-empty">
-            <p className="ph-hint-strong">{p.busy ? 'Translating…' : 'Type or paste a sentence, then tap Translate. Every word shows why it was chosen.'}</p>
+            <p className="ph-hint-strong">{p.busy ? 'Translating…' : 'Type or paste a sentence. It translates when you pause, and every word shows why it was chosen.'}</p>
           </section>
         ) : (
           p.primary.map((s, i) => (
@@ -245,6 +265,7 @@ export function TranslatorPhone(p: TranslatorPhoneProps) {
                 </ul>
               ) : null}
               <div className="pt-actions">
+                {p.primary.length === 1 && <PhoneIconButton icon="bookmark" label={isKept ? 'Remove from saved' : 'Save translation'} pressed={isKept} onClick={toggleSaved} />}
                 <CopyIcon text={s.text} label="Copy translation" />
                 <ShareIcon text={s.text} url={link} />
                 <Listen text={s.text} where="translator" />
@@ -291,16 +312,10 @@ export function TranslatorPhone(p: TranslatorPhoneProps) {
         )}
       </div>
 
-      {kb > 0 ? (
-        <KeyboardBar label="Translate">{button}</KeyboardBar>
-      ) : (
-        <StickyBar>{button}</StickyBar>
-      )}
-
       <BottomSheet
         open={sheet !== null}
         onClose={() => setSheet(null)}
-        title={sheet === 'word' && p.selected ? p.selected.word.surface : sheet === 'report' ? 'Report a problem' : 'Options'}
+        title={sheet === 'word' && p.selected ? p.selected.word.surface : sheet === 'report' ? 'Report a problem' : sheet === 'saved' ? 'Saved translations' : 'Options'}
         detents={sheet === 'report' ? ['full'] : ['half', 'full']}
       >
         {sheet === 'word' && p.selected && (
@@ -330,6 +345,39 @@ export function TranslatorPhone(p: TranslatorPhoneProps) {
                 </p>
               ))}
             </section>
+          </div>
+        )}
+        {sheet === 'saved' && (
+          <div className="ph-sheet-stack pt-saved">
+            {saved.length === 0 ? (
+              <p className="ph-hint-strong">Nothing saved yet. Tap the bookmark under a translation to keep it here. Saved translations stay on this phone.</p>
+            ) : (
+              <>
+                <ul className="pt-saved-list">
+                  {saved.map((s) => (
+                    <li key={s.id}>
+                      <button
+                        type="button"
+                        className="pt-saved-open"
+                        onClick={() => {
+                          p.setLang(s.lang as never);
+                          p.setOrth(s.script as Orthography);
+                          p.setText(s.text);
+                          setSheet(null);
+                        }}
+                      >
+                        <span className="pt-saved-src">{s.text}</span>
+                        <span className="pt-saved-out" lang="isv">{s.out}</span>
+                      </button>
+                      <PhoneIconButton icon="trash" label={`Delete saved: ${s.text}`} onClick={() => setSaved(removeSaved(s.id))} />
+                    </li>
+                  ))}
+                </ul>
+                <button type="button" className="ph-secondary" disabled={sameLang === 0} onClick={sendToSubtitles}>
+                  Send {sameLang} {p.langs.find((l) => l.value === p.lang)?.label ?? ''} to Subtitles
+                </button>
+              </>
+            )}
           </div>
         )}
         {sheet === 'report' && hasResult && (

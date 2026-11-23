@@ -17,18 +17,19 @@ test.describe('translator on a phone', () => {
     await grantClipboard(page);
   });
 
-  test('empty state: hint card, Translate disabled until there is text, no request made', async ({ page }, testInfo) => {
+  test('empty state: hint card, Translate disabled until there is text, then it translates by itself after a pause', async ({ page }, testInfo) => {
     const errors = watchErrors(page, testInfo);
     const api = await mockTranslate(page);
     await page.goto('/');
-    await expect(page.getByText('Type or paste a sentence, then tap Translate')).toBeVisible();
+    await expect(page.getByText('Type or paste a sentence. It translates when you pause')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Translate', exact: true })).toBeDisabled();
     await input(page).fill('   ');
     await expect(page.getByRole('button', { name: 'Translate', exact: true })).toBeDisabled();
     await input(page).fill('Hello');
     await expect(page.getByRole('button', { name: 'Translate', exact: true })).toBeEnabled();
-    await page.waitForTimeout(700);
-    expect(api.calls, 'typing alone must not call the API on a phone').toEqual([]);
+    await expect.poll(() => api.calls.length, { message: 'translates by itself after a pause, once' }).toBe(1);
+    await page.waitForTimeout(900);
+    expect(api.calls.length).toBe(1);
     expect(errors).toEqual([]);
   });
 
@@ -68,21 +69,7 @@ test.describe('translator on a phone', () => {
     expect(api.calls.length, 'one request, carrying both scripts').toBe(1);
   });
 
-  test('Translate button is sticky: visible above the tab bar even when the page is scrolled to the end of a long result', async ({ page }) => {
-    await mockTranslate(page);
-    await page.goto('/');
-    await translate(page);
-    await page.locator('.ph-content').evaluate((el) => el.scrollTo(0, 99999));
-    const btn = page.getByRole('button', { name: 'Translate', exact: true });
-    await expect(btn).toBeInViewport({ ratio: 1 });
-    await expectNotCovered(btn);
-    const b = (await btn.boundingBox())!;
-    const bar = (await page.locator('.ph-tabbar').boundingBox())!;
-    expect(b.y + b.height, 'above the tab bar').toBeLessThanOrEqual(bar.y + 1);
-    expect(b.height, 'tappable').toBeGreaterThanOrEqual(44);
-  });
-
-  test('with the iOS keyboard open (300px) the Translate button sits right above it, visible and tappable, and nothing shifts', async ({ page }) => {
+  test('with the iOS keyboard open (300px) the box and the Translate icon stay visible and tappable, and nothing shifts', async ({ page }) => {
     const api = await mockTranslate(page);
     await page.goto('/');
     await input(page).focus();
@@ -95,7 +82,7 @@ test.describe('translator on a phone', () => {
     expect(vv.h).toBeLessThan(vv.ih - 250);
     const b = (await btn.boundingBox())!;
     expect(b.y + b.height, 'button above the keyboard edge').toBeLessThanOrEqual(vv.h + 1);
-    expect(b.y, 'button on screen').toBeGreaterThan(0);
+    expect(b.width, 'tappable').toBeGreaterThanOrEqual(44);
     await expectNotCovered(btn);
     await expectShellStill(page);
     const topAfter = (await page.locator('.ph-app > .ph-topbar').boundingBox())!;
@@ -103,10 +90,28 @@ test.describe('translator on a phone', () => {
     expect(await page.locator('.ph-content').evaluate((el) => el.scrollLeft)).toBe(0);
     await btn.click();
     await expect(page.getByRole('article', { name: 'Translation 1' })).toBeVisible();
-    expect(api.calls.length).toBeGreaterThan(0);
+    expect(api.calls.length).toBe(1);
     await iosKeyboard(page, 0);
-    await expect(page.locator('.ph-sticky').getByRole('button', { name: 'Translate' })).toBeVisible();
     await expectShellStill(page);
+  });
+
+  test('the box grows with the text up to a limit and then scrolls; save keeps a translation', async ({ page }) => {
+    await mockTranslate(page);
+    await page.goto('/');
+    const h0 = (await input(page).boundingBox())!.height;
+    expect(h0, 'starts small').toBeLessThan(110);
+    await input(page).fill(Array.from({ length: 60 }, (_, i) => `Line number ${i}`).join('\n'));
+    const h1 = (await input(page).boundingBox())!.height;
+    const vh = await page.evaluate(() => innerHeight);
+    expect(h1).toBeGreaterThan(h0);
+    expect(h1, 'capped').toBeLessThanOrEqual(vh * 0.41);
+    expect(await input(page).evaluate((el) => el.scrollHeight > el.clientHeight), 'scrolls inside').toBe(true);
+    await input(page).fill(TEXT);
+    await expect(page.getByRole('article', { name: 'Translation 1' })).toBeVisible();
+    await page.getByRole('button', { name: 'Save translation' }).click();
+    await page.reload();
+    await page.getByRole('button', { name: /Saved translations \(1\)/ }).click();
+    await expect(sheet(page)).toContainText(TEXT);
   });
 
   test('tapping a word opens the word sheet with that word; Prev/Next step through words; Close closes it', async ({ page }, testInfo) => {

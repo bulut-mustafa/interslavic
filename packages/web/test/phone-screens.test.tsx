@@ -56,7 +56,7 @@ afterEach(() => {
 });
 
 describe('Translator on a phone', () => {
-  it('has a big input, a language bar and a sticky Translate button that asks for the translation', async () => {
+  it('has a growing input, a language bar and translates by itself after a pause', async () => {
     phone();
     go('/');
     render(<App />);
@@ -64,7 +64,7 @@ describe('Translator on a phone', () => {
     const box = screen.getByLabelText('Text to translate') as HTMLTextAreaElement;
     const button = screen.getByRole('button', { name: 'Translate' }) as HTMLButtonElement;
     expect(button.disabled).toBe(true);
-    expect(button.closest('.ph-sticky')).toBeTruthy();
+    expect(document.querySelector('.ph-sticky')).toBeNull(); // no big Translate bar
     // The language bar: English from-dropdown, an arrow, Interslavic with its script dropdown.
     expect((screen.getByLabelText('Translate from') as HTMLSelectElement).value).toBe('en');
     expect((screen.getByLabelText('Script') as HTMLSelectElement).value).toBe('standard');
@@ -72,15 +72,34 @@ describe('Translator on a phone', () => {
     expect([...(screen.getByLabelText('Translate from') as HTMLSelectElement).options].map((o) => o.text)).toEqual(['English', 'Russian', 'Ukrainian']);
     expect([...(screen.getByLabelText('Script') as HTMLSelectElement).options].map((o) => o.text)).toEqual(['Latin', 'Etymological', 'Simplified', 'Cyrillic']);
     fireEvent.change(box, { target: { value: 'The woman read a book.' } });
-    await new Promise((r) => setTimeout(r, 600));
-    expect(fetch).not.toHaveBeenCalled(); // typing alone does not translate on a phone
+    expect(fetch).not.toHaveBeenCalled(); // not on every keystroke: it waits for a pause
     expect(button.disabled).toBe(false);
-    fireEvent.click(button);
     await waitFor(() => expect(document.querySelector('.pt-card')).toBeTruthy());
     expect(document.querySelector('.pt-out')?.textContent).toBe('Žena čitala knigu.');
     expect(screen.getByRole('button', { name: 'Copy translation' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Share' })).toBeTruthy();
     expect(document.querySelector('.output-word')?.getAttribute('title')).toBeNull(); // no hover tooltips
+  });
+
+  it('saves a translation with the bookmark, lists it in Saved, and sends it to Subtitles', async () => {
+    window.localStorage.clear();
+    phone();
+    go('/?text=The%20woman%20read%20a%20book.');
+    render(<App />);
+    await waitFor(() => expect(document.querySelector('.pt-card')).toBeTruthy(), { timeout: 3000 });
+    fireEvent.click(screen.getByRole('button', { name: 'Save translation' }));
+    expect(screen.getByRole('button', { name: 'Remove from saved' }).getAttribute('aria-pressed')).toBe('true');
+    fireEvent.click(screen.getByRole('button', { name: /Saved translations \(1\)/ }));
+    const dialog = await waitFor(() => screen.getByRole('dialog', { name: 'Saved translations' }));
+    expect(dialog.textContent).toContain('The woman read a book.');
+    expect(dialog.textContent).toContain('Žena čitala knigu.');
+    const put = vi.spyOn(Storage.prototype, 'setItem');
+    fireEvent.click(screen.getByRole('button', { name: /Send 1 English to Subtitles/ }));
+    const sent = put.mock.calls.find((c) => c[0] === 'interslavic-handoff-srt');
+    put.mockRestore();
+    expect(sent?.[1]).toContain('The woman read a book.');
+    expect(sent?.[1]).toContain('00:00:00,000 --> 00:00:03,000');
+    expect(window.location.pathname).toBe('/studio/subtitles');
   });
 
   it('opens a tapped word as a sheet, and steps through the words there', async () => {

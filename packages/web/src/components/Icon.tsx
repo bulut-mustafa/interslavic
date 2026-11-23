@@ -52,6 +52,7 @@ const PATHS = {
   volume: 'M11 5L6 9H3v6h3l5 4zM15.5 8.5a5 5 0 010 7',
   link: 'M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1',
   flag: 'M5 21V4M5 4h12l-2 4 2 4H5',
+  bookmark: 'M6 4h12v17l-6-4-6 4z',
   chevronDown: 'M6 9l6 6 6-6',
 } as const;
 
