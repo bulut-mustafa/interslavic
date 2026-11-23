@@ -578,3 +578,40 @@ Ukrainian 12 / 16; 43 / 74 in all.
 **Earlier figures this replaces.** English held 64.6 and tune 65.4 (parses before the
 tagger change; now 64.8 and 65.7). Russian held 80.6 and tune 72.9 (now 80.9 and 73.4, the
 lemma repair). The sibling baselines of the same day were taken before the lemma repair.
+
+## 2026-11-23 · An independent translator as a yardstick
+
+**Why.** A chrF of 65 means little alone, and no published benchmark exists for
+Interslavic. Two yardsticks were measured: how much humans agree with each other, and how
+a second, independent translator scores on the same sentences.
+
+**Method.**
+- **Sample:** 150 English and 60 Russian test sentences, drawn at random (seed
+  20261123); ids in `data/tatoeba/independent/sample-ids.json`.
+- **Translator:** a fresh Claude Opus agent given only the source sentences and the
+  instruction to translate into Interslavic. It used no tools (0 tool calls), so it could
+  not read the references or our output. One run, zero-shot, no examples. Its 210 outputs
+  are in `data/tatoeba/independent/translator-outputs.tsv`.
+- **Scoring:** the same normalisation and chrF as everywhere else (sacrebleu 2.4.3).
+
+**Results** (chrF; exact = identical to a human translation after normalising):
+
+| | our engine | independent translator | one human vs the other humans |
+|---|---|---|---|
+| English, 150 sentences | 63.2 (exact 33) | 63.5 (exact 39) | 74.3 on all 246 English sentences that have 2+ different translations; 79.8 on the 34 of them in this sample |
+| Russian, 60 sentences | 79.7 (exact 25) | 74.6 (exact 13) | too few sentences (8 here, 19 in all) |
+
+Paired bootstrap, engine minus translator: **English −0.3 [−5.4, +4.9]; Russian +5.1
+[−0.9, +11.2]**. Both intervals include 0: on these samples the two are not
+distinguishable.
+
+**Reading and limits.**
+- A strong general-purpose model scores about the same as our rule-based engine on
+  English (63.5 against 63.2), so about 63 is where a capable system lands on these
+  references; humans agree with each other at 74 to 80. It is not evidence that either is
+  good.
+- The translator's score may be too high: Tatoeba text is public and may be in its
+  training data. It may also be too low: one prompt, one run, no checking of its output.
+  Its correctness was not audited, only its overlap with the references.
+- The samples are small (margins about ±5), and the human-to-human figure comes from
+  mostly one author's variants, so it likely understates how far apart two strangers' translations are.
